@@ -52,7 +52,7 @@ $rows = foreach ($pr in $prs) {
         default       { "&#x26A0;&#xFE0F;" }
     }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community">community</span>' } else { "" }
-    $authorDisplay = $pr.author
+    $authorDisplay = "@$($pr.author)"
     if ($pr.author -match "copilot-swe-agent") { $authorDisplay = "&#x1F916; copilot" }
 
     # Emoji prefix for next action
