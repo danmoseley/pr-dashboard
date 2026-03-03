@@ -87,20 +87,23 @@ $rows = foreach ($pr in $prs) {
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
     $filesHeat = if ($pr.changed_files -gt 20 -or $pr.lines_changed -gt 500) { " heat-2" } elseif ($pr.changed_files -gt 5 -or $pr.lines_changed -gt 200) { " heat-1" } else { "" }
 
+    $safeWhy = [System.Net.WebUtility]::HtmlEncode($pr.why)
+    $safeBlockers = [System.Net.WebUtility]::HtmlEncode($pr.blockers)
+
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
 
     @"
 <tr$moreClass>
-  <td class="score">$($pr.score)</td>
+  <td class="score" title="$safeWhy">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
   <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))$whoCommunityBadge</td>
-  <td class="action">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
+  <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci">$ciEmoji $($pr.ci_detail)</td>
-  <td class="disc$discHeat">$discEmoji$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
+  <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)p</td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
-  <td class="num$filesHeat">$($pr.changed_files)</td>
+  <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
   <td class="author">$authorDisplay$communityBadge</td>
 </tr>
 "@
