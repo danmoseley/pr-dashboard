@@ -176,7 +176,7 @@ $statsRow = "<tr class=`"stats-row`"><td class=`"report-name`">Scan</td>$($stats
 $botNames = @("dotnet-maestro", "github-actions", "unknown", "dependabot", "dotnet-maestro[bot]", "Copilot")
 
 function Format-TopMergers {
-    param([object]$MergerData, [int]$TopN = 3)
+    param([object]$MergerData, [string]$RepoName, [int]$TopN = 3)
     if (-not $MergerData) { return "&mdash;" }
     $entries = @()
     if ($MergerData -is [hashtable]) {
@@ -191,7 +191,7 @@ function Format-TopMergers {
         $name = $e.Name
         $count = [int]$e.Value
         $medal = if ($i -lt 3) { $medals[$i] } else { "" }
-        "$medal<img src=`"https://github.com/$name.png?size=16`" class=`"avatar-sm`"><a href=`"https://github.com/$name`">$name</a>&nbsp;<span class=`"merge-count`">$count</span>"
+        "$medal<img src=`"https://github.com/$name.png?size=16`" class=`"avatar-sm`"><a href=`"https://github.com/$RepoName/pulls?q=is%3Apr+is%3Amerged+merged-by%3A$name`">$name</a>&nbsp;<span class=`"merge-count`">$count</span>"
     }
     return $parts -join "<br>"
 }
@@ -200,7 +200,7 @@ function Format-TopMergers {
 $communityChampCells = foreach ($repo in $repos) {
     $hist = $repoHistory[$repo.slug]
     $mergerData = if ($hist.Count -gt 0) { $hist[-1].top_community_mergers_7d } else { $null }
-    $html = Format-TopMergers -MergerData $mergerData -TopN 3
+    $html = Format-TopMergers -MergerData $mergerData -RepoName $repo.repo -TopN 3
     "<td class=`"merger-cell`">$html</td>"
 }
 $communityChampRow = "<tr class=`"merger-row`"><td class=`"report-name`" title=`"Maintainers who merged the most community-contributed PRs this week`">&#127775; Community Champs (7d)</td>$($communityChampCells -join '')</tr>"
@@ -209,7 +209,7 @@ $communityChampRow = "<tr class=`"merger-row`"><td class=`"report-name`" title=`
 $topMergerCells = foreach ($repo in $repos) {
     $hist = $repoHistory[$repo.slug]
     $mergerData = if ($hist.Count -gt 0) { $hist[-1].top_mergers_7d } else { $null }
-    $html = Format-TopMergers -MergerData $mergerData -TopN 3
+    $html = Format-TopMergers -MergerData $mergerData -RepoName $repo.repo -TopN 3
     "<td class=`"merger-cell`">$html</td>"
 }
 $topMergerRow = "<tr class=`"merger-row`"><td class=`"report-name`">&#127942; Top Mergers (7d)</td>$($topMergerCells -join '')</tr>"
