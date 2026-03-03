@@ -24,6 +24,7 @@ param(
     [string]$Repo = "dotnet/runtime",
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
+    [int]$ScheduleHours = 0,
     [hashtable]$NavLinks = @{}
 )
 
@@ -175,6 +176,8 @@ if ($Title -match "Actionable") {
 "@
 }
 
+$scheduleNote = if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
+
 $html = @"
 <!DOCTYPE html>
 <html lang="en">
@@ -239,7 +242,7 @@ $html = @"
 <body>
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
-<p class="meta">Updated: $Timestamp &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
+<p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
 $scoringHtml
 <table>
 <thead>

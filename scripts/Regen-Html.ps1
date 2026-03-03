@@ -18,14 +18,14 @@ $docsDir = Join-Path $root "docs"
 
 # Repo config: slug -> full repo name and report types
 $repos = @{
-    "runtime"    = @{ Repo = "dotnet/runtime";     Types = "top15,community,quick-wins" }
-    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,quick-wins" }
-    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,quick-wins" }
-    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,quick-wins" }
-    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,quick-wins" }
-    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,quick-wins" }
-    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,quick-wins" }
-    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,quick-wins" }
+    "runtime"    = @{ Repo = "dotnet/runtime";     Types = "top15,community,quick-wins"; Hours = 4 }
+    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,quick-wins"; Hours = 12 }
+    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,quick-wins"; Hours = 12 }
+    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,quick-wins"; Hours = 12 }
+    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,quick-wins"; Hours = 12 }
+    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,quick-wins"; Hours = 12 }
+    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,quick-wins"; Hours = 12 }
+    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,quick-wins"; Hours = 12 }
 }
 
 $found = 0
@@ -38,10 +38,11 @@ foreach ($slug in $repos.Keys | Sort-Object) {
     $cfg = $repos[$slug]
     Write-Host "=== Regenerating $slug ===" -ForegroundColor Cyan
     $params = @{
-        ScanFile    = $scanFile
-        Repo        = $cfg.Repo
-        Slug        = $slug
-        ReportTypes = $cfg.Types
+        ScanFile      = $scanFile
+        Repo          = $cfg.Repo
+        Slug          = $slug
+        ReportTypes   = $cfg.Types
+        ScheduleHours = $cfg.Hours
     }
     if ($SkipAI) { $params["SkipAI"] = $true }
     & "$PSScriptRoot\Build-Reports.ps1" @params

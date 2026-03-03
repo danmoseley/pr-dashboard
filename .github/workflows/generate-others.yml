@@ -45,7 +45,7 @@ jobs:
               maintainer_args="-Maintainers $maintainers"
             fi
             pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins -ScheduleHours 12
           done
 
       - name: Generate index page

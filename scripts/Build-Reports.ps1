@@ -24,6 +24,7 @@ param(
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][string]$Slug,
     [string[]]$ReportTypes = @("top15", "community", "quick-wins"),
+    [int]$ScheduleHours = 0,
     [switch]$SkipAI
 )
 
@@ -128,13 +129,14 @@ Do NOT repeat what's in the table. Output ONLY the bullet points, each starting 
 
     # Convert to HTML
     $htmlParams = @{
-        InputFile    = $tempJson
-        Title        = "$($report.Title) — $Repo"
-        Observations = $observations
-        Repo         = $Repo
-        OutputFile   = Join-Path $outDir $report.File
-        Timestamp    = $timestamp
-        NavLinks     = $navLinks
+        InputFile     = $tempJson
+        Title         = "$($report.Title) — $Repo"
+        Observations  = $observations
+        Repo          = $Repo
+        OutputFile    = Join-Path $outDir $report.File
+        Timestamp     = $timestamp
+        ScheduleHours = $ScheduleHours
+        NavLinks      = $navLinks
     }
     & "$scriptDir\ConvertTo-ReportHtml.ps1" @htmlParams
 
