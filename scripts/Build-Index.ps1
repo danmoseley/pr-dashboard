@@ -126,12 +126,14 @@ $ageCells = foreach ($repo in $repos) {
 }
 $ageRow = "<tr class=`"metric-row`"><td class=`"report-name`">Median Age</td>$($ageCells -join '')</tr>"
 
-# Merged this week row
+# Merged this week row with sparkline
 $mergedCells = foreach ($repo in $repos) {
     $hist = $repoHistory[$repo.slug]
     $merged = if ($hist.Count -gt 0 -and $null -ne $hist[-1].merged_7d) { [int]$hist[-1].merged_7d } else { 0 }
     $text = if ($merged -gt 0) { "$merged" } else { "&mdash;" }
-    "<td class=`"metric`">$text</td>"
+    $sparkValues = @($hist | ForEach-Object { if ($null -ne $_.merged_7d) { [double]$_.merged_7d } else { 0 } })
+    $spark = New-Sparkline -Values $sparkValues -Color "#58a6ff"
+    "<td class=`"metric`"><span class=`"metric-num`">$text</span><br>$spark</td>"
 }
 $mergedRow = "<tr class=`"metric-row`"><td class=`"report-name`">Merged (7d)</td>$($mergedCells -join '')</tr>"
 
@@ -201,7 +203,7 @@ $communityChampCells = foreach ($repo in $repos) {
     $html = Format-TopMergers -MergerData $mergerData -TopN 3
     "<td class=`"merger-cell`">$html</td>"
 }
-$communityChampRow = "<tr class=`"merger-row`"><td class=`"report-name`">&#127775; Community Champs (7d)</td>$($communityChampCells -join '')</tr>"
+$communityChampRow = "<tr class=`"merger-row`"><td class=`"report-name`" title=`"Maintainers who merged the most community-contributed PRs this week`">&#127775; Community Champs (7d)</td>$($communityChampCells -join '')</tr>"
 
 # Top Mergers row
 $topMergerCells = foreach ($repo in $repos) {
