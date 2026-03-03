@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top 15 Most Actionable PRs - PR Dashboard</title>
+<style>
+  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
+           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); padding: 1em 2em; }
+  nav { margin-bottom: 1em; font-size: 0.9em; }
+  nav a { color: var(--link); text-decoration: none; margin: 0 0.3em; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-size: 1.4em; margin-bottom: 0.2em; }
+  .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  thead { position: sticky; top: 0; z-index: 1; }
+  th { background: var(--header-bg); padding: 6px 10px; text-align: left;
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+  td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover { background: var(--hover); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who, .action { white-space: nowrap; }
+  .ci { white-space: nowrap; }
+  .disc, .num { text-align: right; white-space: nowrap; }
+  .author { white-space: nowrap; }
+  .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+  .badge.community { background: var(--badge-community); color: #fff; }
+  .observations { margin-top: 1.5em; max-width: 900px; }
+  .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
+  .observations ul { padding-left: 1.5em; }
+  .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
+             --hover: #f6f8fa; --header-bg: #f6f8fa; }
+  }
+</style>
+</head>
+<body>
+<nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="index.html">Home</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a href="top15.html">Top 15 Most Actionable PRs</a></nav>
+<h1>Top 15 Most Actionable PRs</h1>
+<p class="meta">Updated: 2026-03-03 02:49 UTC &middot; 15 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<table>
+<thead>
+<tr>
+  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td class="score">9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124880">#124880</a></td>
+  <td class="title">[Wasm RyuJit] annotate (some) local accesses with var nums</td>
+  <td class="who">@kg</td>
+  <td class="action">Ready to merge</td>
+  <td class="ci">&#x2705; 91/2/0</td>
+  <td class="disc">5t/4p</td>
+  <td class="num">5d</td>
+  <td class="num">0d</td>
+  <td class="num">3</td>
+  <td class="author">AndyAyersMS</td>
+</tr>
+<tr>
+  <td class="score">8.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125028">#125028</a></td>
+  <td class="title">JIT: Lower aggressiveRefCnt minimum threshold for CSE promotion</td>
+  <td class="who">@JulieLeeMSFT</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 91/2/0</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">1d</td>
+  <td class="num">0d</td>
+  <td class="num">1</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">8.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/123439">#123439</a></td>
+  <td class="title">Avoid incorrectly resolving a MonoClass for MONO_TYPE_GENERICINST when</td>
+  <td class="who">@vitek-karas</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 65/2/0</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">40d</td>
+  <td class="num">1d</td>
+  <td class="num">1</td>
+  <td class="author">Venkad000 <span class="badge community">community</span></td>
+</tr>
+<tr>
+  <td class="score">8.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124984">#124984</a></td>
+  <td class="title">Align final section to file alignment, not to virtual image size</td>
+  <td class="who">@jkoritzinsky</td>
+  <td class="action">Author: respond to 2 thread(s) from @copilot-pull-request-reviewer</td>
+  <td class="ci">&#x2705; 87/3/0</td>
+  <td class="disc">2t/1p</td>
+  <td class="num">3d</td>
+  <td class="num">0d</td>
+  <td class="num">1</td>
+  <td class="author">jkoritzinsky</td>
+</tr>
+<tr>
+  <td class="score">8.5</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124927">#124927</a></td>
+  <td class="title">[clr-interp] Add reverse P/Invoke support for the Swift calling conven</td>
+  <td class="who">@janvorli</td>
+  <td class="action">Ready to merge</td>
+  <td class="ci">&#x2705; 88/3/0</td>
+  <td class="disc">22t/3p</td>
+  <td class="num">4d</td>
+  <td class="num">0d</td>
+  <td class="num">12</td>
+  <td class="author">kotlarmilos</td>
+</tr>
+<tr>
+  <td class="score">8.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124877">#124877</a></td>
+  <td class="title">Revert forwarding activation signal</td>
+  <td class="who">@janvorli</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 87/2/0</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">5d</td>
+  <td class="num">4d</td>
+  <td class="num">1</td>
+  <td class="author">janvorli</td>
+</tr>
+<tr>
+  <td class="score">8.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124326">#124326</a></td>
+  <td class="title">Fix CallSiteFactoryResolvesIEnumerableOfOpenGenericServiceAfterResolvi</td>
+  <td class="who">@karelz</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 74/3/1</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">18d</td>
+  <td class="num">3d</td>
+  <td class="num">1</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">8.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125062">#125062</a></td>
+  <td class="title">[wasm][coreclr] Disable tests which need native relinking in Pri1</td>
+  <td class="who">@agocke</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 70/1/1</td>
+  <td class="disc">1t/2p</td>
+  <td class="num">0d</td>
+  <td class="num">0d</td>
+  <td class="num">69</td>
+  <td class="author">radekdoulik</td>
+</tr>
+<tr>
+  <td class="score">8.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124970">#124970</a></td>
+  <td class="title">Ignore `DuplicateRootAssembly` during debug builds.  </td>
+  <td class="who">@agocke</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 78/2/0</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">3d</td>
+  <td class="num">1d</td>
+  <td class="num">1</td>
+  <td class="author">mrvoorhe <span class="badge community">community</span></td>
+</tr>
+<tr>
+  <td class="score">8.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124815">#124815</a></td>
+  <td class="title">Implement ISOSDacInterface::GetJitManagerList in cDAC SOSDacImpl</td>
+  <td class="who">@tommcdon</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 89/4/0</td>
+  <td class="disc">7t/4p</td>
+  <td class="num">6d</td>
+  <td class="num">0d</td>
+  <td class="num">13</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124114">#124114</a></td>
+  <td class="title">JIT: Accelerate uint-&gt;floating casts on pre-AVX-512 x86</td>
+  <td class="who">@JulieLeeMSFT</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 89/3/0</td>
+  <td class="disc">1t/2p</td>
+  <td class="num">24d</td>
+  <td class="num">0d</td>
+  <td class="num">6</td>
+  <td class="author">saucecontrol <span class="badge community">community</span></td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124868">#124868</a></td>
+  <td class="title">[wasm][coreclr] Improve method portable entrypoints lifecycle</td>
+  <td class="who">@radekdoulik</td>
+  <td class="action">Author: respond to 1 thread(s) from @jkotas</td>
+  <td class="ci">&#x2705; 87/3/1</td>
+  <td class="disc">5t/4p</td>
+  <td class="num">5d</td>
+  <td class="num">0d</td>
+  <td class="num">4</td>
+  <td class="author">radekdoulik</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124966">#124966</a></td>
+  <td class="title">docs: document that DI scope Dispose() throws for async-only disposabl</td>
+  <td class="who">@rosebyte</td>
+  <td class="action">Author: respond to 6 thread(s) from @rosebyte, @copilot-pull-request-reviewer</td>
+  <td class="ci">&#x2705; 79/2/0</td>
+  <td class="disc">6t/3p</td>
+  <td class="num">3d</td>
+  <td class="num">0d</td>
+  <td class="num">3</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124631">#124631</a></td>
+  <td class="title">Remove Debug.Assert in SetSslCertificate that aborts process during di</td>
+  <td class="who">@rzikm</td>
+  <td class="action">Author: respond to 1 thread(s) from @wfurt</td>
+  <td class="ci">&#x2705; 79/3/0</td>
+  <td class="disc">1t/2p</td>
+  <td class="num">10d</td>
+  <td class="num">6d</td>
+  <td class="num">1</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124033">#124033</a></td>
+  <td class="title">Remove duplicated SVE GatherVector APIs</td>
+  <td class="who">@jeffhandley</td>
+  <td class="action">Maintainer: review needed</td>
+  <td class="ci">&#x2705; 88/5/0</td>
+  <td class="disc">0t/0p</td>
+  <td class="num">25d</td>
+  <td class="num">11d</td>
+  <td class="num">6</td>
+  <td class="author">ylpoonlg <span class="badge community">community</span></td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
