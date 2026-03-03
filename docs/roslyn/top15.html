@@ -29,6 +29,9 @@
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
   .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
   .author { white-space: nowrap; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; }
@@ -44,13 +47,16 @@
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
   }
 </style>
 </head>
 <body>
 <nav><a href="../index.html">Home</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a href="top15.html">Top 15 Most Actionable PRs</a></nav>
 <h1>Top 15 Most Actionable PRs — dotnet/roslyn</h1>
-<p class="meta">Updated: 2026-03-03 04:20 UTC &middot; 15 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
+<p class="meta">Updated: 2026-03-03 04:29 UTC &middot; 15 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
 <table>
 <thead>
 <tr>
@@ -144,8 +150,8 @@
   <td class="who">—</td>
   <td class="action">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 25/0/0</td>
-  <td class="disc">7t/3p</td>
-  <td class="num">35d</td>
+  <td class="disc heat-1">7t/3p</td>
+  <td class="num heat-2">35d</td>
   <td class="num">5d</td>
   <td class="num">2</td>
   <td class="author">DeborahOlaboye</td>
@@ -158,8 +164,8 @@
   <td class="action">&#x1F504; Author: merge main (stale 14d)</td>
   <td class="ci">&#x2705; 26/0/0</td>
   <td class="disc">0t/0p</td>
-  <td class="num">76d</td>
-  <td class="num">14d</td>
+  <td class="num heat-3">76d</td>
+  <td class="num heat-2">14d</td>
   <td class="num">4</td>
   <td class="author">tmat</td>
 </tr>
@@ -197,8 +203,8 @@
   <td class="action">&#x1F504; Author: merge main (stale 83d)</td>
   <td class="ci">&#x2705; 26/0/0</td>
   <td class="disc">0t/0p</td>
-  <td class="num">83d</td>
-  <td class="num">83d</td>
+  <td class="num heat-3">83d</td>
+  <td class="num heat-3">83d</td>
   <td class="num">1</td>
   <td class="author">deepakrathore33</td>
 </tr>
@@ -209,8 +215,8 @@
   <td class="who">@CyrusNajmabadi</td>
   <td class="action">&#x1F4AC; Author: respond to 5 thread(s) from @333fred</td>
   <td class="ci">&#x2705; 23/0/0</td>
-  <td class="disc">10t/3p</td>
-  <td class="num">133d</td>
+  <td class="disc heat-2">10t/3p</td>
+  <td class="num heat-3">133d</td>
   <td class="num">5d</td>
   <td class="num">3</td>
   <td class="author">CyrusNajmabadi</td>
@@ -223,8 +229,8 @@
   <td class="action">&#x1F4AC; Author: respond to 1 thread(s) from @jasonmalinowski</td>
   <td class="ci">&#x2705; 25/0/0</td>
   <td class="disc">2t/3p</td>
-  <td class="num">35d</td>
-  <td class="num">12d</td>
+  <td class="num heat-2">35d</td>
+  <td class="num heat-1">12d</td>
   <td class="num">1</td>
   <td class="author">DeborahOlaboye</td>
 </tr>
@@ -248,7 +254,7 @@
   <td class="who">@JoeRobich</td>
   <td class="action">&#x1F4AC; Author: respond to 8 thread(s) from @AlekseyTs</td>
   <td class="ci">&#x2705; 28/0/0</td>
-  <td class="disc">8t/4p</td>
+  <td class="disc heat-2">8t/4p</td>
   <td class="num">12d</td>
   <td class="num">3d</td>
   <td class="num">10</td>
@@ -259,11 +265,11 @@
 <div class="observations">
   <h3>Observations</h3>
   <ul>
-    <li>Prioritize reviewing PRs #82577, #82587, and #82560 as they have high scores, no active threads, and only require maintainer review to proceed.</li>
-    <li>Address the high thread count in PR #82450 (8 threads from @AlekseyTs) and PR #80825 (5 threads from @333fred) to unblock these stalled contributions.</li>
-    <li>Focus on resolving stale PRs, such as #81729 (76 days old) and #81609 (83 days old), which require a merge with main to move forward.</li>
-    <li>Consider the significant involvement of @333fred and @jasonmalinowski, as these reviewers appear to be slowing down a cluster of actionable PRs due to unresolved threads.</li>
-    <li>Pay attention to community contributors like @MattParkerDev, @DeborahOlaboye, and @deepakrathore33 by providing timely responses or guidance to further encourage their contributions.</li>
+    <li>Review and merge PRs <a href="https://github.com/dotnet/roslyn/pull/82577">#82577</a>, <a href="https://github.com/dotnet/roslyn/pull/82587">#82587</a>, <a href="https://github.com/dotnet/roslyn/pull/82560">#82560</a>, and <a href="https://github.com/dotnet/roslyn/pull/82557">#82557</a>, as they have high scores, no active threads, successful CI, and only require a maintainer review.</li>
+    <li>Prioritize resolving the threads raised by @333fred and @jasonmalinowski, as they are involved in multiple ongoing discussions (<a href="https://github.com/dotnet/roslyn/pull/82558">#82558</a>, <a href="https://github.com/dotnet/roslyn/pull/82490">#82490</a>, <a href="https://github.com/dotnet/roslyn/pull/82572">#82572</a>, <a href="https://github.com/dotnet/roslyn/pull/80825">#80825</a>, <a href="https://github.com/dotnet/roslyn/pull/82171">#82171</a>, <a href="https://github.com/dotnet/roslyn/pull/82450">#82450</a>).</li>
+    <li>Address the cluster of stale PRs (<a href="https://github.com/dotnet/roslyn/pull/81729">#81729</a>, <a href="https://github.com/dotnet/roslyn/pull/81609">#81609</a>, <a href="https://github.com/dotnet/roslyn/pull/80825">#80825</a>) by engaging with the authors to merge or close them for repository hygiene.</li>
+    <li>Pay attention to the CI failure in <a href="https://github.com/dotnet/roslyn/pull/82594">#82594</a>, which blocks progress; expedite troubleshooting to prevent delays.</li>
+    <li>Increase engagement with authors of community-associated PRs such as <a href="https://github.com/dotnet/roslyn/pull/81609">#81609</a> (deepakrathore33) and <a href="https://github.com/dotnet/roslyn/pull/82171">#82171</a> (DeborahOlaboye) to motivate contributions and clear bottlenecks.</li>
   </ul>
 </div>
 <details class="scoring">
