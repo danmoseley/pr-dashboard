@@ -191,7 +191,7 @@ function Format-TopMergers {
         $name = $e.Name
         $count = [int]$e.Value
         $medal = if ($i -lt 3) { $medals[$i] } else { "" }
-        "$medal<img src=`"https://github.com/$name.png?size=16`" class=`"avatar-sm`"><a href=`"https://github.com/$RepoName/pulls?q=is%3Apr+is%3Amerged+merged-by%3A$name`">$name</a>&nbsp;<span class=`"merge-count`">$count</span>"
+        "$medal<img src=`"https://github.com/$name.png?size=16`" class=`"avatar-sm`"><a href=`"https://github.com/$RepoName/pulls?q=is%3Apr+is%3Amerged+reviewed-by%3A$name`">$name</a>&nbsp;<span class=`"merge-count`">$count</span>"
     }
     return $parts -join "<br>"
 }
