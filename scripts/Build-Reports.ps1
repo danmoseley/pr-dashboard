@@ -167,4 +167,65 @@ $meta = @{
     reports  = $reportMeta
 }
 $meta | ConvertTo-Json -Depth 3 | Out-File -FilePath (Join-Path $outDir "meta.json") -Encoding utf8
+
+# --- Fetch recently merged PRs and append history ---
+$historyFile = Join-Path $outDir "history.json"
+[System.Collections.ArrayList]$existingHistory = @()
+if (Test-Path $historyFile) {
+    $parsed = Get-Content $historyFile -Raw | ConvertFrom-Json
+    if ($parsed) {
+        foreach ($item in @($parsed)) { $existingHistory.Add($item) | Out-Null }
+    }
+}
+
+# Compute age stats from scan data
+$ages = @($allPrs | ForEach-Object { [int]$_.age_days } | Sort-Object)
+$openCount = $ages.Count
+$medianAge = if ($ages.Count -gt 0) { $ages[[math]::Floor($ages.Count / 2)] } else { 0 }
+$p90Age = if ($ages.Count -gt 0) { $ages[[math]::Floor($ages.Count * 0.9)] } else { 0 }
+
+# Fetch merged PRs in last 7 days via GraphQL (1-2 calls, gets mergedBy)
+$merged7d = 0
+$topMergers = @{}
+$cutoffDate = (Get-Date).AddDays(-7).ToString("yyyy-MM-dd")
+try {
+    $allMerged = @()
+    $cursor = $null
+    do {
+        $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
+        $query = "query { search(query: `"repo:$Repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { number mergedBy { login } } } } }"
+        $result = gh api graphql -f query="$query" 2>$null | ConvertFrom-Json
+        $search = $result.data.search
+        $allMerged += @($search.nodes)
+        $cursor = if ($search.pageInfo.hasNextPage) { $search.pageInfo.endCursor } else { $null }
+    } while ($cursor)
+    $merged7d = $allMerged.Count
+    foreach ($pr in $allMerged) {
+        $merger = if ($pr.mergedBy -and $pr.mergedBy.login) { $pr.mergedBy.login } else { "unknown" }
+        $topMergers[$merger] = if ($topMergers.ContainsKey($merger)) { $topMergers[$merger] + 1 } else { 1 }
+    }
+    Write-Host "  Merged in last 7d: $merged7d"
+} catch {
+    Write-Warning "Failed to fetch merged PRs: $_"
+}
+
+# Count PRs opened in last 7 days (from scan data — created_at not available, use age_days)
+$opened7d = @($allPrs | Where-Object { [int]$_.age_days -le 7 }).Count
+
+$historyEntry = [ordered]@{
+    date            = $timestampIso
+    open            = $openCount
+    median_age_days = $medianAge
+    p90_age_days    = $p90Age
+    merged_7d       = $merged7d
+    opened_7d       = $opened7d
+    top_mergers_7d  = $topMergers
+}
+$existingHistory.Add([PSCustomObject]$historyEntry) | Out-Null
+# Keep last 90 days (~540 entries at 4h cadence)
+$cutoffDate = (Get-Date).AddDays(-90).ToUniversalTime().ToString("o")
+$trimmed = @($existingHistory | Where-Object { $_.date -gt $cutoffDate })
+ConvertTo-Json -InputObject @($trimmed) -Depth 4 | Out-File -FilePath $historyFile -Encoding utf8
+Write-Host "  History: $($trimmed.Count) entries in $historyFile"
+
 Write-Host "Done! $($reports.Count) reports in $outDir/"

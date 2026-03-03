@@ -36,6 +36,54 @@ if ($repos.Count -eq 0) {
 # Sort repos: runtime first, then alphabetical
 $repos = @($repos | Sort-Object { if ($_.slug -eq "runtime") { "0" } else { $_.slug } })
 
+# Load history data for each repo
+$repoHistory = @{}
+foreach ($repo in $repos) {
+    $histFile = Join-Path $DocsDir "$($repo.slug)/history.json"
+    if (Test-Path $histFile) {
+        $repoHistory[$repo.slug] = @(Get-Content $histFile -Raw | ConvertFrom-Json)
+    } else {
+        $repoHistory[$repo.slug] = @()
+    }
+}
+
+# --- Helper: generate SVG sparkline from an array of numbers ---
+function New-Sparkline {
+    param([double[]]$Values, [string]$Color = "#58a6ff", [int]$Width = 120, [int]$Height = 32)
+    if ($Values.Count -lt 7) { return "" }
+    $min = ($Values | Measure-Object -Minimum).Minimum
+    $max = ($Values | Measure-Object -Maximum).Maximum
+    $range = [Math]::Max($max - $min, 1)
+    $points = @()
+    for ($i = 0; $i -lt $Values.Count; $i++) {
+        $x = [Math]::Round($i * $Width / ($Values.Count - 1), 1)
+        $y = [Math]::Round($Height - (($Values[$i] - $min) / $range) * ($Height - 4) - 2, 1)
+        $points += "$x,$y"
+    }
+    $pathStr = $points -join " "
+    "<svg width=`"$Width`" height=`"$Height`" viewBox=`"0 0 $Width $Height`" style=`"vertical-align:middle`"><polyline points=`"$pathStr`" fill=`"none`" stroke=`"$Color`" stroke-width=`"1.5`" stroke-linecap=`"round`" stroke-linejoin=`"round`"/></svg>"
+}
+
+# --- Helper: compute trend indicator vs 7 days ago ---
+function Get-TrendIndicator {
+    param([object[]]$History, [string]$Field, [string]$GoodDirection = "down")
+    if ($History.Count -lt 2) { return @{ arrow = ""; cssClass = "" ; delta = 0 } }
+    $current = [double]$History[-1].$Field
+    # Find entry closest to 7 days ago
+    $cutoff = (Get-Date).AddDays(-7).ToUniversalTime().ToString("o")
+    $weekAgo = $History | Where-Object { $_.date -le $cutoff } | Select-Object -Last 1
+    if (-not $weekAgo) { $weekAgo = $History[0] }
+    $prev = [double]$weekAgo.$Field
+    $delta = $current - $prev
+    if ($delta -eq 0) {
+        return @{ arrow = ""; cssClass = "trend-flat"; delta = 0 }
+    }
+    $isGood = if ($GoodDirection -eq "down") { $delta -lt 0 } else { $delta -gt 0 }
+    $arrow = if ($delta -gt 0) { "&#9650;" } else { "&#9660;" }  # ▲ ▼
+    $cssClass = if ($isGood) { "trend-good" } else { "trend-bad" }
+    return @{ arrow = "$arrow"; cssClass = $cssClass; delta = [int]$delta }
+}
+
 # All known report types in display order
 $reportTypes = @(
     @{ Id = "top15"; Title = "Most Actionable" }
@@ -44,14 +92,48 @@ $reportTypes = @(
     @{ Id = "stale-close"; Title = "Consider Closing" }
 )
 
-# Build header row — link to the pulls page, not the repo homepage
+# Build header row
 $headerCells = $repos | ForEach-Object {
     $repoShort = $_.slug
     "<th><a href=`"https://github.com/$($_.repo)/pulls`">$repoShort</a></th>"
 }
-$headerRow = "<tr><th>Report</th>$($headerCells -join '')</tr>"
+$headerRow = "<tr><th></th>$($headerCells -join '')</tr>"
 
-# Build data rows
+# --- Hero metrics rows ---
+# Open PRs row with sparkline and trend
+$openCells = foreach ($repo in $repos) {
+    $hist = $repoHistory[$repo.slug]
+    $current = if ($hist.Count -gt 0) { [int]$hist[-1].open } else { [int]$repo.analyzed }
+    $trend = Get-TrendIndicator -History $hist -Field "open" -GoodDirection "down"
+    $sparkValues = @($hist | ForEach-Object { [double]$_.open })
+    $spark = New-Sparkline -Values $sparkValues -Color $(if ($trend.cssClass -eq "trend-good") { "#3fb950" } elseif ($trend.cssClass -eq "trend-bad") { "#f85149" } else { "#58a6ff" })
+    $trendHtml = if ($trend.arrow) { " <span class=`"$($trend.cssClass)`">$($trend.arrow)$([Math]::Abs($trend.delta))</span>" } else { "" }
+    "<td class=`"metric`"><span class=`"metric-num`">$current</span>$trendHtml<br>$spark</td>"
+}
+$openRow = "<tr class=`"metric-row`"><td class=`"report-name`">Open PRs</td>$($openCells -join '')</tr>"
+
+# Median age row with sparkline
+$ageCells = foreach ($repo in $repos) {
+    $hist = $repoHistory[$repo.slug]
+    $current = if ($hist.Count -gt 0) { [int]$hist[-1].median_age_days } else { 0 }
+    $trend = Get-TrendIndicator -History $hist -Field "median_age_days" -GoodDirection "down"
+    $sparkValues = @($hist | ForEach-Object { [double]$_.median_age_days })
+    $spark = New-Sparkline -Values $sparkValues -Color $(if ($trend.cssClass -eq "trend-good") { "#3fb950" } elseif ($trend.cssClass -eq "trend-bad") { "#f85149" } else { "#58a6ff" })
+    $trendHtml = if ($trend.arrow) { " <span class=`"$($trend.cssClass)`">$($trend.arrow)</span>" } else { "" }
+    "<td class=`"metric`"><span class=`"metric-num`">${current}d</span>$trendHtml<br>$spark</td>"
+}
+$ageRow = "<tr class=`"metric-row`"><td class=`"report-name`">Median Age</td>$($ageCells -join '')</tr>"
+
+# Merged this week row
+$mergedCells = foreach ($repo in $repos) {
+    $hist = $repoHistory[$repo.slug]
+    $merged = if ($hist.Count -gt 0 -and $null -ne $hist[-1].merged_7d) { [int]$hist[-1].merged_7d } else { 0 }
+    $text = if ($merged -gt 0) { "$merged" } else { "&mdash;" }
+    "<td class=`"metric`">$text</td>"
+}
+$mergedRow = "<tr class=`"metric-row`"><td class=`"report-name`">Merged (7d)</td>$($mergedCells -join '')</tr>"
+
+# Build data rows (report links)
 $dataRows = foreach ($rt in $reportTypes) {
     $cells = foreach ($repo in $repos) {
         $reportInfo = $null
@@ -67,10 +149,9 @@ $dataRows = foreach ($rt in $reportTypes) {
     "<tr><td class=`"report-name`">$($rt.Title)</td>$($cells -join '')</tr>"
 }
 
-# Build updated row with data-updated and data-interval attributes for JS
+# Build updated row
 $updatedCells = $repos | ForEach-Object {
-    $intervalH = 4
-    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"$($intervalH)`">...</td>"
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"4`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
@@ -87,6 +168,38 @@ $statsCells = $repos | ForEach-Object {
 }
 $statsRow = "<tr class=`"stats-row`"><td class=`"report-name`">Scan</td>$($statsCells -join '')</tr>"
 
+# --- Top Mergers leaderboard ---
+$botNames = @("dotnet-maestro", "github-actions", "unknown", "dependabot", "dotnet-maestro[bot]")
+$globalMergers = @{}
+foreach ($repo in $repos) {
+    $hist = $repoHistory[$repo.slug]
+    if ($hist.Count -gt 0 -and $hist[-1].top_mergers_7d) {
+        $mergers = $hist[-1].top_mergers_7d
+        foreach ($prop in $mergers.PSObject.Properties) {
+            $globalMergers[$prop.Name] = if ($globalMergers.ContainsKey($prop.Name)) { $globalMergers[$prop.Name] + [int]$prop.Value } else { [int]$prop.Value }
+        }
+    }
+}
+$topMergersList = @($globalMergers.GetEnumerator() | Where-Object { $_.Name -notin $botNames -and $_.Name -notmatch '\[bot\]$' } | Sort-Object -Property Value -Descending | Select-Object -First 5)
+$medals = @("&#129351;", "&#129352;", "&#129353;")  # 🥇🥈🥉
+$leaderboardHtml = ""
+if ($topMergersList.Count -gt 0) {
+    $entries = for ($i = 0; $i -lt $topMergersList.Count; $i++) {
+        $m = $topMergersList[$i]
+        $medal = if ($i -lt 3) { $medals[$i] + " " } else { "&nbsp;&nbsp;&nbsp; " }
+        $avatar = "https://github.com/$($m.Name).png?size=20"
+        "$medal<img src=`"$avatar`" class=`"avatar`"> <a href=`"https://github.com/$($m.Name)`">@$($m.Name)</a> <span class=`"merge-count`">$($m.Value) PRs</span>"
+    }
+    $leaderboardHtml = @"
+<div class="leaderboard">
+<h2>&#127942; Top Mergers This Week</h2>
+<div class="merger-list">
+$($entries -join "<br>`n")
+</div>
+</div>
+"@
+}
+
 $indexHtml = @"
 <!DOCTYPE html>
 <html lang="en">
@@ -96,11 +209,12 @@ $indexHtml = @"
 <title>PR Dashboard</title>
 <style>
   :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
-           --hover: #161b22; --header-bg: #161b22; }
+           --hover: #161b22; --header-bg: #161b22; --good: #3fb950; --bad: #f85149; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
          background: var(--bg); color: var(--fg); padding: 2em; }
   h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+  h2 { font-size: 1.1em; margin-bottom: 0.5em; color: var(--fg); }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1.5em; }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
@@ -111,12 +225,24 @@ $indexHtml = @"
   td.na { color: #484f58; }
   td.updated { color: #8b949e; font-size: 0.85em; }
   td.stats { color: #484f58; font-size: 0.8em; }
+  td.metric { font-size: 0.95em; line-height: 1.6; padding: 6px 12px; }
+  .metric-num { font-size: 1.3em; font-weight: 600; }
+  .trend-good { color: var(--good); font-size: 0.8em; }
+  .trend-bad { color: var(--bad); font-size: 0.8em; }
+  .trend-flat { color: #8b949e; font-size: 0.8em; }
+  tr.metric-row td { border-bottom: none; }
+  tr.metric-row + tr.metric-row td { border-top: none; }
+  tr.separator-row td { border-top: 2px solid var(--border); padding: 0; height: 0; border-bottom: none; }
   tr.updated-row td, tr.stats-row td { border-top: 2px solid var(--border); }
   tr:hover { background: var(--hover); }
+  .leaderboard { margin-top: 1.5em; padding: 1em; border: 1px solid var(--border); border-radius: 6px; display: inline-block; }
+  .merger-list { line-height: 2; }
+  .avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
+  .merge-count { color: #8b949e; font-size: 0.85em; }
   .footer { margin-top: 2em; color: #8b949e; font-size: 0.85em; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
-             --hover: #f6f8fa; --header-bg: #f6f8fa; }
+             --hover: #f6f8fa; --header-bg: #f6f8fa; --good: #1a7f37; --bad: #cf222e; }
   }
 </style>
 </head>
@@ -129,11 +255,17 @@ $indexHtml = @"
 $headerRow
 </thead>
 <tbody>
+$openRow
+$ageRow
+$mergedRow
+<tr class="separator-row"><td class="report-name" colspan="$(1 + $repos.Count)"></td></tr>
 $($dataRows -join "`n")
 $updatedRow
 $statsRow
 </tbody>
 </table>
+
+$leaderboardHtml
 
 <p class="footer">
   Generated by <a href="https://github.com/danmoseley/pr-dashboard">pr-dashboard</a> via GitHub Actions.
@@ -154,7 +286,7 @@ function updateTimestamps() {
   document.querySelectorAll('[data-updated]').forEach(function(el) {
     var ago = timeAgo(el.getAttribute('data-updated'));
     var intervalH = el.getAttribute('data-interval');
-    el.textContent = ago + ', updated every ' + intervalH + 'h';
+    el.textContent = ago + ', every ' + intervalH + 'h';
   });
 }
 updateTimestamps();
