@@ -48,7 +48,7 @@ $allReports = @{
     "top15" = @{
         Id       = "top15"
         Title    = "Most Actionable PRs"
-        File     = "top15.html"
+        File     = "actionable.html"
         Filter   = { param($prs) @($prs | Select-Object -First 100) }
         AiPrompt = "These are the most actionable PRs in $Repo ranked by merge-readiness score (up to 100)."
     }

@@ -40,6 +40,15 @@ if ($NavLinks.Count -gt 0) {
     $navHtml = "<nav>$($links -join ' | ')</nav>"
 }
 
+# Helper: replace @username with avatar + linked username
+function ConvertTo-UserHtml([string]$text) {
+    [regex]::Replace($text, '@([\w-]+)', {
+        param($m)
+        $u = $m.Groups[1].Value
+        "<img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a>"
+    })
+}
+
 # Build table rows
 $rowIndex = 0
 $rows = foreach ($pr in $prs) {
@@ -52,7 +61,7 @@ $rows = foreach ($pr in $prs) {
         default       { "&#x26A0;&#xFE0F;" }
     }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community">community</span>' } else { "" }
-    $authorDisplay = "@$($pr.author)"
+    $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
     if ($pr.author -match "copilot-swe-agent") { $authorDisplay = "&#x1F916; copilot" }
 
     # Emoji prefix for next action
@@ -81,8 +90,8 @@ $rows = foreach ($pr in $prs) {
   <td class="score">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
-  <td class="who">$([System.Net.WebUtility]::HtmlEncode($pr.who))</td>
-  <td class="action">$actionEmoji$([System.Net.WebUtility]::HtmlEncode($pr.next_action))</td>
+  <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))</td>
+  <td class="action">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci">$ciEmoji $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
@@ -202,6 +211,7 @@ $html = @"
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
   .author { white-space: nowrap; }
+  .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; }
   .observations { margin-top: 1.5em; max-width: 900px; }

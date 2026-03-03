@@ -7,7 +7,7 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 ## Reports
 
 ### dotnet/runtime (every 4 hours)
-- [Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/top15.html)
+- [Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/actionable.html)
 - [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
 - [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
 
@@ -15,13 +15,13 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 
 Each of these repos gets Most Actionable and Quick Wins reports:
 
-[aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/top15.html) ·
-[sdk](https://danmoseley.github.io/pr-dashboard/sdk/top15.html) ·
-[msbuild](https://danmoseley.github.io/pr-dashboard/msbuild/top15.html) ·
-[winforms](https://danmoseley.github.io/pr-dashboard/winforms/top15.html) ·
-[wpf](https://danmoseley.github.io/pr-dashboard/wpf/top15.html) ·
-[roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/top15.html) ·
-[aspire](https://danmoseley.github.io/pr-dashboard/aspire/top15.html)
+[aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/actionable.html) ·
+[sdk](https://danmoseley.github.io/pr-dashboard/sdk/actionable.html) ·
+[msbuild](https://danmoseley.github.io/pr-dashboard/msbuild/actionable.html) ·
+[winforms](https://danmoseley.github.io/pr-dashboard/winforms/actionable.html) ·
+[wpf](https://danmoseley.github.io/pr-dashboard/wpf/actionable.html) ·
+[roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/actionable.html) ·
+[aspire](https://danmoseley.github.io/pr-dashboard/aspire/actionable.html)
 
 ## How it works
 
