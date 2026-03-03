@@ -105,6 +105,34 @@ if ($Observations.Trim()) {
 
 $prCount = @($prs).Count
 
+# Scoring explainer for "actionable" reports
+$scoringHtml = ""
+if ($Title -match "Actionable|Top 15") {
+    $scoringHtml = @"
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = closer to merge-ready. The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
+"@
+}
+
 $html = @"
 <!DOCTYPE html>
 <html lang="en">
@@ -144,6 +172,11 @@ $html = @"
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .scoring { margin-top: 1.5em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+  .scoring p { margin: 0.5em 0; line-height: 1.4; }
+  .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
+  .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -166,6 +199,7 @@ $($rows -join "`n")
 </tbody>
 </table>
 $obsHtml
+$scoringHtml
 </body>
 </html>
 "@
