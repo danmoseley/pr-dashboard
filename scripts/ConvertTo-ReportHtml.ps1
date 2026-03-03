@@ -151,10 +151,8 @@ if ($prCount -gt 100) {
 "@
 }
 
-# Scoring explainer for "actionable" reports
-$scoringHtml = ""
-if ($Title -match "Actionable") {
-    $scoringHtml = @"
+# Scoring explainer
+$scoringHtml = @"
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -177,9 +175,8 @@ if ($Title -match "Actionable") {
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 "@
-}
 
-$scheduleNote = if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
+$scheduleNote= if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
 
 $html = @"
 <!DOCTYPE html>
