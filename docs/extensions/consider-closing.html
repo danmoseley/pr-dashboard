@@ -50,10 +50,9 @@
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
   .user-ref { position: relative; display: inline-block; }
-  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
-    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+  .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
     text-decoration: none !important; cursor: pointer; }
-  .user-ref:hover .filter-btn { display: inline; }
   .filter-btn:hover { color: var(--link); border-color: var(--link); }
   .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
     border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
@@ -70,7 +69,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Consider Closing — dotnet/extensions</h1>
-<p class="meta">Updated every 4h, last at 2026-03-03 07:37 UTC &middot; 7 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
+<p class="meta">Updated every 4h, last at 2026-03-03 07:59 UTC &middot; 7 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -195,16 +194,7 @@
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li><a href="https://github.com/dotnet/extensions/pull/6932">#6932</a> and <a href="https://github.com/dotnet/extensions/pull/6883">#6883</a> are clear candidates for closure due to CI failures, zero threads, and no evident progress in over 130 days.</li>
-    <li><a href="https://github.com/dotnet/extensions/pull/6244">#6244</a> and <a href="https://github.com/dotnet/extensions/pull/6530">#6530</a> are low-score, long-abandoned PRs with failing CI and minimal engagement. These are likely redundant and can be closed.</li>
-    <li>@mokarchi and <a href="https://github.com/dotnet/extensions/pull/6862">#6862</a> show a pattern of stale merge attempts; maintainers may need a structured process for dealing with aging PRs like this.</li>
-    <li>PR <a href="https://github.com/dotnet/extensions/pull/7090">#7090</a> has a high score and a successful CI but awaits maintainer review — a quick review and decision here would be impactful.</li>
-    <li>Focus attention on <a href="https://github.com/dotnet/extensions/pull/7062">#7062</a> as it involves active threads initiated by a bot yet needs human intervention to resolve.</li>
-  </ul>
-</div>
+
 <script>
 function filterByUser(name) {
   var rows = document.querySelectorAll('tbody tr');

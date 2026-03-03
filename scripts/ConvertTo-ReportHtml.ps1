@@ -238,10 +238,9 @@ $html = @"
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
   .user-ref { position: relative; display: inline-block; }
-  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
-    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+  .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
     text-decoration: none !important; cursor: pointer; }
-  .user-ref:hover .filter-btn { display: inline; }
   .filter-btn:hover { color: var(--link); border-color: var(--link); }
   .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
     border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
