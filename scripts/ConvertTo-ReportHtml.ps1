@@ -41,7 +41,9 @@ if ($NavLinks.Count -gt 0) {
 }
 
 # Build table rows
+$rowIndex = 0
 $rows = foreach ($pr in $prs) {
+    $rowIndex++
     $prUrl = "https://github.com/$Repo/pull/$($pr.number)"
     $ciEmoji = switch ($pr.ci) {
         "SUCCESS"     { "&#x2705;" }
@@ -72,8 +74,10 @@ $rows = foreach ($pr in $prs) {
     $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
 
+    $moreClass = if ($rowIndex -gt 15) { ' class="more-row" style="display:none"' } else { "" }
+
     @"
-<tr>
+<tr$moreClass>
   <td class="score">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
@@ -113,6 +117,26 @@ if ($Observations.Trim()) {
 }
 
 $prCount = @($prs).Count
+
+# Show more / collapse toggle
+$toggleHtml = ""
+if ($prCount -gt 15) {
+    $extraCount = $prCount - 15
+    $toggleHtml = @"
+<button class="show-more-btn" id="toggle-more">Show $extraCount more &#x25BC;</button>
+<script>
+(function() {
+  var btn = document.getElementById('toggle-more');
+  btn.addEventListener('click', function() {
+    var rows = document.querySelectorAll('.more-row');
+    var showing = rows[0] && rows[0].style.display !== 'none';
+    rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
+    btn.innerHTML = showing ? 'Show $extraCount more \u25BC' : 'Show fewer \u25B2';
+  });
+})();
+</script>
+"@
+}
 
 # Scoring explainer for "actionable" reports
 $scoringHtml = ""
@@ -189,6 +213,10 @@ $html = @"
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
   .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
+  .show-more-btn { margin: 0.7em 0; padding: 4px 14px; font-size: 0.85em; cursor: pointer;
+    background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
+    border-radius: 6px; }
+  .show-more-btn:hover { text-decoration: underline; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -213,6 +241,7 @@ $navHtml
 $($rows -join "`n")
 </tbody>
 </table>
+$toggleHtml
 $obsHtml
 $scoringHtml
 </body>

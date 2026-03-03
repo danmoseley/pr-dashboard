@@ -44,6 +44,10 @@
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
   .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
+  .show-more-btn { margin: 0.7em 0; padding: 4px 14px; font-size: 0.85em; cursor: pointer;
+    background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
+    border-radius: 6px; }
+  .show-more-btn:hover { text-decoration: underline; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -56,7 +60,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="../index.html">Home</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a href="top15.html">Top 25 Most Actionable PRs</a></nav>
 <h1>Community PRs Awaiting Review — dotnet/runtime</h1>
-<p class="meta">Updated: 2026-03-03 04:29 UTC &middot; 33 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated: 2026-03-03 04:32 UTC &middot; 33 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <table>
 <thead>
 <tr>
@@ -260,7 +264,7 @@
   <td class="num">4</td>
   <td class="author">snickolls-arm <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124559">#124559</a></td>
   <td class="title">Log and restore XmlNodeType in XmlNodeReader</td>
@@ -273,7 +277,7 @@
   <td class="num">2</td>
   <td class="author">lilinus <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124167">#124167</a></td>
   <td class="title">[clr-interp] Runtime async on armel</td>
@@ -286,7 +290,7 @@
   <td class="num">2</td>
   <td class="author">clamp03 <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124478">#124478</a></td>
   <td class="title">RetryAfter metadata in FixedWindowRateLimiter returns time to next win</td>
@@ -299,7 +303,7 @@
   <td class="num">2</td>
   <td class="author">asbjornvad <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/123717">#123717</a></td>
   <td class="title">arm64: Refactor mov/movprfx for unmasked operations</td>
@@ -312,7 +316,7 @@
   <td class="num">5</td>
   <td class="author">ylpoonlg <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/123890">#123890</a></td>
   <td class="title">Implement SVE2 non-temporal gather loads</td>
@@ -325,7 +329,7 @@
   <td class="num">9</td>
   <td class="author">ylpoonlg <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125089">#125089</a></td>
   <td class="title">Skip cross process mutex on OpenBSD</td>
@@ -338,7 +342,7 @@
   <td class="num">1</td>
   <td class="author">sethjackson <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/119891">#119891</a></td>
   <td class="title">Annotate `System.Diagnostics.EventLog` with Nullable Reference Types</td>
@@ -351,7 +355,7 @@
   <td class="num">37</td>
   <td class="author">RenderMichael <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124716">#124716</a></td>
   <td class="title">Implement SunOS FileSystemWatcher using portfs event ports</td>
@@ -364,7 +368,7 @@
   <td class="num">10</td>
   <td class="author">gwr <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">6.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124428">#124428</a></td>
   <td class="title">Fix XmlReader ArgumentOutOfRangeException for malformed UTF-8 in XML …</td>
@@ -377,7 +381,7 @@
   <td class="num">2</td>
   <td class="author">lufen <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124429">#124429</a></td>
   <td class="title">Add missing Invalidate() calls to FileInfo state-changing methods</td>
@@ -390,7 +394,7 @@
   <td class="num">3</td>
   <td class="author">lufen <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/122030">#122030</a></td>
   <td class="title">[WASI] Stop generation of Node.js execution script due to lack of prev</td>
@@ -403,7 +407,7 @@
   <td class="num">1</td>
   <td class="author">yamachu <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/122349">#122349</a></td>
   <td class="title">Enable ARM (32-bit) deb/rpm package generation</td>
@@ -416,7 +420,7 @@
   <td class="num">1</td>
   <td class="author">csa7mdm <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/117261">#117261</a></td>
   <td class="title">Improve Math.BigMul performance on x64</td>
@@ -429,7 +433,7 @@
   <td class="num">11</td>
   <td class="author">Daniel-Svensson <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/115294">#115294</a></td>
   <td class="title">Add APIs to `BlobBuilder` for customizing the underlying byte array et</td>
@@ -442,7 +446,7 @@
   <td class="num">20</td>
   <td class="author">teo-tsirpanis <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124332">#124332</a></td>
   <td class="title">arm64: Fold negative variable eq/ne to 0</td>
@@ -455,7 +459,7 @@
   <td class="num">3</td>
   <td class="author">jonathandavies-arm <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/123841">#123841</a></td>
   <td class="title">Fix AttemptAcquire(0) when token isn&#39;t available</td>
@@ -468,7 +472,7 @@
   <td class="num">2</td>
   <td class="author">reedz <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/109222">#109222</a></td>
   <td class="title">Factor LibraryImports in `System.Transactions.Local` to Common\</td>
@@ -481,7 +485,7 @@
   <td class="num">27</td>
   <td class="author">deeprobin <span class="badge community">community</span></td>
 </tr>
-<tr>
+<tr class="more-row" style="display:none">
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/117473">#117473</a></td>
   <td class="title">Box value types implementing `IXmlSerializable` in `XmlSerializer` gen</td>
@@ -496,6 +500,18 @@
 </tr>
 </tbody>
 </table>
+<button class="show-more-btn" id="toggle-more">Show 18 more &#x25BC;</button>
+<script>
+(function() {
+  var btn = document.getElementById('toggle-more');
+  btn.addEventListener('click', function() {
+    var rows = document.querySelectorAll('.more-row');
+    var showing = rows[0] && rows[0].style.display !== 'none';
+    rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
+    btn.innerHTML = showing ? 'Show 18 more \u25BC' : 'Show fewer \u25B2';
+  });
+})();
+</script>
 
 
 </body>
