@@ -62,6 +62,8 @@ $rows = foreach ($pr in $prs) {
         default       { "&#x26A0;&#xFE0F;" }
     }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community">community</span>' } else { "" }
+    # Show community badge in Who column when it contains the community PR author
+    $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community">community</span>' } else { "" }
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
     if ($pr.author -match "copilot-swe-agent") { $authorDisplay = "&#x1F916; copilot" }
 
@@ -91,7 +93,7 @@ $rows = foreach ($pr in $prs) {
   <td class="score">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
-  <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))</td>
+  <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))$whoCommunityBadge</td>
   <td class="action">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci">$ciEmoji $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
