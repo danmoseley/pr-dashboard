@@ -33,12 +33,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/aspire:aspire")
+          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/wpf:wpf" "dotnet/roslyn:roslyn" "dotnet/aspire:aspire")
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug <<< "$entry"
             echo "=== Scanning $repo ==="
             pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 > "scan-${slug}.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "scan-${slug}.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "scan-${slug}.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins
           done
 
       - name: Generate index page
@@ -52,6 +52,8 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
+            # Pull any concurrent changes (e.g., from the other workflow)
+            git pull --rebase origin main || true
             git commit -m "Update other repo reports $(date -u +'%Y-%m-%d %H:%M UTC')"
             git push
           fi

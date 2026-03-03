@@ -11,20 +11,17 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 - [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
 - [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
 
-### dotnet/aspnetcore (every 12 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/aspnetcore/top15.html)
+### Other repos (every 12 hours)
 
-### dotnet/sdk (every 12 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/sdk/top15.html)
+Each of these repos gets Top 15 and Quick Wins reports:
 
-### dotnet/msbuild (every 12 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/msbuild/top15.html)
-
-### dotnet/winforms (every 12 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/winforms/top15.html)
-
-### dotnet/aspire (every 12 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/aspire/top15.html)
+[aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/top15.html) ·
+[sdk](https://danmoseley.github.io/pr-dashboard/sdk/top15.html) ·
+[msbuild](https://danmoseley.github.io/pr-dashboard/msbuild/top15.html) ·
+[winforms](https://danmoseley.github.io/pr-dashboard/winforms/top15.html) ·
+[wpf](https://danmoseley.github.io/pr-dashboard/wpf/top15.html) ·
+[roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/top15.html) ·
+[aspire](https://danmoseley.github.io/pr-dashboard/aspire/top15.html)
 
 ## How it works
 
