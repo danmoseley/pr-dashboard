@@ -85,6 +85,7 @@ $rows = foreach ($pr in $prs) {
     $updateHeat = if ($pr.days_since_update -ge 30) { " heat-3" } elseif ($pr.days_since_update -ge 14) { " heat-2" } elseif ($pr.days_since_update -ge 7) { " heat-1" } else { "" }
     $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
+    $filesHeat = if ($pr.changed_files -gt 20 -or $pr.lines_changed -gt 500) { " heat-2" } elseif ($pr.changed_files -gt 5 -or $pr.lines_changed -gt 200) { " heat-1" } else { "" }
 
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
 
@@ -99,7 +100,7 @@ $rows = foreach ($pr in $prs) {
   <td class="disc$discHeat">$discEmoji$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
-  <td class="num">$($pr.changed_files)</td>
+  <td class="num$filesHeat">$($pr.changed_files)</td>
   <td class="author">$authorDisplay$communityBadge</td>
 </tr>
 "@
