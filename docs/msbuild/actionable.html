@@ -40,7 +40,7 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin-top: 1.5em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -61,7 +61,28 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Most Actionable PRs — dotnet/msbuild</h1>
-<p class="meta">Updated: 2026-03-03 04:42 UTC &middot; 50 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
+<p class="meta">Updated: 2026-03-03 04:47 UTC &middot; 50 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
 <table>
 <thead>
 <tr>
@@ -265,7 +286,7 @@
   <td class="num">15</td>
   <td class="author"><img class="avatar" src="https://github.com/JanProvaznik.png?size=32" alt="JanProvaznik"><a href="https://github.com/JanProvaznik">@JanProvaznik</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13293">#13293</a></td>
   <td class="title">Localized file check-in by OneLocBuild Task: Build definition ID 9434:</td>
@@ -278,7 +299,7 @@
   <td class="num">64</td>
   <td class="author"><img class="avatar" src="https://github.com/dotnet-bot.png?size=32" alt="dotnet-bot"><a href="https://github.com/dotnet-bot">@dotnet-bot</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13285">#13285</a></td>
   <td class="title">Do not share assemblies of task dependencies if not running on `MSBuil</td>
@@ -291,7 +312,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12672">#12672</a></td>
   <td class="title">Fix: Show source project in graph build errors for invalid project ref</td>
@@ -304,7 +325,7 @@
   <td class="num">16</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12757">#12757</a></td>
   <td class="title">Enablement of parallel project evaluation</td>
@@ -317,7 +338,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/MichalPavlik.png?size=32" alt="MichalPavlik"><a href="https://github.com/MichalPavlik">@MichalPavlik</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13316">#13316</a></td>
   <td class="title">Fix ObjectDisposedException in BuildsWhileBuildIsRunningOnServer test</td>
@@ -330,7 +351,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12405">#12405</a></td>
   <td class="title">Add PropertyExists MSBuild condition function to distinguish between u</td>
@@ -343,7 +364,7 @@
   <td class="num">4</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12429">#12429</a></td>
   <td class="title">use GxHash in net10</td>
@@ -356,7 +377,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13242">#13242</a></td>
   <td class="title">Add PoC of pipelines check skill</td>
@@ -369,7 +390,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/JanKrivanek.png?size=32" alt="JanKrivanek"><a href="https://github.com/JanKrivanek">@JanKrivanek</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12046">#12046</a></td>
   <td class="title">Fix error message for non-Windows OS</td>
@@ -382,7 +403,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/abulyaev.png?size=32" alt="abulyaev"><a href="https://github.com/abulyaev">@abulyaev</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12318">#12318</a></td>
   <td class="title">Dev/erarndt/project root element</td>
@@ -395,7 +416,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Erarndt.png?size=32" alt="Erarndt"><a href="https://github.com/Erarndt">@Erarndt</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12631">#12631</a></td>
   <td class="title">Rewrite resolveprojectreferences MSBuild calls to reduce the amount of</td>
@@ -408,7 +429,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13027">#13027</a></td>
   <td class="title">Implements support for Repo‑Local MSBuild SDKs via .msbuild/Sdk/&lt;SdkNa</td>
@@ -421,7 +442,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/ocalvo.png?size=32" alt="ocalvo"><a href="https://github.com/ocalvo">@ocalvo</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13290">#13290</a></td>
   <td class="title">Localized file check-in by OneLocBuild Task: Build definition ID 9434:</td>
@@ -434,7 +455,7 @@
   <td class="num">52</td>
   <td class="author"><img class="avatar" src="https://github.com/dotnet-bot.png?size=32" alt="dotnet-bot"><a href="https://github.com/dotnet-bot">@dotnet-bot</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13211">#13211</a></td>
   <td class="title">Add explicit colorization control to TerminalLogger and ConsoleLogger</td>
@@ -447,7 +468,7 @@
   <td class="num">8</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12073">#12073</a></td>
   <td class="title">Add comprehensive binlog version compatibility tests</td>
@@ -460,7 +481,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/adarshamrit.png?size=32" alt="adarshamrit"><a href="https://github.com/adarshamrit">@adarshamrit</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12583">#12583</a></td>
   <td class="title">Add IMultiThreadableTask analyzer specification</td>
@@ -473,7 +494,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/JanProvaznik.png?size=32" alt="JanProvaznik"><a href="https://github.com/JanProvaznik">@JanProvaznik</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/10418">#10418</a></td>
   <td class="title">add CacheGet and CacheSet tasks</td>
@@ -486,7 +507,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/adamralph.png?size=32" alt="adamralph"><a href="https://github.com/adamralph">@adamralph</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/10029">#10029</a></td>
   <td class="title">ElementLocation optimisations</td>
@@ -499,7 +520,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/drewnoakes.png?size=32" alt="drewnoakes"><a href="https://github.com/drewnoakes">@drewnoakes</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12946">#12946</a></td>
   <td class="title">Fill holes in BuildEventContext construction and evaluation ID propaga</td>
@@ -512,7 +533,7 @@
   <td class="num">63</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12887">#12887</a></td>
   <td class="title">Add a new buildcheck that encourages MSBuild logic authors to dispose </td>
@@ -525,7 +546,7 @@
   <td class="num">20</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12496">#12496</a></td>
   <td class="title">Do not fall back to legacy dependency resolution logic if `deps.json` </td>
@@ -538,7 +559,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13222">#13222</a></td>
   <td class="title">Fix hardcoded path separators in output paths</td>
@@ -551,7 +572,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/Serajfard.png?size=32" alt="Serajfard"><a href="https://github.com/Serajfard">@Serajfard</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12655">#12655</a></td>
   <td class="title">Make SdkResolver-provided environment variables take precedence over a</td>
@@ -564,7 +585,7 @@
   <td class="num">18</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13173">#13173</a></td>
   <td class="title">Migrate SignFile Task to TaskEnvironment API</td>
@@ -577,7 +598,7 @@
   <td class="num">4</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12785">#12785</a></td>
   <td class="title">Remove web project configuration check</td>
@@ -590,7 +611,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Youssef1313.png?size=32" alt="Youssef1313"><a href="https://github.com/Youssef1313">@Youssef1313</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12695">#12695</a></td>
   <td class="title">Expose operational counters</td>
@@ -603,7 +624,7 @@
   <td class="num">11</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12231">#12231</a></td>
   <td class="title">Clean-up unnecessary compatibility polyfills and feature definitions.</td>
@@ -616,7 +637,7 @@
   <td class="num">54</td>
   <td class="author"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12856">#12856</a></td>
   <td class="title">Add CommandArguments property to Exec task for shell-safe argument pas</td>
@@ -629,7 +650,7 @@
   <td class="num">3</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12738">#12738</a></td>
   <td class="title">Add CI/CD provider-specific loggers for GitHub Actions, Azure DevOps, </td>
@@ -642,7 +663,7 @@
   <td class="num">15</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/11111">#11111</a></td>
   <td class="title">Improve support for loading MSBuild in a non-default ALC.</td>
@@ -655,7 +676,7 @@
   <td class="num">4</td>
   <td class="author"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/11987">#11987</a></td>
   <td class="title">Avoid lock when setting project entry point</td>
@@ -668,7 +689,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Erarndt.png?size=32" alt="Erarndt"><a href="https://github.com/Erarndt">@Erarndt</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12587">#12587</a></td>
   <td class="title">separate the tracking parts of TL into a reusable base, so that TL bec</td>
@@ -681,7 +702,7 @@
   <td class="num">10</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/8251">#8251</a></td>
   <td class="title">Create proper relative symbolic links</td>
@@ -694,7 +715,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/manfred-brands.png?size=32" alt="manfred-brands"><a href="https://github.com/manfred-brands">@manfred-brands</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/12067">#12067</a></td>
   <td class="title">Perf: Fast TypeLoader cache</td>
@@ -707,7 +728,7 @@
   <td class="num">10</td>
   <td class="author"><img class="avatar" src="https://github.com/ccastanedaucf.png?size=32" alt="ccastanedaucf"><a href="https://github.com/ccastanedaucf">@ccastanedaucf</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">1.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13239">#13239</a></td>
   <td class="title">Fix System.IO.File/Directory property functions with relative paths in</td>
@@ -722,39 +743,7 @@
 </tr>
 </tbody>
 </table>
-<button class="show-more-btn" id="toggle-more">Show 35 more &#x25BC;</button>
-<script>
-(function() {
-  var btn = document.getElementById('toggle-more');
-  btn.addEventListener('click', function() {
-    var rows = document.querySelectorAll('.more-row');
-    var showing = rows[0] && rows[0].style.display !== 'none';
-    rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
-    btn.innerHTML = showing ? 'Show 35 more \u25BC' : 'Show fewer \u25B2';
-  });
-})();
-</script>
 
-<details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
-    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
-</details>
+
 </body>
 </html>

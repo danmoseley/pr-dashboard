@@ -40,7 +40,7 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin-top: 1.5em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -61,7 +61,28 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Most Actionable PRs — dotnet/sdk</h1>
-<p class="meta">Updated: 2026-03-03 04:42 UTC &middot; 100 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
+<p class="meta">Updated: 2026-03-03 04:47 UTC &middot; 105 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
 <table>
 <thead>
 <tr>
@@ -265,7 +286,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/wattsonsean8-del.png?size=32" alt="wattsonsean8-del"><a href="https://github.com/wattsonsean8-del">@wattsonsean8-del</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51651">#51651</a></td>
   <td class="title">Update link for ignored directives in documentation</td>
@@ -278,7 +299,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52936">#52936</a></td>
   <td class="title">Migrate 5 MSBuild tasks to IMultiThreadableTask (Group 2: Bundle, Deps</td>
@@ -291,7 +312,7 @@
   <td class="num">9</td>
   <td class="author"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51997">#51997</a></td>
   <td class="title">[Backport][10.0.1xx] Add suppressor support for `dotnet format`</td>
@@ -304,7 +325,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53156">#53156</a></td>
   <td class="title">Fix PublishSingleFile failure when GenerateDocumentationFile=true and </td>
@@ -317,7 +338,7 @@
   <td class="num">2</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53215">#53215</a></td>
   <td class="title">Add a script that takes output of dotnet-watch tests and formats it to</td>
@@ -330,7 +351,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53140">#53140</a></td>
   <td class="title">Add BundledRuntimeAssetRuntimeIdentifiers to filter runtimes/ folder a</td>
@@ -343,7 +364,7 @@
   <td class="num">2</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50334">#50334</a></td>
   <td class="title">Fix: Unsupported maccatalyst attribute is getting applied to child att</td>
@@ -356,7 +377,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50339">#50339</a></td>
   <td class="title">Avoid reporting CA1033 for interfaces</td>
@@ -369,7 +390,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52405">#52405</a></td>
   <td class="title">Add TaskHostFactory tests to guard against regression of #12751 in MSB</td>
@@ -382,7 +403,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/YuliiaKovalova.png?size=32" alt="YuliiaKovalova"><a href="https://github.com/YuliiaKovalova">@YuliiaKovalova</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53213">#53213</a></td>
   <td class="title">Refactor compatibility tools to use parameter objects instead of long </td>
@@ -395,7 +416,7 @@
   <td class="num">15</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/48893">#48893</a></td>
   <td class="title">macOS: Include global tools in zsh $PATH</td>
@@ -408,7 +429,7 @@
   <td class="num">9</td>
   <td class="author"><img class="avatar" src="https://github.com/edvilme.png?size=32" alt="edvilme"><a href="https://github.com/edvilme">@edvilme</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50488">#50488</a></td>
   <td class="title">Avoid reporting CA1859 for properties with setter more accessible than</td>
@@ -421,7 +442,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50310">#50310</a></td>
   <td class="title">Suggested perf improvements in DataFlowAnalysis</td>
@@ -434,7 +455,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50461">#50461</a></td>
   <td class="title">Make CA1860 work with abstract collections</td>
@@ -447,7 +468,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/verdie-g.png?size=32" alt="verdie-g"><a href="https://github.com/verdie-g">@verdie-g</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52267">#52267</a></td>
   <td class="title">Fix outdated VS version reference in .gitignore template</td>
@@ -460,7 +481,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/drewnoakes.png?size=32" alt="drewnoakes"><a href="https://github.com/drewnoakes">@drewnoakes</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53135">#53135</a></td>
   <td class="title">Add Framework SourceType for static web assets</td>
@@ -473,7 +494,7 @@
   <td class="num">13</td>
   <td class="author"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52802">#52802</a></td>
   <td class="title">Add --delete-source option and interactive prompt to project convert</td>
@@ -486,7 +507,7 @@
   <td class="num">32</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53202">#53202</a></td>
   <td class="title">Added --framework arg to &quot;dotnet format&quot; to set TFM </td>
@@ -499,7 +520,7 @@
   <td class="num">24</td>
   <td class="author"><img class="avatar" src="https://github.com/Hextaku.png?size=32" alt="Hextaku"><a href="https://github.com/Hextaku">@Hextaku</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52899">#52899</a></td>
   <td class="title">Fix `applicable_kinds` for type parameters in EditorConfig template</td>
@@ -512,7 +533,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/daeghanelkin.png?size=32" alt="daeghanelkin"><a href="https://github.com/daeghanelkin">@daeghanelkin</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53200">#53200</a></td>
   <td class="title">Fix NRE when running sln remove</td>
@@ -525,7 +546,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/andbrl.png?size=32" alt="andbrl"><a href="https://github.com/andbrl">@andbrl</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53071">#53071</a></td>
   <td class="title">Fix ignored directives link in documentation</td>
@@ -538,7 +559,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Rekkonnect.png?size=32" alt="Rekkonnect"><a href="https://github.com/Rekkonnect">@Rekkonnect</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53004">#53004</a></td>
   <td class="title">[MTP dotnet test]: Allow specifying project, solution, directory, or t</td>
@@ -551,7 +572,7 @@
   <td class="num">8</td>
   <td class="author"><img class="avatar" src="https://github.com/Youssef1313.png?size=32" alt="Youssef1313"><a href="https://github.com/Youssef1313">@Youssef1313</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52343">#52343</a></td>
   <td class="title">Implement proper static completion generation for NuShell</td>
@@ -564,7 +585,7 @@
   <td class="num">16</td>
   <td class="author"><img class="avatar" src="https://github.com/jlcrochet.png?size=32" alt="jlcrochet"><a href="https://github.com/jlcrochet">@jlcrochet</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50367">#50367</a></td>
   <td class="title">Use AnalysisMode=minimum in Microsoft.CodeAnalysis.NetAnalyzers and fi</td>
@@ -577,7 +598,7 @@
   <td class="num">25</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52898">#52898</a></td>
   <td class="title">Run the issue-labeler over pull requests using polling</td>
@@ -590,7 +611,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50372">#50372</a></td>
   <td class="title">Fix updating `globaljsonworkloadsets.json`</td>
@@ -603,7 +624,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/angyanmark.png?size=32" alt="angyanmark"><a href="https://github.com/angyanmark">@angyanmark</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52410">#52410</a></td>
   <td class="title">`dotnetup dotnet` experiment design doc</td>
@@ -616,7 +637,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52935">#52935</a></td>
   <td class="title">Migrate 5 MSBuild tasks to IMultiThreadableTask (Group 1)</td>
@@ -629,7 +650,7 @@
   <td class="num">14</td>
   <td class="author"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52986">#52986</a></td>
   <td class="title">Use three-dot diff in ProjectCapability detection workflow</td>
@@ -642,7 +663,7 @@
   <td class="num">11</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53170">#53170</a></td>
   <td class="title">Update `RunCommand` to write launch settings messages to stderr for MC</td>
@@ -655,7 +676,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Luiz-Ossinho.png?size=32" alt="Luiz-Ossinho"><a href="https://github.com/Luiz-Ossinho">@Luiz-Ossinho</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52233">#52233</a></td>
   <td class="title">Publish SDK installer artifacts in CI pipeline</td>
@@ -668,7 +689,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53192">#53192</a></td>
   <td class="title">Watch aspire</td>
@@ -681,7 +702,7 @@
   <td class="num">93</td>
   <td class="author"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50120">#50120</a></td>
   <td class="title">Include localPath in deps.json for runtime assets</td>
@@ -694,7 +715,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/elinor-fung.png?size=32" alt="elinor-fung"><a href="https://github.com/elinor-fung">@elinor-fung</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51646">#51646</a></td>
   <td class="title">Replace line number reference with descriptive comment</td>
@@ -707,7 +728,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51694">#51694</a></td>
   <td class="title">chore: add slnx to gitattributes template</td>
@@ -720,7 +741,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/victorfrye.png?size=32" alt="victorfrye"><a href="https://github.com/victorfrye">@victorfrye</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51834">#51834</a></td>
   <td class="title">Fix concurrent tool installation race conditions with named mutex</td>
@@ -733,7 +754,7 @@
   <td class="num">16</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52156">#52156</a></td>
   <td class="title">Update .editorconfig</td>
@@ -746,7 +767,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Varorbc.png?size=32" alt="Varorbc"><a href="https://github.com/Varorbc">@Varorbc</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50876">#50876</a></td>
   <td class="title">address Daniel&#39;s feedback</td>
@@ -759,7 +780,7 @@
   <td class="num">7</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/45071">#45071</a></td>
   <td class="title">Do not create custom instances of TestAssetsManager in tests, use SdkT</td>
@@ -772,7 +793,7 @@
   <td class="num">16</td>
   <td class="author"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51088">#51088</a></td>
   <td class="title">CLI --self-contained description is wrong</td>
@@ -785,7 +806,7 @@
   <td class="num">14</td>
   <td class="author"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52677">#52677</a></td>
   <td class="title">Fix WASM workload detection for non-Blazor/WasmSdk Exe projects</td>
@@ -798,7 +819,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/DrewScoggins.png?size=32" alt="DrewScoggins"><a href="https://github.com/DrewScoggins">@DrewScoggins</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52985">#52985</a></td>
   <td class="title">Collect telemetry on MSBuild project evaluation count and performance</td>
@@ -811,7 +832,7 @@
   <td class="num">3</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52944">#52944</a></td>
   <td class="title">Add restore telemetry to measure effectiveness and scope of restore op</td>
@@ -824,7 +845,7 @@
   <td class="num">6</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52306">#52306</a></td>
   <td class="title">fix: false positive for guarded call to LoggerMessage</td>
@@ -837,7 +858,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/Thomas-Shephard.png?size=32" alt="Thomas-Shephard"><a href="https://github.com/Thomas-Shephard">@Thomas-Shephard</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53046">#53046</a></td>
   <td class="title">Preserve encoding and trailing newlines in dotnet-tools.json</td>
@@ -850,7 +871,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Thomas-Shephard.png?size=32" alt="Thomas-Shephard"><a href="https://github.com/Thomas-Shephard">@Thomas-Shephard</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52427">#52427</a></td>
   <td class="title">[spec] Add dotnet test for devices spec</td>
@@ -863,7 +884,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/rmarinho.png?size=32" alt="rmarinho"><a href="https://github.com/rmarinho">@rmarinho</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50766">#50766</a></td>
   <td class="title">feature: Add analysis for camel-cased format arguments in LoggerMessag</td>
@@ -876,7 +897,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/Meir017.png?size=32" alt="Meir017"><a href="https://github.com/Meir017">@Meir017</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51397">#51397</a></td>
   <td class="title">Fix dotnet command does not honor &quot;globalPackagesFolder&quot; in nuget.conf</td>
@@ -889,7 +910,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/guoyongchang.png?size=32" alt="guoyongchang"><a href="https://github.com/guoyongchang">@guoyongchang</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/49810">#49810</a></td>
   <td class="title">Fix typo.</td>
@@ -902,7 +923,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/ZzZombo.png?size=32" alt="ZzZombo"><a href="https://github.com/ZzZombo">@ZzZombo</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51560">#51560</a></td>
   <td class="title">Suppress advertising manifest messages unless verbosity is diagnostic</td>
@@ -915,7 +936,7 @@
   <td class="num">8</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52222">#52222</a></td>
   <td class="title">Auto-enable DOTNET_CLI_CONTEXT_VERBOSE for diagnostic verbosity</td>
@@ -928,7 +949,7 @@
   <td class="num">5</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50397">#50397</a></td>
   <td class="title">CA1860 should be reported for derived types as well (analyzer fix with</td>
@@ -941,7 +962,7 @@
   <td class="num">4</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50570">#50570</a></td>
   <td class="title">Performance improvements in SymbolNamesWithValueOption&lt;T&gt;</td>
@@ -954,7 +975,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50574">#50574</a></td>
   <td class="title">Don&#39;t import Microsoft.Common.props if it has been imported already</td>
@@ -967,7 +988,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/kzu.png?size=32" alt="kzu"><a href="https://github.com/kzu">@kzu</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50581">#50581</a></td>
   <td class="title">[Proposal] Use Span-based methods to split strings in analyzers</td>
@@ -980,7 +1001,7 @@
   <td class="num">8</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53178">#53178</a></td>
   <td class="title">Remove unused package references</td>
@@ -993,7 +1014,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/49518">#49518</a></td>
   <td class="title">Clean up containers packaging, leaning into NuGet&#39;s expected patterns</td>
@@ -1006,7 +1027,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50411">#50411</a></td>
   <td class="title">Reduce allocations in EnumsShouldHaveZeroValueAnalyzer</td>
@@ -1019,7 +1040,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52855">#52855</a></td>
   <td class="title">Update documentation on target framework updates</td>
@@ -1032,7 +1053,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50309">#50309</a></td>
   <td class="title">Avoid ConcurrentDictionary allocation in DisposeObjectsBeforeLosingSco</td>
@@ -1045,7 +1066,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53162">#53162</a></td>
   <td class="title">Verify hashes in the release manifests</td>
@@ -1058,7 +1079,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52678">#52678</a></td>
   <td class="title">Initial version of a build duty report generator instructions for copi</td>
@@ -1071,7 +1092,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52687">#52687</a></td>
   <td class="title">Add --format &lt;json|text&gt; option to `dotnet solution list` command</td>
@@ -1084,7 +1105,7 @@
   <td class="num">5</td>
   <td class="author"><img class="avatar" src="https://github.com/HarleyRossetto.png?size=32" alt="HarleyRossetto"><a href="https://github.com/HarleyRossetto">@HarleyRossetto</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52448">#52448</a></td>
   <td class="title">Remove 15 unused resource strings from CliCommandStrings</td>
@@ -1097,7 +1118,7 @@
   <td class="num">14</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/46171">#46171</a></td>
   <td class="title">Add error for incorrect PublishSelfContained</td>
@@ -1110,7 +1131,7 @@
   <td class="num">21</td>
   <td class="author"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52758">#52758</a></td>
   <td class="title">Port workload corruption repair to main from release/10.0.2xx</td>
@@ -1123,7 +1144,7 @@
   <td class="num">43</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52302">#52302</a></td>
   <td class="title">Add TypeScript Static Web Assets integration</td>
@@ -1136,7 +1157,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52397">#52397</a></td>
   <td class="title">Implement automatic TargetFramework setting feature</td>
@@ -1149,7 +1170,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51512">#51512</a></td>
   <td class="title">Add a template for servicing pull requests</td>
@@ -1162,7 +1183,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/47141">#47141</a></td>
   <td class="title">Remove underscore from `_UseManagedNtlm`</td>
@@ -1175,7 +1196,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52292">#52292</a></td>
   <td class="title">Fix `seperate` typo</td>
@@ -1188,7 +1209,7 @@
   <td class="num">18</td>
   <td class="author"><img class="avatar" src="https://github.com/SolalPirelli.png?size=32" alt="SolalPirelli"><a href="https://github.com/SolalPirelli">@SolalPirelli</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50342">#50342</a></td>
   <td class="title">[Proposal] Analyzer test readability/performance improvements</td>
@@ -1201,7 +1222,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/48599">#48599</a></td>
   <td class="title">Set PlatformTarget to AnyCPU for modern .NET</td>
@@ -1214,7 +1235,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52755">#52755</a></td>
   <td class="title">Fix &quot;`dotnet publish` removes native DLLs on subsequent runs&quot;</td>
@@ -1227,7 +1248,7 @@
   <td class="num">16</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/39801">#39801</a></td>
   <td class="title">Add --format to dotnet sln list</td>
@@ -1240,7 +1261,7 @@
   <td class="num">18</td>
   <td class="author"><img class="avatar" src="https://github.com/jdraaijer-microsoft.png?size=32" alt="jdraaijer-microsoft"><a href="https://github.com/jdraaijer-microsoft">@jdraaijer-microsoft</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52622">#52622</a></td>
   <td class="title">Added fixer for CA1848: Use the LoggerMessage delegates</td>
@@ -1253,7 +1274,7 @@
   <td class="num">32</td>
   <td class="author"><img class="avatar" src="https://github.com/Yun-Ting.png?size=32" alt="Yun-Ting"><a href="https://github.com/Yun-Ting">@Yun-Ting</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/47772">#47772</a></td>
   <td class="title">Remove reassignments of `MSBuildAllProjects` property.</td>
@@ -1266,7 +1287,7 @@
   <td class="num">4</td>
   <td class="author"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52112">#52112</a></td>
   <td class="title">Add APICompat rule to detect static keyword changes on members and typ</td>
@@ -1279,7 +1300,7 @@
   <td class="num">19</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/43576">#43576</a></td>
   <td class="title">Make the toolsResolverCache path overridable using an environment vari</td>
@@ -1292,7 +1313,7 @@
   <td class="num">4</td>
   <td class="author"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51127">#51127</a></td>
   <td class="title">Add mixed installation detection and warning to `dotnet --info`</td>
@@ -1305,7 +1326,7 @@
   <td class="num">17</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/45637">#45637</a></td>
   <td class="title">realpath in c#</td>
@@ -1318,7 +1339,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/kasperk81.png?size=32" alt="kasperk81"><a href="https://github.com/kasperk81">@kasperk81</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50684">#50684</a></td>
   <td class="title">Make the Verbosity enum normal</td>
@@ -1331,7 +1352,7 @@
   <td class="num">109</td>
   <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/48918">#48918</a></td>
   <td class="title">Utilize ShellName and Add Test to Enable Completions W/out Shell on Un</td>
@@ -1344,7 +1365,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/52329">#52329</a></td>
   <td class="title">[workload] `dotnet workload --info` shows `WorkloadDependencies.json`</td>
@@ -1357,7 +1378,7 @@
   <td class="num">17</td>
   <td class="author"><img class="avatar" src="https://github.com/jonathanpeppers.png?size=32" alt="jonathanpeppers"><a href="https://github.com/jonathanpeppers">@jonathanpeppers</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">2.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/38210">#38210</a></td>
   <td class="title">NET tool roll forward error experience</td>
@@ -1370,9 +1391,74 @@
   <td class="num">42</td>
   <td class="author"><img class="avatar" src="https://github.com/JL03-Yue.png?size=32" alt="JL03-Yue"><a href="https://github.com/JL03-Yue">@JL03-Yue</a></td>
 </tr>
+<tr class="more-row" style="display:none">
+  <td class="score">2.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50389">#50389</a></td>
+  <td class="title">MSBuild Server dogfood (#12120)</td>
+  <td class="who"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a></td>
+  <td class="action">&#x1F6D1; Author: resolve conflicts</td>
+  <td class="ci">&#x274C; 21/5/0</td>
+  <td class="disc heat-2">5t/4p</td>
+  <td class="num heat-3">195d</td>
+  <td class="num heat-3">160d</td>
+  <td class="num">13</td>
+  <td class="author"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a></td>
+</tr>
+<tr class="more-row" style="display:none">
+  <td class="score">2.5</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/53102">#53102</a></td>
+  <td class="title">`dotnetup` retries to download manifest content - flaky test fixes</td>
+  <td class="who"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a></td>
+  <td class="action">&#x1F6D1; Author: resolve conflicts</td>
+  <td class="ci">&#x274C; 24/5/0</td>
+  <td class="disc">1t/1p</td>
+  <td class="num">10d</td>
+  <td class="num heat-1">10d</td>
+  <td class="num">21</td>
+  <td class="author"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a></td>
+</tr>
+<tr class="more-row" style="display:none">
+  <td class="score">2.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/49409">#49409</a></td>
+  <td class="title">OTel experimentation</td>
+  <td class="who"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
+  <td class="action">&#x1F6D1; Author: resolve conflicts</td>
+  <td class="ci">&#x274C; 12/14/0</td>
+  <td class="disc heat-2">9t/3p</td>
+  <td class="num heat-3">260d</td>
+  <td class="num heat-3">73d</td>
+  <td class="num">45</td>
+  <td class="author"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
+</tr>
+<tr class="more-row" style="display:none">
+  <td class="score">2.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51561">#51561</a></td>
+  <td class="title">Add warning when using --framework with solution files</td>
+  <td class="who"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a></td>
+  <td class="action">&#x1F6D1; Author: resolve conflicts</td>
+  <td class="ci">&#x274C; 17/7/0</td>
+  <td class="disc heat-1">5t/3p</td>
+  <td class="num heat-3">118d</td>
+  <td class="num heat-2">28d</td>
+  <td class="num">17</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr class="more-row" style="display:none">
+  <td class="score">1.5</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51068">#51068</a></td>
+  <td class="title">Add telemetry logger support for API-based MSBuild usage with BannedAp</td>
+  <td class="who"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a></td>
+  <td class="action">&#x1F6D1; Author: resolve conflicts</td>
+  <td class="ci">&#x274C; 17/6/0</td>
+  <td class="disc heat-3">&#x1F525; 15t/6p</td>
+  <td class="num heat-3">153d</td>
+  <td class="num heat-3">41d</td>
+  <td class="num">64</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
 </tbody>
 </table>
-<button class="show-more-btn" id="toggle-more">Show 85 more &#x25BC;</button>
+<button class="show-more-btn" id="toggle-more">Show 5 more &#x25BC;</button>
 <script>
 (function() {
   var btn = document.getElementById('toggle-more');
@@ -1380,31 +1466,10 @@
     var rows = document.querySelectorAll('.more-row');
     var showing = rows[0] && rows[0].style.display !== 'none';
     rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
-    btn.innerHTML = showing ? 'Show 85 more \u25BC' : 'Show fewer \u25B2';
+    btn.innerHTML = showing ? 'Show 5 more \u25BC' : 'Show fewer \u25B2';
   });
 })();
 </script>
 
-<details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
-    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
-</details>
 </body>
 </html>

@@ -83,7 +83,7 @@ $rows = foreach ($pr in $prs) {
     $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
 
-    $moreClass = if ($rowIndex -gt 15) { ' class="more-row" style="display:none"' } else { "" }
+    $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
 
     @"
 <tr$moreClass>
@@ -127,10 +127,10 @@ if ($Observations.Trim()) {
 
 $prCount = @($prs).Count
 
-# Show more / collapse toggle
+# Show more / collapse toggle (pages of 100)
 $toggleHtml = ""
-if ($prCount -gt 15) {
-    $extraCount = $prCount - 15
+if ($prCount -gt 100) {
+    $extraCount = $prCount - 100
     $toggleHtml = @"
 <button class="show-more-btn" id="toggle-more">Show $extraCount more &#x25BC;</button>
 <script>
@@ -218,7 +218,7 @@ $html = @"
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin-top: 1.5em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -240,6 +240,7 @@ $html = @"
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
 <p class="meta">Updated: $Timestamp &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
+$scoringHtml
 <table>
 <thead>
 <tr>
@@ -253,7 +254,6 @@ $($rows -join "`n")
 </table>
 $toggleHtml
 $obsHtml
-$scoringHtml
 </body>
 </html>
 "@

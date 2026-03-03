@@ -40,7 +40,7 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin-top: 1.5em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -61,7 +61,28 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Most Actionable PRs — dotnet/winforms</h1>
-<p class="meta">Updated: 2026-03-03 04:42 UTC &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated: 2026-03-03 04:47 UTC &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
 <table>
 <thead>
 <tr>
@@ -265,7 +286,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">7.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14248">#14248</a></td>
   <td class="title">Fix issue 14089: Disabled menu items incorrectly display highlighted t</td>
@@ -278,7 +299,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">7.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14152">#14152</a></td>
   <td class="title">Fix insufficient contrast for PropertyGrid dropdown text in Dark Mode</td>
@@ -291,7 +312,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">7.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14224">#14224</a></td>
   <td class="title">Issue 14204 fix data grid view excessive cpu+memory usage</td>
@@ -304,7 +325,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">7</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14255">#14255</a></td>
   <td class="title">Fix TreeView icons not scaling on high DPI</td>
@@ -317,7 +338,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">7</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14307">#14307</a></td>
   <td class="title">Fix dark mode invisible text for CheckBox/RadioButton with FlatStyle.S</td>
@@ -330,7 +351,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/apoorvdarshan.png?size=32" alt="apoorvdarshan"><a href="https://github.com/apoorvdarshan">@apoorvdarshan</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13878">#13878</a></td>
   <td class="title">fix #13873 [DarkMode]: TabControl doesn&#39;t render tab titles correctly </td>
@@ -343,7 +364,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14301">#14301</a></td>
   <td class="title">Fix UIA Invoke hang when ToolStripMenuItem opens modal dialog from Men</td>
@@ -356,7 +377,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14252">#14252</a></td>
   <td class="title">Fix font size of UserControl in ToolStripControlHost after DPI change</td>
@@ -369,7 +390,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13486">#13486</a></td>
   <td class="title">add workflow Block PRs with &quot;NO-MERGE&quot; label</td>
@@ -382,7 +403,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13891">#13891</a></td>
   <td class="title">Add hover visual effect for Popup button</td>
@@ -395,7 +416,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14216">#14216</a></td>
   <td class="title"> Fix disabled RichTextBox multiline text rendering in Dark Mode</td>
@@ -408,7 +429,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14182">#14182</a></td>
   <td class="title">PropertyGridView: Prevent out-of-range access when committing next enu</td>
@@ -421,7 +442,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13981">#13981</a></td>
   <td class="title">Fix 13976: Enhance TreeNode.UpdateImage() to support inherited image k</td>
@@ -434,7 +455,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14074">#14074</a></td>
   <td class="title">Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMod</td>
@@ -447,7 +468,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14075">#14075</a></td>
   <td class="title">Fix issue 14071: ComboBox.ObjectCollection.CopyTo(Array destination, i</td>
@@ -460,7 +481,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14110">#14110</a></td>
   <td class="title">Fix ToolStripStatusLabel text visibility in High Contrast mode with Sy</td>
@@ -473,7 +494,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14133">#14133</a></td>
   <td class="title">Fix visibility logic for addNewPanel in DesignBindingPicker to use _da</td>
@@ -486,7 +507,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14156">#14156</a></td>
   <td class="title">Fix Form with StartPosition=CenterParent and WindowState=Maximized ope</td>
@@ -499,7 +520,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14129">#14129</a></td>
   <td class="title">Fix dark mode text visibility in Collection Editor dialogs</td>
@@ -512,7 +533,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14131">#14131</a></td>
   <td class="title">Fix TabControl dark mode rendering for Left/Right alignment with verti</td>
@@ -525,7 +546,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14288">#14288</a></td>
   <td class="title">Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in d</td>
@@ -538,7 +559,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13824">#13824</a></td>
   <td class="title">Update the OwnerDraw flag when BackgroundImage changes</td>
@@ -551,7 +572,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14219">#14219</a></td>
   <td class="title">Fix issue 14210: [Dark Mode] The ListView cannot display the items whe</td>
@@ -564,7 +585,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14269">#14269</a></td>
   <td class="title">[release/8.0] Fix issue 14259: Deserialization of the CodeTypeReferenc</td>
@@ -577,7 +598,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13449">#13449</a></td>
   <td class="title">Optimize icon rendering: simplify logic and eliminate redundant calcul</td>
@@ -590,7 +611,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14270">#14270</a></td>
   <td class="title">[release/9.0] Fix issue 14259: Deserialization of the CodeTypeReferenc</td>
@@ -603,7 +624,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14162">#14162</a></td>
   <td class="title">Fix TabControl spinner button not applying Dark Mode when TabPages add</td>
@@ -616,7 +637,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13480">#13480</a></td>
   <td class="title">[DarkMode] Fix MDIParent MainMenuStrip System Bitmaps</td>
@@ -629,7 +650,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13739">#13739</a></td>
   <td class="title">Use programatically check instead of assertion in method ComputeVisibl</td>
@@ -642,7 +663,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13742">#13742</a></td>
   <td class="title">Create  MainForm.cs</td>
@@ -655,7 +676,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/nmza25.png?size=32" alt="nmza25"><a href="https://github.com/nmza25">@nmza25</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13792">#13792</a></td>
   <td class="title">Add check &quot;IsDarkModeEnabled&quot; for SelectionForeColor of DataGridView</td>
@@ -668,7 +689,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14237">#14237</a></td>
   <td class="title">Update the selected anchor color in Dark mode</td>
@@ -681,7 +702,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14161">#14161</a></td>
   <td class="title">Improve ButtonDarkModeAdapter color handling and remove inappropriate </td>
@@ -694,7 +715,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13925">#13925</a></td>
   <td class="title">Update InputLanguage.cs</td>
@@ -707,7 +728,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14179">#14179</a></td>
   <td class="title">Update the link of the &quot;APIs of DotNet&quot; in porting-guidelines.md</td>
@@ -720,7 +741,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14176">#14176</a></td>
   <td class="title">Update KeyboardToolTipStateMachine.cs</td>
@@ -733,7 +754,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/stumper66.png?size=32" alt="stumper66"><a href="https://github.com/stumper66">@stumper66</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14121">#14121</a></td>
   <td class="title">[release/10.0] Refactor StatusStrip DefaultPadding calculation and adj</td>
@@ -746,7 +767,7 @@
   <td class="num">4</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14271">#14271</a></td>
   <td class="title">Adding retry logic while querying\fetching data from clipboard</td>
@@ -759,7 +780,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13898">#13898</a></td>
   <td class="title">Fix the Button border and color with FlatStyle = Flat: FlatAppearance </td>
@@ -772,7 +793,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11641">#11641</a></td>
   <td class="title">Fix 11214 by removing IsHandleCreated in OnFontChanged</td>
@@ -785,7 +806,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14268">#14268</a></td>
   <td class="title">[release/10.0] Fix issue 14259: Deserialization of the CodeTypeReferen</td>
@@ -798,7 +819,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12420">#12420</a></td>
   <td class="title">Style ToolTip to make it dark enough in Dark mode</td>
@@ -811,7 +832,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13456">#13456</a></td>
   <td class="title">Add unit test for RadioButtonStandardAdapter.cs, RadioButtonPopupAdapt</td>
@@ -824,7 +845,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13448">#13448</a></td>
   <td class="title">Refactor icon initialization and make use of CreateIconResourceDirecto</td>
@@ -837,7 +858,7 @@
   <td class="num">6</td>
   <td class="author"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14138">#14138</a></td>
   <td class="title">Add AppContext switch to mirror Owner.TopMost for modal dialogs (resto</td>
@@ -850,7 +871,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13950">#13950</a></td>
   <td class="title">Fixes #13901. Properly displays PropertyGrid` color and cursor dropdow</td>
@@ -863,7 +884,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14168">#14168</a></td>
   <td class="title">Fix cursor editor icon width calculation for proper DPI scaling</td>
@@ -876,7 +897,7 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13303">#13303</a></td>
   <td class="title">Use MouseWheel scrolling in ToolStripDropDownMenu</td>
@@ -889,7 +910,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14079">#14079</a></td>
   <td class="title">Fix incorrect logic in CharIsPrintable for UnicodeCategory exclusions</td>
@@ -902,7 +923,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13440">#13440</a></td>
   <td class="title">Improve Message Box in WinForms</td>
@@ -915,7 +936,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/10944">#10944</a></td>
   <td class="title">Add convenience / perf methods to ListViewItem/ControlCollection</td>
@@ -928,7 +949,7 @@
   <td class="num">7</td>
   <td class="author"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.6</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11258">#11258</a></td>
   <td class="title">Fix WindowsFormsApplicationBase.IsSingleInstance</td>
@@ -941,7 +962,7 @@
   <td class="num">2</td>
   <td class="author"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14267">#14267</a></td>
   <td class="title">Enable DataGridView dark mode theming via AppContext switch</td>
@@ -954,7 +975,7 @@
   <td class="num">10</td>
   <td class="author"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11213">#11213</a></td>
   <td class="title">fixed Font auto scaling when Handle is created</td>
@@ -967,7 +988,7 @@
   <td class="num">1</td>
   <td class="author"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14238">#14238</a></td>
   <td class="title">Add `ImageList.UseMaskForTransparency` for better image transparency</td>
@@ -980,7 +1001,7 @@
   <td class="num">3</td>
   <td class="author"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a></td>
 </tr>
-<tr class="more-row" style="display:none">
+<tr>
   <td class="score">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12486">#12486</a></td>
   <td class="title">Code Coverage for DownloadFile Review 1St</td>
@@ -995,39 +1016,7 @@
 </tr>
 </tbody>
 </table>
-<button class="show-more-btn" id="toggle-more">Show 56 more &#x25BC;</button>
-<script>
-(function() {
-  var btn = document.getElementById('toggle-more');
-  btn.addEventListener('click', function() {
-    var rows = document.querySelectorAll('.more-row');
-    var showing = rows[0] && rows[0].style.display !== 'none';
-    rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
-    btn.innerHTML = showing ? 'Show 56 more \u25BC' : 'Show fewer \u25B2';
-  });
-})();
-</script>
 
-<details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
-    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
-</details>
+
 </body>
 </html>
