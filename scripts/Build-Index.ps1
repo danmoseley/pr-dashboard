@@ -74,10 +74,11 @@ $updatedCells = $repos | ForEach-Object {
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
-# Build scan stats row — show analyzed count (scanned includes drafts/bots/stale that are filtered out)
+# Build scan stats row
 $statsCells = $repos | ForEach-Object {
     $skipped = $_.scanned - $_.analyzed
-    "<td class=`"stats`">$($_.analyzed) open PRs ($skipped drafts/bots excluded)</td>"
+    $pullsUrl = "https://github.com/$($_.repo)/pulls?q=is%3Aopen+is%3Apr+draft%3Atrue"
+    "<td class=`"stats`"><a href=`"$pullsUrl`">$skipped drafts/bots</a> excluded</td>"
 }
 $statsRow = "<tr class=`"stats-row`"><td class=`"report-name`">Scan</td>$($statsCells -join '')</tr>"
 
