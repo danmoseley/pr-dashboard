@@ -43,10 +43,10 @@ $reportTypes = @(
     @{ Id = "quick-wins"; Title = "Quick Wins: Ready to Merge" }
 )
 
-# Build header row
+# Build header row — link to the pulls page, not the repo homepage
 $headerCells = $repos | ForEach-Object {
     $repoShort = $_.slug
-    "<th><a href=`"https://github.com/$($_.repo)`">$repoShort</a></th>"
+    "<th><a href=`"https://github.com/$($_.repo)/pulls`">$repoShort</a></th>"
 }
 $headerRow = "<tr><th>Report</th>$($headerCells -join '')</tr>"
 
@@ -73,9 +73,10 @@ $updatedCells = $repos | ForEach-Object {
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
-# Build scan stats row
+# Build scan stats row — show analyzed count (scanned includes drafts/bots/stale that are filtered out)
 $statsCells = $repos | ForEach-Object {
-    "<td class=`"stats`">$($_.scanned) scanned, $($_.analyzed) analyzed</td>"
+    $skipped = $_.scanned - $_.analyzed
+    "<td class=`"stats`">$($_.analyzed) open PRs ($skipped drafts/bots excluded)</td>"
 }
 $statsRow = "<tr class=`"stats-row`"><td class=`"report-name`">Scan</td>$($statsCells -join '')</tr>"
 
