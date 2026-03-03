@@ -102,7 +102,7 @@ $candidates = @($prsRaw | Where-Object {
 
 # Apply additional label filters
 if ($Community) {
-    $candidates = @($candidates | Where-Object { $_.labels.name -contains "community-contribution" })
+    $candidates = @($candidates | Where-Object { ($_.labels.name | Where-Object { $_ -match '^community' }).Count -gt 0 })
 }
 if ($HasLabel) {
     $candidates = @($candidates | Where-Object { $_.labels.name -contains $HasLabel })
@@ -327,7 +327,7 @@ foreach ($pr in $candidates) {
     $hasAnyReview = $reviews.Count -gt 0
 
     # Labels
-    $isCommunity = $labelNames -contains "community-contribution"
+    $isCommunity = ($labelNames | Where-Object { $_ -match '^community' }).Count -gt 0
     $hasAreaLabel = ($labelNames | Where-Object { $_ -match "^area-" }).Count -gt 0
     $isUntriaged = $labelNames -contains "untriaged"
 
