@@ -1,9 +1,9 @@
-name: Generate PR Reports
+name: Generate Other Repo Reports
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # every 4 hours
-  workflow_dispatch: {}    # manual trigger
+    - cron: '0 */12 * * *'  # every 12 hours
+  workflow_dispatch: {}
 
 permissions:
   contents: write
@@ -20,7 +20,6 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Fetch from fork branch (change to dotnet/runtime main after PR #125005 merges)
           gh api -H "Accept: application/vnd.github.raw" \
             "repos/danmoseley/runtime/contents/.github/skills/pr-triage/scripts/Get-PrTriageData.ps1?ref=pr-triage-skill" \
             > Get-PrTriageData.ps1
@@ -30,18 +29,20 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh extension install github/gh-models
 
-      - name: Run full PR scan
+      - name: Scan and generate reports
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          pwsh ./Get-PrTriageData.ps1 -Repo dotnet/runtime -Limit 500 > full-scan.json
-          echo "Scan complete. $(cat full-scan.json | python3 -c 'import json,sys; d=json.load(sys.stdin); print(f"Scanned {d[\"scanned\"]}, analyzed {d[\"analyzed\"]}, {d[\"elapsed_seconds\"]}s")')"
+          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/aspire:aspire")
+          for entry in "${repos[@]}"; do
+            IFS=':' read -r repo slug <<< "$entry"
+            echo "=== Scanning $repo ==="
+            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 > "scan-${slug}.json"
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "scan-${slug}.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15
+          done
 
-      - name: Generate HTML reports
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          pwsh ./scripts/Build-Reports.ps1 -ScanFile full-scan.json -DocsDir docs -Repo dotnet/runtime
+      - name: Generate index page
+        run: pwsh ./scripts/Build-Index.ps1
 
       - name: Commit and push
         run: |
@@ -51,6 +52,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Update reports $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git commit -m "Update other repo reports $(date -u +'%Y-%m-%d %H:%M UTC')"
             git push
           fi
