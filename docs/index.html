@@ -36,14 +36,14 @@
 
 <table>
 <thead>
-<tr><th>Report</th><th><a href="https://github.com/dotnet/runtime">runtime</a></th><th><a href="https://github.com/dotnet/aspire">aspire</a></th><th><a href="https://github.com/dotnet/aspnetcore">aspnetcore</a></th><th><a href="https://github.com/dotnet/msbuild">msbuild</a></th><th><a href="https://github.com/dotnet/roslyn">roslyn</a></th><th><a href="https://github.com/dotnet/sdk">sdk</a></th><th><a href="https://github.com/dotnet/winforms">winforms</a></th><th><a href="https://github.com/dotnet/wpf">wpf</a></th></tr>
+<tr><th>Report</th><th><a href="https://github.com/dotnet/runtime/pulls">runtime</a></th><th><a href="https://github.com/dotnet/aspire/pulls">aspire</a></th><th><a href="https://github.com/dotnet/aspnetcore/pulls">aspnetcore</a></th><th><a href="https://github.com/dotnet/msbuild/pulls">msbuild</a></th><th><a href="https://github.com/dotnet/roslyn/pulls">roslyn</a></th><th><a href="https://github.com/dotnet/sdk/pulls">sdk</a></th><th><a href="https://github.com/dotnet/winforms/pulls">winforms</a></th><th><a href="https://github.com/dotnet/wpf/pulls">wpf</a></th></tr>
 </thead>
 <tbody>
 <tr><td class="report-name">Top 15 Actionable</td><td><a href="runtime/top15.html">15 PRs</a></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td></tr>
 <tr><td class="report-name">Community Awaiting Review</td><td><a href="runtime/community.html">33 PRs</a></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td></tr>
 <tr><td class="report-name">Quick Wins: Ready to Merge</td><td><a href="runtime/quick-wins.html">2 PRs</a></td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td><td class="na">&mdash;</td></tr>
-<tr class="updated-row"><td class="report-name">Updated</td><td class="updated" data-updated="2026-03-03T03:32:59Z">...</td><td class="updated" data-updated="2026-03-03T03:39:06Z">...</td><td class="updated" data-updated="2026-03-03T03:36:00Z">...</td><td class="updated" data-updated="2026-03-03T03:36:38Z">...</td><td class="updated" data-updated="2026-03-03T03:38:46Z">...</td><td class="updated" data-updated="2026-03-03T03:36:28Z">...</td><td class="updated" data-updated="2026-03-03T03:36:52Z">...</td><td class="updated" data-updated="2026-03-03T03:37:27Z">...</td></tr>
-<tr class="stats-row"><td class="report-name">Scan</td><td class="stats">427 scanned, 271 analyzed</td><td class="stats">105 scanned, 69 analyzed</td><td class="stats">229 scanned, 147 analyzed</td><td class="stats">89 scanned, 50 analyzed</td><td class="stats">500 scanned, 220 analyzed</td><td class="stats">206 scanned, 105 analyzed</td><td class="stats">87 scanned, 71 analyzed</td><td class="stats">211 scanned, 194 analyzed</td></tr>
+<tr class="updated-row"><td class="report-name">Updated</td><td class="updated" data-updated="2026-03-03T03:32:59Z" data-interval="4">...</td><td class="updated" data-updated="2026-03-03T03:39:06Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:36:00Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:36:38Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:38:46Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:36:28Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:36:52Z" data-interval="12">...</td><td class="updated" data-updated="2026-03-03T03:37:27Z" data-interval="12">...</td></tr>
+<tr class="stats-row"><td class="report-name">Scan</td><td class="stats">271 open PRs (156 drafts/bots excluded)</td><td class="stats">69 open PRs (36 drafts/bots excluded)</td><td class="stats">147 open PRs (82 drafts/bots excluded)</td><td class="stats">50 open PRs (39 drafts/bots excluded)</td><td class="stats">220 open PRs (280 drafts/bots excluded)</td><td class="stats">105 open PRs (101 drafts/bots excluded)</td><td class="stats">71 open PRs (16 drafts/bots excluded)</td><td class="stats">194 open PRs (17 drafts/bots excluded)</td></tr>
 </tbody>
 </table>
 
@@ -63,15 +63,15 @@ function timeAgo(iso) {
   const days = Math.floor(hrs / 24);
   return days + 'd ago';
 }
-document.querySelectorAll('[data-updated]').forEach(function(el) {
-  el.textContent = timeAgo(el.getAttribute('data-updated'));
-});
-// Refresh every minute
-setInterval(function() {
+function updateTimestamps() {
   document.querySelectorAll('[data-updated]').forEach(function(el) {
-    el.textContent = timeAgo(el.getAttribute('data-updated'));
+    var ago = timeAgo(el.getAttribute('data-updated'));
+    var intervalH = el.getAttribute('data-interval');
+    el.textContent = ago + ', updated every ' + intervalH + 'h';
   });
-}, 60000);
+}
+updateTimestamps();
+setInterval(updateTimestamps, 60000);
 </script>
 </body>
 </html>
