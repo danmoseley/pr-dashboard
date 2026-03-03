@@ -53,8 +53,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            # Pull any concurrent changes (e.g., from the other workflow)
-            git pull --rebase origin main || true
             git commit -m "Update runtime reports $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git pull --rebase origin main || true
             git push
           fi
