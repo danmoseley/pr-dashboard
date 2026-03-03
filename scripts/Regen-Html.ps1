@@ -26,6 +26,7 @@ $repos = @{
     "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
     "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
     "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "extensions" = @{ Repo = "dotnet/extensions";   Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
 }
 
 $found = 0

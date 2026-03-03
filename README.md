@@ -22,7 +22,8 @@ Each of these repos gets Most Actionable, Quick Wins, and Consider Closing repor
 [winforms](https://danmoseley.github.io/pr-dashboard/winforms/actionable.html) ·
 [wpf](https://danmoseley.github.io/pr-dashboard/wpf/actionable.html) ·
 [roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/actionable.html) ·
-[aspire](https://danmoseley.github.io/pr-dashboard/aspire/actionable.html)
+[aspire](https://danmoseley.github.io/pr-dashboard/aspire/actionable.html) ·
+[extensions](https://danmoseley.github.io/pr-dashboard/extensions/actionable.html)
 
 ### Per-person view
 

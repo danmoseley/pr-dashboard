@@ -25,7 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/wpf:wpf" "dotnet/roslyn:roslyn" "dotnet/aspire:aspire")
+          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/wpf:wpf" "dotnet/roslyn:roslyn" "dotnet/aspire:aspire" "dotnet/extensions:extensions")
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug <<< "$entry"
             echo "=== Scanning $repo ==="
