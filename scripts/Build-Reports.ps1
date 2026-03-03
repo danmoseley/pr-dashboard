@@ -30,6 +30,11 @@ param(
 $ErrorActionPreference = "Stop"
 $scriptDir = $PSScriptRoot
 
+# Handle comma-separated string from bash (e.g., "top15,quick-wins" becomes one string element)
+if ($ReportTypes.Count -eq 1 -and $ReportTypes[0] -match ',') {
+    $ReportTypes = $ReportTypes[0] -split ','
+}
+
 $scan = Get-Content $ScanFile -Raw | ConvertFrom-Json
 $allPrs = $scan.prs
 $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm 'UTC'")
