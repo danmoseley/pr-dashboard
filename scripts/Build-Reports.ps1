@@ -96,11 +96,13 @@ Generate 3-5 concise bullet-point observations that are actionable for maintaine
 Do NOT repeat what's in the table. Output ONLY the bullet points, each starting with "- ".
 "@
             Write-Host "  Calling AI for observations..."
-            $observations = ($prompt | gh models run openai/gpt-4o 2>&1)
+            $aiOutput = ($prompt | gh models run openai/gpt-4o 2>&1)
             if ($LASTEXITCODE -ne 0) {
                 Write-Warning "AI observation generation failed, continuing without observations"
-                $observations = ""
+                $aiOutput = ""
             }
+            # gh models run may return an array of lines; join into a single string
+            $observations = if ($aiOutput -is [array]) { $aiOutput -join "`n" } else { [string]$aiOutput }
         } catch {
             Write-Warning "AI observation generation failed: $_"
             $observations = ""
