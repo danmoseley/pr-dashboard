@@ -37,8 +37,9 @@ jobs:
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug <<< "$entry"
             echo "=== Scanning $repo ==="
-            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 > "scan-${slug}.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "scan-${slug}.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins
+            mkdir -p "docs/${slug}"
+            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 > "docs/${slug}/scan.json"
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins
           done
 
       - name: Generate index page
