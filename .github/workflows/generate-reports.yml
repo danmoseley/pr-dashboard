@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  models: read
+  # models: read  # uncomment when re-enabling AI observations
 
 jobs:
   generate:
@@ -16,29 +16,28 @@ jobs:
       - name: Checkout dashboard repo
         uses: actions/checkout@v4
 
-      - name: Install gh-models extension
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: gh extension install github/gh-models
+      # - name: Install gh-models extension
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
+      #   run: gh extension install github/gh-models
 
       - name: Scan and generate reports
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # repo:slug:ai (ai = 1 for AI observations, 0 to skip)
           repos=(
-            "dotnet/runtime:runtime:1"
-            "dotnet/aspnetcore:aspnetcore:1"
-            "dotnet/aspire:aspire:1"
-            "dotnet/extensions:extensions:1"
-            "dotnet/sdk:sdk:0"
-            "dotnet/msbuild:msbuild:0"
-            "dotnet/winforms:winforms:0"
-            "dotnet/wpf:wpf:0"
-            "dotnet/roslyn:roslyn:0"
+            "dotnet/runtime:runtime"
+            "dotnet/aspnetcore:aspnetcore"
+            "dotnet/aspire:aspire"
+            "dotnet/extensions:extensions"
+            "dotnet/sdk:sdk"
+            "dotnet/msbuild:msbuild"
+            "dotnet/winforms:winforms"
+            "dotnet/wpf:wpf"
+            "dotnet/roslyn:roslyn"
           )
           for entry in "${repos[@]}"; do
-            IFS=':' read -r repo slug use_ai <<< "$entry"
+            IFS=':' read -r repo slug <<< "$entry"
             echo "=== Scanning $repo ==="
             mkdir -p "docs/${slug}"
             # Read maintainers for this repo from config
@@ -48,11 +47,7 @@ jobs:
               maintainer_args="-Maintainers $maintainers"
             fi
             pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
-            skip_ai_flag=""
-            if [ "$use_ai" = "0" ]; then
-              skip_ai_flag="-SkipAI"
-            fi
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 4 $skip_ai_flag
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 4 -SkipAI
           done
 
       - name: Generate index page
