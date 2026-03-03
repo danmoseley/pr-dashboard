@@ -53,6 +53,16 @@ $rows = foreach ($pr in $prs) {
     $authorDisplay = $pr.author
     if ($pr.author -match "copilot-swe-agent") { $authorDisplay = "&#x1F916; copilot" }
 
+    # Emoji prefix for next action
+    $actionEmoji = if ($pr.next_action -match "Ready to merge") { "&#x1F7E2; " }       # 🟢
+                   elseif ($pr.next_action -match "review needed") { "&#x1F441; " }     # 👁
+                   elseif ($pr.next_action -match "resolve conflicts") { "&#x1F6D1; " } # 🛑
+                   elseif ($pr.next_action -match "fix CI") { "&#x1F6D1; " }            # 🛑
+                   elseif ($pr.next_action -match "respond to") { "&#x1F4AC; " }        # 💬
+                   elseif ($pr.next_action -match "Wait for CI") { "&#x23F3; " }        # ⏳
+                   elseif ($pr.next_action -match "merge main") { "&#x1F504; " }        # 🔄
+                   else { "" }
+
     # Escape HTML in title
     $safeTitle = [System.Net.WebUtility]::HtmlEncode($pr.title)
 
@@ -62,7 +72,7 @@ $rows = foreach ($pr in $prs) {
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
   <td class="who">$([System.Net.WebUtility]::HtmlEncode($pr.who))</td>
-  <td class="action">$([System.Net.WebUtility]::HtmlEncode($pr.next_action))</td>
+  <td class="action">$actionEmoji$([System.Net.WebUtility]::HtmlEncode($pr.next_action))</td>
   <td class="ci">$ciEmoji $($pr.ci_detail)</td>
   <td class="disc">$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
   <td class="num">$($pr.age_days)d</td>
