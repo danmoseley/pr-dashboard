@@ -38,7 +38,13 @@ jobs:
             IFS=':' read -r repo slug <<< "$entry"
             echo "=== Scanning $repo ==="
             mkdir -p "docs/${slug}"
-            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 > "docs/${slug}/scan.json"
+            # Read maintainers for this repo from config
+            maintainers=$(pwsh -Command "(Get-Content config/maintainers.json | ConvertFrom-Json).'$repo' -join ','")
+            maintainer_args=""
+            if [ -n "$maintainers" ]; then
+              maintainer_args="-Maintainers $maintainers"
+            fi
+            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
             pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins
           done
 
