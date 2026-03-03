@@ -161,6 +161,8 @@ $meta = @{
     updated  = $timestampIso
     scanned  = $scan.scanned
     analyzed = $scan.analyzed
+    drafts   = if ($scan.screened_out) { [int]$scan.screened_out.drafts_count } else { 0 }
+    bots     = if ($scan.screened_out -and $scan.screened_out.bots) { @($scan.screened_out.bots).Count } else { 0 }
     elapsed  = $scan.elapsed_seconds
     reports  = $reportMeta
 }
