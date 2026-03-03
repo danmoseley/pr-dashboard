@@ -69,7 +69,7 @@ $dataRows = foreach ($rt in $reportTypes) {
 
 # Build updated row with data-updated and data-interval attributes for JS
 $updatedCells = $repos | ForEach-Object {
-    $intervalH = if ($_.slug -eq "runtime") { 4 } else { 12 }
+    $intervalH = 4
     "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"$($intervalH)`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"

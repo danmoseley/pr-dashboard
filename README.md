@@ -6,15 +6,17 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 
 ## Reports
 
-### dotnet/runtime (every 4 hours)
+All repos are updated every 4 hours. AI observations are generated for runtime, aspnetcore, aspire, and extensions.
+
+### dotnet/runtime
 - [Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/actionable.html)
 - [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
 - [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
 - [Consider Closing](https://danmoseley.github.io/pr-dashboard/runtime/consider-closing.html)
 
-### Other repos (every 12 hours)
+### Other repos
 
-Each of these repos gets Most Actionable, Quick Wins, and Consider Closing reports:
+Each repo gets Most Actionable, Community, Quick Wins, and Consider Closing reports:
 
 [aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/actionable.html) ·
 [sdk](https://danmoseley.github.io/pr-dashboard/sdk/actionable.html) ·
@@ -34,7 +36,7 @@ You can also hover any @username in a report and click "only" to filter interact
 
 ## How it works
 
-1. Scheduled GitHub Actions workflows run on cron (runtime every 4h, others every 12h)
+1. A single scheduled GitHub Actions workflow runs every 4 hours
 2. Each run executes `scripts/Get-PrTriageData.ps1` which scores all open PRs using batched GraphQL queries across 12 dimensions
 3. Results are filtered into reports and formatted as full-width HTML tables
 4. AI-generated observations are added via [GitHub Models](https://docs.github.com/en/github-models) (GPT-4o)

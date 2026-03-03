@@ -1,8 +1,8 @@
-name: Generate Other Repo Reports
+name: Generate All Reports
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # every 12 hours
+    - cron: '0 */4 * * *'  # every 4 hours
   workflow_dispatch: {}
 
 permissions:
@@ -25,9 +25,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          repos=("dotnet/aspnetcore:aspnetcore" "dotnet/sdk:sdk" "dotnet/msbuild:msbuild" "dotnet/winforms:winforms" "dotnet/wpf:wpf" "dotnet/roslyn:roslyn" "dotnet/aspire:aspire" "dotnet/extensions:extensions")
+          # repo:slug:ai (ai = 1 for AI observations, 0 to skip)
+          repos=(
+            "dotnet/runtime:runtime:1"
+            "dotnet/aspnetcore:aspnetcore:1"
+            "dotnet/aspire:aspire:1"
+            "dotnet/extensions:extensions:1"
+            "dotnet/sdk:sdk:0"
+            "dotnet/msbuild:msbuild:0"
+            "dotnet/winforms:winforms:0"
+            "dotnet/wpf:wpf:0"
+            "dotnet/roslyn:roslyn:0"
+          )
           for entry in "${repos[@]}"; do
-            IFS=':' read -r repo slug <<< "$entry"
+            IFS=':' read -r repo slug use_ai <<< "$entry"
             echo "=== Scanning $repo ==="
             mkdir -p "docs/${slug}"
             # Read maintainers for this repo from config
@@ -37,7 +48,11 @@ jobs:
               maintainer_args="-Maintainers $maintainers"
             fi
             pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,community,quick-wins,stale-close -ScheduleHours 12
+            skip_ai_flag=""
+            if [ "$use_ai" = "0" ]; then
+              skip_ai_flag="-SkipAI"
+            fi
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 4 $skip_ai_flag
           done
 
       - name: Generate index page
@@ -47,20 +62,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # Retry loop to handle concurrent pushes from the other workflow
           for attempt in 1 2 3; do
-            # Pull latest (may include runtime workflow's push)
             git stash --include-untracked || true
             git pull origin main || true
             git stash pop || true
-            # Regenerate index with all available meta.json files
             pwsh ./scripts/Build-Index.ps1
             git add docs/
             if git diff --cached --quiet; then
               echo "No changes to commit"
               break
             fi
-            git commit -m "Update other repo reports $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git commit -m "Update reports $(date -u +'%Y-%m-%d %H:%M UTC')"
             if git push; then
               break
             fi
