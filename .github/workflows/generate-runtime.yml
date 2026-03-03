@@ -20,9 +20,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Fetch from fork branch (change to dotnet/runtime main after PR #125005 merges)
+          # Fetch from dotnet/runtime main (PR #125005 merged)
           gh api -H "Accept: application/vnd.github.raw" \
-            "repos/danmoseley/runtime/contents/.github/skills/pr-triage/scripts/Get-PrTriageData.ps1?ref=pr-triage-skill" \
+            "repos/dotnet/runtime/contents/.github/skills/pr-triage/scripts/Get-PrTriageData.ps1" \
             > Get-PrTriageData.ps1
 
       - name: Install gh-models extension
