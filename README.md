@@ -7,13 +7,13 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 ## Reports
 
 ### dotnet/runtime (every 4 hours)
-- [Top 25 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/top15.html)
+- [Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/top15.html)
 - [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
 - [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
 
 ### Other repos (every 12 hours)
 
-Each of these repos gets Top 25 and Quick Wins reports:
+Each of these repos gets Most Actionable and Quick Wins reports:
 
 [aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/top15.html) ·
 [sdk](https://danmoseley.github.io/pr-dashboard/sdk/top15.html) ·
