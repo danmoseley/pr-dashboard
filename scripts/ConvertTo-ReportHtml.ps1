@@ -95,7 +95,10 @@ if ($Observations.Trim()) {
     # Convert markdown bullets to HTML list items
     $items = $Observations -split "`n" | Where-Object { $_.Trim() -match "^[-*]" } | ForEach-Object {
         $text = ($_ -replace "^[\s]*[-*]\s*", "").Trim()
-        "<li>$([System.Net.WebUtility]::HtmlEncode($text))</li>"
+        $encoded = [System.Net.WebUtility]::HtmlEncode($text)
+        # Hyperlink PR references like #12345
+        $encoded = [regex]::Replace($encoded, '#(\d{3,})', "<a href=`"https://github.com/$Repo/pull/`$1`">#`$1</a>")
+        "<li>$encoded</li>"
     }
     if ($items.Count -gt 0) {
         $obsHtml = @"
