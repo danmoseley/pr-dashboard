@@ -6,18 +6,9 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 
 ## Reports
 
-All repos are updated every 4 hours. AI observations are generated for runtime, aspnetcore, aspire, and extensions.
+All repos are updated every 4 hours with Most Actionable, Community, Quick Wins, and Consider Closing reports. AI observations are generated for runtime, aspnetcore, aspire, and extensions.
 
-### dotnet/runtime
-- [Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/actionable.html)
-- [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
-- [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
-- [Consider Closing](https://danmoseley.github.io/pr-dashboard/runtime/consider-closing.html)
-
-### Other repos
-
-Each repo gets Most Actionable, Community, Quick Wins, and Consider Closing reports:
-
+[runtime](https://danmoseley.github.io/pr-dashboard/runtime/actionable.html) ·
 [aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/actionable.html) ·
 [sdk](https://danmoseley.github.io/pr-dashboard/sdk/actionable.html) ·
 [msbuild](https://danmoseley.github.io/pr-dashboard/msbuild/actionable.html) ·
