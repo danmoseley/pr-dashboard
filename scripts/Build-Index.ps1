@@ -38,7 +38,7 @@ $repos = @($repos | Sort-Object { if ($_.slug -eq "runtime") { "0" } else { $_.s
 
 # All known report types in display order
 $reportTypes = @(
-    @{ Id = "top15"; Title = "Top 15 Actionable" }
+    @{ Id = "top15"; Title = "Top 25 Actionable" }
     @{ Id = "community"; Title = "Community Awaiting Review" }
     @{ Id = "quick-wins"; Title = "Quick Wins: Ready to Merge" }
 )

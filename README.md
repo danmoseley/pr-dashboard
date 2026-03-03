@@ -7,13 +7,13 @@ Automated PR triage dashboard for dotnet repositories, updated via GitHub Action
 ## Reports
 
 ### dotnet/runtime (every 4 hours)
-- [Top 15 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/top15.html)
+- [Top 25 Most Actionable PRs](https://danmoseley.github.io/pr-dashboard/runtime/top15.html)
 - [Community PRs Awaiting Review](https://danmoseley.github.io/pr-dashboard/runtime/community.html)
 - [Quick Wins: Ready to Merge](https://danmoseley.github.io/pr-dashboard/runtime/quick-wins.html)
 
 ### Other repos (every 12 hours)
 
-Each of these repos gets Top 15 and Quick Wins reports:
+Each of these repos gets Top 25 and Quick Wins reports:
 
 [aspnetcore](https://danmoseley.github.io/pr-dashboard/aspnetcore/top15.html) ·
 [sdk](https://danmoseley.github.io/pr-dashboard/sdk/top15.html) ·
@@ -30,6 +30,19 @@ Each of these repos gets Top 15 and Quick Wins reports:
 3. Results are filtered into reports and formatted as full-width HTML tables
 4. AI-generated observations are added via [GitHub Models](https://docs.github.com/en/github-models) (GPT-4o)
 5. Reports are published via GitHub Pages
+
+## Local regeneration
+
+After the workflows have run at least once, you can regenerate HTML reports locally from
+cached `scan.json` data (no API calls needed). Useful after changing templates or styles:
+
+```powershell
+# Regenerate all reports from cached scan data (skip AI observations)
+pwsh ./scripts/Regen-Html.ps1
+
+# Include AI observations (requires gh-models extension)
+pwsh ./scripts/Regen-Html.ps1 -SkipAI:$false
+```
 
 ## Adding reports
 

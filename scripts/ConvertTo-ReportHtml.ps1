@@ -4,7 +4,7 @@
 .PARAMETER InputFile
     Path to the filtered JSON file (array of PR objects).
 .PARAMETER Title
-    Report title (e.g., "Top 15 Most Actionable PRs").
+    Report title (e.g., "Top 25 Most Actionable PRs").
 .PARAMETER Observations
     AI-generated observations text (markdown bullet list). Optional.
 .PARAMETER Repo
@@ -116,7 +116,7 @@ $prCount = @($prs).Count
 
 # Scoring explainer for "actionable" reports
 $scoringHtml = ""
-if ($Title -match "Actionable|Top 15") {
+if ($Title -match "Actionable|Top \d+") {
     $scoringHtml = @"
 <details class="scoring">
   <summary>How is the score calculated?</summary>

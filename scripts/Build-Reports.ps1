@@ -47,10 +47,10 @@ if (-not (Test-Path $outDir)) { New-Item -ItemType Directory -Path $outDir -Forc
 $allReports = @{
     "top15" = @{
         Id       = "top15"
-        Title    = "Top 15 Most Actionable PRs"
+        Title    = "Top 25 Most Actionable PRs"
         File     = "top15.html"
-        Filter   = { param($prs) @($prs | Select-Object -First 15) }
-        AiPrompt = "These are the top 15 most actionable PRs in $Repo ranked by merge-readiness score."
+        Filter   = { param($prs) @($prs | Select-Object -First 25) }
+        AiPrompt = "These are the top 25 most actionable PRs in $Repo ranked by merge-readiness score."
     }
     "community" = @{
         Id       = "community"
