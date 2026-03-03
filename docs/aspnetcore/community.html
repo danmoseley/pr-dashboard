@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Community PRs Awaiting Review — dotnet/aspnetcore - PR Dashboard</title>
+<style>
+  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
+           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); padding: 1em 2em; }
+  nav { margin-bottom: 1em; font-size: 0.9em; }
+  nav a { color: var(--link); text-decoration: none; margin: 0 0.3em; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-size: 1.4em; margin-bottom: 0.2em; }
+  .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  thead { position: sticky; top: 0; z-index: 1; }
+  th { background: var(--header-bg); padding: 6px 10px; text-align: left;
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+  td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover { background: var(--hover); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who, .action { white-space: nowrap; }
+  .ci { white-space: nowrap; }
+  .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
+  .author { white-space: nowrap; }
+  .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
+  .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+  .badge.community { background: var(--badge-community); color: #fff; }
+  .observations { margin-top: 1.5em; max-width: 900px; }
+  .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
+  .observations ul { padding-left: 1.5em; }
+  .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+  .scoring p { margin: 0.5em 0; line-height: 1.4; }
+  .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
+  .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
+  .show-more-btn { display: block; margin: 1em auto; padding: 6px 20px; font-size: 0.9em; cursor: pointer;
+    background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
+    border-radius: 6px; font-weight: 500; }
+  .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
+             --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+  }
+</style>
+</head>
+<body>
+<nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
+<h1>Community PRs Awaiting Review — dotnet/aspnetcore</h1>
+<p class="meta">Updated every 12h, last at 2026-03-03 07:22 UTC &middot; 32 PRs &middot; <a href="https://github.com/dotnet/aspnetcore">dotnet/aspnetcore</a></p>
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
+<table>
+<thead>
+<tr>
+  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128077; community reviewed &#183; &#127760; community &#183; &#128230; small change">8.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65577">#65577</a></td>
+  <td class="title">Initialize PartialTagHelper.ViewData to support view-data-* prefix att</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 23/0/0</td>
+  <td class="disc heat-1">0/5t 2p</td>
+  <td class="num">2d</td>
+  <td class="num">1d</td>
+  <td class="num" title="83 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#127760; community &#183; &#128230; small change">8.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65573">#65573</a></td>
+  <td class="title">Fix FieldIdentifier.GetHashCode() NullReferenceException for default s</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 24/0/0</td>
+  <td class="disc">0/1t 2p</td>
+  <td class="num">2d</td>
+  <td class="num">1d</td>
+  <td class="num" title="31 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#127760; community &#183; &#128230; small change">8.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65576">#65576</a></td>
+  <td class="title">Fix UpdatePasswordHash virtual method not called consistently</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 22/0/0</td>
+  <td class="disc heat-1">0/5t 2p</td>
+  <td class="num">2d</td>
+  <td class="num">1d</td>
+  <td class="num" title="72 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#127760; community">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65571">#65571</a></td>
+  <td class="title">Fix optional form file params returning 408/415 for non-form content t</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 23/0/0</td>
+  <td class="disc">0/2t 2p</td>
+  <td class="num">2d</td>
+  <td class="num">1d</td>
+  <td class="num heat-1" title="233 lines changed">7</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128488;️ active (8 threads) &#183; &#127760; community &#183; &#128230; small change">7.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65561">#65561</a></td>
+  <td class="title">Fix SignalR Java client memory leak in stream() due to unbounded Repla</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 23/0/0</td>
+  <td class="disc heat-1">0/8t 2p</td>
+  <td class="num">3d</td>
+  <td class="num">1d</td>
+  <td class="num" title="188 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kubaflo">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128488;️ active (8 threads) &#183; &#127760; community &#183; &#128230; small change">7.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65575">#65575</a></td>
+  <td class="title">Fix User Secrets crash on case-different duplicate keys</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 22/0/0</td>
+  <td class="disc heat-1">0/8t 2p</td>
+  <td class="num">2d</td>
+  <td class="num">1d</td>
+  <td class="num" title="64 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,marcominerva">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#127760; community &#183; &#128368;️ old (97d)">7.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64539">#64539</a></td>
+  <td class="title">Refactor param binding failure handling in RequestDelegate</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 23/0/0</td>
+  <td class="disc">0/1t 2p</td>
+  <td class="num heat-3">97d</td>
+  <td class="num heat-1">12d</td>
+  <td class="num heat-1" title="294 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/marcominerva.png?size=32" alt="marcominerva"><a href="https://github.com/marcominerva">@marcominerva</a><a class="filter-btn" href="#" onclick="filterByUser('marcominerva');return false" title="Show only @marcominerva">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="OrthFelix,copilot-pull-request-reviewer">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128172; 1 unresolved &#183; &#127760; community &#183; &#128230; small change">7.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65556">#65556</a></td>
+  <td class="title">Exotic object function call - JSInterop</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/OrthFelix.png?size=32" alt="OrthFelix"><a href="https://github.com/OrthFelix">@OrthFelix</a><a class="filter-btn" href="#" onclick="filterByUser('OrthFelix');return false" title="Show only @OrthFelix">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/OrthFelix.png?size=32" alt="OrthFelix"><a href="https://github.com/OrthFelix">@OrthFelix</a><a class="filter-btn" href="#" onclick="filterByUser('OrthFelix');return false" title="Show only @OrthFelix">only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">only</a></span></td>
+  <td class="ci">&#x2705; 22/0/0</td>
+  <td class="disc">1/1t 3p</td>
+  <td class="num">4d</td>
+  <td class="num">1d</td>
+  <td class="num" title="2 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/OrthFelix.png?size=32" alt="OrthFelix"><a href="https://github.com/OrthFelix">@OrthFelix</a><a class="filter-btn" href="#" onclick="filterByUser('OrthFelix');return false" title="Show only @OrthFelix">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,KristofferStrube">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change">7.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65614">#65614</a></td>
+  <td class="title">Removes casts to concrete IJSRuntime implementations and instead regis</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 24/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num">1d</td>
+  <td class="num">1d</td>
+  <td class="num" title="12 lines changed">4</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KristofferStrube.png?size=32" alt="KristofferStrube"><a href="https://github.com/KristofferStrube">@KristofferStrube</a><a class="filter-btn" href="#" onclick="filterByUser('KristofferStrube');return false" title="Show only @KristofferStrube">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Fririz">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change">6.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65504">#65504</a></td>
+  <td class="title">docs(azure): fix placeholder title in README.md</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 6/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num">9d</td>
+  <td class="num">2d</td>
+  <td class="num" title="2 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Fririz.png?size=32" alt="Fririz"><a href="https://github.com/Fririz">@Fririz</a><a class="filter-btn" href="#" onclick="filterByUser('Fririz');return false" title="Show only @Fririz">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,martincostello">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128368;️ old (199d)">6.5</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63291">#63291</a></td>
+  <td class="title">[Validation] Use [JsonPropertyName] for display name</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 31/0/0</td>
+  <td class="disc">0/1t 1p</td>
+  <td class="num heat-3">199d</td>
+  <td class="num heat-1">7d</td>
+  <td class="num heat-1" title="147 lines changed">7</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/martincostello.png?size=32" alt="martincostello"><a href="https://github.com/martincostello">@martincostello</a><a class="filter-btn" href="#" onclick="filterByUser('martincostello');return false" title="Show only @martincostello">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,csa7mdm">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (33d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64718">#64718</a></td>
+  <td class="title">Surface ApiDescription.Server logs in Terminal Logger</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 33d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 21/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">83d</td>
+  <td class="num heat-3">33d</td>
+  <td class="num" title="57 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/csa7mdm.png?size=32" alt="csa7mdm"><a href="https://github.com/csa7mdm">@csa7mdm</a><a class="filter-btn" href="#" onclick="filterByUser('csa7mdm');return false" title="Show only @csa7mdm">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kemocca">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (98d) &#183; &#128368;️ old (105d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64416">#64416</a></td>
+  <td class="title">Support for target injection in RequestDelegateFactory (#63709)</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 98d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 28/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">105d</td>
+  <td class="num heat-3">98d</td>
+  <td class="num" title="97 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kemocca.png?size=32" alt="kemocca"><a href="https://github.com/kemocca">@kemocca</a><a class="filter-btn" href="#" onclick="filterByUser('kemocca');return false" title="Show only @kemocca">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,medhatiwari">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (116d) &#183; &#128368;️ old (126d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64180">#64180</a></td>
+  <td class="title">Fix HttpSys test failure on non-Windows platforms.</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 116d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 29/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">126d</td>
+  <td class="num heat-3">116d</td>
+  <td class="num" title="2 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/medhatiwari.png?size=32" alt="medhatiwari"><a href="https://github.com/medhatiwari">@medhatiwari</a><a class="filter-btn" href="#" onclick="filterByUser('medhatiwari');return false" title="Show only @medhatiwari">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,kiryl-labada">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (59d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64878">#64878</a></td>
+  <td class="title">Fix form files when request buffering is enabled</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 59d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 23/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">66d</td>
+  <td class="num heat-3">59d</td>
+  <td class="num" title="46 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kiryl-labada.png?size=32" alt="kiryl-labada"><a href="https://github.com/kiryl-labada">@kiryl-labada</a><a class="filter-btn" href="#" onclick="filterByUser('kiryl-labada');return false" title="Show only @kiryl-labada">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,medhatiwari">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (56d) &#183; &#128368;️ old (147d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63945">#63945</a></td>
+  <td class="title">Improve stack trace consistency for generic types across runtimes</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 56d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 28/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">147d</td>
+  <td class="num heat-3">56d</td>
+  <td class="num" title="65 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/medhatiwari.png?size=32" alt="medhatiwari"><a href="https://github.com/medhatiwari">@medhatiwari</a><a class="filter-btn" href="#" onclick="filterByUser('medhatiwari');return false" title="Show only @medhatiwari">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,pedrobsaila">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (63d) &#183; &#128368;️ old (690d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/55092">#55092</a></td>
+  <td class="title">ALWAYS include the Vary Accept-Encoding header when response compressi</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 63d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 21/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">690d</td>
+  <td class="num heat-3">63d</td>
+  <td class="num" title="26 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/pedrobsaila.png?size=32" alt="pedrobsaila"><a href="https://github.com/pedrobsaila">@pedrobsaila</a><a class="filter-btn" href="#" onclick="filterByUser('pedrobsaila');return false" title="Show only @pedrobsaila">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Alex-Sob">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (162d) &#183; &#128368;️ old (173d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63641">#63641</a></td>
+  <td class="title">Fix RouteHandlerAnalyzer to avoid exception when generic type paramete</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 162d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 28/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">173d</td>
+  <td class="num heat-3">162d</td>
+  <td class="num" title="28 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Nonanti">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (82d) &#183; &#128368;️ old (175d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63593">#63593</a></td>
+  <td class="title">Fix null reference exception in MvcFacts.GetDeclaringType</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 82d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 27/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">175d</td>
+  <td class="num heat-3">82d</td>
+  <td class="num" title="7 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Nonanti.png?size=32" alt="Nonanti"><a href="https://github.com/Nonanti">@Nonanti</a><a class="filter-btn" href="#" onclick="filterByUser('Nonanti');return false" title="Show only @Nonanti">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,deadmeu">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (177d) &#183; &#128368;️ old (185d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63483">#63483</a></td>
+  <td class="title">Remove extraneous whitespace in ProjectTemplates code</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 177d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 26/0/1</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">185d</td>
+  <td class="num heat-3">177d</td>
+  <td class="num" title="14 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/deadmeu.png?size=32" alt="deadmeu"><a href="https://github.com/deadmeu">@deadmeu</a><a class="filter-btn" href="#" onclick="filterByUser('deadmeu');return false" title="Show only @deadmeu">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="kubaflo,copilot-pull-request-reviewer">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128172; 3 unresolved &#183; &#128488;️ active (10 threads) &#183; &#127760; community &#183; &#128230; small change">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/65598">#65598</a></td>
+  <td class="title">Fix CancellationTokenSource leak in SpaProxy.PerformProxyRequest</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="3 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">only</a></span></td>
+  <td class="ci">&#x2705; 22/0/0</td>
+  <td class="disc heat-2">3/10t 1p</td>
+  <td class="num">1d</td>
+  <td class="num">1d</td>
+  <td class="num" title="51 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kubaflo.png?size=32" alt="kubaflo"><a href="https://github.com/kubaflo">@kubaflo</a><a class="filter-btn" href="#" onclick="filterByUser('kubaflo');return false" title="Show only @kubaflo">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Emik03">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (267d) &#183; &#128368;️ old (277d)">5.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/62180">#62180</a></td>
+  <td class="title">Fix bounds check in test code</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 267d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 27/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">277d</td>
+  <td class="num heat-3">267d</td>
+  <td class="num" title="2 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Emik03.png?size=32" alt="Emik03"><a href="https://github.com/Emik03">@Emik03</a><a class="filter-btn" href="#" onclick="filterByUser('Emik03');return false" title="Show only @Emik03">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Alex-Sob">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (21d) &#183; &#128368;️ old (173d)">5.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63642">#63642</a></td>
+  <td class="title">[Proposal] Analyzer test readability improvements</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 21d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 28/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">173d</td>
+  <td class="num heat-2">21d</td>
+  <td class="num" title="21 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,wukunyu264">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; ⏳ stale (137d) &#183; &#128368;️ old (200d)">5.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63264">#63264</a></td>
+  <td class="title">Fix ReDoS in Bootstrap sample</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 137d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 25/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">200d</td>
+  <td class="num heat-3">137d</td>
+  <td class="num heat-1" title="210 lines changed">5</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/wukunyu264.png?size=32" alt="wukunyu264"><a href="https://github.com/wukunyu264">@wukunyu264</a><a class="filter-btn" href="#" onclick="filterByUser('wukunyu264');return false" title="Show only @wukunyu264">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,ldsenow">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; ⏳ stale (110d) &#183; &#128368;️ old (156d)">5.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63856">#63856</a></td>
+  <td class="title">Add OpenApiGenerateEnvironment property support for API description se</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 110d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 26/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">156d</td>
+  <td class="num heat-3">110d</td>
+  <td class="num heat-1" title="111 lines changed">11</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ldsenow.png?size=32" alt="ldsenow"><a href="https://github.com/ldsenow">@ldsenow</a><a class="filter-btn" href="#" onclick="filterByUser('ldsenow');return false" title="Show only @ldsenow">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,Alex-Sob">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; ⏳ stale (158d) &#183; &#128368;️ old (172d)">5.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63657">#63657</a></td>
+  <td class="title">Provide code analysis rule to detect attribute routing for non-action </td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 158d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 27/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">172d</td>
+  <td class="num heat-3">158d</td>
+  <td class="num heat-1" title="203 lines changed">7</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,gkulin">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; large (27 files, 54 lines) &#183; ⏳ stale (36d) &#183; &#128368;️ old (315d)">5.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/61593">#61593</a></td>
+  <td class="title">update template descriptions to be more beginner-friendly</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 36d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 29/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">315d</td>
+  <td class="num heat-3">36d</td>
+  <td class="num heat-2" title="54 lines changed">27</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/gkulin.png?size=32" alt="gkulin"><a href="https://github.com/gkulin">@gkulin</a><a class="filter-btn" href="#" onclick="filterByUser('gkulin');return false" title="Show only @gkulin">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="hangy,copilot-pull-request-reviewer">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128172; 1 unresolved &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (194d) &#183; &#128368;️ old (230d)">5.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/62759">#62759</a></td>
+  <td class="title">feat(DataProtection): add overloads for PersistKeysToStackExchangeRedi</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/hangy.png?size=32" alt="hangy"><a href="https://github.com/hangy">@hangy</a><a class="filter-btn" href="#" onclick="filterByUser('hangy');return false" title="Show only @hangy">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="1 threads, No review, Stale 194d"><span class="user-ref"><img class="avatar" src="https://github.com/hangy.png?size=32" alt="hangy"><a href="https://github.com/hangy">@hangy</a><a class="filter-btn" href="#" onclick="filterByUser('hangy');return false" title="Show only @hangy">only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">only</a></span></td>
+  <td class="ci">&#x2705; 27/0/0</td>
+  <td class="disc">1/3t 1p</td>
+  <td class="num heat-3">230d</td>
+  <td class="num heat-3">194d</td>
+  <td class="num" title="59 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/hangy.png?size=32" alt="hangy"><a href="https://github.com/hangy">@hangy</a><a class="filter-btn" href="#" onclick="filterByUser('hangy');return false" title="Show only @hangy">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="opuzakov,copilot-pull-request-reviewer">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128172; 1 unresolved &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (188d) &#183; &#128368;️ old (224d)">5.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/62861">#62861</a></td>
+  <td class="title">Fix RequestDelegateFactory to handle nullable types correctly in empty</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/opuzakov.png?size=32" alt="opuzakov"><a href="https://github.com/opuzakov">@opuzakov</a><a class="filter-btn" href="#" onclick="filterByUser('opuzakov');return false" title="Show only @opuzakov">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="1 threads, No review, Stale 188d"><span class="user-ref"><img class="avatar" src="https://github.com/opuzakov.png?size=32" alt="opuzakov"><a href="https://github.com/opuzakov">@opuzakov</a><a class="filter-btn" href="#" onclick="filterByUser('opuzakov');return false" title="Show only @opuzakov">only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">only</a></span></td>
+  <td class="ci">&#x2705; 28/0/0</td>
+  <td class="disc">1/1t 1p</td>
+  <td class="num heat-3">224d</td>
+  <td class="num heat-3">188d</td>
+  <td class="num" title="25 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/opuzakov.png?size=32" alt="opuzakov"><a href="https://github.com/opuzakov">@opuzakov</a><a class="filter-btn" href="#" onclick="filterByUser('opuzakov');return false" title="Show only @opuzakov">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,cloudlucky">
+  <td class="score" title="&#128993; CI pending &#183; &#128269; no review yet &#183; &#127760; community &#183; &#128230; small change &#183; ⏳ stale (36d) &#183; &#128368;️ old (479d)">5.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/58844">#58844</a></td>
+  <td class="title">Handling CultureInfo.InvariantCulture in RequestLocalizationMiddleware</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No CI, No review, Stale 36d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">479d</td>
+  <td class="num heat-3">36d</td>
+  <td class="num" title="10 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/cloudlucky.png?size=32" alt="cloudlucky"><a href="https://github.com/cloudlucky">@cloudlucky</a><a class="filter-btn" href="#" onclick="filterByUser('cloudlucky');return false" title="Show only @cloudlucky">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JamesNK,davidfowl,wahab-cide">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#127760; community &#183; ⏳ stale (73d)">5.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/64753">#64753</a></td>
+  <td class="title">Fix/asparameters fromform collection interfaces</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
+  <td class="action" title="No review, Stale 73d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 21/2/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">81d</td>
+  <td class="num heat-3">73d</td>
+  <td class="num heat-1" title="240 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/wahab-cide.png?size=32" alt="wahab-cide"><a href="https://github.com/wahab-cide">@wahab-cide</a><a class="filter-btn" href="#" onclick="filterByUser('wahab-cide');return false" title="Show only @wahab-cide">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="absurdlylongusername,BrennanConroy,copilot-pull-request-reviewer">
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128172; 25 unresolved &#183; &#128488;️ busy (25 threads, 2 people) &#183; &#127760; community &#183; &#128230; large (6 files, 560 lines) &#183; ⏳ stale (84d) &#183; &#128368;️ old (216d)">4.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspnetcore/pull/63000">#63000</a></td>
+  <td class="title">Improve logging and error handling for IIS ASP.NET Core module shadow </td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/absurdlylongusername.png?size=32" alt="absurdlylongusername"><a href="https://github.com/absurdlylongusername">@absurdlylongusername</a><a class="filter-btn" href="#" onclick="filterByUser('absurdlylongusername');return false" title="Show only @absurdlylongusername">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="25 threads, No owner approval, Stale 84d"><span class="user-ref"><img class="avatar" src="https://github.com/absurdlylongusername.png?size=32" alt="absurdlylongusername"><a href="https://github.com/absurdlylongusername">@absurdlylongusername</a><a class="filter-btn" href="#" onclick="filterByUser('absurdlylongusername');return false" title="Show only @absurdlylongusername">only</a></span>: respond to 25 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/BrennanConroy.png?size=32" alt="BrennanConroy"><a href="https://github.com/BrennanConroy">@BrennanConroy</a><a class="filter-btn" href="#" onclick="filterByUser('BrennanConroy');return false" title="Show only @BrennanConroy">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">only</a></span></td>
+  <td class="ci">&#x2705; 26/0/0</td>
+  <td class="disc heat-3">&#x1F525; 25/25t 2p</td>
+  <td class="num heat-3">216d</td>
+  <td class="num heat-3">84d</td>
+  <td class="num heat-2" title="560 lines changed">6</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/absurdlylongusername.png?size=32" alt="absurdlylongusername"><a href="https://github.com/absurdlylongusername">@absurdlylongusername</a><a class="filter-btn" href="#" onclick="filterByUser('absurdlylongusername');return false" title="Show only @absurdlylongusername">only</a></span> <span class="badge community">community</span></td>
+</tr>
+</tbody>
+</table>
+
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+  history.replaceState(null, '', location.pathname);
+}
+// Apply ?user=X filter on page load
+(function() {
+  var params = new URLSearchParams(location.search);
+  var user = params.get('user');
+  if (user) filterByUser(user);
+})();
+</script>
+</body>
+</html>

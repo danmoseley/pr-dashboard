@@ -19,13 +19,13 @@ $docsDir = Join-Path $root "docs"
 # Repo config: slug -> full repo name and report types
 $repos = @{
     "runtime"    = @{ Repo = "dotnet/runtime";     Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,quick-wins,stale-close"; Hours = 12 }
-    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,quick-wins,stale-close"; Hours = 12 }
+    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
+    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,community,quick-wins,stale-close"; Hours = 12 }
 }
 
 $found = 0
