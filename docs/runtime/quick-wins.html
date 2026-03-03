@@ -49,6 +49,15 @@
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -61,7 +70,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/runtime</h1>
-<p class="meta">Updated every 4h, last at 2026-03-03 06:51 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated every 4h, last at 2026-03-03 07:04 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -83,6 +92,7 @@
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table>
 <thead>
 <tr>
@@ -91,29 +101,51 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr data-people="janvorli,kotlarmilos">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128488;️ busy (22 threads, 3 people) &#183; &#128230; large (12 files, 607 lines)">8.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124927">#124927</a></td>
   <td class="title">[clr-interp] Add reverse P/Invoke support for the Swift calling conven</td>
-  <td class="who"><img class="avatar" src="https://github.com/janvorli.png?size=32" alt="janvorli"><a href="https://github.com/janvorli">@janvorli</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/janvorli.png?size=32" alt="janvorli"><a href="https://github.com/janvorli">@janvorli</a><a class="filter-btn" href="#" onclick="filterByUser('janvorli');return false" title="Show only @janvorli">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 88/3/0</td>
   <td class="disc heat-3">&#x1F525; 0/22t 3p</td>
   <td class="num">4d</td>
   <td class="num">1d</td>
   <td class="num heat-2" title="607 lines changed">12</td>
-  <td class="author"><img class="avatar" src="https://github.com/kotlarmilos.png?size=32" alt="kotlarmilos"><a href="https://github.com/kotlarmilos">@kotlarmilos</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kotlarmilos.png?size=32" alt="kotlarmilos"><a href="https://github.com/kotlarmilos">@kotlarmilos</a><a class="filter-btn" href="#" onclick="filterByUser('kotlarmilos');return false" title="Show only @kotlarmilos">only</a></span></td>
 </tr>
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li>High-priority quick win: PR <a href="https://github.com/dotnet/runtime/pull/124927">#124927</a> is ready to merge, with a high score, no unresolved threads, and green CI; action required is minimal.</li>
-    <li>Maintain monitor: No additional PR data indicates bottlenecks, stale clusters, or blockers requiring immediate intervention.</li>
-    <li>Author engagement: Kotlar milos (author of the flagged action_ teamwork predict responscripting promptly followed validated approves.stats fine, even reaffirms note-check.&#39;)</li>
-  </ul>
-</div>
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+}
+</script>
 </body>
 </html>

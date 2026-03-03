@@ -49,6 +49,15 @@
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -61,7 +70,7 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/msbuild</h1>
-<p class="meta">Updated every 12h, last at 2026-03-03 06:54 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-03 07:04 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -83,6 +92,7 @@
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table>
 <thead>
 <tr>
@@ -91,29 +101,51 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr data-people="rainersigwald,AR-May">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">8.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13305">#13305</a></td>
   <td class="title">Add escape hatch for not sharing assemblies from tools directory</td>
-  <td class="who"><img class="avatar" src="https://github.com/rainersigwald.png?size=32" alt="rainersigwald"><a href="https://github.com/rainersigwald">@rainersigwald</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rainersigwald.png?size=32" alt="rainersigwald"><a href="https://github.com/rainersigwald">@rainersigwald</a><a class="filter-btn" href="#" onclick="filterByUser('rainersigwald');return false" title="Show only @rainersigwald">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 10/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num">4d</td>
   <td class="num">3d</td>
   <td class="num" title="13 lines changed">2</td>
-  <td class="author"><img class="avatar" src="https://github.com/AR-May.png?size=32" alt="AR-May"><a href="https://github.com/AR-May">@AR-May</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AR-May.png?size=32" alt="AR-May"><a href="https://github.com/AR-May">@AR-May</a><a class="filter-btn" href="#" onclick="filterByUser('AR-May');return false" title="Show only @AR-May">only</a></span></td>
 </tr>
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li>The high score and &quot;Ready to merge&quot; status of <a href="https://github.com/dotnet/msbuild/pull/13305">#13305</a> suggest it can be quickly merged to clear the board.</li>
-    <li>Consider assigning a maintainer to focus on PR shepherding for rapid resolution of future high-priority, no-controversy PRs like this one.</li>
-    <li>Monitor and address any patterns of maintainers delaying low-friction merges, as seen with this community/internal distinction.</li>
-  </ul>
-</div>
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+}
+</script>
 </body>
 </html>

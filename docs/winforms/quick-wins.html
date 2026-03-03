@@ -49,6 +49,15 @@
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -61,7 +70,7 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/winforms</h1>
-<p class="meta">Updated every 12h, last at 2026-03-03 06:54 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-03 07:04 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -83,6 +92,7 @@
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table>
 <thead>
 <tr>
@@ -91,29 +101,51 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr data-people="KlausLoeffelmann,Shyam-Gupta">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">9.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14296">#14296</a></td>
   <td class="title">[release/10.0]: Avoid double free of STGMEDIUM while fetching stream d</td>
-  <td class="who"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">18d</td>
   <td class="num heat-1">10d</td>
   <td class="num" title="154 lines changed">3</td>
-  <td class="author"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">only</a></span></td>
 </tr>
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li>Prioritize merging PR <a href="https://github.com/dotnet/winforms/pull/14296">#14296</a> as it is a high-scoring, green CI, and thread-free submission that is immediately actionable.</li>
-    <li>Consider reviewing processes involving community PRs to ensure contributors feel supported, as this PR is not community-sourced.</li>
-    <li>Monitor and address potential bottlenecks in review workflows to maintain quick turnaround for similarly unblocked PRs.</li>
-  </ul>
-</div>
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+}
+</script>
 </body>
 </html>

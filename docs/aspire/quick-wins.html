@@ -49,6 +49,15 @@
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -61,7 +70,7 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/aspire</h1>
-<p class="meta">Updated every 12h, last at 2026-03-03 06:56 UTC &middot; 6 PRs &middot; <a href="https://github.com/dotnet/aspire">dotnet/aspire</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-03 07:04 UTC &middot; 6 PRs &middot; <a href="https://github.com/dotnet/aspire">dotnet/aspire</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -83,6 +92,7 @@
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table>
 <thead>
 <tr>
@@ -91,37 +101,37 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr data-people="JamesNK,mitchdenny">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">9.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14409">#14409</a></td>
   <td class="title">Increase az aks update timeout from 3 to 5 minutes in AKS E2E tests</td>
-  <td class="who"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 100/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">22d</td>
   <td class="num heat-1">8d</td>
   <td class="num" title="4 lines changed">2</td>
-  <td class="author"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">only</a></span></td>
 </tr>
-<tr>
+<tr data-people="mitchdenny,joperezr">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">9.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14696">#14696</a></td>
   <td class="title">Add networkIsolationPolicy to 1ES pipeline templates for SFI-ES4.2.4 c</td>
-  <td class="who"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 10/0/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num">5d</td>
   <td class="num">0d</td>
   <td class="num" title="4 lines changed">2</td>
-  <td class="author"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a><a class="filter-btn" href="#" onclick="filterByUser('joperezr');return false" title="Show only @joperezr">only</a></span></td>
 </tr>
-<tr>
+<tr data-people="davidfowl,app">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change &#183; &#128368;️ old (155d)">9.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/11706">#11706</a></td>
   <td class="title">Fix UpdateConfig property types for Docker Compose serialization</td>
-  <td class="who"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 97/0/0</td>
   <td class="disc">0/1t 2p</td>
@@ -130,11 +140,11 @@
   <td class="num" title="103 lines changed">2</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr>
+<tr data-people="eerhardt,app">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14448">#14448</a></td>
   <td class="title">Disable scheduled builds for release/9.4</td>
-  <td class="who"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 100/0/0</td>
   <td class="disc">0/0t 0p</td>
@@ -143,11 +153,11 @@
   <td class="num" title="23 lines changed">2</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr>
+<tr data-people="sebastienros,app">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128230; small change">8.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14449">#14449</a></td>
   <td class="title">Disable scheduled builds for release/9.5 branch</td>
-  <td class="who"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
@@ -156,31 +166,51 @@
   <td class="num" title="22 lines changed">2</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr>
+<tr data-people="mitchdenny,eerhardt">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved &#183; &#128488;️ active (11 threads) &#183; &#128230; large (38 files, 5421 lines)">8.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14664">#14664</a></td>
   <td class="title">Fix Azure SQL Server private endpoints</td>
-  <td class="who"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 100/0/0</td>
   <td class="disc heat-2">0/11t 2p</td>
   <td class="num">6d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="5421 lines changed">38</td>
-  <td class="author"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">only</a></span></td>
 </tr>
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li>High-scoring and recently updated PRs by active authors (e.g., <a href="https://github.com/dotnet/aspire/pull/14409">#14409</a>, <a href="https://github.com/dotnet/aspire/pull/14696">#14696</a>) could be merged immediately for quick wins.</li>
-    <li>PRs authored by `app/copilot-swe-agent` (e.g., <a href="https://github.com/dotnet/aspire/pull/11706">#11706</a>, <a href="https://github.com/dotnet/aspire/pull/14448">#14448</a>, <a href="https://github.com/dotnet/aspire/pull/14449">#14449</a>) are lining up—consider reviewing for any automation patterns or specific dependencies.</li>
-    <li>No community-authored PRs are present in this list, suggesting the need for engagement efforts to encourage external contributions.</li>
-    <li>`@mitchdenny` is heavily involved in approvals and authorships; ensure balancing of review workload to reduce potential bottlenecks.</li>
-    <li>A consistent lack of unresolved threads indicates effective pre-merge handling; maintain this efficiency while screening for stale or overlooked requests due to age.</li>
-  </ul>
-</div>
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+}
+</script>
 </body>
 </html>

@@ -49,6 +49,15 @@
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { display: none; font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .user-ref:hover .filter-btn { display: inline; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
@@ -61,7 +70,7 @@
 <body>
 <nav><a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/roslyn</h1>
-<p class="meta">Updated every 12h, last at 2026-03-03 06:56 UTC &middot; 2 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-03 07:04 UTC &middot; 2 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -83,6 +92,7 @@
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table>
 <thead>
 <tr>
@@ -91,42 +101,64 @@
 </tr>
 </thead>
 <tbody>
-<tr>
+<tr data-people="333fred,AlekseyTs">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved">9.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/roslyn/pull/82560">#82560</a></td>
   <td class="title">Union declarations implement IUnion interface</td>
-  <td class="who"><img class="avatar" src="https://github.com/333fred.png?size=32" alt="333fred"><a href="https://github.com/333fred">@333fred</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/333fred.png?size=32" alt="333fred"><a href="https://github.com/333fred">@333fred</a><a class="filter-btn" href="#" onclick="filterByUser('333fred');return false" title="Show only @333fred">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 23/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">4d</td>
   <td class="num">0d</td>
   <td class="num heat-1" title="361 lines changed">9</td>
-  <td class="author"><img class="avatar" src="https://github.com/AlekseyTs.png?size=32" alt="AlekseyTs"><a href="https://github.com/AlekseyTs">@AlekseyTs</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AlekseyTs.png?size=32" alt="AlekseyTs"><a href="https://github.com/AlekseyTs">@AlekseyTs</a><a class="filter-btn" href="#" onclick="filterByUser('AlekseyTs');return false" title="Show only @AlekseyTs">only</a></span></td>
 </tr>
-<tr>
+<tr data-people="333fred,AlekseyTs">
   <td class="score" title="✅ CI passed &#183; &#128077; owner approved">9.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/roslyn/pull/82587">#82587</a></td>
   <td class="title">Mark Union related APIs as experimental</td>
-  <td class="who"><img class="avatar" src="https://github.com/333fred.png?size=32" alt="333fred"><a href="https://github.com/333fred">@333fred</a></td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/333fred.png?size=32" alt="333fred"><a href="https://github.com/333fred">@333fred</a><a class="filter-btn" href="#" onclick="filterByUser('333fred');return false" title="Show only @333fred">only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 23/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num heat-1" title="28 lines changed">6</td>
-  <td class="author"><img class="avatar" src="https://github.com/AlekseyTs.png?size=32" alt="AlekseyTs"><a href="https://github.com/AlekseyTs">@AlekseyTs</a></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AlekseyTs.png?size=32" alt="AlekseyTs"><a href="https://github.com/AlekseyTs">@AlekseyTs</a><a class="filter-btn" href="#" onclick="filterByUser('AlekseyTs');return false" title="Show only @AlekseyTs">only</a></span></td>
 </tr>
 </tbody>
 </table>
 
-<div class="observations">
-  <h3>Observations</h3>
-  <ul>
-    <li>Both PRs show high scores and are marked as &quot;Ready to merge,&quot; suggesting they are ideal for quick action by maintainers.</li>
-    <li>Both PRs have zero unresolved threads and successful CI, presenting no apparent blockers for immediate merging.</li>
-    <li>All PRs are authored by AlekseyTs and are not from the community, indicating no immediate need for community PR shepherding in this case.</li>
-  </ul>
-</div>
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+}
+</script>
 </body>
 </html>
