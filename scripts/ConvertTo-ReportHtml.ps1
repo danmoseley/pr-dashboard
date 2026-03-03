@@ -72,7 +72,7 @@ $rows = foreach ($pr in $prs) {
                    elseif ($pr.next_action -match "review needed") { "&#x1F441; " }     # 👁
                    elseif ($pr.next_action -match "resolve conflicts") { "&#x1F6D1; " } # 🛑
                    elseif ($pr.next_action -match "fix CI") { "&#x1F6D1; " }            # 🛑
-                   elseif ($pr.next_action -match "respond to") { "&#x1F4AC; " }        # 💬
+                   elseif ($pr.next_action -match "respond to") { "" }                    # no emoji, text is clear
                    elseif ($pr.next_action -match "Wait for CI") { "&#x23F3; " }        # ⏳
                    elseif ($pr.next_action -match "merge main") { "&#x1F504; " }        # 🔄
                    else { "" }
