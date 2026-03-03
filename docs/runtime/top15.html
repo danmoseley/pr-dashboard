@@ -29,6 +29,9 @@
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
   .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
   .author { white-space: nowrap; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; }
@@ -44,13 +47,16 @@
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
   }
 </style>
 </head>
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="../index.html">Home</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a href="top15.html">Top 15 Most Actionable PRs</a></nav>
 <h1>Top 15 Most Actionable PRs — dotnet/runtime</h1>
-<p class="meta">Updated: 2026-03-03 04:18 UTC &middot; 15 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated: 2026-03-03 04:28 UTC &middot; 15 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <table>
 <thead>
 <tr>
@@ -66,7 +72,7 @@
   <td class="who">@kg</td>
   <td class="action">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 91/2/0</td>
-  <td class="disc">5t/4p</td>
+  <td class="disc heat-2">5t/4p</td>
   <td class="num">5d</td>
   <td class="num">1d</td>
   <td class="num">3</td>
@@ -93,7 +99,7 @@
   <td class="action">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 65/2/0</td>
   <td class="disc">0t/0p</td>
-  <td class="num">40d</td>
+  <td class="num heat-2">40d</td>
   <td class="num">1d</td>
   <td class="num">1</td>
   <td class="author">Venkad000 <span class="badge community">community</span></td>
@@ -107,7 +113,7 @@
   <td class="ci">&#x2705; 87/3/0</td>
   <td class="disc">2t/1p</td>
   <td class="num">3d</td>
-  <td class="num">0d</td>
+  <td class="num">1d</td>
   <td class="num">1</td>
   <td class="author">jkoritzinsky</td>
 </tr>
@@ -118,7 +124,7 @@
   <td class="who">@janvorli</td>
   <td class="action">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 88/3/0</td>
-  <td class="disc">22t/3p</td>
+  <td class="disc heat-3">&#x1F525; 22t/3p</td>
   <td class="num">4d</td>
   <td class="num">1d</td>
   <td class="num">12</td>
@@ -139,19 +145,6 @@
 </tr>
 <tr>
   <td class="score">8.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124326">#124326</a></td>
-  <td class="title">Fix CallSiteFactoryResolvesIEnumerableOfOpenGenericServiceAfterResolvi</td>
-  <td class="who">@karelz</td>
-  <td class="action">&#x1F441; Maintainer: review needed</td>
-  <td class="ci">&#x2705; 74/3/1</td>
-  <td class="disc">0t/0p</td>
-  <td class="num">19d</td>
-  <td class="num">4d</td>
-  <td class="num">1</td>
-  <td class="author">&#x1F916; copilot</td>
-</tr>
-<tr>
-  <td class="score">8.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124877">#124877</a></td>
   <td class="title">Revert forwarding activation signal</td>
   <td class="who">@janvorli</td>
@@ -162,6 +155,19 @@
   <td class="num">4d</td>
   <td class="num">1</td>
   <td class="author">janvorli</td>
+</tr>
+<tr>
+  <td class="score">8.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124326">#124326</a></td>
+  <td class="title">Fix CallSiteFactoryResolvesIEnumerableOfOpenGenericServiceAfterResolvi</td>
+  <td class="who">@karelz</td>
+  <td class="action">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 74/3/1</td>
+  <td class="disc">0t/0p</td>
+  <td class="num heat-1">19d</td>
+  <td class="num">4d</td>
+  <td class="num">1</td>
+  <td class="author">&#x1F916; copilot</td>
 </tr>
 <tr>
   <td class="score">8.2</td>
@@ -196,10 +202,36 @@
   <td class="who">@tommcdon</td>
   <td class="action">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 89/4/0</td>
-  <td class="disc">7t/4p</td>
+  <td class="disc heat-2">7t/4p</td>
   <td class="num">6d</td>
   <td class="num">0d</td>
   <td class="num">13</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124868">#124868</a></td>
+  <td class="title">[wasm][coreclr] Improve method portable entrypoints lifecycle</td>
+  <td class="who">@radekdoulik</td>
+  <td class="action">&#x1F4AC; Author: respond to 1 thread(s) from @jkotas</td>
+  <td class="ci">&#x2705; 87/3/1</td>
+  <td class="disc heat-2">5t/4p</td>
+  <td class="num">5d</td>
+  <td class="num">0d</td>
+  <td class="num">4</td>
+  <td class="author">radekdoulik</td>
+</tr>
+<tr>
+  <td class="score">7.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124631">#124631</a></td>
+  <td class="title">Remove Debug.Assert in SetSslCertificate that aborts process during di</td>
+  <td class="who">@rzikm</td>
+  <td class="action">&#x1F4AC; Author: respond to 1 thread(s) from @wfurt</td>
+  <td class="ci">&#x2705; 79/3/0</td>
+  <td class="disc">1t/2p</td>
+  <td class="num">11d</td>
+  <td class="num heat-1">7d</td>
+  <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
 <tr>
@@ -209,24 +241,11 @@
   <td class="who">@rosebyte</td>
   <td class="action">&#x1F4AC; Author: respond to 6 thread(s) from @rosebyte, @copilot-pull-request-reviewer</td>
   <td class="ci">&#x2705; 79/2/0</td>
-  <td class="disc">6t/3p</td>
+  <td class="disc heat-1">6t/3p</td>
   <td class="num">4d</td>
   <td class="num">0d</td>
   <td class="num">3</td>
   <td class="author">&#x1F916; copilot</td>
-</tr>
-<tr>
-  <td class="score">7.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124033">#124033</a></td>
-  <td class="title">Remove duplicated SVE GatherVector APIs</td>
-  <td class="who">@jeffhandley</td>
-  <td class="action">&#x1F441; Maintainer: review needed</td>
-  <td class="ci">&#x2705; 88/5/0</td>
-  <td class="disc">0t/0p</td>
-  <td class="num">26d</td>
-  <td class="num">11d</td>
-  <td class="num">6</td>
-  <td class="author">ylpoonlg <span class="badge community">community</span></td>
 </tr>
 <tr>
   <td class="score">7.9</td>
@@ -241,29 +260,16 @@
   <td class="num">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
-<tr>
-  <td class="score">7.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124868">#124868</a></td>
-  <td class="title">[wasm][coreclr] Improve method portable entrypoints lifecycle</td>
-  <td class="who">@radekdoulik</td>
-  <td class="action">&#x1F4AC; Author: respond to 1 thread(s) from @jkotas</td>
-  <td class="ci">&#x2705; 87/3/1</td>
-  <td class="disc">5t/4p</td>
-  <td class="num">5d</td>
-  <td class="num">0d</td>
-  <td class="num">4</td>
-  <td class="author">radekdoulik</td>
-</tr>
 </tbody>
 </table>
 <div class="observations">
   <h3>Observations</h3>
   <ul>
-    <li>Two PRs (#124880 and #124927) are marked &quot;Ready to merge&quot; with high scores (9 and 8.5) and no threads; maintainers should prioritize merging these immediately for quick wins.</li>
-    <li>Reviewer assignments show a potential bottleneck around &quot;@JulieLeeMSFT&quot; with multiple high-score PRs (e.g., #125028, #125078) awaiting &quot;Maintainer: review needed.&quot;</li>
-    <li>PR #124033 has aged significantly (26d) despite a good score (7.9); review and action on this community-authored PR are recommended to avoid it becoming stale.</li>
-    <li>Three PRs (#124984, #124966, #125067) require authors to address open threads (totaling 10 discussions); follow-ups may be needed to ensure these aren&#39;t delayed further.</li>
-    <li>Community-authored PRs (e.g., #123439, #124970, #124033) generally have longer wait times; consider expediting reviews to encourage contributions.</li>
+    <li>PRs <a href="https://github.com/dotnet/runtime/pull/124880">#124880</a> and <a href="https://github.com/dotnet/runtime/pull/124927">#124927</a> are quick wins, both &quot;Ready to merge&quot; with no threads and high scores (9 and 8.5, respectively). These can be merged immediately.</li>
+    <li>PRs <a href="https://github.com/dotnet/runtime/pull/124966">#124966</a> and <a href="https://github.com/dotnet/runtime/pull/125067">#125067</a> have several threads (6 and 2 respectively) requiring responses, indicating they are currently blocked and need the authors to address feedback.</li>
+    <li>Reviewer @JulieLeeMSFT appears as a bottleneck with multiple PRs (<a href="https://github.com/dotnet/runtime/pull/125028">#125028</a>, <a href="https://github.com/dotnet/runtime/pull/125078">#125078</a>) pending their review, indicating prioritization or delegation may be beneficial.</li>
+    <li>Several PRs authored by community members, like <a href="https://github.com/dotnet/runtime/pull/123439">#123439</a> and <a href="https://github.com/dotnet/runtime/pull/124970">#124970</a>, require attention to encourage continued contributions from external contributors.</li>
+    <li>There is a noticeable cluster of PRs authored by &quot;app/copilot-swe-agent&quot;, which might reflect automation but may require closer scrutiny to ensure code quality and alignment with project standards.</li>
   </ul>
 </div>
 <details class="scoring">

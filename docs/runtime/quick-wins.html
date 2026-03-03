@@ -29,6 +29,9 @@
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
   .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
   .author { white-space: nowrap; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; }
@@ -44,13 +47,16 @@
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
   }
 </style>
 </head>
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="../index.html">Home</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a href="top15.html">Top 15 Most Actionable PRs</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/runtime</h1>
-<p class="meta">Updated: 2026-03-03 04:18 UTC &middot; 2 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated: 2026-03-03 04:28 UTC &middot; 2 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <table>
 <thead>
 <tr>
@@ -66,7 +72,7 @@
   <td class="who">@kg</td>
   <td class="action">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 91/2/0</td>
-  <td class="disc">5t/4p</td>
+  <td class="disc heat-2">5t/4p</td>
   <td class="num">5d</td>
   <td class="num">1d</td>
   <td class="num">3</td>
@@ -79,7 +85,7 @@
   <td class="who">@janvorli</td>
   <td class="action">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 88/3/0</td>
-  <td class="disc">22t/3p</td>
+  <td class="disc heat-3">&#x1F525; 22t/3p</td>
   <td class="num">4d</td>
   <td class="num">1d</td>
   <td class="num">12</td>
@@ -90,10 +96,9 @@
 <div class="observations">
   <h3>Observations</h3>
   <ul>
-    <li>Prioritize merging PRs with high scores, no unresolved threads, and green CI, such as #124880 and #124927, as they represent quick wins requiring minimal effort.</li>
-    <li>Consider routine checks for PRs with scores below a certain threshold, which might signal the need for additional attention or discussion.</li>
-    <li>Evaluate the frequency and duration of PR reviews from maintainers like @kg or @janvorli to identify potential bottlenecks and optimize review assignments.</li>
-    <li>Maintain consistent engagement with community authors to ensure external contributions remain active and aligned with project guidelines.</li>
+    <li>Prioritize merging high-score, green CI PRs like <a href="https://github.com/dotnet/runtime/pull/124880">#124880</a> and <a href="https://github.com/dotnet/runtime/pull/124927">#124927</a> as quick wins to reduce queue backlog.</li>
+    <li>Monitor PRs authored by core team members with no threads, as they may be easy to merge but could benefit from expedited action to maintain flow.</li>
+    <li>Evaluate if resources can be allocated to community PRs to ensure external contributors remain engaged despite potentially slower review processes.</li>
   </ul>
 </div>
 
