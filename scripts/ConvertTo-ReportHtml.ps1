@@ -160,7 +160,7 @@ if ($Title -match "Actionable|Top \d+") {
     <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
     <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
   </table>
-  <p>Higher score = closer to merge-ready. The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 "@
