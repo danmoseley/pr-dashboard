@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Most Actionable PRs — dotnet/machinelearning - PR Dashboard</title>
+<style>
+  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
+           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); padding: 1em 2em; }
+  nav { margin-bottom: 1em; font-size: 0.9em; }
+  nav a { color: var(--link); text-decoration: none; margin: 0 0.3em; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-size: 1.4em; margin-bottom: 0.2em; }
+  .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  thead { position: sticky; top: 0; z-index: 1; }
+  th { background: var(--header-bg); padding: 6px 10px; text-align: left;
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+  td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:hover { background: var(--hover); }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .who, .action { white-space: nowrap; }
+  .ci { white-space: nowrap; }
+  .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
+  .author { white-space: nowrap; }
+  .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
+  .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+  .badge.community { background: var(--badge-community); color: #fff; }
+  .observations { margin-top: 1.5em; max-width: 900px; }
+  .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
+  .observations ul { padding-left: 1.5em; }
+  .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+  .scoring p { margin: 0.5em 0; line-height: 1.4; }
+  .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
+  .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
+  .show-more-btn { display: block; margin: 1em auto; padding: 6px 20px; font-size: 0.9em; cursor: pointer;
+    background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
+    border-radius: 6px; font-weight: 500; }
+  .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
+             --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+  }
+</style>
+</head>
+<body>
+<nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
+<h1>Most Actionable PRs — dotnet/machinelearning</h1>
+<p class="meta">Updated every 4h, last at 2026-03-03 21:44 UTC &middot; 10 PRs &middot; <a href="https://github.com/dotnet/machinelearning">dotnet/machinelearning</a></p>
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
+<table>
+<thead>
+<tr>
+  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="sevenzees">
+  <td class="score" title="? CI passed � ?? reviewed, not approved � ??? active (8 threads) � ?? community">6.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7578">#7578</a></td>
+  <td class="title">Add Melt method to DataFrame</td>
+  <td class="who">-</td>
+  <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 20/1/0</td>
+  <td class="disc heat-1">0/8t 2p</td>
+  <td class="num heat-1">23d</td>
+  <td class="num">4d</td>
+  <td class="num heat-1" title="476 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sevenzees.png?size=32" alt="sevenzees"><a href="https://github.com/sevenzees">@sevenzees</a><a class="filter-btn" href="#" onclick="filterByUser('sevenzees');return false" title="Show only @sevenzees">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="area,sevenzees">
+  <td class="score" title="? CI passed � ?? no review yet � ?? community � ?? small change">6.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7575">#7575</a></td>
+  <td class="title">Add CountDistinct and CountIf methods to GroupBy</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">only</a></span> owner</td>
+  <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 20/1/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-2">32d</td>
+  <td class="num heat-1">8d</td>
+  <td class="num" title="120 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sevenzees.png?size=32" alt="sevenzees"><a href="https://github.com/sevenzees">@sevenzees</a><a class="filter-btn" href="#" onclick="filterByUser('sevenzees');return false" title="Show only @sevenzees">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="area,JeWaVe">
+  <td class="score" title="? CI passed � ?? no review yet � ?? community � ?? small change � ? stale (39d)">5.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7569">#7569</a></td>
+  <td class="title">fix: performance of erfinv #7568</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">only</a></span> owner</td>
+  <td class="action" title="No review, Stale 39d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 25/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-2">47d</td>
+  <td class="num heat-3">39d</td>
+  <td class="num" title="28 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeWaVe.png?size=32" alt="JeWaVe"><a href="https://github.com/JeWaVe">@JeWaVe</a><a class="filter-btn" href="#" onclick="filterByUser('JeWaVe');return false" title="Show only @JeWaVe">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="stephentoub,app">
+  <td class="score" title="? CI failing � ?? community reviewed � ?? approval on older commit � ?? 3 unresolved � ?? small change">5.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7582">#7582</a></td>
+  <td class="title">Update SkiaSharp from 2.88.8 to 3.119.2</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">only</a></span></td>
+  <td class="action" title="CI fail (5 failed), 3 threads, No owner approval, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/app.png?size=32" alt="app"><a href="https://github.com/app">@app</a><a class="filter-btn" href="#" onclick="filterByUser('app');return false" title="Show only @app">only</a></span>/copilot-swe-agent: fix CI failures</td>
+  <td class="ci">&#x274C; 16/5/0</td>
+  <td class="disc">3/3t 2p</td>
+  <td class="num">13d</td>
+  <td class="num heat-1">8d</td>
+  <td class="num" title="25 lines changed">3</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
+<tr data-people="JakeRadMSFT,ericstj">
+  <td class="score" title="?? CI pending � ?? reviewed, not approved � ?? 7 unresolved � ??? active (11 threads) � ?? large (105 files, 1425 lines) � ??? old (978d)">5.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/6749">#6749</a></td>
+  <td class="title">Update Projects to .NET 8 in MLNET 4.0 Branch</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span></td>
+  <td class="action" title="No CI, 7 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span>: respond to 7 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ericstj.png?size=32" alt="ericstj"><a href="https://github.com/ericstj">@ericstj</a><a class="filter-btn" href="#" onclick="filterByUser('ericstj');return false" title="Show only @ericstj">only</a></span></td>
+  <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
+  <td class="disc heat-2">7/11t 3p</td>
+  <td class="num heat-3">978d</td>
+  <td class="num">4d</td>
+  <td class="num heat-2" title="1425 lines changed">105</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span></td>
+</tr>
+<tr data-people="piyushdubey,ericstj,asmirnov82">
+  <td class="score" title="?? CI pending � ?? reviewed, not approved � ?? 2 unresolved � ?? community � ?? small change � ? stale (68d) � ??? old (712d)">4.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7094">#7094</a></td>
+  <td class="title">Add support for Apache.Arrow.Types.Decimal128Type</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/piyushdubey.png?size=32" alt="piyushdubey"><a href="https://github.com/piyushdubey">@piyushdubey</a><a class="filter-btn" href="#" onclick="filterByUser('piyushdubey');return false" title="Show only @piyushdubey">only</a></span> <span class="badge community">community</span></td>
+  <td class="action" title="No CI, 2 threads, No owner approval, Stale 68d"><span class="user-ref"><img class="avatar" src="https://github.com/piyushdubey.png?size=32" alt="piyushdubey"><a href="https://github.com/piyushdubey">@piyushdubey</a><a class="filter-btn" href="#" onclick="filterByUser('piyushdubey');return false" title="Show only @piyushdubey">only</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ericstj.png?size=32" alt="ericstj"><a href="https://github.com/ericstj">@ericstj</a><a class="filter-btn" href="#" onclick="filterByUser('ericstj');return false" title="Show only @ericstj">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/asmirnov82.png?size=32" alt="asmirnov82"><a href="https://github.com/asmirnov82">@asmirnov82</a><a class="filter-btn" href="#" onclick="filterByUser('asmirnov82');return false" title="Show only @asmirnov82">only</a></span></td>
+  <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
+  <td class="disc">2/2t 2p</td>
+  <td class="num heat-3">712d</td>
+  <td class="num heat-3">68d</td>
+  <td class="num" title="9 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/piyushdubey.png?size=32" alt="piyushdubey"><a href="https://github.com/piyushdubey">@piyushdubey</a><a class="filter-btn" href="#" onclick="filterByUser('piyushdubey');return false" title="Show only @piyushdubey">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="area,FranklinWhale">
+  <td class="score" title="?? CI pending � ?? no review yet � ?? community � ?? small change � ? stale (1190d) � ??? old (1207d)">4.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/6449">#6449</a></td>
+  <td class="title">Add `DataViewSchema` overloads to `ConvertToOnnx`</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">only</a></span> owner</td>
+  <td class="action" title="No CI, No review, Stale 1190d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">1207d</td>
+  <td class="num heat-3">1190d</td>
+  <td class="num" title="71 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/FranklinWhale.png?size=32" alt="FranklinWhale"><a href="https://github.com/FranklinWhale">@FranklinWhale</a><a class="filter-btn" href="#" onclick="filterByUser('FranklinWhale');return false" title="Show only @FranklinWhale">only</a></span> <span class="badge community">community</span></td>
+</tr>
+<tr data-people="JakeRadMSFT">
+  <td class="score" title="?? CI pending � ?? has conflicts � ?? reviewed, not approved � ?? 1 unresolved � ?? large (80 files, 46978 lines) � ? stale (971d) � ??? old (1029d)">2.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/6664">#6664</a></td>
+  <td class="title">(WIP) Generic DataFrame Math</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span></td>
+  <td class="action" title="Conflicts, No CI, 1 threads, No owner approval, Stale 971d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span>: resolve conflicts</td>
+  <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
+  <td class="disc">1/1t 3p</td>
+  <td class="num heat-3">1029d</td>
+  <td class="num heat-3">971d</td>
+  <td class="num heat-2" title="46978 lines changed">80</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JakeRadMSFT.png?size=32" alt="JakeRadMSFT"><a href="https://github.com/JakeRadMSFT">@JakeRadMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('JakeRadMSFT');return false" title="Show only @JakeRadMSFT">only</a></span></td>
+</tr>
+<tr data-people="LittleLittleCloud">
+  <td class="score" title="? CI failing � ?? has conflicts � ?? no review yet � ?? small change � ? stale (337d) � ??? old (357d)">2.5</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7416">#7416</a></td>
+  <td class="title">update torchsharp to 0.105.0</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span></td>
+  <td class="action" title="Conflicts, CI fail (20 failed), No review, Stale 337d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span>: resolve conflicts</td>
+  <td class="ci">&#x274C; 5/20/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">357d</td>
+  <td class="num heat-3">337d</td>
+  <td class="num" title="24 lines changed">4</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span></td>
+</tr>
+<tr data-people="LittleLittleCloud">
+  <td class="score" title="? CI failing � ?? has conflicts � ?? reviewed, not approved � ?? 2 unresolved � ? stale (357d) � ??? old (367d)">2.1</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/machinelearning/pull/7406">#7406</a></td>
+  <td class="title">[GenAI] Use BitsAndBytes for 4bit quantization.</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span></td>
+  <td class="action" title="Conflicts, CI fail (16 failed), 2 threads, No owner approval, Stale 357d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span>: resolve conflicts</td>
+  <td class="ci">&#x274C; 9/16/0</td>
+  <td class="disc heat-1">2/5t 3p</td>
+  <td class="num heat-3">367d</td>
+  <td class="num heat-3">357d</td>
+  <td class="num heat-1" title="315 lines changed">17</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LittleLittleCloud.png?size=32" alt="LittleLittleCloud"><a href="https://github.com/LittleLittleCloud">@LittleLittleCloud</a><a class="filter-btn" href="#" onclick="filterByUser('LittleLittleCloud');return false" title="Show only @LittleLittleCloud">only</a></span></td>
+</tr>
+</tbody>
+</table>
+
+
+<script>
+function filterByUser(name) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+}
+function clearFilter() {
+  var rows = document.querySelectorAll('tbody tr');
+  rows.forEach(function(r) {
+    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+  history.replaceState(null, '', location.pathname);
+}
+// Apply ?user=X filter on page load
+(function() {
+  var params = new URLSearchParams(location.search);
+  var user = params.get('user');
+  if (user) filterByUser(user);
+})();
+</script>
+</body>
+</html>

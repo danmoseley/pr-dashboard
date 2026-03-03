@@ -97,7 +97,7 @@ $reportTypes = @(
 # Build header row
 $headerCells = $repos | ForEach-Object {
     $repoShort = $_.slug
-    "<th><a href=`"https://github.com/$($_.repo)/pulls`">$repoShort</a></th>"
+    "<th><a href=`"$($_.slug)/actionable.html`">$repoShort</a></th>"
 }
 $headerRow = "<tr><th></th>$($headerCells -join '')</tr>"
 
