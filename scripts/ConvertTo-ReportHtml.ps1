@@ -292,6 +292,7 @@ function filterByUser(name) {
   banner.style.display = 'block';
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
 }
 function clearFilter() {
   var rows = document.querySelectorAll('tbody tr');
