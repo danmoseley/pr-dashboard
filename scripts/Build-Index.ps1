@@ -66,9 +66,10 @@ $dataRows = foreach ($rt in $reportTypes) {
     "<tr><td class=`"report-name`">$($rt.Title)</td>$($cells -join '')</tr>"
 }
 
-# Build updated row with data-updated attributes for JS
+# Build updated row with data-updated and data-interval attributes for JS
 $updatedCells = $repos | ForEach-Object {
-    "<td class=`"updated`" data-updated=`"$($_.updated)`">...</td>"
+    $intervalH = if ($_.slug -eq "runtime") { 4 } else { 12 }
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"$($intervalH)`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
@@ -142,15 +143,15 @@ function timeAgo(iso) {
   const days = Math.floor(hrs / 24);
   return days + 'd ago';
 }
-document.querySelectorAll('[data-updated]').forEach(function(el) {
-  el.textContent = timeAgo(el.getAttribute('data-updated'));
-});
-// Refresh every minute
-setInterval(function() {
+function updateTimestamps() {
   document.querySelectorAll('[data-updated]').forEach(function(el) {
-    el.textContent = timeAgo(el.getAttribute('data-updated'));
+    var ago = timeAgo(el.getAttribute('data-updated'));
+    var intervalH = el.getAttribute('data-interval');
+    el.textContent = ago + ', updated every ' + intervalH + 'h';
   });
-}, 60000);
+}
+updateTimestamps();
+setInterval(updateTimestamps, 60000);
 </script>
 </body>
 </html>
