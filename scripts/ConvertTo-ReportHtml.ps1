@@ -213,10 +213,10 @@ $html = @"
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
   .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
-  .show-more-btn { margin: 0.7em 0; padding: 4px 14px; font-size: 0.85em; cursor: pointer;
+  .show-more-btn { display: block; margin: 1em auto; padding: 6px 20px; font-size: 0.9em; cursor: pointer;
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
-    border-radius: 6px; }
-  .show-more-btn:hover { text-decoration: underline; }
+    border-radius: 6px; font-weight: 500; }
+  .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
