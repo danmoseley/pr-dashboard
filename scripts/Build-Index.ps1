@@ -67,7 +67,7 @@ function New-Sparkline {
 # --- Helper: compute trend indicator vs 7 days ago ---
 function Get-TrendIndicator {
     param([object[]]$History, [string]$Field, [string]$GoodDirection = "down")
-    if ($History.Count -lt 2) { return @{ arrow = ""; cssClass = "" ; delta = 0 } }
+    if ($History.Count -lt 2) { return @{ arrow = ""; cssClass = "" ; delta = 0; tooltip = "" } }
     $current = [double]$History[-1].$Field
     # Find entry closest to 7 days ago
     $cutoff = (Get-Date).AddDays(-7).ToUniversalTime().ToString("o")
@@ -75,13 +75,15 @@ function Get-TrendIndicator {
     if (-not $weekAgo) { $weekAgo = $History[0] }
     $prev = [double]$weekAgo.$Field
     $delta = $current - $prev
+    $sign = if ($delta -gt 0) { "+" } else { "" }
+    $tooltip = "vs 7 days ago: ${sign}$([int]$delta) (was $([int]$prev))"
     if ($delta -eq 0) {
-        return @{ arrow = ""; cssClass = "trend-flat"; delta = 0 }
+        return @{ arrow = ""; cssClass = "trend-flat"; delta = 0; tooltip = "No change vs 7 days ago" }
     }
     $isGood = if ($GoodDirection -eq "down") { $delta -lt 0 } else { $delta -gt 0 }
     $arrow = if ($delta -gt 0) { "&#9650;" } else { "&#9660;" }  # ▲ ▼
     $cssClass = if ($isGood) { "trend-good" } else { "trend-bad" }
-    return @{ arrow = "$arrow"; cssClass = $cssClass; delta = [int]$delta }
+    return @{ arrow = "$arrow"; cssClass = $cssClass; delta = [int]$delta; tooltip = $tooltip }
 }
 
 # All known report types in display order
@@ -107,7 +109,7 @@ $openCells = foreach ($repo in $repos) {
     $trend = Get-TrendIndicator -History $hist -Field "open" -GoodDirection "down"
     $sparkValues = @($hist | ForEach-Object { [double]$_.open })
     $spark = New-Sparkline -Values $sparkValues -Color $(if ($trend.cssClass -eq "trend-good") { "#3fb950" } elseif ($trend.cssClass -eq "trend-bad") { "#f85149" } else { "#58a6ff" })
-    $trendHtml = if ($trend.arrow) { " <span class=`"$($trend.cssClass)`">$($trend.arrow)$([Math]::Abs($trend.delta))</span>" } else { "" }
+    $trendHtml = if ($trend.arrow) { " <span class=`"trend-indicator $($trend.cssClass)`" title=`"$($trend.tooltip)`">$($trend.arrow)$([Math]::Abs($trend.delta))</span>" } else { "" }
     "<td class=`"metric`"><span class=`"metric-num`">$current</span>$trendHtml<br>$spark</td>"
 }
 $openRow = "<tr class=`"metric-row`"><td class=`"report-name`">Open PRs</td>$($openCells -join '')</tr>"
@@ -119,7 +121,7 @@ $ageCells = foreach ($repo in $repos) {
     $trend = Get-TrendIndicator -History $hist -Field "median_age_days" -GoodDirection "down"
     $sparkValues = @($hist | ForEach-Object { [double]$_.median_age_days })
     $spark = New-Sparkline -Values $sparkValues -Color $(if ($trend.cssClass -eq "trend-good") { "#3fb950" } elseif ($trend.cssClass -eq "trend-bad") { "#f85149" } else { "#58a6ff" })
-    $trendHtml = if ($trend.arrow) { " <span class=`"$($trend.cssClass)`">$($trend.arrow)</span>" } else { "" }
+    $trendHtml = if ($trend.arrow) { " <span class=`"trend-indicator $($trend.cssClass)`" title=`"$($trend.tooltip)`">$($trend.arrow)$([Math]::Abs($trend.delta))d</span>" } else { "" }
     "<td class=`"metric`"><span class=`"metric-num`">${current}d</span>$trendHtml<br>$spark</td>"
 }
 $ageRow = "<tr class=`"metric-row`"><td class=`"report-name`">Median Age</td>$($ageCells -join '')</tr>"
@@ -168,37 +170,47 @@ $statsCells = $repos | ForEach-Object {
 }
 $statsRow = "<tr class=`"stats-row`"><td class=`"report-name`">Scan</td>$($statsCells -join '')</tr>"
 
-# --- Top Mergers leaderboard ---
-$botNames = @("dotnet-maestro", "github-actions", "unknown", "dependabot", "dotnet-maestro[bot]")
-$globalMergers = @{}
-foreach ($repo in $repos) {
+# --- Per-repo merger rows ---
+$botNames = @("dotnet-maestro", "github-actions", "unknown", "dependabot", "dotnet-maestro[bot]", "Copilot")
+
+function Format-TopMergers {
+    param([object]$MergerData, [int]$TopN = 3)
+    if (-not $MergerData) { return "&mdash;" }
+    $entries = @()
+    if ($MergerData -is [hashtable]) {
+        $entries = @($MergerData.GetEnumerator() | Where-Object { $_.Name -notin $botNames -and $_.Name -notmatch '\[bot\]$' } | Sort-Object -Property Value -Descending | Select-Object -First $TopN)
+    } elseif ($MergerData.PSObject) {
+        $entries = @($MergerData.PSObject.Properties | Where-Object { $_.Name -notin $botNames -and $_.Name -notmatch '\[bot\]$' } | Sort-Object -Property { [int]$_.Value } -Descending | Select-Object -First $TopN)
+    }
+    if ($entries.Count -eq 0) { return "&mdash;" }
+    $medals = @("&#129351;", "&#129352;", "&#129353;")  # 🥇🥈🥉
+    $parts = for ($i = 0; $i -lt $entries.Count; $i++) {
+        $e = $entries[$i]
+        $name = $e.Name
+        $count = [int]$e.Value
+        $medal = if ($i -lt 3) { $medals[$i] } else { "" }
+        "$medal<img src=`"https://github.com/$name.png?size=16`" class=`"avatar-sm`"><a href=`"https://github.com/$name`">$name</a>&nbsp;<span class=`"merge-count`">$count</span>"
+    }
+    return $parts -join "<br>"
+}
+
+# Community Champs row (who merged the most community PRs this week)
+$communityChampCells = foreach ($repo in $repos) {
     $hist = $repoHistory[$repo.slug]
-    if ($hist.Count -gt 0 -and $hist[-1].top_mergers_7d) {
-        $mergers = $hist[-1].top_mergers_7d
-        foreach ($prop in $mergers.PSObject.Properties) {
-            $globalMergers[$prop.Name] = if ($globalMergers.ContainsKey($prop.Name)) { $globalMergers[$prop.Name] + [int]$prop.Value } else { [int]$prop.Value }
-        }
-    }
+    $mergerData = if ($hist.Count -gt 0) { $hist[-1].top_community_mergers_7d } else { $null }
+    $html = Format-TopMergers -MergerData $mergerData -TopN 3
+    "<td class=`"merger-cell`">$html</td>"
 }
-$topMergersList = @($globalMergers.GetEnumerator() | Where-Object { $_.Name -notin $botNames -and $_.Name -notmatch '\[bot\]$' } | Sort-Object -Property Value -Descending | Select-Object -First 5)
-$medals = @("&#129351;", "&#129352;", "&#129353;")  # 🥇🥈🥉
-$leaderboardHtml = ""
-if ($topMergersList.Count -gt 0) {
-    $entries = for ($i = 0; $i -lt $topMergersList.Count; $i++) {
-        $m = $topMergersList[$i]
-        $medal = if ($i -lt 3) { $medals[$i] + " " } else { "&nbsp;&nbsp;&nbsp; " }
-        $avatar = "https://github.com/$($m.Name).png?size=20"
-        "$medal<img src=`"$avatar`" class=`"avatar`"> <a href=`"https://github.com/$($m.Name)`">@$($m.Name)</a> <span class=`"merge-count`">$($m.Value) PRs</span>"
-    }
-    $leaderboardHtml = @"
-<div class="leaderboard">
-<h2>&#127942; Top Mergers This Week</h2>
-<div class="merger-list">
-$($entries -join "<br>`n")
-</div>
-</div>
-"@
+$communityChampRow = "<tr class=`"merger-row`"><td class=`"report-name`">&#127775; Community Champs (7d)</td>$($communityChampCells -join '')</tr>"
+
+# Top Mergers row
+$topMergerCells = foreach ($repo in $repos) {
+    $hist = $repoHistory[$repo.slug]
+    $mergerData = if ($hist.Count -gt 0) { $hist[-1].top_mergers_7d } else { $null }
+    $html = Format-TopMergers -MergerData $mergerData -TopN 3
+    "<td class=`"merger-cell`">$html</td>"
 }
+$topMergerRow = "<tr class=`"merger-row`"><td class=`"report-name`">&#127942; Top Mergers (7d)</td>$($topMergerCells -join '')</tr>"
 
 $indexHtml = @"
 <!DOCTYPE html>
@@ -227,18 +239,19 @@ $indexHtml = @"
   td.stats { color: #484f58; font-size: 0.8em; }
   td.metric { font-size: 0.95em; line-height: 1.6; padding: 6px 12px; }
   .metric-num { font-size: 1.3em; font-weight: 600; }
-  .trend-good { color: var(--good); font-size: 0.8em; }
-  .trend-bad { color: var(--bad); font-size: 0.8em; }
-  .trend-flat { color: #8b949e; font-size: 0.8em; }
+  .trend-good { color: var(--good); font-size: 0.95em; font-weight: 600; }
+  .trend-bad { color: var(--bad); font-size: 0.95em; font-weight: 600; }
+  .trend-flat { color: #8b949e; font-size: 0.95em; }
+  .trend-indicator { cursor: help; }
   tr.metric-row td { border-bottom: none; }
   tr.metric-row + tr.metric-row td { border-top: none; }
   tr.separator-row td { border-top: 2px solid var(--border); padding: 0; height: 0; border-bottom: none; }
   tr.updated-row td, tr.stats-row td { border-top: 2px solid var(--border); }
   tr:hover { background: var(--hover); }
-  .leaderboard { margin-top: 1.5em; padding: 1em; border: 1px solid var(--border); border-radius: 6px; display: inline-block; }
-  .merger-list { line-height: 2; }
-  .avatar { width: 20px; height: 20px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
-  .merge-count { color: #8b949e; font-size: 0.85em; }
+  td.merger-cell { font-size: 0.8em; text-align: left; line-height: 1.8; white-space: nowrap; padding: 6px 10px; }
+  .avatar-sm { width: 16px; height: 16px; border-radius: 50%; vertical-align: middle; margin-right: 2px; }
+  .merge-count { color: #8b949e; font-size: 0.9em; }
+  tr.merger-row td { border-top: none; }
   .footer { margin-top: 2em; color: #8b949e; font-size: 0.85em; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
@@ -258,14 +271,14 @@ $headerRow
 $openRow
 $ageRow
 $mergedRow
+$communityChampRow
+$topMergerRow
 <tr class="separator-row"><td class="report-name" colspan="$(1 + $repos.Count)"></td></tr>
 $($dataRows -join "`n")
 $updatedRow
 $statsRow
 </tbody>
 </table>
-
-$leaderboardHtml
 
 <p class="footer">
   Generated by <a href="https://github.com/danmoseley/pr-dashboard">pr-dashboard</a> via GitHub Actions.

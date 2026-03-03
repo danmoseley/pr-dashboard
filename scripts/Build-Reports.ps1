@@ -184,27 +184,43 @@ $openCount = $ages.Count
 $medianAge = if ($ages.Count -gt 0) { $ages[[math]::Floor($ages.Count / 2)] } else { 0 }
 $p90Age = if ($ages.Count -gt 0) { $ages[[math]::Floor($ages.Count * 0.9)] } else { 0 }
 
-# Fetch merged PRs in last 7 days via GraphQL (1-2 calls, gets mergedBy)
+# Helper: fetch merged PRs for a given period via GraphQL (includes labels for community detection)
+function Get-MergedPrs {
+    param([string]$RepoName, [int]$Days)
+    $cutoff = (Get-Date).AddDays(-$Days).ToString("yyyy-MM-dd")
+    $all = @()
+    $cur = $null
+    do {
+        $after = if ($cur) { ", after: `"$cur`"" } else { "" }
+        $q = "query { search(query: `"repo:$RepoName is:pr is:merged merged:>$cutoff`", type: ISSUE, first: 100$after) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { number mergedBy { login } labels(first: 10) { nodes { name } } } } } }"
+        $res = gh api graphql -f query="$q" 2>$null | ConvertFrom-Json
+        $s = $res.data.search
+        $all += @($s.nodes)
+        $cur = if ($s.pageInfo.hasNextPage) { $s.pageInfo.endCursor } else { $null }
+    } while ($cur)
+    return $all
+}
+
+# Fetch merged PRs in last 7 days
 $merged7d = 0
 $topMergers = @{}
-$cutoffDate = (Get-Date).AddDays(-7).ToString("yyyy-MM-dd")
+$topCommunityMergers = @{}
 try {
-    $allMerged = @()
-    $cursor = $null
-    do {
-        $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
-        $query = "query { search(query: `"repo:$Repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { number mergedBy { login } } } } }"
-        $result = gh api graphql -f query="$query" 2>$null | ConvertFrom-Json
-        $search = $result.data.search
-        $allMerged += @($search.nodes)
-        $cursor = if ($search.pageInfo.hasNextPage) { $search.pageInfo.endCursor } else { $null }
-    } while ($cursor)
+    $allMerged = @(Get-MergedPrs -RepoName $Repo -Days 7)
     $merged7d = $allMerged.Count
     foreach ($pr in $allMerged) {
         $merger = if ($pr.mergedBy -and $pr.mergedBy.login) { $pr.mergedBy.login } else { "unknown" }
         $topMergers[$merger] = if ($topMergers.ContainsKey($merger)) { $topMergers[$merger] + 1 } else { 1 }
+        # Check if community PR
+        $isCommunity = $false
+        if ($pr.labels -and $pr.labels.nodes) {
+            $isCommunity = @($pr.labels.nodes | Where-Object { $_.name -match '^community' }).Count -gt 0
+        }
+        if ($isCommunity) {
+            $topCommunityMergers[$merger] = if ($topCommunityMergers.ContainsKey($merger)) { $topCommunityMergers[$merger] + 1 } else { 1 }
+        }
     }
-    Write-Host "  Merged in last 7d: $merged7d"
+    Write-Host "  Merged in last 7d: $merged7d (community: $($topCommunityMergers.Values | Measure-Object -Sum | Select-Object -ExpandProperty Sum))"
 } catch {
     Write-Warning "Failed to fetch merged PRs: $_"
 }
@@ -213,13 +229,14 @@ try {
 $opened7d = @($allPrs | Where-Object { [int]$_.age_days -le 7 }).Count
 
 $historyEntry = [ordered]@{
-    date            = $timestampIso
-    open            = $openCount
-    median_age_days = $medianAge
-    p90_age_days    = $p90Age
-    merged_7d       = $merged7d
-    opened_7d       = $opened7d
-    top_mergers_7d  = $topMergers
+    date                     = $timestampIso
+    open                     = $openCount
+    median_age_days          = $medianAge
+    p90_age_days             = $p90Age
+    merged_7d                = $merged7d
+    opened_7d                = $opened7d
+    top_mergers_7d           = $topMergers
+    top_community_mergers_7d = $topCommunityMergers
 }
 $existingHistory.Add([PSCustomObject]$historyEntry) | Out-Null
 # Keep last 90 days (~540 entries at 4h cadence)
