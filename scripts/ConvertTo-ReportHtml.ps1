@@ -301,7 +301,14 @@ function clearFilter() {
   document.getElementById('filter-banner').style.display = 'none';
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = '';
+  history.replaceState(null, '', location.pathname);
 }
+// Apply ?user=X filter on page load
+(function() {
+  var params = new URLSearchParams(location.search);
+  var user = params.get('user');
+  if (user) filterByUser(user);
+})();
 </script>
 </body>
 </html>

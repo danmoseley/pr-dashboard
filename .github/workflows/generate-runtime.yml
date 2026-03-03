@@ -16,15 +16,6 @@ jobs:
       - name: Checkout dashboard repo
         uses: actions/checkout@v4
 
-      - name: Fetch triage script
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          # Fetch from fork branch (change to dotnet/runtime main after PR #125005 merges)
-          gh api -H "Accept: application/vnd.github.raw" \
-            "repos/danmoseley/runtime/contents/.github/skills/pr-triage/scripts/Get-PrTriageData.ps1?ref=pr-triage-skill" \
-            > Get-PrTriageData.ps1
-
       - name: Install gh-models extension
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,7 +26,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p docs/runtime
-          pwsh ./Get-PrTriageData.ps1 -Repo dotnet/runtime -Limit 500 > docs/runtime/scan.json
+          pwsh ./scripts/Get-PrTriageData.ps1 -Repo dotnet/runtime -Limit 500 > docs/runtime/scan.json
 
       - name: Generate HTML reports
         env:

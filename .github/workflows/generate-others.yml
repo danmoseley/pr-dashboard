@@ -16,14 +16,6 @@ jobs:
       - name: Checkout dashboard repo
         uses: actions/checkout@v4
 
-      - name: Fetch triage script
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh api -H "Accept: application/vnd.github.raw" \
-            "repos/danmoseley/runtime/contents/.github/skills/pr-triage/scripts/Get-PrTriageData.ps1?ref=pr-triage-skill" \
-            > Get-PrTriageData.ps1
-
       - name: Install gh-models extension
         env:
           GH_TOKEN: ${{ github.token }}
@@ -44,8 +36,8 @@ jobs:
             if [ -n "$maintainers" ]; then
               maintainer_args="-Maintainers $maintainers"
             fi
-            pwsh ./Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins -ScheduleHours 12
+            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
+            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ReportTypes top15,quick-wins,stale-close -ScheduleHours 12
           done
 
       - name: Generate index page

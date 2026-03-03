@@ -23,7 +23,7 @@ param(
     [string]$DocsDir = "docs",
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][string]$Slug,
-    [string[]]$ReportTypes = @("top15", "community", "quick-wins"),
+    [string[]]$ReportTypes = @("top15", "community", "quick-wins", "stale-close"),
     [int]$ScheduleHours = 0,
     [switch]$SkipAI
 )
@@ -66,6 +66,16 @@ $allReports = @{
         File     = "quick-wins.html"
         Filter   = { param($prs) @($prs | Where-Object { $_.next_action -match "Ready to merge" }) }
         AiPrompt = "These PRs in $Repo appear ready to merge (CI green, approved, no unresolved threads)."
+    }
+    "stale-close" = @{
+        Id       = "stale-close"
+        Title    = "Consider Closing"
+        File     = "consider-closing.html"
+        Filter   = { param($prs) @($prs | Where-Object {
+            ($_.age_days -gt 90 -and $_.days_since_update -gt 30) -or
+            ($_.age_days -gt 180 -and $_.days_since_update -gt 14)
+        } | Sort-Object -Property days_since_update -Descending) }
+        AiPrompt = "These PRs in $Repo are old and stale — likely abandoned or superseded. Identify which ones seem most clearly closeable and why."
     }
 }
 
