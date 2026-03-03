@@ -66,6 +66,12 @@ $rows = foreach ($pr in $prs) {
     # Escape HTML in title
     $safeTitle = [System.Net.WebUtility]::HtmlEncode($pr.title)
 
+    # Heat classes for age, staleness, and discussion
+    $ageHeat = if ($pr.age_days -ge 60) { " heat-3" } elseif ($pr.age_days -ge 30) { " heat-2" } elseif ($pr.age_days -ge 14) { " heat-1" } else { "" }
+    $updateHeat = if ($pr.days_since_update -ge 30) { " heat-3" } elseif ($pr.days_since_update -ge 14) { " heat-2" } elseif ($pr.days_since_update -ge 7) { " heat-1" } else { "" }
+    $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
+    $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
+
     @"
 <tr>
   <td class="score">$($pr.score)</td>
@@ -74,9 +80,9 @@ $rows = foreach ($pr in $prs) {
   <td class="who">$([System.Net.WebUtility]::HtmlEncode($pr.who))</td>
   <td class="action">$actionEmoji$([System.Net.WebUtility]::HtmlEncode($pr.next_action))</td>
   <td class="ci">$ciEmoji $($pr.ci_detail)</td>
-  <td class="disc">$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
-  <td class="num">$($pr.age_days)d</td>
-  <td class="num">$($pr.days_since_update)d</td>
+  <td class="disc$discHeat">$discEmoji$($pr.total_threads)t/$($pr.distinct_commenters)p</td>
+  <td class="num$ageHeat">$($pr.age_days)d</td>
+  <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num">$($pr.changed_files)</td>
   <td class="author">$authorDisplay$communityBadge</td>
 </tr>
@@ -165,6 +171,9 @@ $html = @"
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
   .disc, .num { text-align: right; white-space: nowrap; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
   .author { white-space: nowrap; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; }
@@ -180,6 +189,9 @@ $html = @"
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
   }
 </style>
 </head>
