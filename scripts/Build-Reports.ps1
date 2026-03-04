@@ -239,7 +239,7 @@ $historyEntry = [ordered]@{
     top_community_mergers_7d = $topCommunityMergers
 }
 $existingHistory.Add([PSCustomObject]$historyEntry) | Out-Null
-# Keep last 90 days (~540 entries at 4h cadence)
+# Keep last 90 days (~180 entries at 12h cadence)
 $cutoffDate = (Get-Date).AddDays(-90).ToUniversalTime().ToString("o")
 $trimmed = @($existingHistory | Where-Object { $_.date -gt $cutoffDate })
 ConvertTo-Json -InputObject @($trimmed) -Depth 4 | Out-File -FilePath $historyFile -Encoding utf8
