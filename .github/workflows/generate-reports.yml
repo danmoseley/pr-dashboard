@@ -52,7 +52,7 @@ jobs:
           done
 
       - name: Generate index page
-        run: pwsh ./scripts/Build-Index.ps1
+        run: pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
 
       - name: Commit and push
         run: |
@@ -62,7 +62,7 @@ jobs:
             git stash --include-untracked || true
             git pull origin main || true
             git stash pop || true
-            pwsh ./scripts/Build-Index.ps1
+            pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
             git add docs/
             if git diff --cached --quiet; then
               echo "No changes to commit"

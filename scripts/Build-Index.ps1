@@ -10,7 +10,8 @@
 #>
 [CmdletBinding()]
 param(
-    [string]$DocsDir = "docs"
+    [string]$DocsDir = "docs",
+    [int]$ScheduleHours = 12
 )
 
 $ErrorActionPreference = "Stop"
@@ -155,7 +156,7 @@ $dataRows = foreach ($rt in $reportTypes) {
 
 # Build updated row
 $updatedCells = $repos | ForEach-Object {
-    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"4`">...</td>"
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"$ScheduleHours`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
