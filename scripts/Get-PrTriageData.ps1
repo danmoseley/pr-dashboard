@@ -45,6 +45,28 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
+function Invoke-GhRetry {
+    param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(60, 300, 1200))
+    for ($i = 1; $i -le $MaxAttempts; $i++) {
+        $output = & gh @Arguments 2>&1
+        $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
+        $out  = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
+        $errText = ($errs | ForEach-Object { $_.ToString() }) -join '; '
+        if ($LASTEXITCODE -eq 0 -and -not ($errText -match 'HTTP [45]\d{2}')) {
+            return ($out -join "`n")
+        }
+        if ($i -lt $MaxAttempts) {
+            $delay = $DelaySeconds[$i - 1]
+            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
+            Start-Sleep -Seconds $delay
+        } else {
+            Write-Warning "gh failed after $MaxAttempts attempts: $errText"
+            return ($out -join "`n")
+        }
+    }
+}
+
 # Handle comma-separated string from bash (e.g., "a,b,c" becomes one string element)
 if ($Maintainers.Count -eq 1 -and $Maintainers[0] -match ',') {
     $Maintainers = $Maintainers[0] -split ','
@@ -85,7 +107,7 @@ if ($Label) { $listArgs += @("--label",$Label) }
 if ($Author) { $listArgs += @("--author",$Author) }
 if ($Assignee) { $listArgs += @("--assignee",$Assignee) }
 
-$prsRaw = & gh @listArgs | ConvertFrom-Json
+$prsRaw = (Invoke-GhRetry $listArgs) | ConvertFrom-Json
 
 # --- Step 2: Quick-screen ---
 $drafts = @($prsRaw | Where-Object { $_.isDraft })
@@ -169,7 +191,7 @@ foreach ($b in $batches) {
         $parts += "pr$($i): pullRequest(number:$($b[$i])) { $fragment }"
     }
     $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
-    $result = gh api graphql -f query="$query" 2>&1 | ConvertFrom-Json
+    $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
     for ($i = 0; $i -lt $b.Count; $i++) {
         $prData = $result.data.repository."pr$i"
         if ($prData) { $graphqlData[$b[$i]] = $prData }
@@ -187,7 +209,7 @@ foreach ($prNum in @($graphqlData.Keys)) {
     $allNodes = [System.Collections.ArrayList]@($rollup.contexts.nodes)
     while ($cursor) {
         $q = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { pullRequest(number:$prNum) { commits(last:1) { nodes { commit { statusCheckRollup { contexts(first:100, after:`"$cursor`") { pageInfo { hasNextPage endCursor } nodes { ...on CheckRun { name conclusion status } } } } } } } } } }"
-        $res = gh api graphql -f query="$q" 2>&1 | ConvertFrom-Json
+        $res = (Invoke-GhRetry @("api","graphql","-f","query=$q")) | ConvertFrom-Json
         if (-not $res -or -not $res.data -or $res.errors) {
             Write-Warning "Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
             break
@@ -237,7 +259,7 @@ if ($prsWithCopilotReview.Count -gt 0) {
             $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
         }
         $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
-        $result = gh api graphql -f query="$query" 2>&1 | ConvertFrom-Json
+        $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
         for ($i = 0; $i -lt $b.Count; $i++) {
             $prData = $result.data.repository."pr$i"
             if ($prData -and ($prData.reviews.nodes | Where-Object {
