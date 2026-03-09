@@ -61,6 +61,15 @@ $rows = foreach ($pr in $prs) {
         "IN_PROGRESS" { "&#x23F3;" }
         default       { "&#x26A0;&#xFE0F;" }
     }
+    # Parse ci_detail (passed/failed/running) to detect failures behind a passing Build Analysis
+    $ciFailCount = 0
+    if ($pr.ci_detail -match '^(\d+)/(\d+)/(\d+)$') { $ciFailCount = [int]$Matches[2] }
+    $ciTitle = ""
+    $ciFailHint = ""
+    if ($pr.ci -eq "SUCCESS" -and $ciFailCount -gt 0) {
+        $ciTitle = " title=`"Build Analysis passed; $ciFailCount non-blocking check(s) failed`""
+        $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
+    }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community">community</span>' } else { "" }
     # Show community badge in Who column when it contains the community PR author
     $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community">community</span>' } else { "" }
@@ -103,7 +112,7 @@ $rows = foreach ($pr in $prs) {
   <td class="title">$safeTitle</td>
   <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))$whoCommunityBadge</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
-  <td class="ci">$ciEmoji $($pr.ci_detail)</td>
+  <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)p</td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
@@ -216,6 +225,7 @@ $html = @"
   .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
+  .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
   .disc, .num { text-align: right; white-space: nowrap; }
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
