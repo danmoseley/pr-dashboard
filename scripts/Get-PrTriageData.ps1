@@ -144,7 +144,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -174,6 +174,32 @@ foreach ($b in $batches) {
         $prData = $result.data.repository."pr$i"
         if ($prData) { $graphqlData[$b[$i]] = $prData }
     }
+}
+
+# Paginate statusCheckRollup contexts for PRs with >100 checks
+foreach ($prNum in @($graphqlData.Keys)) {
+    $gql = $graphqlData[$prNum]
+    if (-not $gql -or -not $gql.commits.nodes -or $gql.commits.nodes.Count -eq 0) { continue }
+    $rollup = $gql.commits.nodes[0].commit.statusCheckRollup
+    if (-not $rollup -or -not $rollup.contexts.pageInfo.hasNextPage) { continue }
+
+    $cursor = $rollup.contexts.pageInfo.endCursor
+    $allNodes = [System.Collections.ArrayList]@($rollup.contexts.nodes)
+    while ($cursor) {
+        $q = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { pullRequest(number:$prNum) { commits(last:1) { nodes { commit { statusCheckRollup { contexts(first:100, after:`"$cursor`") { pageInfo { hasNextPage endCursor } nodes { ...on CheckRun { name conclusion status } } } } } } } } } }"
+        $res = gh api graphql -f query="$q" 2>&1 | ConvertFrom-Json
+        if (-not $res -or -not $res.data -or $res.errors) {
+            Write-Warning "Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
+            break
+        }
+        $ctx = $res.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts
+        if ($ctx -and $ctx.nodes) {
+            foreach ($node in $ctx.nodes) { [void]$allNodes.Add($node) }
+        }
+        $cursor = if ($ctx.pageInfo.hasNextPage -and $ctx.pageInfo.endCursor) { $ctx.pageInfo.endCursor } else { $null }
+    }
+    $rollup.contexts | Add-Member -NotePropertyName nodes -NotePropertyValue @($allNodes) -Force
+    Write-Verbose "PR #${prNum}: fetched $($allNodes.Count) total checks (paginated beyond 100)"
 }
 
 # --- Step 4: Determine area owners for label ---
