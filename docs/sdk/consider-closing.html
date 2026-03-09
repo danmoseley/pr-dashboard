@@ -28,6 +28,7 @@
   .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .who, .action { white-space: nowrap; }
   .ci { white-space: nowrap; }
+  .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
   .disc, .num { text-align: right; white-space: nowrap; }
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
@@ -69,7 +70,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Consider Closing — dotnet/sdk</h1>
-<p class="meta">Updated every 12h, last at 2026-03-09 12:58 UTC &middot; 43 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-09 23:45 UTC &middot; 43 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -140,29 +141,42 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kzu.png?size=32" alt="kzu"><a href="https://github.com/kzu">@kzu</a><a class="filter-btn" href="#" onclick="filterByUser('kzu');return false" title="Show only @kzu">only</a></span></td>
 </tr>
 <tr data-people="baronfel">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (172d) &#183; &#128368;️ old (174d)">4.5</td>
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (173d) &#183; &#128368;️ old (174d)">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50876">#50876</a></td>
   <td class="title">address Daniel&#39;s feedback</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
-  <td class="action" title="CI fail (3 failed), Stale 172d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (3 failed), Stale 173d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 23/3/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num heat-3">174d</td>
-  <td class="num heat-3">172d</td>
+  <td class="num heat-3">173d</td>
   <td class="num heat-1" title="89 lines changed">7</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
 </tr>
-<tr data-people="dsplaisted,baronfel,Alex-Sob">
-  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (195d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50488">#50488</a></td>
-  <td class="title">Avoid reporting CA1859 for properties with setter more accessible than</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dsplaisted.png?size=32" alt="dsplaisted"><a href="https://github.com/dsplaisted">@dsplaisted</a><a class="filter-btn" href="#" onclick="filterByUser('dsplaisted');return false" title="Show only @dsplaisted">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
-  <td class="action" title="No review, Stale 168d">&#x1F441; Maintainer: review needed</td>
-  <td class="ci">&#x2705; 26/0/0</td>
-  <td class="disc">0/0t 0p</td>
-  <td class="num heat-3">195d</td>
+<tr data-people="Alex-Sob">
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 2 unresolved &#183; ⏳ stale (168d) &#183; &#128368;️ old (188d)">3.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50581">#50581</a></td>
+  <td class="title">[Proposal] Use Span-based methods to split strings in analyzers</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+  <td class="action" title="CI fail (3 failed), 2 threads, No owner approval, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 23/3/0</td>
+  <td class="disc">2/2t 2p</td>
+  <td class="num heat-3">188d</td>
   <td class="num heat-3">168d</td>
-  <td class="num" title="61 lines changed">2</td>
+  <td class="num heat-1" title="260 lines changed">8</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+</tr>
+<tr data-people="Alex-Sob">
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (205d)">3.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50309">#50309</a></td>
+  <td class="title">Avoid ConcurrentDictionary allocation in DisposeObjectsBeforeLosingSco</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+  <td class="action" title="CI fail (3 failed), No review, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 23/3/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">205d</td>
+  <td class="num heat-3">168d</td>
+  <td class="num" title="8 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
 <tr data-people="Alex-Sob">
@@ -179,16 +193,42 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
 <tr data-people="Alex-Sob">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (204d)">3.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50309">#50309</a></td>
-  <td class="title">Avoid ConcurrentDictionary allocation in DisposeObjectsBeforeLosingSco</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 2 unresolved &#183; ⏳ stale (168d) &#183; &#128368;️ old (200d)">3.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50411">#50411</a></td>
+  <td class="title">Reduce allocations in EnumsShouldHaveZeroValueAnalyzer</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-  <td class="action" title="CI fail (3 failed), No review, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 23/3/0</td>
-  <td class="disc">0/0t 0p</td>
-  <td class="num heat-3">204d</td>
+  <td class="action" title="CI fail (4 failed), 2 threads, No owner approval, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 22/4/0</td>
+  <td class="disc">2/2t 1p</td>
+  <td class="num heat-3">200d</td>
   <td class="num heat-3">168d</td>
-  <td class="num" title="8 lines changed">1</td>
+  <td class="num heat-1" title="213 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+</tr>
+<tr data-people="dsplaisted,baronfel,Alex-Sob">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (195d)">5.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50488">#50488</a></td>
+  <td class="title">Avoid reporting CA1859 for properties with setter more accessible than</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dsplaisted.png?size=32" alt="dsplaisted"><a href="https://github.com/dsplaisted">@dsplaisted</a><a class="filter-btn" href="#" onclick="filterByUser('dsplaisted');return false" title="Show only @dsplaisted">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
+  <td class="action" title="No review, Stale 168d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 26/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">195d</td>
+  <td class="num heat-3">168d</td>
+  <td class="num" title="61 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+</tr>
+<tr data-people="dsplaisted,baronfel,Alex-Sob">
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (205d)">5.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50310">#50310</a></td>
+  <td class="title">Suggested perf improvements in DataFlowAnalysis</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dsplaisted.png?size=32" alt="dsplaisted"><a href="https://github.com/dsplaisted">@dsplaisted</a><a class="filter-btn" href="#" onclick="filterByUser('dsplaisted');return false" title="Show only @dsplaisted">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
+  <td class="action" title="No review, Stale 168d">&#x1F441; Maintainer: review needed</td>
+  <td class="ci">&#x2705; 26/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">205d</td>
+  <td class="num heat-3">168d</td>
+  <td class="num" title="34 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
 <tr data-people="dsplaisted,baronfel,Alex-Sob">
@@ -204,94 +244,42 @@
   <td class="num heat-2" title="110 lines changed">25</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
-<tr data-people="Alex-Sob">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 2 unresolved &#183; ⏳ stale (168d) &#183; &#128368;️ old (200d)">3.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50411">#50411</a></td>
-  <td class="title">Reduce allocations in EnumsShouldHaveZeroValueAnalyzer</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-  <td class="action" title="CI fail (4 failed), 2 threads, No owner approval, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 22/4/0</td>
-  <td class="disc">2/2t 1p</td>
-  <td class="num heat-3">200d</td>
+<tr data-people="tmat">
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (168d) &#183; &#128368;️ old (471d)">5.2</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/45071">#45071</a></td>
+  <td class="title">Do not create custom instances of TestAssetsManager in tests, use SdkT</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span></td>
+  <td class="action" title="CI fail (18 failed), Stale 168d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 11/18/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num heat-3">471d</td>
   <td class="num heat-3">168d</td>
-  <td class="num heat-1" title="213 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
+  <td class="num heat-1" title="362 lines changed">16</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span></td>
 </tr>
 <tr data-people="Alex-Sob">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 2 unresolved &#183; ⏳ stale (168d) &#183; &#128368;️ old (188d)">3.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50581">#50581</a></td>
-  <td class="title">[Proposal] Use Span-based methods to split strings in analyzers</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-  <td class="action" title="CI fail (3 failed), 2 threads, No owner approval, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 23/3/0</td>
-  <td class="disc">2/2t 2p</td>
-  <td class="num heat-3">188d</td>
-  <td class="num heat-3">168d</td>
-  <td class="num heat-1" title="260 lines changed">8</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-</tr>
-<tr data-people="Alex-Sob">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (189d)">3.8</td>
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (190d)">3.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50570">#50570</a></td>
   <td class="title">Performance improvements in SymbolNamesWithValueOption&lt;T&gt;</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
   <td class="action" title="CI fail (3 failed), No review, Stale 168d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 23/3/0</td>
   <td class="disc">0/0t 0p</td>
-  <td class="num heat-3">189d</td>
+  <td class="num heat-3">190d</td>
   <td class="num heat-3">168d</td>
   <td class="num" title="25 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
-<tr data-people="dsplaisted,baronfel,Alex-Sob">
-  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (168d) &#183; &#128368;️ old (204d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50310">#50310</a></td>
-  <td class="title">Suggested perf improvements in DataFlowAnalysis</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dsplaisted.png?size=32" alt="dsplaisted"><a href="https://github.com/dsplaisted">@dsplaisted</a><a class="filter-btn" href="#" onclick="filterByUser('dsplaisted');return false" title="Show only @dsplaisted">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
-  <td class="action" title="No review, Stale 168d">&#x1F441; Maintainer: review needed</td>
-  <td class="ci">&#x2705; 26/0/0</td>
-  <td class="disc">0/0t 0p</td>
-  <td class="num heat-3">204d</td>
-  <td class="num heat-3">168d</td>
-  <td class="num" title="34 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-</tr>
-<tr data-people="tmat">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (167d) &#183; &#128368;️ old (471d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/45071">#45071</a></td>
-  <td class="title">Do not create custom instances of TestAssetsManager in tests, use SdkT</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span></td>
-  <td class="action" title="CI fail (18 failed), Stale 167d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 11/18/0</td>
-  <td class="disc">0/0t 0p</td>
-  <td class="num heat-3">471d</td>
-  <td class="num heat-3">167d</td>
-  <td class="num heat-1" title="362 lines changed">16</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/tmat.png?size=32" alt="tmat"><a href="https://github.com/tmat">@tmat</a><a class="filter-btn" href="#" onclick="filterByUser('tmat');return false" title="Show only @tmat">only</a></span></td>
-</tr>
-<tr data-people="SimaTian">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; &#128172; 3 unresolved &#183; ⏳ stale (166d) &#183; &#128368;️ old (201d)">3.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50389">#50389</a></td>
-  <td class="title">MSBuild Server dogfood (#12120)</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span></td>
-  <td class="action" title="CI fail (5 failed), 3 threads, Stale 166d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 21/5/0</td>
-  <td class="disc heat-2">3/5t 4p</td>
-  <td class="num heat-3">201d</td>
-  <td class="num heat-3">166d</td>
-  <td class="num heat-1" title="51 lines changed">13</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span></td>
-</tr>
 <tr data-people="sbomer">
-  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128230; large (21 files, 130 lines) &#183; ⏳ stale (166d) &#183; &#128368;️ old (412d)">5</td>
+  <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128230; large (21 files, 130 lines) &#183; ⏳ stale (167d) &#183; &#128368;️ old (412d)">5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/46171">#46171</a></td>
   <td class="title">Add error for incorrect PublishSelfContained</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">only</a></span></td>
-  <td class="action" title="No owner approval, Stale 166d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">only</a></span>: merge main (stale 166d)</td>
+  <td class="action" title="No owner approval, Stale 167d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">only</a></span>: merge main (stale 167d)</td>
   <td class="ci">&#x2705; 38/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">412d</td>
-  <td class="num heat-3">166d</td>
+  <td class="num heat-3">167d</td>
   <td class="num heat-2" title="130 lines changed">21</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">only</a></span></td>
 </tr>
@@ -308,21 +296,34 @@
   <td class="num" title="9 lines changed">4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a><a class="filter-btn" href="#" onclick="filterByUser('teo-tsirpanis');return false" title="Show only @teo-tsirpanis">only</a></span></td>
 </tr>
+<tr data-people="SimaTian">
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; &#128172; 3 unresolved &#183; ⏳ stale (166d) &#183; &#128368;️ old (202d)">3.6</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50389">#50389</a></td>
+  <td class="title">MSBuild Server dogfood (#12120)</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span></td>
+  <td class="action" title="CI fail (5 failed), 3 threads, Stale 166d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 21/5/0</td>
+  <td class="disc heat-2">3/5t 4p</td>
+  <td class="num heat-3">202d</td>
+  <td class="num heat-3">166d</td>
+  <td class="num heat-1" title="51 lines changed">13</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimaTian.png?size=32" alt="SimaTian"><a href="https://github.com/SimaTian">@SimaTian</a><a class="filter-btn" href="#" onclick="filterByUser('SimaTian');return false" title="Show only @SimaTian">only</a></span></td>
+</tr>
 <tr data-people="Alex-Sob">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (164d) &#183; &#128368;️ old (203d)">3.2</td>
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (165d) &#183; &#128368;️ old (203d)">3.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50342">#50342</a></td>
   <td class="title">[Proposal] Analyzer test readability/performance improvements</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
-  <td class="action" title="CI fail (6 failed), No review, Stale 164d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (6 failed), No review, Stale 165d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 20/6/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">203d</td>
-  <td class="num heat-3">164d</td>
+  <td class="num heat-3">165d</td>
   <td class="num" title="18 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Alex-Sob.png?size=32" alt="Alex-Sob"><a href="https://github.com/Alex-Sob">@Alex-Sob</a><a class="filter-btn" href="#" onclick="filterByUser('Alex-Sob');return false" title="Show only @Alex-Sob">only</a></span></td>
 </tr>
 <tr data-people="baronfel,app">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 8 unresolved &#183; &#128488;️ active (11 threads) &#183; &#128230; large (17 files, 509 lines) &#183; ⏳ stale (146d) &#183; &#128368;️ old (156d)">2.6</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 8 unresolved &#183; &#128488;️ active (11 threads) &#183; &#128230; large (17 files, 509 lines) &#183; ⏳ stale (146d) &#183; &#128368;️ old (156d)">3.4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51127">#51127</a></td>
   <td class="title">Add mixed installation detection and warning to `dotnet --info`</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
@@ -348,33 +349,33 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
 </tr>
 <tr data-people="dsplaisted,baronfel,verdie-g">
-  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (120d) &#183; &#128368;️ old (197d)">5.2</td>
+  <td class="score" title="✅ CI passed &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (121d) &#183; &#128368;️ old (197d)">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50461">#50461</a></td>
   <td class="title">Make CA1860 work with abstract collections</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dsplaisted.png?size=32" alt="dsplaisted"><a href="https://github.com/dsplaisted">@dsplaisted</a><a class="filter-btn" href="#" onclick="filterByUser('dsplaisted');return false" title="Show only @dsplaisted">only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
-  <td class="action" title="No review, Stale 120d">&#x1F441; Maintainer: review needed</td>
+  <td class="action" title="No review, Stale 121d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 29/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">197d</td>
-  <td class="num heat-3">120d</td>
+  <td class="num heat-3">121d</td>
   <td class="num" title="37 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/verdie-g.png?size=32" alt="verdie-g"><a href="https://github.com/verdie-g">@verdie-g</a><a class="filter-btn" href="#" onclick="filterByUser('verdie-g');return false" title="Show only @verdie-g">only</a></span></td>
 </tr>
 <tr data-people="nohwnd,app">
-  <td class="score" title="❌ CI failing &#183; &#128077; community reviewed &#183; ⚠️ approval on older commit &#183; &#128230; small change &#183; ⏳ stale (117d) &#183; &#128368;️ old (118d)">4</td>
+  <td class="score" title="❌ CI failing &#183; &#128077; community reviewed &#183; ⚠️ approval on older commit &#183; &#128230; small change &#183; ⏳ stale (118d) &#183; &#128368;️ old (118d)">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51646">#51646</a></td>
   <td class="title">Replace line number reference with descriptive comment</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/nohwnd.png?size=32" alt="nohwnd"><a href="https://github.com/nohwnd">@nohwnd</a><a class="filter-btn" href="#" onclick="filterByUser('nohwnd');return false" title="Show only @nohwnd">only</a></span></td>
-  <td class="action" title="CI fail (4 failed), No owner approval, Stale 117d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/app.png?size=32" alt="app"><a href="https://github.com/app">@app</a><a class="filter-btn" href="#" onclick="filterByUser('app');return false" title="Show only @app">only</a></span>/copilot-swe-agent: fix CI failures</td>
+  <td class="action" title="CI fail (4 failed), No owner approval, Stale 118d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/app.png?size=32" alt="app"><a href="https://github.com/app">@app</a><a class="filter-btn" href="#" onclick="filterByUser('app');return false" title="Show only @app">only</a></span>/copilot-swe-agent: fix CI failures</td>
   <td class="ci">&#x274C; 21/4/0</td>
   <td class="disc">0/2t 2p</td>
   <td class="num heat-3">118d</td>
-  <td class="num heat-3">117d</td>
+  <td class="num heat-3">118d</td>
   <td class="num" title="2 lines changed">1</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
 <tr data-people="victorfrye">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; &#128230; small change &#183; ⏳ stale (111d) &#183; &#128368;️ old (117d)">6.5</td>
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; &#128230; small change &#183; ⏳ stale (111d) &#183; &#128368;️ old (117d)">5.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51694">#51694</a></td>
   <td class="title">chore: add slnx to gitattributes template</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/victorfrye.png?size=32" alt="victorfrye"><a href="https://github.com/victorfrye">@victorfrye</a><a class="filter-btn" href="#" onclick="filterByUser('victorfrye');return false" title="Show only @victorfrye">only</a></span></td>
@@ -413,46 +414,59 @@
   <td class="author">&#x1F916; copilot</td>
 </tr>
 <tr data-people="nagilson">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; &#128172; 5 unresolved &#183; &#128488;️ active (7 threads) &#183; &#128230; small change &#183; ⏳ stale (104d) &#183; &#128368;️ old (300d)">3.9</td>
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; &#128172; 5 unresolved &#183; &#128488;️ active (7 threads) &#183; &#128230; small change &#183; ⏳ stale (105d) &#183; &#128368;️ old (300d)">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/48918">#48918</a></td>
   <td class="title">Utilize ShellName and Add Test to Enable Completions W/out Shell on Un</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a><a class="filter-btn" href="#" onclick="filterByUser('nagilson');return false" title="Show only @nagilson">only</a></span></td>
-  <td class="action" title="CI fail (7 failed), 5 threads, Stale 104d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a><a class="filter-btn" href="#" onclick="filterByUser('nagilson');return false" title="Show only @nagilson">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (7 failed), 5 threads, Stale 105d, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a><a class="filter-btn" href="#" onclick="filterByUser('nagilson');return false" title="Show only @nagilson">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 19/7/0</td>
   <td class="disc heat-2">5/7t 4p</td>
   <td class="num heat-3">300d</td>
-  <td class="num heat-3">104d</td>
+  <td class="num heat-3">105d</td>
   <td class="num" title="28 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/nagilson.png?size=32" alt="nagilson"><a href="https://github.com/nagilson">@nagilson</a><a class="filter-btn" href="#" onclick="filterByUser('nagilson');return false" title="Show only @nagilson">only</a></span></td>
 </tr>
 <tr data-people="am11">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 1 unresolved &#183; &#128230; small change &#183; ⏳ stale (94d) &#183; &#128368;️ old (322d)">3.9</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 1 unresolved &#183; &#128230; small change &#183; ⏳ stale (94d) &#183; &#128368;️ old (323d)">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/48599">#48599</a></td>
   <td class="title">Set PlatformTarget to AnyCPU for modern .NET</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span></td>
   <td class="action" title="CI fail (5 failed), 1 threads, No owner approval, Stale 94d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 18/5/0</td>
   <td class="disc">1/3t 3p</td>
-  <td class="num heat-3">322d</td>
+  <td class="num heat-3">323d</td>
   <td class="num heat-3">94d</td>
   <td class="num" title="17 lines changed">3</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span></td>
 </tr>
 <tr data-people="kasperk81">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128230; small change &#183; ⏳ stale (91d) &#183; &#128368;️ old (437d)">4</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128230; small change &#183; ⏳ stale (92d) &#183; &#128368;️ old (437d)">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/45637">#45637</a></td>
   <td class="title">realpath in c#</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/kasperk81.png?size=32" alt="kasperk81"><a href="https://github.com/kasperk81">@kasperk81</a><a class="filter-btn" href="#" onclick="filterByUser('kasperk81');return false" title="Show only @kasperk81">only</a></span></td>
-  <td class="action" title="CI fail (4 failed), No owner approval, Stale 91d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/kasperk81.png?size=32" alt="kasperk81"><a href="https://github.com/kasperk81">@kasperk81</a><a class="filter-btn" href="#" onclick="filterByUser('kasperk81');return false" title="Show only @kasperk81">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (4 failed), No owner approval, Stale 92d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/kasperk81.png?size=32" alt="kasperk81"><a href="https://github.com/kasperk81">@kasperk81</a><a class="filter-btn" href="#" onclick="filterByUser('kasperk81');return false" title="Show only @kasperk81">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 21/4/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num heat-3">437d</td>
-  <td class="num heat-3">91d</td>
+  <td class="num heat-3">92d</td>
   <td class="num" title="37 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kasperk81.png?size=32" alt="kasperk81"><a href="https://github.com/kasperk81">@kasperk81</a><a class="filter-btn" href="#" onclick="filterByUser('kasperk81');return false" title="Show only @kasperk81">only</a></span></td>
 </tr>
+<tr data-people="rolfbjarne">
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128172; 3 unresolved &#183; &#128230; small change &#183; ⏳ stale (90d) &#183; &#128368;️ old (537d)">2.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/43576">#43576</a></td>
+  <td class="title">Make the toolsResolverCache path overridable using an environment vari</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
+  <td class="action" title="CI fail (5 failed), 3 threads, No review, Stale 90d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 21/5/0</td>
+  <td class="disc">3/3t 1p</td>
+  <td class="num heat-3">537d</td>
+  <td class="num heat-3">90d</td>
+  <td class="num" title="58 lines changed">4</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
+</tr>
 <tr data-people="adegeo">
-  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (89d) &#183; &#128368;️ old (159d)">4.5</td>
+  <td class="score" title="❌ CI failing &#183; &#128077; owner approved &#183; ⚠️ approval on older commit &#183; ⏳ stale (89d) &#183; &#128368;️ old (159d)">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51088">#51088</a></td>
   <td class="title">CLI --self-contained description is wrong</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">only</a></span></td>
@@ -464,42 +478,29 @@
   <td class="num heat-1" title="81 lines changed">14</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">only</a></span></td>
 </tr>
-<tr data-people="rolfbjarne">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128172; 3 unresolved &#183; &#128230; small change &#183; ⏳ stale (89d) &#183; &#128368;️ old (536d)">3.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/43576">#43576</a></td>
-  <td class="title">Make the toolsResolverCache path overridable using an environment vari</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
-  <td class="action" title="CI fail (5 failed), 3 threads, No review, Stale 89d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 21/5/0</td>
-  <td class="disc">3/3t 1p</td>
-  <td class="num heat-3">536d</td>
-  <td class="num heat-3">89d</td>
-  <td class="num" title="58 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
-</tr>
 <tr data-people="JoeRobich">
-  <td class="score" title="✅ CI passed &#183; &#128077; community reviewed &#183; ⏳ stale (87d) &#183; &#128368;️ old (96d)">5.8</td>
+  <td class="score" title="✅ CI passed &#183; &#128077; community reviewed &#183; ⏳ stale (88d) &#183; &#128368;️ old (96d)">6.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51997">#51997</a></td>
   <td class="title">[Backport][10.0.1xx] Add suppressor support for `dotnet format`</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a><a class="filter-btn" href="#" onclick="filterByUser('JoeRobich');return false" title="Show only @JoeRobich">only</a></span></td>
-  <td class="action" title="No owner approval, Stale 87d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a><a class="filter-btn" href="#" onclick="filterByUser('JoeRobich');return false" title="Show only @JoeRobich">only</a></span>: merge main (stale 87d)</td>
-  <td class="ci">&#x2705; 25/1/0</td>
+  <td class="action" title="No owner approval, Stale 88d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a><a class="filter-btn" href="#" onclick="filterByUser('JoeRobich');return false" title="Show only @JoeRobich">only</a></span>: merge main (stale 88d)</td>
+  <td class="ci" title="Build Analysis passed; 1 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">1</sup> 25/1/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">96d</td>
-  <td class="num heat-3">87d</td>
+  <td class="num heat-3">88d</td>
   <td class="num heat-1" title="84 lines changed">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a><a class="filter-btn" href="#" onclick="filterByUser('JoeRobich');return false" title="Show only @JoeRobich">only</a></span></td>
 </tr>
 <tr data-people="baronfel">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 9 unresolved &#183; &#128488;️ active (9 threads) &#183; &#128230; large (45 files, 3068 lines) &#183; ⏳ stale (79d) &#183; &#128368;️ old (267d)">3.1</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 9 unresolved &#183; &#128488;️ active (9 threads) &#183; &#128230; large (45 files, 3068 lines) &#183; ⏳ stale (80d) &#183; &#128368;️ old (267d)">3.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/49409">#49409</a></td>
   <td class="title">OTel experimentation</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
-  <td class="action" title="CI fail (14 failed), 9 threads, No owner approval, Stale 79d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (14 failed), 9 threads, No owner approval, Stale 80d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 12/14/0</td>
   <td class="disc heat-2">9/9t 3p</td>
   <td class="num heat-3">267d</td>
-  <td class="num heat-3">79d</td>
+  <td class="num heat-3">80d</td>
   <td class="num heat-2" title="3068 lines changed">45</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/baronfel.png?size=32" alt="baronfel"><a href="https://github.com/baronfel">@baronfel</a><a class="filter-btn" href="#" onclick="filterByUser('baronfel');return false" title="Show only @baronfel">only</a></span></td>
 </tr>
@@ -517,15 +518,15 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jdraaijer-microsoft.png?size=32" alt="jdraaijer-microsoft"><a href="https://github.com/jdraaijer-microsoft">@jdraaijer-microsoft</a><a class="filter-btn" href="#" onclick="filterByUser('jdraaijer-microsoft');return false" title="Show only @jdraaijer-microsoft">only</a></span></td>
 </tr>
 <tr data-people="am11">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (73d) &#183; &#128368;️ old (376d)">4</td>
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (74d) &#183; &#128368;️ old (376d)">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/47141">#47141</a></td>
   <td class="title">Remove underscore from `_UseManagedNtlm`</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span></td>
-  <td class="action" title="CI fail (4 failed), No review, Stale 73d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (4 failed), No review, Stale 74d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 21/4/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">376d</td>
-  <td class="num heat-3">73d</td>
+  <td class="num heat-3">74d</td>
   <td class="num" title="6 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/am11.png?size=32" alt="am11"><a href="https://github.com/am11">@am11</a><a class="filter-btn" href="#" onclick="filterByUser('am11');return false" title="Show only @am11">only</a></span></td>
 </tr>
@@ -582,20 +583,7 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JL03-Yue.png?size=32" alt="JL03-Yue"><a href="https://github.com/JL03-Yue">@JL03-Yue</a><a class="filter-btn" href="#" onclick="filterByUser('JL03-Yue');return false" title="Show only @JL03-Yue">only</a></span></td>
 </tr>
 <tr data-people="marcpopMSFT,app">
-  <td class="score" title="❌ CI failing &#183; ⚠️ has conflicts &#183; &#128064; reviewed, not approved &#183; &#128172; 5 unresolved &#183; ⏳ stale (35d) &#183; &#128368;️ old (125d)">2.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51561">#51561</a></td>
-  <td class="title">Add warning when using --framework with solution files</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('marcpopMSFT');return false" title="Show only @marcpopMSFT">only</a></span></td>
-  <td class="action" title="Conflicts, CI fail (7 failed), 5 threads, No owner approval, Stale 35d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/app.png?size=32" alt="app"><a href="https://github.com/app">@app</a><a class="filter-btn" href="#" onclick="filterByUser('app');return false" title="Show only @app">only</a></span>/copilot-swe-agent: resolve conflicts</td>
-  <td class="ci">&#x274C; 17/7/0</td>
-  <td class="disc heat-1">5/5t 3p</td>
-  <td class="num heat-3">125d</td>
-  <td class="num heat-3">35d</td>
-  <td class="num heat-1" title="178 lines changed">17</td>
-  <td class="author">&#x1F916; copilot</td>
-</tr>
-<tr data-people="marcpopMSFT,app">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; ⏳ stale (35d) &#183; &#128368;️ old (125d)">4.5</td>
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; ⏳ stale (35d) &#183; &#128368;️ old (125d)">3.8</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51560">#51560</a></td>
   <td class="title">Suppress advertising manifest messages unless verbosity is diagnostic</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('marcpopMSFT');return false" title="Show only @marcpopMSFT">only</a></span></td>
@@ -607,18 +595,44 @@
   <td class="num heat-1" title="75 lines changed">8</td>
   <td class="author">&#x1F916; copilot</td>
 </tr>
+<tr data-people="marcpopMSFT,app">
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128172; 5 unresolved &#183; ⏳ stale (35d) &#183; &#128368;️ old (125d)">2.9</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/51561">#51561</a></td>
+  <td class="title">Add warning when using --framework with solution files</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/marcpopMSFT.png?size=32" alt="marcpopMSFT"><a href="https://github.com/marcpopMSFT">@marcpopMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('marcpopMSFT');return false" title="Show only @marcpopMSFT">only</a></span></td>
+  <td class="action" title="CI fail (7 failed), 5 threads, No owner approval, Stale 35d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/app.png?size=32" alt="app"><a href="https://github.com/app">@app</a><a class="filter-btn" href="#" onclick="filterByUser('app');return false" title="Show only @app">only</a></span>/copilot-swe-agent: fix CI failures</td>
+  <td class="ci">&#x274C; 17/7/0</td>
+  <td class="disc heat-1">5/5t 3p</td>
+  <td class="num heat-3">125d</td>
+  <td class="num heat-3">35d</td>
+  <td class="num heat-1" title="178 lines changed">17</td>
+  <td class="author">&#x1F916; copilot</td>
+</tr>
 <tr data-people="ZzZombo">
-  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (27d) &#183; &#128368;️ old (236d)">4</td>
+  <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (28d) &#183; &#128368;️ old (236d)">4</td>
   <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/49810">#49810</a></td>
   <td class="title">Fix typo.</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ZzZombo.png?size=32" alt="ZzZombo"><a href="https://github.com/ZzZombo">@ZzZombo</a><a class="filter-btn" href="#" onclick="filterByUser('ZzZombo');return false" title="Show only @ZzZombo">only</a></span></td>
-  <td class="action" title="CI fail (3 failed), No review, Stale 27d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/ZzZombo.png?size=32" alt="ZzZombo"><a href="https://github.com/ZzZombo">@ZzZombo</a><a class="filter-btn" href="#" onclick="filterByUser('ZzZombo');return false" title="Show only @ZzZombo">only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (3 failed), No review, Stale 28d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/ZzZombo.png?size=32" alt="ZzZombo"><a href="https://github.com/ZzZombo">@ZzZombo</a><a class="filter-btn" href="#" onclick="filterByUser('ZzZombo');return false" title="Show only @ZzZombo">only</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 21/3/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">236d</td>
-  <td class="num heat-2">27d</td>
+  <td class="num heat-2">28d</td>
   <td class="num" title="4 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ZzZombo.png?size=32" alt="ZzZombo"><a href="https://github.com/ZzZombo">@ZzZombo</a><a class="filter-btn" href="#" onclick="filterByUser('ZzZombo');return false" title="Show only @ZzZombo">only</a></span></td>
+</tr>
+<tr data-people="rolfbjarne">
+  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128230; small change &#183; ⏳ stale (20d) &#183; &#128368;️ old (204d)">4.8</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50334">#50334</a></td>
+  <td class="title">Fix: Unsupported maccatalyst attribute is getting applied to child att</td>
+  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
+  <td class="action" title="CI fail (4 failed), No owner approval, Stale 20d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span>: fix CI failures</td>
+  <td class="ci">&#x274C; 20/4/0</td>
+  <td class="disc">0/2t 2p</td>
+  <td class="num heat-3">204d</td>
+  <td class="num heat-2">20d</td>
+  <td class="num" title="108 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
 </tr>
 <tr data-people="edvilme,Forgind">
   <td class="score" title="✅ CI passed &#183; &#128064; reviewed, not approved &#183; &#128172; 1 unresolved &#183; ⏳ stale (20d) &#183; &#128368;️ old (304d)">5.4</td>
@@ -626,25 +640,12 @@
   <td class="title">macOS: Include global tools in zsh $PATH</td>
   <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/edvilme.png?size=32" alt="edvilme"><a href="https://github.com/edvilme">@edvilme</a><a class="filter-btn" href="#" onclick="filterByUser('edvilme');return false" title="Show only @edvilme">only</a></span></td>
   <td class="action" title="1 threads, No owner approval, Stale 20d"><span class="user-ref"><img class="avatar" src="https://github.com/edvilme.png?size=32" alt="edvilme"><a href="https://github.com/edvilme">@edvilme</a><a class="filter-btn" href="#" onclick="filterByUser('edvilme');return false" title="Show only @edvilme">only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Forgind.png?size=32" alt="Forgind"><a href="https://github.com/Forgind">@Forgind</a><a class="filter-btn" href="#" onclick="filterByUser('Forgind');return false" title="Show only @Forgind">only</a></span></td>
-  <td class="ci">&#x2705; 31/5/0</td>
+  <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 31/5/0</td>
   <td class="disc">1/1t 3p</td>
   <td class="num heat-3">304d</td>
   <td class="num heat-2">20d</td>
   <td class="num heat-1" title="331 lines changed">9</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/edvilme.png?size=32" alt="edvilme"><a href="https://github.com/edvilme">@edvilme</a><a class="filter-btn" href="#" onclick="filterByUser('edvilme');return false" title="Show only @edvilme">only</a></span></td>
-</tr>
-<tr data-people="rolfbjarne">
-  <td class="score" title="❌ CI failing &#183; &#128064; reviewed, not approved &#183; &#128230; small change &#183; ⏳ stale (19d) &#183; &#128368;️ old (203d)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/sdk/pull/50334">#50334</a></td>
-  <td class="title">Fix: Unsupported maccatalyst attribute is getting applied to child att</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
-  <td class="action" title="CI fail (4 failed), No owner approval, Stale 19d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 20/4/0</td>
-  <td class="disc">0/2t 2p</td>
-  <td class="num heat-3">203d</td>
-  <td class="num heat-2">19d</td>
-  <td class="num" title="108 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/rolfbjarne.png?size=32" alt="rolfbjarne"><a href="https://github.com/rolfbjarne">@rolfbjarne</a><a class="filter-btn" href="#" onclick="filterByUser('rolfbjarne');return false" title="Show only @rolfbjarne">only</a></span></td>
 </tr>
 <tr data-people="angyanmark">
   <td class="score" title="❌ CI failing &#183; &#128269; no review yet &#183; &#128230; small change &#183; ⏳ stale (16d) &#183; &#128368;️ old (202d)">4</td>
