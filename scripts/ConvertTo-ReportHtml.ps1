@@ -46,7 +46,7 @@ function ConvertTo-UserHtml([string]$text) {
     [regex]::Replace($text, '@([\w-]+)', {
         param($m)
         $u = $m.Groups[1].Value
-        "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">only</a></span>"
+        "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D; only</a></span>"
     })
 }
 
