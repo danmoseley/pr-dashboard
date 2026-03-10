@@ -107,6 +107,7 @@ $rows = foreach ($pr in $prs) {
 
     # Collect all @usernames for filtering
     $allText = "$($pr.who) @$($pr.author) $($pr.next_action)"
+    if ($pr.copilot_trigger) { $allText += " @$($pr.copilot_trigger)" }
     $people = @([regex]::Matches($allText, '@([\w-]+)') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique) -join ','
 
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
