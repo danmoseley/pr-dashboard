@@ -262,10 +262,15 @@ if ($prsWithCopilotReview.Count -gt 0) {
         $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
         for ($i = 0; $i -lt $b.Count; $i++) {
             $prData = $result.data.repository."pr$i"
-            if ($prData -and ($prData.reviews.nodes | Where-Object {
-                $_.author.login -eq "copilot-pull-request-reviewer" -and $_.body -match "Copilot encountered an error"
-            })) {
-                $copilotErrorPRs[$b[$i]] = $true
+            if ($prData) {
+                # Only flag if the MOST RECENT copilot review is an error
+                # (a successful review on a newer commit supersedes an earlier error)
+                $lastCopilotReview = $prData.reviews.nodes |
+                    Where-Object { $_.author.login -eq "copilot-pull-request-reviewer" } |
+                    Select-Object -Last 1
+                if ($lastCopilotReview -and $lastCopilotReview.body -match "Copilot encountered an error") {
+                    $copilotErrorPRs[$b[$i]] = $true
+                }
             }
         }
     }
