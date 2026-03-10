@@ -477,6 +477,7 @@ foreach ($pr in $candidates) {
     $who = @()
 
     $authorLogin = $pr.author.login
+    if ($botTrigger) { $authorLogin = $botTrigger }
 
     if ($pr.mergeable -eq "CONFLICTING") {
         $prNextAction = "@$($authorLogin): resolve conflicts"

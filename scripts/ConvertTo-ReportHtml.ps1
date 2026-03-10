@@ -43,10 +43,18 @@ if ($NavLinks.Count -gt 0) {
 
 # Helper: replace @username with avatar + linked username + filter button
 function ConvertTo-UserHtml([string]$text) {
-    [regex]::Replace($text, '@([\w-]+)', {
+    # Match @user or @app/bot-name as a single token
+    [regex]::Replace($text, '@((?:app/)?[\w-]+)', {
         param($m)
-        $u = $m.Groups[1].Value
-        "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D; only</a></span>"
+        $full = $m.Groups[1].Value
+        if ($full -match '^app/(.+)$') {
+            # Bot app — link to GitHub Apps page, no avatar/filter
+            $name = $Matches[1]
+            "<a href=`"https://github.com/apps/$name`">@$name</a>"
+        } else {
+            $u = $full
+            "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D; only</a></span>"
+        }
     })
 }
 
