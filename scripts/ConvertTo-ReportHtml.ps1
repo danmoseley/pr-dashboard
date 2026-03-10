@@ -257,8 +257,8 @@ $html = @"
   .user-ref { position: relative; display: inline-block; }
   .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
     background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
-    text-decoration: none !important; cursor: pointer; }
-  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+    text-decoration: none !important; cursor: pointer; filter: grayscale(1) opacity(0.5); }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); filter: none; }
   .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
     border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
   .filter-banner a { margin-left: 8px; }
