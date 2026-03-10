@@ -74,7 +74,13 @@ $rows = foreach ($pr in $prs) {
     # Show community badge in Who column when it contains the community PR author
     $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community">community</span>' } else { "" }
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
-    if ($pr.author -match "copilot-swe-agent") { $authorDisplay = "&#x1F916; copilot" }
+    if ($pr.author -match "copilot-swe-agent") {
+        if ($pr.copilot_trigger) {
+            $authorDisplay = "$(ConvertTo-UserHtml "@$($pr.copilot_trigger)") <span class=`"badge`" title=`"authored by Copilot`">via &#x1F916;</span>"
+        } else {
+            $authorDisplay = "&#x1F916; copilot"
+        }
+    }
 
     # Emoji prefix for next action
     $actionEmoji = if ($pr.next_action -match "Ready to merge") { "&#x1F7E2; " }       # 🟢

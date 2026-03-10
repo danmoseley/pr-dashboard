@@ -166,7 +166,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}} timelineItems(first:5,itemTypes:ASSIGNED_EVENT){nodes{...on AssignedEvent{actor{login}assignee{...on User{login}...on Bot{login}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -286,11 +286,21 @@ foreach ($pr in $candidates) {
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
 
-    # For bot-authored PRs, find the human who triggered it (non-Copilot assignee)
+    # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null
     if ($pr.author.login -match "^(app/)?copilot-swe-agent$") {
-        $botTrigger = $pr.assignees | Where-Object { $_.login -ne "Copilot" -and $_.login -ne "app/copilot-swe-agent" } |
-            Select-Object -First 1 -ExpandProperty login -ErrorAction SilentlyContinue
+        # Primary: look for AssignedEvent where copilot-swe-agent assigned a human
+        if ($gql -and $gql.timelineItems.nodes) {
+            $botTrigger = $gql.timelineItems.nodes |
+                Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "copilot" } |
+                Select-Object -First 1 -ExpandProperty assignee |
+                Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
+        }
+        # Fallback: non-Copilot assignee on the PR
+        if (-not $botTrigger) {
+            $botTrigger = $pr.assignees | Where-Object { $_.login -ne "Copilot" -and $_.login -ne "app/copilot-swe-agent" } |
+                Select-Object -First 1 -ExpandProperty login -ErrorAction SilentlyContinue
+        }
     }
 
     # Extract Build Analysis
@@ -557,6 +567,7 @@ foreach ($pr in $candidates) {
         number = $n
         title = $pr.title.Substring(0, [Math]::Min(70, $pr.title.Length))
         author = $pr.author.login
+        copilot_trigger = $botTrigger
         score = $composite
         ci = $baConclusion
         ci_detail = "$passed/$failed/$running"
