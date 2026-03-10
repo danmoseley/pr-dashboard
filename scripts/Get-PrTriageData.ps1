@@ -295,7 +295,7 @@ if ($copilotAuthoredPRs.Count -gt 0) {
             $prData = $result.data.repository."pr$i"
             if ($prData) {
                 $trigger = $prData.timelineItems.nodes |
-                    Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "copilot" } |
+                    Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "^(app/)?copilot-swe-agent$|^Copilot$" } |
                     Select-Object -First 1 -ExpandProperty assignee |
                     Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
                 if ($trigger) { $copilotTriggers[$b[$i]] = $trigger }
