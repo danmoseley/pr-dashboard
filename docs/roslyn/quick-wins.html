@@ -53,8 +53,8 @@
   .user-ref { position: relative; display: inline-block; }
   .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
     background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
-    text-decoration: none !important; cursor: pointer; }
-  .filter-btn:hover { color: var(--link); border-color: var(--link); }
+    text-decoration: none !important; cursor: pointer; filter: grayscale(1) opacity(0.5); }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); filter: none; }
   .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
     border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
   .filter-banner a { margin-left: 8px; }
@@ -70,7 +70,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/roslyn</h1>
-<p class="meta">Updated every 12h, last at 2026-03-10 01:53 UTC &middot; 0 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-10 13:01 UTC &middot; 0 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -93,17 +93,7 @@
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table>
-<thead>
-<tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
-</tr>
-</thead>
-<tbody>
-
-</tbody>
-</table>
+<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
 
 
 <script>
