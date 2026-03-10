@@ -110,7 +110,7 @@ $rows = foreach ($pr in $prs) {
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
     $filesHeat = if ($pr.changed_files -gt 20 -or $pr.lines_changed -gt 500) { " heat-2" } elseif ($pr.changed_files -gt 5 -or $pr.lines_changed -gt 200) { " heat-1" } else { "" }
 
-    $safeWhy = [System.Net.WebUtility]::HtmlEncode($pr.why)
+    $safeWhy = $pr.why
     $safeBlockers = [System.Net.WebUtility]::HtmlEncode($pr.blockers)
 
     # Collect all @usernames for filtering
@@ -285,6 +285,10 @@ $navHtml
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
 $scoringHtml
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
+$(if ($prCount -eq 0) {
+'<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
+} else {
+@"
 <table>
 <thead>
 <tr>
@@ -296,6 +300,8 @@ $scoringHtml
 $($rows -join "`n")
 </tbody>
 </table>
+"@
+})
 $toggleHtml
 $obsHtml
 <script>

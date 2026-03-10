@@ -572,25 +572,25 @@ foreach ($pr in $candidates) {
     if ($copilotReviewFailed) { $blockers += "Copilot review errored" }
     $blockersStr = if ($blockers.Count -gt 0) { $blockers -join ", " } else { "—" }
 
-    # Why
+    # Why (use HTML entities for emojis to avoid encoding issues across platforms)
     $why = @()
-    $why += if ($ciScore -eq 1) { "✅ CI passed" } elseif ($ciScore -eq 0) { "❌ CI failing" } else { "🟡 CI pending" }
-    if ($conflictScore -eq 0) { $why += "⚠️ has conflicts" }
-    if ($hasOwnerApproval) { $why += "👍 owner approved" }
-    elseif ($hasTriagerApproval) { $why += "👍 triager approved" }
-    elseif ($hasAnyApproval) { $why += "👍 community reviewed" }
-    elseif ($hasAnyReview) { $why += "👀 reviewed, not approved" }
-    else { $why += "🔍 no review yet" }
-    if ($hasStaleApproval) { $why += "⚠️ approval on older commit" }
-    if ($unresolvedThreads -gt 0) { $why += "💬 $unresolvedThreads unresolved" }
-    if ($totalThreads -gt 15) { $why += "🗨️ busy ($totalThreads threads, $distinctCommenters people)" }
-    elseif ($totalThreads -gt 5) { $why += "🗨️ active ($totalThreads threads)" }
-    if ($isCommunity) { $why += "🌐 community" }
-    if ($sizeScore -eq 1) { $why += "📦 small change" }
-    elseif ($sizeScore -eq 0) { $why += "📦 large ($($pr.changedFiles) files, $($totalLines) lines)" }
-    if ($daysSinceUpdate -gt 14) { $why += "⏳ stale ($([int]$daysSinceUpdate)d)" }
-    if ($ageInDays -gt 90) { $why += "🕰️ old ($([int]$ageInDays)d)" }
-    $whyStr = $why -join " · "
+    $why += if ($ciScore -eq 1) { "&#x2705; CI passed" } elseif ($ciScore -eq 0) { "&#x274C; CI failing" } else { "&#x1F7E1; CI pending" }
+    if ($conflictScore -eq 0) { $why += "&#x26A0;&#xFE0F; has conflicts" }
+    if ($hasOwnerApproval) { $why += "&#x1F44D; owner approved" }
+    elseif ($hasTriagerApproval) { $why += "&#x1F44D; triager approved" }
+    elseif ($hasAnyApproval) { $why += "&#x1F44D; community reviewed" }
+    elseif ($hasAnyReview) { $why += "&#x1F440; reviewed, not approved" }
+    else { $why += "&#x1F50D; no review yet" }
+    if ($hasStaleApproval) { $why += "&#x26A0;&#xFE0F; approval on older commit" }
+    if ($unresolvedThreads -gt 0) { $why += "&#x1F4AC; $unresolvedThreads unresolved" }
+    if ($totalThreads -gt 15) { $why += "&#x1F5E8;&#xFE0F; busy ($totalThreads threads, $distinctCommenters people)" }
+    elseif ($totalThreads -gt 5) { $why += "&#x1F5E8;&#xFE0F; active ($totalThreads threads)" }
+    if ($isCommunity) { $why += "&#x1F310; community" }
+    if ($sizeScore -eq 1) { $why += "&#x1F4E6; small change" }
+    elseif ($sizeScore -eq 0) { $why += "&#x1F4E6; large ($($pr.changedFiles) files, $($totalLines) lines)" }
+    if ($daysSinceUpdate -gt 14) { $why += "&#x23F3; stale ($([int]$daysSinceUpdate)d)" }
+    if ($ageInDays -gt 90) { $why += "&#x1F570;&#xFE0F; old ($([int]$ageInDays)d)" }
+    $whyStr = $why -join " &#183; "
 
     $results += [PSCustomObject]@{
         number = $n
