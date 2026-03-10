@@ -166,7 +166,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}} timelineItems(first:5,itemTypes:ASSIGNED_EVENT){nodes{...on AssignedEvent{actor{login}assignee{...on User{login}...on Bot{login}}}}}'
+$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -272,6 +272,39 @@ if ($prsWithCopilotReview.Count -gt 0) {
     Write-Verbose "Found $($copilotErrorPRs.Count) PR(s) with Copilot review errors"
 }
 
+# --- Step 4c: Detect who triggered Copilot-authored PRs (isolated query to avoid breaking main batch) ---
+$copilotTriggers = @{}
+$copilotAuthoredPRs = @($candidates | Where-Object { $_.author.login -match "^(app/)?copilot-swe-agent$" })
+if ($copilotAuthoredPRs.Count -gt 0) {
+    $triggerBatches = [System.Collections.ArrayList]@()
+    $tb = [System.Collections.ArrayList]@()
+    foreach ($pr in $copilotAuthoredPRs) {
+        [void]$tb.Add($pr.number)
+        if ($tb.Count -eq 50) { [void]$triggerBatches.Add([long[]]$tb.ToArray()); $tb = [System.Collections.ArrayList]@() }
+    }
+    if ($tb.Count -gt 0) { [void]$triggerBatches.Add([long[]]$tb.ToArray()) }
+    Write-Verbose "Looking up trigger user for $($copilotAuthoredPRs.Count) Copilot PR(s) in $($triggerBatches.Count) batch(es)..."
+    foreach ($b in $triggerBatches) {
+        $parts = @()
+        for ($i = 0; $i -lt $b.Count; $i++) {
+            $parts += "pr$($i): pullRequest(number:$($b[$i])) { number timelineItems(first:5,itemTypes:ASSIGNED_EVENT) { nodes { ... on AssignedEvent { actor{login} assignee{...on User{login}...on Bot{login}} } } } }"
+        }
+        $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
+        $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
+        for ($i = 0; $i -lt $b.Count; $i++) {
+            $prData = $result.data.repository."pr$i"
+            if ($prData) {
+                $trigger = $prData.timelineItems.nodes |
+                    Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "copilot" } |
+                    Select-Object -First 1 -ExpandProperty assignee |
+                    Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
+                if ($trigger) { $copilotTriggers[$b[$i]] = $trigger }
+            }
+        }
+    }
+    Write-Verbose "Found trigger user for $($copilotTriggers.Count) of $($copilotAuthoredPRs.Count) Copilot PR(s)"
+}
+
 # --- Step 5: Score each PR ---
 $now = Get-Date
 $results = @()
@@ -289,13 +322,8 @@ foreach ($pr in $candidates) {
     # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null
     if ($pr.author.login -match "^(app/)?copilot-swe-agent$") {
-        # Primary: look for AssignedEvent where copilot-swe-agent assigned a human
-        if ($gql -and $gql.timelineItems.nodes) {
-            $botTrigger = $gql.timelineItems.nodes |
-                Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "copilot" } |
-                Select-Object -First 1 -ExpandProperty assignee |
-                Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
-        }
+        # Primary: from isolated AssignedEvent query (step 4c)
+        $botTrigger = $copilotTriggers[$n]
         # Fallback: non-Copilot assignee on the PR
         if (-not $botTrigger) {
             $botTrigger = $pr.assignees | Where-Object { $_.login -ne "Copilot" -and $_.login -ne "app/copilot-swe-agent" } |
