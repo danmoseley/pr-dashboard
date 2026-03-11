@@ -15,7 +15,7 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -23,12 +23,11 @@
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; width: 1%; }
-  .pr-num { white-space: nowrap; width: 1%; }
-  .title { min-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .area-col { white-space: nowrap; width: 1%; }
-  .who { white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
-  .action { min-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
   .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
@@ -36,7 +35,7 @@
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; max-width: 165px; overflow: hidden; text-overflow: ellipsis; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
@@ -75,7 +74,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Consider Closing — dotnet/extensions</h1>
-<p class="meta">Updated: 2026-03-11 05:13 UTC &middot; 7 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-11 06:00 UTC &middot; 7 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -98,19 +97,31 @@
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:3%">
+  <col style="width:4%">
+  <col>
+  <col style="width:28%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
   <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th><th>Area</th>
 </tr>
 </thead>
 <tbody>
 <tr data-people="BowenYang666" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x23F3; stale (202d) &#183; &#x1F570;&#xFE0F; old (341d)">3.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6244">#6244</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6244" title="add CommTagAttribute for metric code generator">#6244</a></td>
   <td class="title">add CommTagAttribute for metric code generator</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/BowenYang666.png?size=32" alt="BowenYang666"><a href="https://github.com/BowenYang666">@BowenYang666</a><a class="filter-btn" href="#" onclick="filterByUser('BowenYang666');return false" title="Show only @BowenYang666">&#x1F50D;</a></span></td>
   <td class="action" title="CI fail (2 failed), 1 threads, No owner approval, Stale 202d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/BowenYang666.png?size=32" alt="BowenYang666"><a href="https://github.com/BowenYang666">@BowenYang666</a><a class="filter-btn" href="#" onclick="filterByUser('BowenYang666');return false" title="Show only @BowenYang666">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 4/2/0</td>
   <td class="disc">1/1t 1p</td>
@@ -122,9 +133,8 @@
 </tr>
 <tr data-people="Youssef1313" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (142d) &#183; &#x1F570;&#xFE0F; old (142d)">3.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6932">#6932</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6932" title="Improve contextual options gen incrementality">#6932</a></td>
   <td class="title">Improve contextual options gen incrementality</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Youssef1313.png?size=32" alt="Youssef1313"><a href="https://github.com/Youssef1313">@Youssef1313</a><a class="filter-btn" href="#" onclick="filterByUser('Youssef1313');return false" title="Show only @Youssef1313">&#x1F50D;</a></span></td>
   <td class="action" title="CI fail (4 failed), No review, Stale 142d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Youssef1313.png?size=32" alt="Youssef1313"><a href="https://github.com/Youssef1313">@Youssef1313</a><a class="filter-btn" href="#" onclick="filterByUser('Youssef1313');return false" title="Show only @Youssef1313">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 1/4/0</td>
   <td class="disc">0/2t 1p</td>
@@ -136,9 +146,8 @@
 </tr>
 <tr data-people="IbrahimMNada" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (27 files, 2236 lines) &#183; &#x23F3; stale (127d) &#183; &#x1F570;&#xFE0F; old (263d)">2.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6530">#6530</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6530" title="introduce JsonEmitterBase completion of  ( Tweak MetaData Report forma">#6530</a></td>
   <td class="title">introduce JsonEmitterBase completion of  ( Tweak MetaData Report forma</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span></td>
   <td class="action" title="CI fail (2 failed), 2 threads, No review, Stale 127d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 4/2/0</td>
   <td class="disc">2/3t 1p</td>
@@ -150,9 +159,8 @@
 </tr>
 <tr data-people="mokarchi" data-labels="area-caching-hybrid">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; large (10 files, 855 lines) &#183; &#x23F3; stale (102d) &#183; &#x1F570;&#xFE0F; old (163d)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6862">#6862</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6862" title="Implementation Plan for HybridCache ReportTagMetrics">#6862</a></td>
   <td class="title">Implementation Plan for HybridCache ReportTagMetrics</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span></td>
   <td class="action" title="No owner approval, Stale 102d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span>: merge main (stale 102d)</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">0/3t 2p</td>
@@ -164,9 +172,8 @@
 </tr>
 <tr data-people="evgenyfedorov2,app,joperezr" data-labels="area-telemetry">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4AC; 2 unresolved &#183; &#x1F5E8;&#xFE0F; active (8 threads) &#183; &#x1F4E6; small change &#183; &#x23F3; stale (53d) &#183; &#x1F570;&#xFE0F; old (110d)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7062">#7062</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7062" title="Fix CS0757 error when multi-targeting with Microsoft.Extensions.Teleme">#7062</a></td>
   <td class="title">Fix CS0757 error when multi-targeting with Microsoft.Extensions.Teleme</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/evgenyfedorov2.png?size=32" alt="evgenyfedorov2"><a href="https://github.com/evgenyfedorov2">@evgenyfedorov2</a><a class="filter-btn" href="#" onclick="filterByUser('evgenyfedorov2');return false" title="Show only @evgenyfedorov2">&#x1F50D;</a></span></td>
   <td class="action" title="2 threads, No owner approval, Stale 53d"><span class="user-ref"><img class="avatar" src="https://github.com/evgenyfedorov2.png?size=32" alt="evgenyfedorov2"><a href="https://github.com/evgenyfedorov2">@evgenyfedorov2</a><a class="filter-btn" href="#" onclick="filterByUser('evgenyfedorov2');return false" title="Show only @evgenyfedorov2">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a><a class="filter-btn" href="#" onclick="filterByUser('joperezr');return false" title="Show only @joperezr">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc heat-2">2/8t 4p</td>
@@ -178,9 +185,8 @@
 </tr>
 <tr data-people="Meir017" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (46d) &#183; &#x1F570;&#xFE0F; old (159d)">5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6883">#6883</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6883" title="Fix typo in AddExtendedLoggerFactory method name">#6883</a></td>
   <td class="title">Fix typo in AddExtendedLoggerFactory method name</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Meir017.png?size=32" alt="Meir017"><a href="https://github.com/Meir017">@Meir017</a><a class="filter-btn" href="#" onclick="filterByUser('Meir017');return false" title="Show only @Meir017">&#x1F50D;</a></span></td>
   <td class="action" title="CI fail (3 failed), No owner approval, Stale 46d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Meir017.png?size=32" alt="Meir017"><a href="https://github.com/Meir017">@Meir017</a><a class="filter-btn" href="#" onclick="filterByUser('Meir017');return false" title="Show only @Meir017">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 2/3/0</td>
   <td class="disc">0/0t 0p</td>
@@ -192,9 +198,8 @@
 </tr>
 <tr data-people="area,adamsitnik" data-labels="area-data-ingestion">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (30 files, 593 lines) &#183; &#x23F3; stale (42d) &#183; &#x1F570;&#xFE0F; old (103d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7090">#7090</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7090" title="[MEDI] Allow Pipeline and Reader to work with any Source">#7090</a></td>
   <td class="title">[MEDI] Allow Pipeline and Reader to work with any Source</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">&#x1F50D;</a></span> owner</td>
   <td class="action" title="No review, Stale 42d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">0/3t 1p</td>
@@ -229,7 +234,7 @@ function filterByLabel(label) {
   history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
 }
 function filterByUser(name) {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
@@ -248,7 +253,7 @@ function filterByUser(name) {
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
 }
 function clearFilter() {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   rows.forEach(function(r) {
     r.style.display = r.classList.contains('more-row') ? 'none' : '';
   });
@@ -273,6 +278,7 @@ function clearFilter() {
     grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
     th.style.position = 'relative';
     grip.addEventListener('mousedown', function(e) {
+      lockLayout();
       var startX = e.pageX, startW = th.offsetWidth;
       function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
       function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
@@ -282,7 +288,11 @@ function clearFilter() {
     });
     th.appendChild(grip);
   });
-  document.querySelector('table').style.tableLayout = 'fixed';
+  // On first drag, snapshot auto widths so resizing works predictably
+  var tbl = document.querySelector('table'), locked = false;
+  function lockLayout() {
+    if (locked) return; locked = true;
+  }
 })();
 </script>
 </body>

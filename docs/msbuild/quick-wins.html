@@ -15,7 +15,7 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -23,12 +23,11 @@
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; width: 1%; }
-  .pr-num { white-space: nowrap; width: 1%; }
-  .title { min-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .area-col { white-space: nowrap; width: 1%; }
-  .who { white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
-  .action { min-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
   .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
@@ -36,7 +35,7 @@
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; max-width: 165px; overflow: hidden; text-overflow: ellipsis; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
@@ -75,7 +74,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/msbuild</h1>
-<p class="meta">Updated: 2026-03-11 05:13 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-11 06:00 UTC &middot; 1 PRs &middot; <a href="https://github.com/dotnet/msbuild">dotnet/msbuild</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -98,19 +97,31 @@
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:3%">
+  <col style="width:4%">
+  <col>
+  <col style="width:28%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  
+</colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
   <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>
 </tr>
 </thead>
 <tbody>
 <tr data-people="rainersigwald,dotnet-bot" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4E6; large (64 files, 1925 lines)">8.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13293">#13293</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/msbuild/pull/13293" title="Localized file check-in by OneLocBuild Task: Build definition ID 9434:">#13293</a></td>
   <td class="title">Localized file check-in by OneLocBuild Task: Build definition ID 9434:</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/rainersigwald.png?size=32" alt="rainersigwald"><a href="https://github.com/rainersigwald">@rainersigwald</a><a class="filter-btn" href="#" onclick="filterByUser('rainersigwald');return false" title="Show only @rainersigwald">&#x1F50D;</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci">&#x2705; 11/0/0</td>
   <td class="disc">0/0t 0p</td>
@@ -145,7 +156,7 @@ function filterByLabel(label) {
   history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
 }
 function filterByUser(name) {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
@@ -164,7 +175,7 @@ function filterByUser(name) {
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
 }
 function clearFilter() {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   rows.forEach(function(r) {
     r.style.display = r.classList.contains('more-row') ? 'none' : '';
   });
@@ -189,6 +200,7 @@ function clearFilter() {
     grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
     th.style.position = 'relative';
     grip.addEventListener('mousedown', function(e) {
+      lockLayout();
       var startX = e.pageX, startW = th.offsetWidth;
       function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
       function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
@@ -198,7 +210,11 @@ function clearFilter() {
     });
     th.appendChild(grip);
   });
-  document.querySelector('table').style.tableLayout = 'fixed';
+  // On first drag, snapshot auto widths so resizing works predictably
+  var tbl = document.querySelector('table'), locked = false;
+  function lockLayout() {
+    if (locked) return; locked = true;
+  }
 })();
 </script>
 </body>

@@ -6,7 +6,7 @@
 <title>Most Actionable PRs — dotnet/winforms - PR Dashboard</title>
 <style>
   :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
-           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+           --badge-community: #238636; --badge-area: #d4c5f9; --hover: #161b22; --header-bg: #161b22; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
          background: var(--bg); color: var(--fg); padding: 1em 2em; }
@@ -15,28 +15,32 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
-       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
   td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .score { font-weight: bold; text-align: right; white-space: nowrap; }
   .pr-num { white-space: nowrap; }
-  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who, .action { white-space: nowrap; }
-  .ci { white-space: nowrap; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
-  .disc, .num { text-align: right; white-space: nowrap; }
+  .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
+  .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
-  .badge.community { background: var(--badge-community); color: #fff; }
+  .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
+  .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
+  .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
   .observations { margin-top: 1.5em; max-width: 900px; }
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
@@ -70,7 +74,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Most Actionable PRs — dotnet/winforms</h1>
-<p class="meta">Updated every 12h, last at 2026-03-11 01:50 UTC &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-11 06:00 UTC &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -93,944 +97,976 @@
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:3%">
+  <col style="width:4%">
+  <col>
+  <col style="width:28%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  
+</colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>
 </tr>
 </thead>
 <tbody>
-<tr data-people="KlausLoeffelmann,app">
+<tr data-people="KlausLoeffelmann,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x26A0;&#xFE0F; approval on older commit &#183; &#x23F3; stale (15d)">8.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14306">#14306</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14306" title="Add documentation and in-code awareness for shared WinForms/WPF clipbo">#14306</a></td>
   <td class="title">Add documentation and in-code awareness for shared WinForms/WPF clipbo</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span></td>
-  <td class="action" title="Stale 15d, Approval not on latest commit">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>: merge main (stale 15d)</td>
+  <td class="action" title="Stale 15d, Approval not on latest commit">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: merge main (stale 15d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/4t 2p</td>
   <td class="num heat-1">22d</td>
   <td class="num heat-2">15d</td>
   <td class="num heat-1" title="213 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888">
+<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change">8.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14339">#14339</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14339" title="Fix issue 11914: In DarkMode: Add a default color to the ProcessBar.">#14339</a></td>
   <td class="title">Fix issue 11914: In DarkMode: Add a default color to the ProcessBar.</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num">9d</td>
   <td class="num">6d</td>
   <td class="num" title="6 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change">8.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14156">#14156</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14156" title="Fix Form with StartPosition=CenterParent and WindowState=Maximized ope">#14156</a></td>
   <td class="title">Fix Form with StartPosition=CenterParent and WindowState=Maximized ope</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">79d</td>
   <td class="num">0d</td>
   <td class="num" title="9 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888">
+<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change">8.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14338">#14338</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14338" title="Fix issue 11939: [Dark Mode]HelpProvider text color is barely visible">#14338</a></td>
   <td class="title">Fix issue 11939: [Dark Mode]HelpProvider text color is barely visible</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">9d</td>
   <td class="num heat-1">8d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="ricardobossan,LeafShi1">
+<tr data-people="ricardobossan,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change">8.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14317">#14317</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14317" title="Indeterminate and checked `ToolStripMenuItem` icons are now clearly vi">#14317</a></td>
   <td class="title">Indeterminate and checked `ToolStripMenuItem` icons are now clearly vi</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">1/4t 2p</td>
   <td class="num heat-1">18d</td>
   <td class="num">2d</td>
   <td class="num" title="35 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker">
+<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change">8.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14260">#14260</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14260" title="Fix issue 14259: Deserialization of the CodeTypeReference to generic t">#14260</a></td>
   <td class="title">Fix issue 14259: Deserialization of the CodeTypeReference to generic t</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">37d</td>
   <td class="num heat-1">12d</td>
   <td class="num" title="26 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,Shyam-Gupta,adegeo">
+<tr data-people="KlausLoeffelmann,Shyam-Gupta,adegeo" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (105d) &#183; &#x1F570;&#xFE0F; old (107d)">8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14074">#14074</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14074" title="Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMod">#14074</a></td>
   <td class="title">Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMod</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span></td>
-  <td class="action" title="2 threads, Stale 105d"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">&#x1F50D; only</a></span></td>
+  <td class="action" title="2 threads, Stale 105d"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">2/2t 2p</td>
   <td class="num heat-3">107d</td>
   <td class="num heat-3">105d</td>
   <td class="num" title="21 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888">
+<tr data-people="KlausLoeffelmann,merriemcgaw,SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change">7.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14288">#14288</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14288" title="Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in d">#14288</a></td>
   <td class="title">Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in d</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc heat-1">0/5t 3p</td>
   <td class="num heat-1">28d</td>
   <td class="num">0d</td>
   <td class="num" title="130 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change">7.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14182">#14182</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14182" title="PropertyGridView: Prevent out-of-range access when committing next enu">#14182</a></td>
   <td class="title">PropertyGridView: Prevent out-of-range access when committing next enu</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">65d</td>
   <td class="num heat-1">7d</td>
   <td class="num" title="12 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,JeremyKuhne">
+<tr data-people="KlausLoeffelmann,merriemcgaw,JeremyKuhne" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; large (54 files, 3560 lines)">7.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14371">#14371</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14371" title="Add shared project for .NET Framework polyfills">#14371</a></td>
   <td class="title">Add shared project for .NET Framework polyfills</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num">1d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="3560 lines changed">54</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,app">
+<tr data-people="SimonZhao888,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d)">7.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14166">#14166</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14166" title="Fix MaskedTextBox PropertyGrid text editor DPI scaling at runtime">#14166</a></td>
   <td class="title">Fix MaskedTextBox PropertyGrid text editor DPI scaling at runtime</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 29d)</td>
+  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 29d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">77d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="22 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (18d)">7.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14283">#14283</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14283" title="Fix LinkLabel contrast in Dark Mode">#14283</a></td>
   <td class="title">Fix LinkLabel contrast in Dark Mode</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 18d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 18d)</td>
+  <td class="action" title="No owner approval, Stale 18d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 18d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/3t 1p</td>
   <td class="num heat-1">29d</td>
   <td class="num heat-2">18d</td>
   <td class="num" title="41 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,app">
+<tr data-people="SimonZhao888,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (91d)">7.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14128">#14128</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14128" title="Fix ComboBox dark mode theme on first TabPage">#14128</a></td>
   <td class="title">Fix ComboBox dark mode theme on first TabPage</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 29d)</td>
+  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 29d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">91d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="16 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="SimonZhao888">
+<tr data-people="SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (40d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14244">#14244</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14244" title="Fix issue 14094: After reducing the form width, clicking the ToolStrip">#14244</a></td>
   <td class="title">Fix issue 14094: After reducing the form width, clicking the ToolStrip</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 40d)</td>
+  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 40d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-2">44d</td>
   <td class="num heat-3">40d</td>
   <td class="num" title="50 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888">
+<tr data-people="SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (40d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14248">#14248</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14248" title="Fix issue 14089: Disabled menu items incorrectly display highlighted t">#14248</a></td>
   <td class="title">Fix issue 14089: Disabled menu items incorrectly display highlighted t</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 40d)</td>
+  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 40d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">43d</td>
   <td class="num heat-3">40d</td>
   <td class="num" title="8 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (77d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14163">#14163</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14163" title="Fix CollectionEditor Up/Down button enabled state for first/last items">#14163</a></td>
   <td class="title">Fix CollectionEditor Up/Down button enabled state for first/last items</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 77d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 77d)</td>
+  <td class="action" title="No owner approval, Stale 77d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 77d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">77d</td>
   <td class="num heat-3">77d</td>
   <td class="num" title="4 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (30d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14277">#14277</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14277" title="Fix incorrect ClientSize calculation in PerMonitorV2 mode when form mo">#14277</a></td>
   <td class="title">Fix incorrect ClientSize calculation in PerMonitorV2 mode when form mo</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 30d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 30d)</td>
+  <td class="action" title="No owner approval, Stale 30d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 30d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-2">33d</td>
   <td class="num heat-3">30d</td>
   <td class="num" title="35 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="Olina-Zhang">
+<tr data-people="Olina-Zhang" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (35d) &#183; &#x1F570;&#xFE0F; old (168d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13896">#13896</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13896" title="Add unit tests for ToolStripKeyboardHandlingService.cs file">#13896</a></td>
   <td class="title">Add unit tests for ToolStripKeyboardHandlingService.cs file</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 35d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D; only</a></span>: merge main (stale 35d)</td>
+  <td class="action" title="No owner approval, Stale 35d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span>: merge main (stale 35d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">168d</td>
   <td class="num heat-3">35d</td>
   <td class="num" title="124 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (173d) &#183; &#x1F570;&#xFE0F; old (260d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13645">#13645</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13645" title="Adding Data, DataObject, FileDrop and Text tests to ClipboardCoreTests">#13645</a></td>
   <td class="title">Adding Data, DataObject, FileDrop and Text tests to ClipboardCoreTests</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 173d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 173d)</td>
+  <td class="action" title="No owner approval, Stale 173d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 173d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">260d</td>
   <td class="num heat-3">173d</td>
   <td class="num" title="137 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (77d)">7.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14152">#14152</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14152" title="Fix insufficient contrast for PropertyGrid dropdown text in Dark Mode">#14152</a></td>
   <td class="title">Fix insufficient contrast for PropertyGrid dropdown text in Dark Mode</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 77d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 77d)</td>
+  <td class="action" title="No owner approval, Stale 77d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 77d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">82d</td>
   <td class="num heat-3">77d</td>
   <td class="num" title="3 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (14d)">7</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14295">#14295</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14295" title="Fix InvalidCastException in Control.OnHandleDestroyed for non-ControlA">#14295</a></td>
   <td class="title">Fix InvalidCastException in Control.OnHandleDestroyed for non-ControlA</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 14d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 14d)</td>
+  <td class="action" title="No owner approval, Stale 14d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 14d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 2p</td>
   <td class="num heat-1">27d</td>
   <td class="num heat-2">14d</td>
   <td class="num" title="23 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,DJm00n">
+<tr data-people="KlausLoeffelmann,merriemcgaw,DJm00n" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x1F570;&#xFE0F; old (160d)">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13925">#13925</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13925" title="Update InputLanguage.cs">#13925</a></td>
   <td class="title">Update InputLanguage.cs</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">160d</td>
   <td class="num">4d</td>
   <td class="num" title="70 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="Epica3055">
+<tr data-people="Epica3055" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (169d) &#183; &#x1F570;&#xFE0F; old (175d)">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13878">#13878</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13878" title="fix #13873 [DarkMode]: TabControl doesn&#39;t render tab titles correctly ">#13878</a></td>
   <td class="title">fix #13873 [DarkMode]: TabControl doesn&#39;t render tab titles correctly </td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 169d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span>: merge main (stale 169d)</td>
+  <td class="action" title="No owner approval, Stale 169d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>: merge main (stale 169d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 3p</td>
   <td class="num heat-3">175d</td>
   <td class="num heat-3">169d</td>
   <td class="num" title="6 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (36d)">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14224">#14224</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14224" title="Issue 14204 fix data grid view excessive cpu+memory usage">#14224</a></td>
   <td class="title">Issue 14204 fix data grid view excessive cpu+memory usage</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 36d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 36d)</td>
+  <td class="action" title="No owner approval, Stale 36d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 36d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/4t 3p</td>
   <td class="num heat-2">50d</td>
   <td class="num heat-3">36d</td>
   <td class="num" title="48 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,copilot-pull-request-reviewer">
+<tr data-people="SimonZhao888,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14375">#14375</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14375" title="Fix issue 14049：The title of the collection editor for custom controls">#14375</a></td>
   <td class="title">Fix issue 14049：The title of the collection editor for custom controls</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">1/1t 1p</td>
   <td class="num">1d</td>
   <td class="num">1d</td>
   <td class="num" title="36 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (135d) &#183; &#x1F570;&#xFE0F; old (140d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13981">#13981</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13981" title="Fix 13976: Enhance TreeNode.UpdateImage() to support inherited image k">#13981</a></td>
   <td class="title">Fix 13976: Enhance TreeNode.UpdateImage() to support inherited image k</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 135d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 135d)</td>
+  <td class="action" title="No owner approval, Stale 135d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 135d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">140d</td>
   <td class="num heat-3">135d</td>
   <td class="num" title="78 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="ricardobossan,SimonZhao888">
+<tr data-people="ricardobossan,SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (42d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14216">#14216</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14216" title=" Fix disabled RichTextBox multiline text rendering in Dark Mode">#14216</a></td>
   <td class="title"> Fix disabled RichTextBox multiline text rendering in Dark Mode</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 42d"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 42d"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">1/1t 1p</td>
   <td class="num heat-2">53d</td>
   <td class="num heat-3">42d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="Epica3055">
+<tr data-people="Epica3055" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (208d) &#183; &#x1F570;&#xFE0F; old (295d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13486">#13486</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13486" title="add workflow Block PRs with &quot;NO-MERGE&quot; label">#13486</a></td>
   <td class="title">add workflow Block PRs with &quot;NO-MERGE&quot; label</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 208d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span>: merge main (stale 208d)</td>
+  <td class="action" title="No owner approval, Stale 208d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>: merge main (stale 208d)</td>
   <td class="ci">&#x2705; 3/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">295d</td>
   <td class="num heat-3">208d</td>
   <td class="num" title="19 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (168d) &#183; &#x1F570;&#xFE0F; old (169d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13891">#13891</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13891" title="Add hover visual effect for Popup button">#13891</a></td>
   <td class="title">Add hover visual effect for Popup button</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 168d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 168d)</td>
+  <td class="action" title="No owner approval, Stale 168d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 168d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">169d</td>
   <td class="num heat-3">168d</td>
   <td class="num" title="18 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888">
+<tr data-people="SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (105d) &#183; &#x1F570;&#xFE0F; old (107d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14075">#14075</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14075" title="Fix issue 14071: ComboBox.ObjectCollection.CopyTo(Array destination, i">#14075</a></td>
   <td class="title">Fix issue 14071: ComboBox.ObjectCollection.CopyTo(Array destination, i</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 105d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 105d)</td>
+  <td class="action" title="No owner approval, Stale 105d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 105d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">107d</td>
   <td class="num heat-3">105d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (40d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14252">#14252</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14252" title="Fix font size of UserControl in ToolStripControlHost after DPI change">#14252</a></td>
   <td class="title">Fix font size of UserControl in ToolStripControlHost after DPI change</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 40d)</td>
+  <td class="action" title="No owner approval, Stale 40d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 40d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">41d</td>
   <td class="num heat-3">40d</td>
   <td class="num" title="14 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (36d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14255">#14255</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14255" title="Fix TreeView icons not scaling on high DPI">#14255</a></td>
   <td class="title">Fix TreeView icons not scaling on high DPI</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 36d, Copilot review errored">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 36d); rerequest Copilot review</td>
+  <td class="action" title="No owner approval, Stale 36d, Copilot review errored">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 36d); rerequest Copilot review</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">40d</td>
   <td class="num heat-3">36d</td>
   <td class="num" title="103 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888">
+<tr data-people="SimonZhao888" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (91d) &#183; &#x1F570;&#xFE0F; old (97d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14110">#14110</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14110" title="Fix ToolStripStatusLabel text visibility in High Contrast mode with Sy">#14110</a></td>
   <td class="title">Fix ToolStripStatusLabel text visibility in High Contrast mode with Sy</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 91d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 91d)</td>
+  <td class="action" title="No owner approval, Stale 91d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 91d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">97d</td>
   <td class="num heat-3">91d</td>
   <td class="num" title="10 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (88d)">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14133">#14133</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14133" title="Fix visibility logic for addNewPanel in DesignBindingPicker to use _da">#14133</a></td>
   <td class="title">Fix visibility logic for addNewPanel in DesignBindingPicker to use _da</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 88d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 88d)</td>
+  <td class="action" title="No owner approval, Stale 88d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 88d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/3t 1p</td>
   <td class="num heat-3">90d</td>
   <td class="num heat-3">88d</td>
   <td class="num" title="6 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,app">
+<tr data-people="SimonZhao888,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (91d)">6.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14129">#14129</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14129" title="Fix dark mode text visibility in Collection Editor dialogs">#14129</a></td>
   <td class="title">Fix dark mode text visibility in Collection Editor dialogs</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: merge main (stale 29d)</td>
+  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 29d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc heat-2">0/5t 4p</td>
   <td class="num heat-3">91d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="6 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,app,LeafShi1">
+<tr data-people="SimonZhao888,app,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d)">6.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14131">#14131</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14131" title="Fix TabControl dark mode rendering for Left/Right alignment with verti">#14131</a></td>
   <td class="title">Fix TabControl dark mode rendering for Left/Right alignment with verti</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 29d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 29d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">1/1t 2p</td>
   <td class="num heat-3">90d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="188 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (203d)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13824">#13824</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13824" title="Update the OwnerDraw flag when BackgroundImage changes">#13824</a></td>
   <td class="title">Update the OwnerDraw flag when BackgroundImage changes</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: merge main (stale 29d)</td>
+  <td class="action" title="No owner approval, Stale 29d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 29d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/4t 3p</td>
   <td class="num heat-3">203d</td>
   <td class="num heat-2">29d</td>
   <td class="num heat-1" title="74 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,LeafShi1">
+<tr data-people="SimonZhao888,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4AC; 1 unresolved &#183; &#x1F5E8;&#xFE0F; active (6 threads) &#183; &#x1F4E6; small change &#183; &#x23F3; stale (42d)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14219">#14219</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14219" title="Fix issue 14210: [Dark Mode] The ListView cannot display the items whe">#14219</a></td>
   <td class="title">Fix issue 14210: [Dark Mode] The ListView cannot display the items whe</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 42d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 42d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc heat-1">1/6t 2p</td>
   <td class="num heat-2">51d</td>
   <td class="num heat-3">42d</td>
   <td class="num" title="7 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,apoorvdarshan">
+<tr data-people="KlausLoeffelmann,merriemcgaw,apoorvdarshan" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (20d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14307">#14307</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14307" title="Fix dark mode invisible text for CheckBox/RadioButton with FlatStyle.S">#14307</a></td>
   <td class="title">Fix dark mode invisible text for CheckBox/RadioButton with FlatStyle.S</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 20d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">22d</td>
   <td class="num heat-2">20d</td>
   <td class="num" title="17 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/apoorvdarshan.png?size=32" alt="apoorvdarshan"><a href="https://github.com/apoorvdarshan">@apoorvdarshan</a><a class="filter-btn" href="#" onclick="filterByUser('apoorvdarshan');return false" title="Show only @apoorvdarshan">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/apoorvdarshan.png?size=32" alt="apoorvdarshan"><a href="https://github.com/apoorvdarshan">@apoorvdarshan</a><a class="filter-btn" href="#" onclick="filterByUser('apoorvdarshan');return false" title="Show only @apoorvdarshan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (20d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14301">#14301</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14301" title="Fix UIA Invoke hang when ToolStripMenuItem opens modal dialog from Men">#14301</a></td>
   <td class="title">Fix UIA Invoke hang when ToolStripMenuItem opens modal dialog from Men</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 20d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">25d</td>
   <td class="num heat-2">20d</td>
   <td class="num" title="70 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="DJm00n">
+<tr data-people="DJm00n" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (112d) &#183; &#x1F570;&#xFE0F; old (302d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13449">#13449</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13449" title="Optimize icon rendering: simplify logic and eliminate redundant calcul">#13449</a></td>
   <td class="title">Optimize icon rendering: simplify logic and eliminate redundant calcul</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 112d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D; only</a></span>: merge main (stale 112d)</td>
+  <td class="action" title="No owner approval, Stale 112d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span>: merge main (stale 112d)</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">302d</td>
   <td class="num heat-3">112d</td>
   <td class="num" title="113 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (63d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14179">#14179</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14179" title="Update the link of the &quot;APIs of DotNet&quot; in porting-guidelines.md">#14179</a></td>
   <td class="title">Update the link of the &quot;APIs of DotNet&quot; in porting-guidelines.md</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 63d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 2/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">66d</td>
   <td class="num heat-3">63d</td>
   <td class="num" title="4 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (78d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14161">#14161</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14161" title="Improve ButtonDarkModeAdapter color handling and remove inappropriate ">#14161</a></td>
   <td class="title">Improve ButtonDarkModeAdapter color handling and remove inappropriate </td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 78d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">78d</td>
   <td class="num heat-3">78d</td>
   <td class="num" title="14 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,memoarfaa">
+<tr data-people="KlausLoeffelmann,merriemcgaw,memoarfaa" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (147d) &#183; &#x1F570;&#xFE0F; old (295d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13480">#13480</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13480" title="[DarkMode] Fix MDIParent MainMenuStrip System Bitmaps">#13480</a></td>
   <td class="title">[DarkMode] Fix MDIParent MainMenuStrip System Bitmaps</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 147d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">295d</td>
   <td class="num heat-3">147d</td>
   <td class="num" title="31 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (92d) &#183; &#x1F570;&#xFE0F; old (92d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14121">#14121</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14121" title="[release/10.0] Refactor StatusStrip DefaultPadding calculation and adj">#14121</a></td>
   <td class="title">[release/10.0] Refactor StatusStrip DefaultPadding calculation and adj</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 92d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">92d</td>
   <td class="num heat-3">92d</td>
   <td class="num" title="104 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (78d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14162">#14162</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14162" title="Fix TabControl spinner button not applying Dark Mode when TabPages add">#14162</a></td>
   <td class="title">Fix TabControl spinner button not applying Dark Mode when TabPages add</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 78d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">78d</td>
   <td class="num heat-3">78d</td>
   <td class="num" title="9 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (209d) &#183; &#x1F570;&#xFE0F; old (229d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13739">#13739</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13739" title="Use programatically check instead of assertion in method ComputeVisibl">#13739</a></td>
   <td class="title">Use programatically check instead of assertion in method ComputeVisibl</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 209d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">229d</td>
   <td class="num heat-3">209d</td>
   <td class="num" title="23 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (187d) &#183; &#x1F570;&#xFE0F; old (215d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13792">#13792</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13792" title="Add check &quot;IsDarkModeEnabled&quot; for SelectionForeColor of DataGridView">#13792</a></td>
   <td class="title">Add check &quot;IsDarkModeEnabled&quot; for SelectionForeColor of DataGridView</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 187d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">215d</td>
   <td class="num heat-3">187d</td>
   <td class="num" title="4 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (47d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14237">#14237</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14237" title="Update the selected anchor color in Dark mode">#14237</a></td>
   <td class="title">Update the selected anchor color in Dark mode</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 47d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-2">48d</td>
   <td class="num heat-3">47d</td>
   <td class="num" title="4 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,stumper66">
+<tr data-people="KlausLoeffelmann,merriemcgaw,stumper66" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (71d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14176">#14176</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14176" title="Update KeyboardToolTipStateMachine.cs">#14176</a></td>
   <td class="title">Update KeyboardToolTipStateMachine.cs</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 71d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">71d</td>
   <td class="num heat-3">71d</td>
   <td class="num" title="11 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stumper66.png?size=32" alt="stumper66"><a href="https://github.com/stumper66">@stumper66</a><a class="filter-btn" href="#" onclick="filterByUser('stumper66');return false" title="Show only @stumper66">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stumper66.png?size=32" alt="stumper66"><a href="https://github.com/stumper66">@stumper66</a><a class="filter-btn" href="#" onclick="filterByUser('stumper66');return false" title="Show only @stumper66">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,Olina-Zhang">
+<tr data-people="KlausLoeffelmann,merriemcgaw,Olina-Zhang" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (300d) &#183; &#x1F570;&#xFE0F; old (301d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13456">#13456</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13456" title="Add unit test for RadioButtonStandardAdapter.cs, RadioButtonPopupAdapt">#13456</a></td>
   <td class="title">Add unit test for RadioButtonStandardAdapter.cs, RadioButtonPopupAdapt</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 300d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">301d</td>
   <td class="num heat-3">300d</td>
   <td class="num heat-1" title="390 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (153d) &#183; &#x1F570;&#xFE0F; old (168d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13898">#13898</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13898" title="Fix the Button border and color with FlatStyle = Flat: FlatAppearance ">#13898</a></td>
   <td class="title">Fix the Button border and color with FlatStyle = Flat: FlatAppearance </td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 153d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">168d</td>
   <td class="num heat-3">153d</td>
   <td class="num heat-1" title="90 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (610d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11641">#11641</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11641" title="Fix 11214 by removing IsHandleCreated in OnFontChanged">#11641</a></td>
   <td class="title">Fix 11214 by removing IsHandleCreated in OnFontChanged</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 29d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">610d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,Shyam-Gupta">
+<tr data-people="KlausLoeffelmann,merriemcgaw,Shyam-Gupta" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (34d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14271">#14271</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14271" title="Adding retry logic while querying\fetching data from clipboard">#14271</a></td>
   <td class="title">Adding retry logic while querying\fetching data from clipboard</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 34d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">34d</td>
   <td class="num heat-3">34d</td>
   <td class="num heat-1" title="207 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,DJm00n">
+<tr data-people="KlausLoeffelmann,merriemcgaw,DJm00n" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (278d) &#183; &#x1F570;&#xFE0F; old (302d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13448">#13448</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13448" title="Refactor icon initialization and make use of CreateIconResourceDirecto">#13448</a></td>
   <td class="title">Refactor icon initialization and make use of CreateIconResourceDirecto</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 278d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">302d</td>
   <td class="num heat-3">278d</td>
   <td class="num heat-1" title="237 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="ricardobossan">
+<tr data-people="ricardobossan" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (152d)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13950">#13950</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13950" title="Fixes #13901. Properly displays PropertyGrid` color and cursor dropdow">#13950</a></td>
   <td class="title">Fixes #13901. Properly displays PropertyGrid` color and cursor dropdow</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">152d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="18 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1">
+<tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (86d)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14138">#14138</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14138" title="Add AppContext switch to mirror Owner.TopMost for modal dialogs (resto">#14138</a></td>
   <td class="title">Add AppContext switch to mirror Owner.TopMost for modal dialogs (resto</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 86d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num heat-3">89d</td>
   <td class="num heat-3">86d</td>
   <td class="num" title="28 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker">
+<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (35d)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14268">#14268</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14268" title="[release/10.0] Fix issue 14259: Deserialization of the CodeTypeReferen">#14268</a></td>
   <td class="title">[release/10.0] Fix issue 14259: Deserialization of the CodeTypeReferen</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 35d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">35d</td>
   <td class="num heat-3">35d</td>
   <td class="num" title="26 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker">
+<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (35d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14270">#14270</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14270" title="[release/9.0] Fix issue 14259: Deserialization of the CodeTypeReferenc">#14270</a></td>
   <td class="title">[release/9.0] Fix issue 14259: Deserialization of the CodeTypeReferenc</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 35d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">35d</td>
   <td class="num heat-3">35d</td>
   <td class="num" title="26 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker">
+<tr data-people="KlausLoeffelmann,merriemcgaw,aerworker" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (35d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14269">#14269</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14269" title="[release/8.0] Fix issue 14259: Deserialization of the CodeTypeReferenc">#14269</a></td>
   <td class="title">[release/8.0] Fix issue 14259: Deserialization of the CodeTypeReferenc</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 35d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-2">35d</td>
   <td class="num heat-3">35d</td>
   <td class="num" title="26 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="willibrandon">
+<tr data-people="willibrandon" data-labels="">
   <td class="score" title="&#x1F7E1; CI pending &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F570;&#xFE0F; old (492d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12420">#12420</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12420" title="Style ToolTip to make it dark enough in Dark mode">#12420</a></td>
   <td class="title">Style ToolTip to make it dark enough in Dark mode</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No CI, No owner approval">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No CI, No owner approval">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x26A0;&#xFE0F; 0/0/0</td>
   <td class="disc heat-1">0/5t 2p</td>
   <td class="num heat-3">492d</td>
   <td class="num heat-1">11d</td>
   <td class="num heat-1" title="154 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="SimonZhao888,app">
+<tr data-people="SimonZhao888,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d)">5.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14168">#14168</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14168" title="Fix cursor editor icon width calculation for proper DPI scaling">#14168</a></td>
   <td class="title">Fix cursor editor icon width calculation for proper DPI scaling</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/4t 3p</td>
   <td class="num heat-3">77d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="14 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="toehead2001">
+<tr data-people="toehead2001" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (331d)">5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13303">#13303</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13303" title="Use MouseWheel scrolling in ToolStripDropDownMenu">#13303</a></td>
   <td class="title">Use MouseWheel scrolling in ToolStripDropDownMenu</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">1/1t 2p</td>
   <td class="num heat-3">331d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="33 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JeremyKuhne">
+<tr data-people="JeremyKuhne" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (746d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/10944">#10944</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/10944" title="Add convenience / perf methods to ListViewItem/ControlCollection">#10944</a></td>
   <td class="title">Add convenience / perf methods to ListViewItem/ControlCollection</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 1/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">746d</td>
   <td class="num heat-2">29d</td>
   <td class="num heat-1" title="159 lines changed">7</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="xPaw">
+<tr data-people="xPaw" data-labels="">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 5 unresolved &#183; &#x1F4E6; small change">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14238">#14238</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14238" title="Add `ImageList.UseMaskForTransparency` for better image transparency">#14238</a></td>
   <td class="title">Add `ImageList.UseMaskForTransparency` for better image transparency</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D; only</a></span></td>
-  <td class="action" title="CI fail (7 failed), 5 threads, No review">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D; only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (7 failed), 5 threads, No review">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 2/7/0</td>
   <td class="disc heat-1">5/5t 1p</td>
   <td class="num heat-2">47d</td>
   <td class="num">1d</td>
   <td class="num" title="79 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (106d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14079">#14079</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14079" title="Fix incorrect logic in CharIsPrintable for UnicodeCategory exclusions">#14079</a></td>
   <td class="title">Fix incorrect logic in CharIsPrintable for UnicodeCategory exclusions</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No review, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No review, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">106d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="4 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="memoarfaa,AraHaan">
+<tr data-people="memoarfaa,AraHaan" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 5 unresolved &#183; &#x1F5E8;&#xFE0F; busy (20 threads, 2 people) &#183; &#x23F3; stale (92d) &#183; &#x1F570;&#xFE0F; old (303d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13440">#13440</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13440" title="Improve Message Box in WinForms">#13440</a></td>
   <td class="title">Improve Message Box in WinForms</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D; only</a></span></td>
-  <td class="action" title="5 threads, No owner approval, Stale 92d"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D; only</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/AraHaan.png?size=32" alt="AraHaan"><a href="https://github.com/AraHaan">@AraHaan</a><a class="filter-btn" href="#" onclick="filterByUser('AraHaan');return false" title="Show only @AraHaan">&#x1F50D; only</a></span></td>
+  <td class="action" title="5 threads, No owner approval, Stale 92d"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/AraHaan.png?size=32" alt="AraHaan"><a href="https://github.com/AraHaan">@AraHaan</a><a class="filter-btn" href="#" onclick="filterByUser('AraHaan');return false" title="Show only @AraHaan">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc heat-3">&#x1F525; 5/20t 2p</td>
   <td class="num heat-3">303d</td>
   <td class="num heat-3">92d</td>
   <td class="num heat-1" title="240 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="elachlan">
+<tr data-people="elachlan" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (686d)">4.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11258">#11258</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11258" title="Fix WindowsFormsApplicationBase.IsSingleInstance">#11258</a></td>
   <td class="title">Fix WindowsFormsApplicationBase.IsSingleInstance</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 1/0/0</td>
   <td class="disc">1/1t 3p</td>
   <td class="num heat-3">686d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="68 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="swapso">
+<tr data-people="swapso" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (29d) &#183; &#x1F570;&#xFE0F; old (696d)">4.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11213">#11213</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11213" title="fixed Font auto scaling when Handle is created">#11213</a></td>
   <td class="title">fixed Font auto scaling when Handle is created</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a><a class="filter-btn" href="#" onclick="filterByUser('swapso');return false" title="Show only @swapso">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No review, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a><a class="filter-btn" href="#" onclick="filterByUser('swapso');return false" title="Show only @swapso">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No review, Stale 29d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a><a class="filter-btn" href="#" onclick="filterByUser('swapso');return false" title="Show only @swapso">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-3">696d</td>
   <td class="num heat-2">29d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a><a class="filter-btn" href="#" onclick="filterByUser('swapso');return false" title="Show only @swapso">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/swapso.png?size=32" alt="swapso"><a href="https://github.com/swapso">@swapso</a><a class="filter-btn" href="#" onclick="filterByUser('swapso');return false" title="Show only @swapso">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="LeafShi1">
+<tr data-people="LeafShi1" data-labels="">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F50D; no review yet &#183; &#x1F5E8;&#xFE0F; busy (31 threads, 1 people) &#183; &#x1F4E6; large (10 files, 564 lines)">4.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14267">#14267</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14267" title="Enable DataGridView dark mode theming via AppContext switch">#14267</a></td>
   <td class="title">Enable DataGridView dark mode theming via AppContext switch</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
-  <td class="action" title="CI fail (7 failed), No review">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span>: fix CI failures</td>
+  <td class="action" title="CI fail (7 failed), No review">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: fix CI failures</td>
   <td class="ci">&#x274C; 1/7/0</td>
   <td class="disc heat-3">&#x1F525; 0/31t 1p</td>
   <td class="num heat-2">35d</td>
   <td class="num heat-1">8d</td>
   <td class="num heat-2" title="564 lines changed">10</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="paul1956">
+<tr data-people="paul1956" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 6 unresolved &#183; &#x1F5E8;&#xFE0F; active (14 threads) &#183; &#x1F4E6; large (29 files, 4239 lines) &#183; &#x23F3; stale (131d) &#183; &#x1F570;&#xFE0F; old (481d)">3.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12486">#12486</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12486" title="Code Coverage for DownloadFile Review 1St">#12486</a></td>
   <td class="title">Code Coverage for DownloadFile Review 1St</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 6 threads, No owner approval, Stale 131d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 6 threads, No owner approval, Stale 131d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 8/0/0</td>
   <td class="disc heat-2">6/14t 3p</td>
   <td class="num heat-3">481d</td>
   <td class="num heat-3">131d</td>
   <td class="num heat-2" title="4239 lines changed">29</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D;</a></span></td>
+  
 </tr>
 </tbody>
 </table>
 
 
 <script>
-function filterByUser(name) {
+function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = label;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+}
+function filterByUser(name) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
@@ -1049,7 +1085,7 @@ function filterByUser(name) {
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
 }
 function clearFilter() {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   rows.forEach(function(r) {
     r.style.display = r.classList.contains('more-row') ? 'none' : '';
   });
@@ -1058,11 +1094,37 @@ function clearFilter() {
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
 }
-// Apply ?user=X filter on page load
+// Apply ?user=X or ?label=X filter on page load
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
+  var label = params.get('label');
   if (user) filterByUser(user);
+  else if (label) filterByLabel(label);
+})();
+// Resizable columns: drag right edge of any <th> to resize
+(function() {
+  var ths = document.querySelectorAll('thead th');
+  ths.forEach(function(th) {
+    var grip = document.createElement('div');
+    grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
+    th.style.position = 'relative';
+    grip.addEventListener('mousedown', function(e) {
+      lockLayout();
+      var startX = e.pageX, startW = th.offsetWidth;
+      function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
+      function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+    th.appendChild(grip);
+  });
+  // On first drag, snapshot auto widths so resizing works predictably
+  var tbl = document.querySelector('table'), locked = false;
+  function lockLayout() {
+    if (locked) return; locked = true;
+  }
 })();
 </script>
 </body>

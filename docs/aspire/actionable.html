@@ -6,7 +6,7 @@
 <title>Most Actionable PRs — dotnet/aspire - PR Dashboard</title>
 <style>
   :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
-           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+           --badge-community: #238636; --badge-area: #d4c5f9; --hover: #161b22; --header-bg: #161b22; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
          background: var(--bg); color: var(--fg); padding: 1em 2em; }
@@ -15,28 +15,32 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
-       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
   td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
   .score { font-weight: bold; text-align: right; white-space: nowrap; }
   .pr-num { white-space: nowrap; }
-  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who, .action { white-space: nowrap; }
-  .ci { white-space: nowrap; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
-  .disc, .num { text-align: right; white-space: nowrap; }
+  .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
+  .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
-  .badge.community { background: var(--badge-community); color: #fff; }
+  .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
+  .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
+  .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
   .observations { margin-top: 1.5em; max-width: 900px; }
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
@@ -70,7 +74,7 @@
 <body>
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a></nav>
 <h1>Most Actionable PRs — dotnet/aspire</h1>
-<p class="meta">Updated every 12h, last at 2026-03-11 01:48 UTC &middot; 51 PRs &middot; <a href="https://github.com/dotnet/aspire">dotnet/aspire</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-11 06:00 UTC &middot; 51 PRs &middot; <a href="https://github.com/dotnet/aspire">dotnet/aspire</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -93,684 +97,716 @@
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:3%">
+  <col style="width:4%">
+  <col>
+  <col style="width:28%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  
+</colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>
 </tr>
 </thead>
 <tbody>
-<tr data-people="davidfowl,app">
+<tr data-people="davidfowl,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4E6; small change &#183; &#x1F570;&#xFE0F; old (163d)">9.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/11706">#11706</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/11706" title="Fix UpdateConfig property types for Docker Compose serialization">#11706</a></td>
   <td class="title">Fix UpdateConfig property types for Docker Compose serialization</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 645/5/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num heat-3">163d</td>
   <td class="num">1d</td>
   <td class="num" title="103 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="eerhardt,app,radical">
+<tr data-people="eerhardt,app,radical" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4E6; small change">9.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14448">#14448</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14448" title="Disable scheduled builds for release/9.4">#14448</a></td>
   <td class="title">Disable scheduled builds for release/9.4</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="—">&#x1F7E2; Ready to merge</td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 251/5/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">27d</td>
   <td class="num">0d</td>
   <td class="num" title="23 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="radical,app">
+<tr data-people="radical,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (20d)">8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14449">#14449</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14449" title="Disable scheduled builds for release/9.5 branch">#14449</a></td>
   <td class="title">Disable scheduled builds for release/9.5 branch</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span></td>
-  <td class="action" title="Stale 20d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span>: merge main (stale 20d)</td>
+  <td class="action" title="Stale 20d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span>: merge main (stale 20d)</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">27d</td>
   <td class="num heat-2">20d</td>
   <td class="num" title="22 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,joperezr">
+<tr data-people="JamesNK,eerhardt,joperezr" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4E6; small change">8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14696">#14696</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14696" title="Add networkIsolationPolicy to 1ES pipeline templates for SFI-ES4.2.4 c">#14696</a></td>
   <td class="title">Add networkIsolationPolicy to 1ES pipeline templates for SFI-ES4.2.4 c</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="—">Maintainer: review/merge</td>
   <td class="ci">&#x2705; 10/0/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num">13d</td>
   <td class="num heat-1">8d</td>
   <td class="num" title="4 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a><a class="filter-btn" href="#" onclick="filterByUser('joperezr');return false" title="Show only @joperezr">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a><a class="filter-btn" href="#" onclick="filterByUser('joperezr');return false" title="Show only @joperezr">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="aaron-seq">
+<tr data-people="aaron-seq" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F310; community &#183; &#x1F4E6; small change &#183; &#x23F3; stale (47d) &#183; &#x1F570;&#xFE0F; old (119d)">7.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12902">#12902</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12902" title="Fix dashboard static files loading when working directory differs from">#12902</a></td>
   <td class="title">Fix dashboard static files loading when working directory differs from</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/aaron-seq.png?size=32" alt="aaron-seq"><a href="https://github.com/aaron-seq">@aaron-seq</a><a class="filter-btn" href="#" onclick="filterByUser('aaron-seq');return false" title="Show only @aaron-seq">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="Stale 47d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/aaron-seq.png?size=32" alt="aaron-seq"><a href="https://github.com/aaron-seq">@aaron-seq</a><a class="filter-btn" href="#" onclick="filterByUser('aaron-seq');return false" title="Show only @aaron-seq">&#x1F50D; only</a></span>: merge main (stale 47d)</td>
+  <td class="action" title="Stale 47d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/aaron-seq.png?size=32" alt="aaron-seq"><a href="https://github.com/aaron-seq">@aaron-seq</a><a class="filter-btn" href="#" onclick="filterByUser('aaron-seq');return false" title="Show only @aaron-seq">&#x1F50D;</a></span>: merge main (stale 47d)</td>
   <td class="ci">&#x2705; 301/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-3">119d</td>
   <td class="num heat-3">47d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aaron-seq.png?size=32" alt="aaron-seq"><a href="https://github.com/aaron-seq">@aaron-seq</a><a class="filter-btn" href="#" onclick="filterByUser('aaron-seq');return false" title="Show only @aaron-seq">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/aaron-seq.png?size=32" alt="aaron-seq"><a href="https://github.com/aaron-seq">@aaron-seq</a><a class="filter-btn" href="#" onclick="filterByUser('aaron-seq');return false" title="Show only @aaron-seq">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,radical">
+<tr data-people="JamesNK,eerhardt,radical" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change">7.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15111">#15111</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15111" title="[CI] Fix randomly failing tests on azdo due to docker+testcontainers/r">#15111</a></td>
   <td class="title">[CI] Fix randomly failing tests on azdo due to docker+testcontainers/r</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci" title="Build Analysis passed; 3 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">3</sup> 383/3/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num" title="36 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="sebastienros,eerhardt">
+<tr data-people="sebastienros,eerhardt" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x26A0;&#xFE0F; approval on older commit &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; large (22 files, 233 lines)">7.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15114">#15114</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15114" title="Fix AspireExport coverage for hosting integrations">#15114</a></td>
   <td class="title">Fix AspireExport coverage for hosting integrations</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 17/5/0</td>
   <td class="disc">1/3t 3p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="233 lines changed">22</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="annatisch,sebastienros">
+<tr data-people="annatisch,sebastienros" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x26A0;&#xFE0F; approval on older commit &#183; &#x1F4AC; 1 unresolved &#183; &#x1F5E8;&#xFE0F; active (8 threads) &#183; &#x1F4E6; large (49 files, 30063 lines)">7.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13947">#13947</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13947" title="PythonAppHost Code Generator">#13947</a></td>
   <td class="title">PythonAppHost Code Generator</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/annatisch.png?size=32" alt="annatisch"><a href="https://github.com/annatisch">@annatisch</a><a class="filter-btn" href="#" onclick="filterByUser('annatisch');return false" title="Show only @annatisch">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/annatisch.png?size=32" alt="annatisch"><a href="https://github.com/annatisch">@annatisch</a><a class="filter-btn" href="#" onclick="filterByUser('annatisch');return false" title="Show only @annatisch">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/annatisch.png?size=32" alt="annatisch"><a href="https://github.com/annatisch">@annatisch</a><a class="filter-btn" href="#" onclick="filterByUser('annatisch');return false" title="Show only @annatisch">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 385/0/0</td>
   <td class="disc heat-1">1/8t 3p</td>
   <td class="num heat-2">54d</td>
   <td class="num">2d</td>
   <td class="num heat-2" title="30063 lines changed">49</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/annatisch.png?size=32" alt="annatisch"><a href="https://github.com/annatisch">@annatisch</a><a class="filter-btn" href="#" onclick="filterByUser('annatisch');return false" title="Show only @annatisch">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/annatisch.png?size=32" alt="annatisch"><a href="https://github.com/annatisch">@annatisch</a><a class="filter-btn" href="#" onclick="filterByUser('annatisch');return false" title="Show only @annatisch">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="eerhardt,mitchdenny,danegsta">
+<tr data-people="eerhardt,mitchdenny,danegsta" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (8 threads)">7.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14756">#14756</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14756" title="Add support for pkcs12 format certificate trust bundles to enable trus">#14756</a></td>
   <td class="title">Add support for pkcs12 format certificate trust bundles to enable trus</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 379/0/0</td>
   <td class="disc heat-1">0/8t 2p</td>
   <td class="num">12d</td>
   <td class="num">1d</td>
   <td class="num heat-1" title="421 lines changed">7</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,mitchdenny,Falco20019">
+<tr data-people="JamesNK,mitchdenny,Falco20019" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F310; community">7</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14254">#14254</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14254" title="Fix WithReference to only use IResourceWithEndpoints">#14254</a></td>
   <td class="title">Fix WithReference to only use IResourceWithEndpoints</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci" title="Build Analysis passed; 27 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">27</sup> 358/27/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num heat-2">39d</td>
   <td class="num heat-1">7d</td>
   <td class="num heat-1" title="212 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Falco20019.png?size=32" alt="Falco20019"><a href="https://github.com/Falco20019">@Falco20019</a><a class="filter-btn" href="#" onclick="filterByUser('Falco20019');return false" title="Show only @Falco20019">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/Falco20019.png?size=32" alt="Falco20019"><a href="https://github.com/Falco20019">@Falco20019</a><a class="filter-btn" href="#" onclick="filterByUser('Falco20019');return false" title="Show only @Falco20019">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,mitchdenny,eerhardt">
+<tr data-people="JamesNK,mitchdenny,eerhardt" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (9 threads) &#183; &#x1F4E6; large (52 files, 855 lines)">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15115">#15115</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15115" title="Add AspireExport opt-in for background-thread sync dispatch">#15115</a></td>
   <td class="title">Add AspireExport opt-in for background-thread sync dispatch</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 250/0/0</td>
   <td class="disc heat-2">0/9t 3p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="855 lines changed">52</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK">
+<tr data-people="JamesNK" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F44D; owner approved &#183; &#x26A0;&#xFE0F; approval on older commit &#183; &#x1F4AC; 1 unresolved">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15000">#15000</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15000" title="Prefer StringComparisons over StringComparers for string comparisons">#15000</a></td>
   <td class="title">Prefer StringComparisons over StringComparers for string comparisons</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 1 threads, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 1 threads, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci" title="Build Analysis passed; 50 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">50</sup> 329/50/0</td>
   <td class="disc">1/3t 3p</td>
   <td class="num">5d</td>
   <td class="num">0d</td>
   <td class="num heat-1" title="23 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="adamint,copilot-pull-request-reviewer,radical">
+<tr data-people="adamint,copilot-pull-request-reviewer,radical" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4AC; 6 unresolved &#183; &#x1F5E8;&#xFE0F; active (6 threads)">6.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14847">#14847</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14847" title="Move VS Code extension Marketplace publishing to release-publish-nuget">#14847</a></td>
   <td class="title">Move VS Code extension Marketplace publishing to release-publish-nuget</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span></td>
-  <td class="action" title="6 threads"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span>: respond to 6 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span></td>
+  <td class="action" title="6 threads"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D;</a></span>: respond to 6 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 10/0/0</td>
   <td class="disc heat-1">6/6t 2p</td>
   <td class="num">8d</td>
   <td class="num heat-1">8d</td>
   <td class="num heat-1" title="273 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="flensrocker,ReubenBond">
+<tr data-people="flensrocker,ReubenBond" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F310; community &#183; &#x1F4E6; small change">6.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13630">#13630</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13630" title="feat: add custom Orleans provider type annotation">#13630</a></td>
   <td class="title">feat: add custom Orleans provider type annotation</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/flensrocker.png?size=32" alt="flensrocker"><a href="https://github.com/flensrocker">@flensrocker</a><a class="filter-btn" href="#" onclick="filterByUser('flensrocker');return false" title="Show only @flensrocker">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/flensrocker.png?size=32" alt="flensrocker"><a href="https://github.com/flensrocker">@flensrocker</a><a class="filter-btn" href="#" onclick="filterByUser('flensrocker');return false" title="Show only @flensrocker">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ReubenBond.png?size=32" alt="ReubenBond"><a href="https://github.com/ReubenBond">@ReubenBond</a><a class="filter-btn" href="#" onclick="filterByUser('ReubenBond');return false" title="Show only @ReubenBond">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/flensrocker.png?size=32" alt="flensrocker"><a href="https://github.com/flensrocker">@flensrocker</a><a class="filter-btn" href="#" onclick="filterByUser('flensrocker');return false" title="Show only @flensrocker">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ReubenBond.png?size=32" alt="ReubenBond"><a href="https://github.com/ReubenBond">@ReubenBond</a><a class="filter-btn" href="#" onclick="filterByUser('ReubenBond');return false" title="Show only @ReubenBond">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">1/1t 2p</td>
   <td class="num heat-3">83d</td>
   <td class="num">6d</td>
   <td class="num" title="71 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/flensrocker.png?size=32" alt="flensrocker"><a href="https://github.com/flensrocker">@flensrocker</a><a class="filter-btn" href="#" onclick="filterByUser('flensrocker');return false" title="Show only @flensrocker">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/flensrocker.png?size=32" alt="flensrocker"><a href="https://github.com/flensrocker">@flensrocker</a><a class="filter-btn" href="#" onclick="filterByUser('flensrocker');return false" title="Show only @flensrocker">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="adamint,copilot-pull-request-reviewer">
+<tr data-people="adamint,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 7 unresolved &#183; &#x1F5E8;&#xFE0F; active (7 threads)">6.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15118">#15118</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15118" title="Add Azure Functions debugging support to VS Code extension">#15118</a></td>
   <td class="title">Add Azure Functions debugging support to VS Code extension</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span></td>
-  <td class="action" title="7 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span>: respond to 7 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="7 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D;</a></span>: respond to 7 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 1 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">1</sup> 245/1/2</td>
   <td class="disc heat-1">7/7t 2p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num heat-1" title="487 lines changed">12</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="sebastienros,radical">
+<tr data-people="sebastienros,radical" data-labels="">
   <td class="score" title="&#x1F7E1; CI pending &#183; &#x1F44D; owner approved &#183; &#x26A0;&#xFE0F; approval on older commit &#183; &#x1F4AC; 1 unresolved">6.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15083">#15083</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15083" title="Make ATS analyzer packaged in Aspire.Hosting and opt-in">#15083</a></td>
   <td class="title">Make ATS analyzer packaged in Aspire.Hosting and opt-in</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span></td>
-  <td class="action" title="CI running, 1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span></td>
+  <td class="action" title="CI running, 1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span></td>
   <td class="ci">&#x23F3; 242/1/5</td>
   <td class="disc">1/3t 3p</td>
   <td class="num">1d</td>
   <td class="num">0d</td>
   <td class="num heat-1" title="242 lines changed">11</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sebastienros.png?size=32" alt="sebastienros"><a href="https://github.com/sebastienros">@sebastienros</a><a class="filter-btn" href="#" onclick="filterByUser('sebastienros');return false" title="Show only @sebastienros">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,jfversluis">
+<tr data-people="JamesNK,eerhardt,jfversluis" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (6 threads) &#183; &#x1F4E6; large (12 files, 1423 lines)">6.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14945">#14945</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14945" title="Add MAUI build queue to serialize platform builds">#14945</a></td>
   <td class="title">Add MAUI build queue to serialize platform builds</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No owner approval">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 384/0/0</td>
   <td class="disc heat-1">0/6t 2p</td>
   <td class="num">6d</td>
   <td class="num">6d</td>
   <td class="num heat-2" title="1423 lines changed">12</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="kola-tm,DamianEdwards">
+<tr data-people="kola-tm,DamianEdwards" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F310; community">6.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14112">#14112</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14112" title="Add Region to DevTunnelOptions to ensure setting region devtunnel is c">#14112</a></td>
   <td class="title">Add Region to DevTunnelOptions to ensure setting region devtunnel is c</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/kola-tm.png?size=32" alt="kola-tm"><a href="https://github.com/kola-tm">@kola-tm</a><a class="filter-btn" href="#" onclick="filterByUser('kola-tm');return false" title="Show only @kola-tm">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/kola-tm.png?size=32" alt="kola-tm"><a href="https://github.com/kola-tm">@kola-tm</a><a class="filter-btn" href="#" onclick="filterByUser('kola-tm');return false" title="Show only @kola-tm">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/DamianEdwards.png?size=32" alt="DamianEdwards"><a href="https://github.com/DamianEdwards">@DamianEdwards</a><a class="filter-btn" href="#" onclick="filterByUser('DamianEdwards');return false" title="Show only @DamianEdwards">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/kola-tm.png?size=32" alt="kola-tm"><a href="https://github.com/kola-tm">@kola-tm</a><a class="filter-btn" href="#" onclick="filterByUser('kola-tm');return false" title="Show only @kola-tm">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/DamianEdwards.png?size=32" alt="DamianEdwards"><a href="https://github.com/DamianEdwards">@DamianEdwards</a><a class="filter-btn" href="#" onclick="filterByUser('DamianEdwards');return false" title="Show only @DamianEdwards">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc heat-1">1/5t 3p</td>
   <td class="num heat-2">45d</td>
   <td class="num">1d</td>
   <td class="num heat-1" title="178 lines changed">7</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kola-tm.png?size=32" alt="kola-tm"><a href="https://github.com/kola-tm">@kola-tm</a><a class="filter-btn" href="#" onclick="filterByUser('kola-tm');return false" title="Show only @kola-tm">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/kola-tm.png?size=32" alt="kola-tm"><a href="https://github.com/kola-tm">@kola-tm</a><a class="filter-btn" href="#" onclick="filterByUser('kola-tm');return false" title="Show only @kola-tm">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,IEvangelist">
+<tr data-people="JamesNK,eerhardt,IEvangelist" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (15 files, 1224 lines)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15073">#15073</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15073" title="Enhance TypeScript code generation for callback properties and update…">#15073</a></td>
   <td class="title">Enhance TypeScript code generation for callback properties and update…</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 379/0/0</td>
   <td class="disc heat-1">0/5t 1p</td>
   <td class="num">1d</td>
   <td class="num">1d</td>
   <td class="num heat-2" title="1224 lines changed">15</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IEvangelist.png?size=32" alt="IEvangelist"><a href="https://github.com/IEvangelist">@IEvangelist</a><a class="filter-btn" href="#" onclick="filterByUser('IEvangelist');return false" title="Show only @IEvangelist">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IEvangelist.png?size=32" alt="IEvangelist"><a href="https://github.com/IEvangelist">@IEvangelist</a><a class="filter-btn" href="#" onclick="filterByUser('IEvangelist');return false" title="Show only @IEvangelist">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,danegsta">
+<tr data-people="JamesNK,eerhardt,danegsta" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (47 files, 3540 lines)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15117">#15117</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15117" title="Add &#39;aspire doctor fix&#39; sub-command for automated environment repair">#15117</a></td>
   <td class="title">Add &#39;aspire doctor fix&#39; sub-command for automated environment repair</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 246/5/0</td>
   <td class="disc heat-1">0/5t 1p</td>
   <td class="num">0d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="3540 lines changed">47</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,IEvangelist">
+<tr data-people="JamesNK,eerhardt,IEvangelist" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (32 files, 1108 lines)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15022">#15022</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15022" title="Refactor agent environment scanners and add standard location support">#15022</a></td>
   <td class="title">Refactor agent environment scanners and add standard location support</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci" title="Build Analysis passed; 6 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">6</sup> 244/6/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num">4d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="1108 lines changed">32</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IEvangelist.png?size=32" alt="IEvangelist"><a href="https://github.com/IEvangelist">@IEvangelist</a><a class="filter-btn" href="#" onclick="filterByUser('IEvangelist');return false" title="Show only @IEvangelist">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IEvangelist.png?size=32" alt="IEvangelist"><a href="https://github.com/IEvangelist">@IEvangelist</a><a class="filter-btn" href="#" onclick="filterByUser('IEvangelist');return false" title="Show only @IEvangelist">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="mcumming,copilot-pull-request-reviewer">
+<tr data-people="mcumming,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 4 unresolved &#183; &#x1F4E6; large (36 files, 839 lines)">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14882">#14882</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14882" title="Add FileChooser InputType to the Interaction Service">#14882</a></td>
   <td class="title">Add FileChooser InputType to the Interaction Service</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span></td>
-  <td class="action" title="4 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span>: respond to 4 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="4 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D;</a></span>: respond to 4 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 3 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">3</sup> 343/3/0</td>
   <td class="disc">4/4t 2p</td>
   <td class="num">7d</td>
   <td class="num">4d</td>
   <td class="num heat-2" title="839 lines changed">36</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,app">
+<tr data-people="JamesNK,eerhardt,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F310; community &#183; &#x1F4E6; small change">6.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14998">#14998</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14998" title="Bump flask from 3.0.0 to 3.1.3 in /playground/deployers/Deployers.Dock">#14998</a></td>
   <td class="title">Bump flask from 3.0.0 to 3.1.3 in /playground/deployers/Deployers.Dock</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 385/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">5d</td>
   <td class="num">5d</td>
   <td class="num" title="2 lines changed">1</td>
-  <td class="author"><a href="https://github.com/apps/dependabot">@dependabot</a> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><a href="https://github.com/apps/dependabot">@dependabot</a></td>
+  
 </tr>
-<tr data-people="jeffhandley,app">
+<tr data-people="jeffhandley,app" data-labels="">
   <td class="score" title="&#x1F7E1; CI pending &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (24d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14395">#14395</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14395" title="Run the issue-labeler over pull requests using polling">#14395</a></td>
   <td class="title">Run the issue-labeler over pull requests using polling</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D; only</a></span></td>
-  <td class="action" title="CI running, No owner approval, Stale 24d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D; only</a></span>: merge main (stale 24d)</td>
+  <td class="action" title="CI running, No owner approval, Stale 24d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D;</a></span>: merge main (stale 24d)</td>
   <td class="ci">&#x23F3; 1/0/1</td>
   <td class="disc">0/1t 1p</td>
   <td class="num heat-2">31d</td>
   <td class="num heat-2">24d</td>
   <td class="num" title="70 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="danegsta,app">
+<tr data-people="danegsta,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (43d) &#183; &#x1F570;&#xFE0F; old (118d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12945">#12945</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12945" title="Update Redis Commander container image to ghcr.io/joeferner/redis-comm">#12945</a></td>
   <td class="title">Update Redis Commander container image to ghcr.io/joeferner/redis-comm</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 43d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span>: merge main (stale 43d)</td>
+  <td class="action" title="No owner approval, Stale 43d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span>: merge main (stale 43d)</td>
   <td class="ci" title="Build Analysis passed; 2 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">2</sup> 325/2/0</td>
   <td class="disc">0/1t 2p</td>
   <td class="num heat-3">118d</td>
   <td class="num heat-3">43d</td>
   <td class="num" title="6 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="AndriySvyryd,app">
+<tr data-people="AndriySvyryd,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F5E8;&#xFE0F; busy (50 threads, 2 people) &#183; &#x1F4E6; large (17 files, 2622 lines) &#183; &#x1F570;&#xFE0F; old (90d)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13481">#13481</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13481" title="[release/13.2] Add Aspire.Hosting.EntityFrameworkCore hosting integrat">#13481</a></td>
   <td class="title">[release/13.2] Add Aspire.Hosting.EntityFrameworkCore hosting integrat</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/AndriySvyryd.png?size=32" alt="AndriySvyryd"><a href="https://github.com/AndriySvyryd">@AndriySvyryd</a><a class="filter-btn" href="#" onclick="filterByUser('AndriySvyryd');return false" title="Show only @AndriySvyryd">&#x1F50D; only</a></span></td>
-  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/AndriySvyryd.png?size=32" alt="AndriySvyryd"><a href="https://github.com/AndriySvyryd">@AndriySvyryd</a><a class="filter-btn" href="#" onclick="filterByUser('AndriySvyryd');return false" title="Show only @AndriySvyryd">&#x1F50D; only</a></span>: respond to 1 thread(s)</td>
+  <td class="action" title="1 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/AndriySvyryd.png?size=32" alt="AndriySvyryd"><a href="https://github.com/AndriySvyryd">@AndriySvyryd</a><a class="filter-btn" href="#" onclick="filterByUser('AndriySvyryd');return false" title="Show only @AndriySvyryd">&#x1F50D;</a></span>: respond to 1 thread(s)</td>
   <td class="ci">&#x2705; 388/0/0</td>
   <td class="disc heat-3">&#x1F525; 1/50t 2p</td>
   <td class="num heat-3">90d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="2622 lines changed">17</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AndriySvyryd.png?size=32" alt="AndriySvyryd"><a href="https://github.com/AndriySvyryd">@AndriySvyryd</a><a class="filter-btn" href="#" onclick="filterByUser('AndriySvyryd');return false" title="Show only @AndriySvyryd">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AndriySvyryd.png?size=32" alt="AndriySvyryd"><a href="https://github.com/AndriySvyryd">@AndriySvyryd</a><a class="filter-btn" href="#" onclick="filterByUser('AndriySvyryd');return false" title="Show only @AndriySvyryd">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="afscrome,copilot-pull-request-reviewer">
+<tr data-people="afscrome,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 1 unresolved &#183; &#x1F310; community">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15053">#15053</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15053" title="Fix some references to LifecycleHooks that were actually Event Subscr…">#15053</a></td>
   <td class="title">Fix some references to LifecycleHooks that were actually Event Subscr…</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 3 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">3</sup> 383/3/0</td>
   <td class="disc">1/1t 1p</td>
   <td class="num">2d</td>
   <td class="num">2d</td>
   <td class="num heat-1" title="46 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,jfversluis">
+<tr data-people="JamesNK,eerhardt,jfversluis" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (10 files, 1252 lines)">6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14768">#14768</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14768" title="Add Aspire.Hosting.Maui.Tests to CI and expand test coverage">#14768</a></td>
   <td class="title">Add Aspire.Hosting.Maui.Tests to CI and expand test coverage</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 343/0/0</td>
   <td class="disc">0/1t 1p</td>
   <td class="num">12d</td>
   <td class="num heat-1">11d</td>
   <td class="num heat-2" title="1252 lines changed">10</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,davidfowl">
+<tr data-people="JamesNK,eerhardt,davidfowl" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet">5.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15018">#15018</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15018" title="Make .NET SDK check in aspire doctor based on apphost language">#15018</a></td>
   <td class="title">Make .NET SDK check in aspire doctor based on apphost language</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 385/0/0</td>
   <td class="disc">0/2t 1p</td>
   <td class="num">4d</td>
   <td class="num">1d</td>
   <td class="num heat-1" title="338 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="ericsuh,eerhardt">
+<tr data-people="ericsuh,eerhardt" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 18 unresolved &#183; &#x1F5E8;&#xFE0F; busy (23 threads, 3 people) &#183; &#x1F310; community &#183; &#x1F4E6; large (136 files, 11987 lines)">5.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14149">#14149</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14149" title="Foundry Agents Hosting Integration">#14149</a></td>
   <td class="title">Foundry Agents Hosting Integration</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ericsuh.png?size=32" alt="ericsuh"><a href="https://github.com/ericsuh">@ericsuh</a><a class="filter-btn" href="#" onclick="filterByUser('ericsuh');return false" title="Show only @ericsuh">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="18 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/ericsuh.png?size=32" alt="ericsuh"><a href="https://github.com/ericsuh">@ericsuh</a><a class="filter-btn" href="#" onclick="filterByUser('ericsuh');return false" title="Show only @ericsuh">&#x1F50D; only</a></span>: respond to 18 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
+  <td class="action" title="18 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/ericsuh.png?size=32" alt="ericsuh"><a href="https://github.com/ericsuh">@ericsuh</a><a class="filter-btn" href="#" onclick="filterByUser('ericsuh');return false" title="Show only @ericsuh">&#x1F50D;</a></span>: respond to 18 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 252/0/0</td>
   <td class="disc heat-3">&#x1F525; 18/23t 3p</td>
   <td class="num heat-2">42d</td>
   <td class="num">0d</td>
   <td class="num heat-2" title="11987 lines changed">136</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ericsuh.png?size=32" alt="ericsuh"><a href="https://github.com/ericsuh">@ericsuh</a><a class="filter-btn" href="#" onclick="filterByUser('ericsuh');return false" title="Show only @ericsuh">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/ericsuh.png?size=32" alt="ericsuh"><a href="https://github.com/ericsuh">@ericsuh</a><a class="filter-btn" href="#" onclick="filterByUser('ericsuh');return false" title="Show only @ericsuh">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,app">
+<tr data-people="JamesNK,eerhardt,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F310; community &#183; &#x1F4E6; large (27 files, 2864 lines)">5.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15030">#15030</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/15030" title="Bump the npm_and_yarn group across 22 directories with 5 updates">#15030</a></td>
   <td class="title">Bump the npm_and_yarn group across 22 directories with 5 updates</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review">&#x1F441; Maintainer: review needed</td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 275/5/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num">4d</td>
   <td class="num">4d</td>
   <td class="num heat-2" title="2864 lines changed">27</td>
-  <td class="author"><a href="https://github.com/apps/dependabot">@dependabot</a> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><a href="https://github.com/apps/dependabot">@dependabot</a></td>
+  
 </tr>
-<tr data-people="JamesNK,eerhardt,app,radical">
+<tr data-people="JamesNK,eerhardt,app,radical" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (27d)">5.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14450">#14450</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14450" title="Remove scheduled builds for release/13.0 branch">#14450</a></td>
   <td class="title">Remove scheduled builds for release/13.0 branch</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/JamesNK.png?size=32" alt="JamesNK"><a href="https://github.com/JamesNK">@JamesNK</a><a class="filter-btn" href="#" onclick="filterByUser('JamesNK');return false" title="Show only @JamesNK">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
   <td class="action" title="No review, Stale 27d">&#x1F441; Maintainer: review needed</td>
   <td class="ci">&#x2705; 9/0/0</td>
   <td class="disc">0/0t 0p</td>
   <td class="num heat-1">27d</td>
   <td class="num heat-2">27d</td>
   <td class="num" title="22 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/radical.png?size=32" alt="radical"><a href="https://github.com/radical">@radical</a><a class="filter-btn" href="#" onclick="filterByUser('radical');return false" title="Show only @radical">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="afscrome,danegsta">
+<tr data-people="afscrome,danegsta" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F310; community &#183; &#x1F4E6; small change &#183; &#x23F3; stale (47d) &#183; &#x1F570;&#xFE0F; old (108d)">5.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13131">#13131</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13131" title="Use DevCert for SQL Server">#13131</a></td>
   <td class="title">Use DevCert for SQL Server</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 47d"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 47d"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 286/0/0</td>
   <td class="disc">1/1t 2p</td>
   <td class="num heat-3">108d</td>
   <td class="num heat-3">47d</td>
   <td class="num" title="26 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="mitchdenny,copilot-pull-request-reviewer">
+<tr data-people="mitchdenny,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (38 files, 8346 lines)">5.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14763">#14763</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14763" title="Add git-based template system spec and command stubs">#14763</a></td>
   <td class="title">Add git-based template system spec and command stubs</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
-  <td class="action" title="2 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="2 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 7/0/0</td>
   <td class="disc">2/2t 1p</td>
   <td class="num">12d</td>
   <td class="num heat-1">8d</td>
   <td class="num heat-2" title="8346 lines changed">38</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="philliphoff">
+<tr data-people="philliphoff" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (13 threads) &#183; &#x1F4E6; large (19 files, 948 lines) &#183; &#x23F3; stale (35d)">5.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13711">#13711</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13711" title="Addition of Durable Task Scheduler resources to Azure Functions host l">#13711</a></td>
   <td class="title">Addition of Durable Task Scheduler resources to Azure Functions host l</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/philliphoff.png?size=32" alt="philliphoff"><a href="https://github.com/philliphoff">@philliphoff</a><a class="filter-btn" href="#" onclick="filterByUser('philliphoff');return false" title="Show only @philliphoff">&#x1F50D; only</a></span></td>
-  <td class="action" title="No owner approval, Stale 35d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/philliphoff.png?size=32" alt="philliphoff"><a href="https://github.com/philliphoff">@philliphoff</a><a class="filter-btn" href="#" onclick="filterByUser('philliphoff');return false" title="Show only @philliphoff">&#x1F50D; only</a></span>: merge main (stale 35d)</td>
+  <td class="action" title="No owner approval, Stale 35d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/philliphoff.png?size=32" alt="philliphoff"><a href="https://github.com/philliphoff">@philliphoff</a><a class="filter-btn" href="#" onclick="filterByUser('philliphoff');return false" title="Show only @philliphoff">&#x1F50D;</a></span>: merge main (stale 35d)</td>
   <td class="ci">&#x2705; 298/0/0</td>
   <td class="disc heat-2">0/13t 2p</td>
   <td class="num heat-3">70d</td>
   <td class="num heat-3">35d</td>
   <td class="num heat-2" title="948 lines changed">19</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/philliphoff.png?size=32" alt="philliphoff"><a href="https://github.com/philliphoff">@philliphoff</a><a class="filter-btn" href="#" onclick="filterByUser('philliphoff');return false" title="Show only @philliphoff">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/philliphoff.png?size=32" alt="philliphoff"><a href="https://github.com/philliphoff">@philliphoff</a><a class="filter-btn" href="#" onclick="filterByUser('philliphoff');return false" title="Show only @philliphoff">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="Waleed-KH,eerhardt">
+<tr data-people="Waleed-KH,eerhardt" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F310; community &#183; &#x1F4E6; small change &#183; &#x23F3; stale (39d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13999">#13999</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13999" title="feat(node): add build output annotation">#13999</a></td>
   <td class="title">feat(node): add build output annotation</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/Waleed-KH.png?size=32" alt="Waleed-KH"><a href="https://github.com/Waleed-KH">@Waleed-KH</a><a class="filter-btn" href="#" onclick="filterByUser('Waleed-KH');return false" title="Show only @Waleed-KH">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 39d"><span class="user-ref"><img class="avatar" src="https://github.com/Waleed-KH.png?size=32" alt="Waleed-KH"><a href="https://github.com/Waleed-KH">@Waleed-KH</a><a class="filter-btn" href="#" onclick="filterByUser('Waleed-KH');return false" title="Show only @Waleed-KH">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 39d"><span class="user-ref"><img class="avatar" src="https://github.com/Waleed-KH.png?size=32" alt="Waleed-KH"><a href="https://github.com/Waleed-KH">@Waleed-KH</a><a class="filter-btn" href="#" onclick="filterByUser('Waleed-KH');return false" title="Show only @Waleed-KH">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 323/5/0</td>
   <td class="disc">1/3t 3p</td>
   <td class="num heat-2">51d</td>
   <td class="num heat-3">39d</td>
   <td class="num" title="79 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Waleed-KH.png?size=32" alt="Waleed-KH"><a href="https://github.com/Waleed-KH">@Waleed-KH</a><a class="filter-btn" href="#" onclick="filterByUser('Waleed-KH');return false" title="Show only @Waleed-KH">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/Waleed-KH.png?size=32" alt="Waleed-KH"><a href="https://github.com/Waleed-KH">@Waleed-KH</a><a class="filter-btn" href="#" onclick="filterByUser('Waleed-KH');return false" title="Show only @Waleed-KH">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="maddymontaquila,app">
+<tr data-people="maddymontaquila,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (21 files, 280 lines) &#183; &#x23F3; stale (49d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13938">#13938</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13938" title="Improve Console Logs download discoverability and reduce destructive b">#13938</a></td>
   <td class="title">Improve Console Logs download discoverability and reduce destructive b</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span></td>
-  <td class="action" title="2 threads, No owner approval, Stale 49d"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span>: respond to 2 thread(s)</td>
+  <td class="action" title="2 threads, No owner approval, Stale 49d"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D;</a></span>: respond to 2 thread(s)</td>
   <td class="ci" title="Build Analysis passed; 3 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">3</sup> 299/3/0</td>
   <td class="disc">2/2t 2p</td>
   <td class="num heat-2">54d</td>
   <td class="num heat-3">49d</td>
   <td class="num heat-2" title="280 lines changed">21</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="dkattan,adamint">
+<tr data-people="dkattan,adamint" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 3 unresolved &#183; &#x1F5E8;&#xFE0F; active (10 threads) &#183; &#x1F310; community &#183; &#x1F4E6; small change &#183; &#x23F3; stale (46d)">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13930">#13930</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13930" title="Refactor serverReadyAction handling">#13930</a></td>
   <td class="title">Refactor serverReadyAction handling</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/dkattan.png?size=32" alt="dkattan"><a href="https://github.com/dkattan">@dkattan</a><a class="filter-btn" href="#" onclick="filterByUser('dkattan');return false" title="Show only @dkattan">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="3 threads, No owner approval, Stale 46d"><span class="user-ref"><img class="avatar" src="https://github.com/dkattan.png?size=32" alt="dkattan"><a href="https://github.com/dkattan">@dkattan</a><a class="filter-btn" href="#" onclick="filterByUser('dkattan');return false" title="Show only @dkattan">&#x1F50D; only</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D; only</a></span></td>
+  <td class="action" title="3 threads, No owner approval, Stale 46d"><span class="user-ref"><img class="avatar" src="https://github.com/dkattan.png?size=32" alt="dkattan"><a href="https://github.com/dkattan">@dkattan</a><a class="filter-btn" href="#" onclick="filterByUser('dkattan');return false" title="Show only @dkattan">&#x1F50D;</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/adamint.png?size=32" alt="adamint"><a href="https://github.com/adamint">@adamint</a><a class="filter-btn" href="#" onclick="filterByUser('adamint');return false" title="Show only @adamint">&#x1F50D;</a></span></td>
   <td class="ci" title="Build Analysis passed; 5 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">5</sup> 324/5/0</td>
   <td class="disc heat-2">3/10t 3p</td>
   <td class="num heat-2">54d</td>
   <td class="num heat-3">46d</td>
   <td class="num" title="104 lines changed">5</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/dkattan.png?size=32" alt="dkattan"><a href="https://github.com/dkattan">@dkattan</a><a class="filter-btn" href="#" onclick="filterByUser('dkattan');return false" title="Show only @dkattan">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/dkattan.png?size=32" alt="dkattan"><a href="https://github.com/dkattan">@dkattan</a><a class="filter-btn" href="#" onclick="filterByUser('dkattan');return false" title="Show only @dkattan">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="mitchdenny,copilot-pull-request-reviewer">
+<tr data-people="mitchdenny,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 4 unresolved &#183; &#x1F4E6; small change">5.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14990">#14990</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14990" title="Default telemetry API to disabled when frontend has auth">#14990</a></td>
   <td class="title">Default telemetry API to disabled when frontend has auth</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
-  <td class="action" title="4 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span>: respond to 4 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="4 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span>: respond to 4 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 386/0/0</td>
   <td class="disc">4/4t 1p</td>
   <td class="num">5d</td>
   <td class="num">5d</td>
   <td class="num" title="99 lines changed">4</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="bbartels,davidfowl">
+<tr data-people="bbartels,davidfowl" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F5E8;&#xFE0F; busy (20 threads, 3 people) &#183; &#x1F310; community &#183; &#x1F4E6; large (3 files, 648 lines) &#183; &#x23F3; stale (19d)">4.6</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14128">#14128</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14128" title="Add container registry mirror support for image builds">#14128</a></td>
   <td class="title">Add container registry mirror support for image builds</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/bbartels.png?size=32" alt="bbartels"><a href="https://github.com/bbartels">@bbartels</a><a class="filter-btn" href="#" onclick="filterByUser('bbartels');return false" title="Show only @bbartels">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="1 threads, No owner approval, Stale 19d"><span class="user-ref"><img class="avatar" src="https://github.com/bbartels.png?size=32" alt="bbartels"><a href="https://github.com/bbartels">@bbartels</a><a class="filter-btn" href="#" onclick="filterByUser('bbartels');return false" title="Show only @bbartels">&#x1F50D; only</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
+  <td class="action" title="1 threads, No owner approval, Stale 19d"><span class="user-ref"><img class="avatar" src="https://github.com/bbartels.png?size=32" alt="bbartels"><a href="https://github.com/bbartels">@bbartels</a><a class="filter-btn" href="#" onclick="filterByUser('bbartels');return false" title="Show only @bbartels">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 1/20t 3p</td>
   <td class="num heat-2">43d</td>
   <td class="num heat-2">19d</td>
   <td class="num heat-2" title="648 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/bbartels.png?size=32" alt="bbartels"><a href="https://github.com/bbartels">@bbartels</a><a class="filter-btn" href="#" onclick="filterByUser('bbartels');return false" title="Show only @bbartels">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/bbartels.png?size=32" alt="bbartels"><a href="https://github.com/bbartels">@bbartels</a><a class="filter-btn" href="#" onclick="filterByUser('bbartels');return false" title="Show only @bbartels">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="marshalhayes">
+<tr data-people="marshalhayes" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (6 threads) &#183; &#x1F310; community &#183; &#x23F3; stale (91d) &#183; &#x1F570;&#xFE0F; old (146d)">4.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12076">#12076</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12076" title="Add Java debugger support">#12076</a></td>
   <td class="title">Add Java debugger support</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/marshalhayes.png?size=32" alt="marshalhayes"><a href="https://github.com/marshalhayes">@marshalhayes</a><a class="filter-btn" href="#" onclick="filterByUser('marshalhayes');return false" title="Show only @marshalhayes">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="Conflicts, No owner approval, Stale 91d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/marshalhayes.png?size=32" alt="marshalhayes"><a href="https://github.com/marshalhayes">@marshalhayes</a><a class="filter-btn" href="#" onclick="filterByUser('marshalhayes');return false" title="Show only @marshalhayes">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No owner approval, Stale 91d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/marshalhayes.png?size=32" alt="marshalhayes"><a href="https://github.com/marshalhayes">@marshalhayes</a><a class="filter-btn" href="#" onclick="filterByUser('marshalhayes');return false" title="Show only @marshalhayes">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci" title="Build Analysis passed; 1 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">1</sup> 285/1/0</td>
   <td class="disc heat-1">0/6t 3p</td>
   <td class="num heat-3">146d</td>
   <td class="num heat-3">91d</td>
   <td class="num heat-1" title="133 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/marshalhayes.png?size=32" alt="marshalhayes"><a href="https://github.com/marshalhayes">@marshalhayes</a><a class="filter-btn" href="#" onclick="filterByUser('marshalhayes');return false" title="Show only @marshalhayes">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/marshalhayes.png?size=32" alt="marshalhayes"><a href="https://github.com/marshalhayes">@marshalhayes</a><a class="filter-btn" href="#" onclick="filterByUser('marshalhayes');return false" title="Show only @marshalhayes">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="afscrome">
+<tr data-people="afscrome" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 3 unresolved &#183; &#x1F5E8;&#xFE0F; active (7 threads) &#183; &#x1F310; community">4.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14119">#14119</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14119" title="Extension methods on `IDistributedApplicationBuilder` for subscribing ">#14119</a></td>
   <td class="title">Extension methods on `IDistributedApplicationBuilder` for subscribing </td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="Conflicts, 3 threads, No owner approval, Copilot review errored">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span>: resolve conflicts; rerequest Copilot review</td>
+  <td class="action" title="Conflicts, 3 threads, No owner approval, Copilot review errored">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span>: resolve conflicts; rerequest Copilot review</td>
   <td class="ci" title="Build Analysis passed; 4 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">4</sup> 339/4/0</td>
   <td class="disc heat-1">3/7t 3p</td>
   <td class="num heat-2">44d</td>
   <td class="num heat-1">11d</td>
   <td class="num heat-1" title="249 lines changed">16</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/afscrome.png?size=32" alt="afscrome"><a href="https://github.com/afscrome">@afscrome</a><a class="filter-btn" href="#" onclick="filterByUser('afscrome');return false" title="Show only @afscrome">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="maddymontaquila,app,copilot-pull-request-reviewer">
+<tr data-people="maddymontaquila,app,copilot-pull-request-reviewer" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 11 unresolved &#183; &#x1F5E8;&#xFE0F; active (11 threads) &#183; &#x23F3; stale (32d)">4.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14072">#14072</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14072" title="Add friendly error messages to health check failures">#14072</a></td>
   <td class="title">Add friendly error messages to health check failures</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span></td>
-  <td class="action" title="11 threads, No review, Stale 32d"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span>: respond to 11 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span></td>
+  <td class="action" title="11 threads, No review, Stale 32d"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D;</a></span>: respond to 11 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 5/0/0</td>
   <td class="disc heat-2">11/11t 1p</td>
   <td class="num heat-2">47d</td>
   <td class="num heat-3">32d</td>
   <td class="num heat-1" title="300 lines changed">8</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/maddymontaquila.png?size=32" alt="maddymontaquila"><a href="https://github.com/maddymontaquila">@maddymontaquila</a><a class="filter-btn" href="#" onclick="filterByUser('maddymontaquila');return false" title="Show only @maddymontaquila">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="danegsta">
+<tr data-people="danegsta" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F5E8;&#xFE0F; active (6 threads) &#183; &#x23F3; stale (55d) &#183; &#x1F570;&#xFE0F; old (105d)">4.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13200">#13200</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13200" title="Add new event for finalizing resource annotations and use to configure">#13200</a></td>
   <td class="title">Add new event for finalizing resource annotations and use to configure</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, No owner approval, Stale 55d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, No owner approval, Stale 55d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 286/0/0</td>
   <td class="disc heat-1">0/6t 2p</td>
   <td class="num heat-3">105d</td>
   <td class="num heat-3">55d</td>
   <td class="num heat-1" title="352 lines changed">8</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danegsta.png?size=32" alt="danegsta"><a href="https://github.com/danegsta">@danegsta</a><a class="filter-btn" href="#" onclick="filterByUser('danegsta');return false" title="Show only @danegsta">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="ShilpiRach,copilot-pull-request-reviewer,eerhardt">
+<tr data-people="ShilpiRach,copilot-pull-request-reviewer,eerhardt" data-labels="">
   <td class="score" title="&#x1F7E1; CI pending &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 5 unresolved &#183; &#x1F5E8;&#xFE0F; busy (18 threads, 3 people) &#183; &#x1F310; community &#183; &#x1F4E6; large (30 files, 706 lines) &#183; &#x23F3; stale (28d)">3.9</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14001">#14001</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14001" title="Add support to enable regional DNL for Azure App Service">#14001</a></td>
   <td class="title">Add support to enable regional DNL for Azure App Service</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/ShilpiRach.png?size=32" alt="ShilpiRach"><a href="https://github.com/ShilpiRach">@ShilpiRach</a><a class="filter-btn" href="#" onclick="filterByUser('ShilpiRach');return false" title="Show only @ShilpiRach">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="CI running, 5 threads, No owner approval, Stale 28d"><span class="user-ref"><img class="avatar" src="https://github.com/ShilpiRach.png?size=32" alt="ShilpiRach"><a href="https://github.com/ShilpiRach">@ShilpiRach</a><a class="filter-btn" href="#" onclick="filterByUser('ShilpiRach');return false" title="Show only @ShilpiRach">&#x1F50D; only</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D; only</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D; only</a></span></td>
+  <td class="action" title="CI running, 5 threads, No owner approval, Stale 28d"><span class="user-ref"><img class="avatar" src="https://github.com/ShilpiRach.png?size=32" alt="ShilpiRach"><a href="https://github.com/ShilpiRach">@ShilpiRach</a><a class="filter-btn" href="#" onclick="filterByUser('ShilpiRach');return false" title="Show only @ShilpiRach">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/eerhardt.png?size=32" alt="eerhardt"><a href="https://github.com/eerhardt">@eerhardt</a><a class="filter-btn" href="#" onclick="filterByUser('eerhardt');return false" title="Show only @eerhardt">&#x1F50D;</a></span></td>
   <td class="ci">&#x23F3; 307/30/1</td>
   <td class="disc heat-3">&#x1F525; 5/18t 3p</td>
   <td class="num heat-2">51d</td>
   <td class="num heat-2">28d</td>
   <td class="num heat-2" title="706 lines changed">30</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ShilpiRach.png?size=32" alt="ShilpiRach"><a href="https://github.com/ShilpiRach">@ShilpiRach</a><a class="filter-btn" href="#" onclick="filterByUser('ShilpiRach');return false" title="Show only @ShilpiRach">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/ShilpiRach.png?size=32" alt="ShilpiRach"><a href="https://github.com/ShilpiRach">@ShilpiRach</a><a class="filter-btn" href="#" onclick="filterByUser('ShilpiRach');return false" title="Show only @ShilpiRach">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="icyca">
+<tr data-people="icyca" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 4 unresolved &#183; &#x1F5E8;&#xFE0F; active (7 threads) &#183; &#x1F310; community &#183; &#x23F3; stale (46d)">3.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13774">#13774</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13774" title="Concurrency pwd generation issue">#13774</a></td>
   <td class="title">Concurrency pwd generation issue</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/icyca.png?size=32" alt="icyca"><a href="https://github.com/icyca">@icyca</a><a class="filter-btn" href="#" onclick="filterByUser('icyca');return false" title="Show only @icyca">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="Conflicts, 4 threads, No owner approval, Stale 46d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/icyca.png?size=32" alt="icyca"><a href="https://github.com/icyca">@icyca</a><a class="filter-btn" href="#" onclick="filterByUser('icyca');return false" title="Show only @icyca">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 4 threads, No owner approval, Stale 46d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/icyca.png?size=32" alt="icyca"><a href="https://github.com/icyca">@icyca</a><a class="filter-btn" href="#" onclick="filterByUser('icyca');return false" title="Show only @icyca">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc heat-1">4/7t 3p</td>
   <td class="num heat-3">63d</td>
   <td class="num heat-3">46d</td>
   <td class="num heat-1" title="141 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/icyca.png?size=32" alt="icyca"><a href="https://github.com/icyca">@icyca</a><a class="filter-btn" href="#" onclick="filterByUser('icyca');return false" title="Show only @icyca">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/icyca.png?size=32" alt="icyca"><a href="https://github.com/icyca">@icyca</a><a class="filter-btn" href="#" onclick="filterByUser('icyca');return false" title="Show only @icyca">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="TheRubble">
+<tr data-people="TheRubble" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F5E8;&#xFE0F; active (11 threads) &#183; &#x1F310; community &#183; &#x23F3; stale (46d) &#183; &#x1F570;&#xFE0F; old (109d)">3.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13090">#13090</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13090" title="Add Schema Registry option to the Kafka hosting package.">#13090</a></td>
   <td class="title">Add Schema Registry option to the Kafka hosting package.</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/TheRubble.png?size=32" alt="TheRubble"><a href="https://github.com/TheRubble">@TheRubble</a><a class="filter-btn" href="#" onclick="filterByUser('TheRubble');return false" title="Show only @TheRubble">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
-  <td class="action" title="Conflicts, 2 threads, No owner approval, Stale 46d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/TheRubble.png?size=32" alt="TheRubble"><a href="https://github.com/TheRubble">@TheRubble</a><a class="filter-btn" href="#" onclick="filterByUser('TheRubble');return false" title="Show only @TheRubble">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 2 threads, No owner approval, Stale 46d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/TheRubble.png?size=32" alt="TheRubble"><a href="https://github.com/TheRubble">@TheRubble</a><a class="filter-btn" href="#" onclick="filterByUser('TheRubble');return false" title="Show only @TheRubble">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 295/0/0</td>
   <td class="disc heat-2">2/11t 4p</td>
   <td class="num heat-3">109d</td>
   <td class="num heat-3">46d</td>
   <td class="num heat-1" title="149 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/TheRubble.png?size=32" alt="TheRubble"><a href="https://github.com/TheRubble">@TheRubble</a><a class="filter-btn" href="#" onclick="filterByUser('TheRubble');return false" title="Show only @TheRubble">&#x1F50D; only</a></span> <span class="badge community">community</span></td>
+  <td class="author"> <span class="badge community" title="community">C</span><span class="user-ref"><img class="avatar" src="https://github.com/TheRubble.png?size=32" alt="TheRubble"><a href="https://github.com/TheRubble">@TheRubble</a><a class="filter-btn" href="#" onclick="filterByUser('TheRubble');return false" title="Show only @TheRubble">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="davidfowl,app">
+<tr data-people="davidfowl,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 3 unresolved &#183; &#x1F4E6; large (5 files, 552 lines) &#183; &#x23F3; stale (107d) &#183; &#x1F570;&#xFE0F; old (110d)">3.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13086">#13086</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13086" title="Add Poetry package manager support for Python">#13086</a></td>
   <td class="title">Add Poetry package manager support for Python</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 3 threads, No owner approval, Stale 107d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 3 threads, No owner approval, Stale 107d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci" title="Build Analysis passed; 1 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">1</sup> 298/1/0</td>
   <td class="disc heat-2">3/4t 4p</td>
   <td class="num heat-3">110d</td>
   <td class="num heat-3">107d</td>
   <td class="num heat-2" title="552 lines changed">5</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="mitchdenny,app">
+<tr data-people="mitchdenny,app" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; large (24 files, 1137 lines) &#183; &#x23F3; stale (100d) &#183; &#x1F570;&#xFE0F; old (100d)">3</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13261">#13261</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/13261" title="Add IPackageMigration service for automatic package migration in aspir">#13261</a></td>
   <td class="title">Add IPackageMigration service for automatic package migration in aspir</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 1 threads, No review, Stale 100d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 1 threads, No review, Stale 100d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci" title="Build Analysis passed; 4 non-blocking check(s) failed">&#x2705;<sup class="ci-warn">4</sup> 291/4/0</td>
   <td class="disc">1/1t 1p</td>
   <td class="num heat-3">100d</td>
   <td class="num heat-3">100d</td>
   <td class="num heat-2" title="1137 lines changed">24</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D; only</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mitchdenny.png?size=32" alt="mitchdenny"><a href="https://github.com/mitchdenny">@mitchdenny</a><a class="filter-btn" href="#" onclick="filterByUser('mitchdenny');return false" title="Show only @mitchdenny">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  
 </tr>
-<tr data-people="davidfowl">
+<tr data-people="davidfowl" data-labels="">
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 4 unresolved &#183; &#x1F4E6; large (6 files, 874 lines) &#183; &#x23F3; stale (31d)">3</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14378">#14378</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/14378" title="Add port availability check to aspire doctor">#14378</a></td>
   <td class="title">Add port availability check to aspire doctor</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, 4 threads, No review, Stale 31d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, 4 threads, No review, Stale 31d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x2705; 337/0/0</td>
   <td class="disc">4/4t 1p</td>
   <td class="num heat-2">32d</td>
   <td class="num heat-3">31d</td>
   <td class="num heat-2" title="874 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidfowl.png?size=32" alt="davidfowl"><a href="https://github.com/davidfowl">@davidfowl</a><a class="filter-btn" href="#" onclick="filterByUser('davidfowl');return false" title="Show only @davidfowl">&#x1F50D;</a></span></td>
+  
 </tr>
-<tr data-people="mcumming">
+<tr data-people="mcumming" data-labels="">
   <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 8 unresolved &#183; &#x1F5E8;&#xFE0F; active (8 threads) &#183; &#x23F3; stale (53d) &#183; &#x1F570;&#xFE0F; old (137d)">2.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12346">#12346</a></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/aspire/pull/12346" title="Enable Urls to display using FluentIcon">#12346</a></td>
   <td class="title">Enable Urls to display using FluentIcon</td>
-  <td class="who"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span></td>
-  <td class="action" title="Conflicts, CI fail (11 failed), 8 threads, No owner approval, Stale 53d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span>: resolve conflicts</td>
+  <td class="action" title="Conflicts, CI fail (11 failed), 8 threads, No owner approval, Stale 53d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D;</a></span>: resolve conflicts</td>
   <td class="ci">&#x274C; 227/11/0</td>
   <td class="disc heat-1">8/8t 1p</td>
   <td class="num heat-3">137d</td>
   <td class="num heat-3">53d</td>
   <td class="num heat-1" title="99 lines changed">13</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D; only</a></span></td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mcumming.png?size=32" alt="mcumming"><a href="https://github.com/mcumming">@mcumming</a><a class="filter-btn" href="#" onclick="filterByUser('mcumming');return false" title="Show only @mcumming">&#x1F50D;</a></span></td>
+  
 </tr>
 </tbody>
 </table>
 
 
 <script>
-function filterByUser(name) {
+function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = label;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+}
+function filterByUser(name) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
@@ -789,7 +825,7 @@ function filterByUser(name) {
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
 }
 function clearFilter() {
-  var rows = document.querySelectorAll('tbody tr');
+  var rows = document.querySelectorAll('#pr-table tbody tr');
   rows.forEach(function(r) {
     r.style.display = r.classList.contains('more-row') ? 'none' : '';
   });
@@ -798,11 +834,37 @@ function clearFilter() {
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
 }
-// Apply ?user=X filter on page load
+// Apply ?user=X or ?label=X filter on page load
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
+  var label = params.get('label');
   if (user) filterByUser(user);
+  else if (label) filterByLabel(label);
+})();
+// Resizable columns: drag right edge of any <th> to resize
+(function() {
+  var ths = document.querySelectorAll('thead th');
+  ths.forEach(function(th) {
+    var grip = document.createElement('div');
+    grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
+    th.style.position = 'relative';
+    grip.addEventListener('mousedown', function(e) {
+      lockLayout();
+      var startX = e.pageX, startW = th.offsetWidth;
+      function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
+      function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+    th.appendChild(grip);
+  });
+  // On first drag, snapshot auto widths so resizing works predictably
+  var tbl = document.querySelector('table'), locked = false;
+  function lockLayout() {
+    if (locked) return; locked = true;
+  }
 })();
 </script>
 </body>
