@@ -4,6 +4,7 @@
 .DESCRIPTION
     Re-runs Build-Reports.ps1 for each repo that has a docs/{slug}/scan.json,
     then rebuilds the index page. Useful after changing HTML templates.
+    The schedule interval is read from the workflow YAML so it stays in sync.
 .PARAMETER SkipAI
     Skip AI observation generation (default: true, since gh-models may not be available locally).
 #>
@@ -16,17 +17,27 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $docsDir = Join-Path $root "docs"
 
+# Read schedule hours from the workflow YAML (single source of truth)
+$workflowFile = Join-Path $root ".github/workflows/generate-reports.yml"
+$scheduleHours = 12  # fallback
+if (Test-Path $workflowFile) {
+    $cronLine = Get-Content $workflowFile | Where-Object { $_ -match 'cron:.*\*/(\d+)' }
+    if ($cronLine -and $cronLine -match '\*/(\d+)') {
+        $scheduleHours = [int]$Matches[1]
+    }
+}
+
 # Repo config: slug -> full repo name and report types
 $repos = @{
-    "runtime"    = @{ Repo = "dotnet/runtime";     Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
-    "extensions" = @{ Repo = "dotnet/extensions";   Types = "top15,community,quick-wins,stale-close"; Hours = 4 }
+    "runtime"    = @{ Repo = "dotnet/runtime";     Types = "top15,community,quick-wins,stale-close" }
+    "aspnetcore" = @{ Repo = "dotnet/aspnetcore";   Types = "top15,community,quick-wins,stale-close" }
+    "sdk"        = @{ Repo = "dotnet/sdk";          Types = "top15,community,quick-wins,stale-close" }
+    "msbuild"    = @{ Repo = "dotnet/msbuild";      Types = "top15,community,quick-wins,stale-close" }
+    "winforms"   = @{ Repo = "dotnet/winforms";     Types = "top15,community,quick-wins,stale-close" }
+    "wpf"        = @{ Repo = "dotnet/wpf";          Types = "top15,community,quick-wins,stale-close" }
+    "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,community,quick-wins,stale-close" }
+    "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,community,quick-wins,stale-close" }
+    "extensions" = @{ Repo = "dotnet/extensions";   Types = "top15,community,quick-wins,stale-close" }
 }
 
 $found = 0
@@ -43,7 +54,7 @@ foreach ($slug in $repos.Keys | Sort-Object) {
         Repo          = $cfg.Repo
         Slug          = $slug
         ReportTypes   = $cfg.Types
-        ScheduleHours = $cfg.Hours
+        ScheduleHours = $scheduleHours
     }
     if ($SkipAI) { $params["SkipAI"] = $true }
     & "$PSScriptRoot\Build-Reports.ps1" @params
@@ -56,6 +67,6 @@ if ($found -eq 0) {
 }
 
 Write-Host "`n=== Rebuilding index ===" -ForegroundColor Cyan
-& "$PSScriptRoot\Build-Index.ps1"
+& "$PSScriptRoot\Build-Index.ps1" -ScheduleHours $scheduleHours
 
 Write-Host "`nDone — regenerated $found repos from cached scan data." -ForegroundColor Green
