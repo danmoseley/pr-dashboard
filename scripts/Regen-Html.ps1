@@ -38,6 +38,7 @@ $repos = @{
     "roslyn"     = @{ Repo = "dotnet/roslyn";       Types = "top15,community,quick-wins,stale-close" }
     "aspire"     = @{ Repo = "dotnet/aspire";       Types = "top15,community,quick-wins,stale-close" }
     "extensions" = @{ Repo = "dotnet/extensions";   Types = "top15,community,quick-wins,stale-close" }
+    "maui"       = @{ Repo = "dotnet/maui";         Types = "top15,community,quick-wins,stale-close" }
 }
 
 $found = 0
