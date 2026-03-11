@@ -32,6 +32,9 @@ $ErrorActionPreference = "Stop"
 
 $prs = Get-Content $InputFile -Raw | ConvertFrom-Json
 
+# Detect whether any PR has area labels (to conditionally show Area column)
+$hasAnyAreaLabels = @($prs | Where-Object { $_.area_labels -and $_.area_labels.Count -gt 0 }).Count -gt 0
+
 # Build nav HTML
 $navHtml = ""
 if ($NavLinks.Count -gt 0) {
@@ -146,7 +149,7 @@ $rows = foreach ($pr in $prs) {
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
   <td class="author">$communityBadge$authorDisplay</td>
-  <td class="area-col">$areaLabelHtml</td>
+  $(if ($hasAnyAreaLabels) { "<td class=`"area-col`">$areaLabelHtml</td>" })
 </tr>
 "@
 }
@@ -312,7 +315,7 @@ $(if ($prCount -eq 0) {
 <thead>
 <tr>
   <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th><th>Area</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>$(if ($hasAnyAreaLabels) { "<th>Area</th>" })
 </tr>
 </thead>
 <tbody>
