@@ -41,7 +41,7 @@ if ($NavLinks.Count -gt 0) {
     $links = $NavLinks.GetEnumerator() | Sort-Object Name | ForEach-Object {
         "<a href=`"$($_.Value)`">$($_.Name)</a>"
     }
-    $navHtml = "<nav>$($links -join ' | ')</nav>"
+    $navHtml = "<nav>$($links -join ' | ') | <a class=`"feedback`" href=`"https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20$Repo/$($OutputFile | Split-Path -Leaf)`" target=`"_blank`">&#x1F4AC; Feedback</a></nav>"
 }
 
 # Helper: replace @username with avatar + linked username + filter button
@@ -295,6 +295,9 @@ $html = @"
     .heat-2 { background: rgba(210, 105, 30, 0.15); }
     .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
   }
+  a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
+              border-radius: 10px; text-decoration: none; margin-left: 4px; }
+  a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
 <body>

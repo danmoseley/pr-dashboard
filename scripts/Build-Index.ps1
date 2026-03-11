@@ -256,15 +256,20 @@ $indexHtml = @"
   .merge-count { color: #8b949e; font-size: 0.9em; }
   tr.merger-row td { border-top: none; }
   .footer { margin-top: 2em; color: #8b949e; font-size: 0.85em; }
+  a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
+              border-radius: 10px; text-decoration: none; margin-left: 8px; vertical-align: middle; }
+  a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; --good: #1a7f37; --bad: #cf222e; }
+    a.feedback { background: #0969da; }
+    a.feedback:hover { background: #0550ae; }
   }
 </style>
 </head>
 <body>
 <h1>PR Dashboard</h1>
-<p class="meta">Automated PR triage reports for dotnet repositories</p>
+<p class="meta">Automated PR triage reports for dotnet repositories <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback" target="_blank">&#x1F4AC; Feedback</a></p>
 
 <table>
 <thead>
