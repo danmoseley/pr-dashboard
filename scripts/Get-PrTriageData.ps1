@@ -560,7 +560,14 @@ foreach ($pr in $candidates) {
         $prNextAction += "; rerequest Copilot review"
     }
 
-    $whoStr = if ($who.Count -gt 0) { "@" + ($who -join ", @") } else { "—" }
+    $whoStr = if ($who.Count -gt 0) { "@" + ($who -join ", @") } else { "" }
+
+    # Fold who names into next_action so the Who column is redundant
+    if ($whoStr -and $prNextAction -match '^Maintainer:\s*(.+)') {
+        $prNextAction = "$whoStr`: $($Matches[1])"
+    } elseif ($whoStr -and $prNextAction -eq "Ready to merge") {
+        $prNextAction = "$whoStr`: Ready to merge"
+    }
 
     # Blockers
     $blockers = @()

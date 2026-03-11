@@ -82,8 +82,6 @@ $rows = foreach ($pr in $prs) {
         $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
     }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community" title="community">C</span>' } else { "" }
-    # Show community badge in Who column when it contains the community PR author
-    $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community" title="community">C</span>' } else { "" }
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
     if ($pr.author -match "copilot-swe-agent") {
         if ($pr.copilot_trigger) {
@@ -141,7 +139,6 @@ $rows = foreach ($pr in $prs) {
   <td class="score" title="$safeWhy">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
-  <td class="who">$whoCommunityBadge$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)p</td>
@@ -256,7 +253,6 @@ $html = @"
   .pr-num { white-space: nowrap; width: 1%; }
   .title { min-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .area-col { white-space: nowrap; width: 1%; }
-  .who { white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
   .action { min-width: 300px; overflow: hidden; text-overflow: ellipsis; }
   .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
@@ -314,7 +310,7 @@ $(if ($prCount -eq 0) {
 <table id="pr-table">
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
+  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
   <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>$(if ($hasAnyAreaLabels) { "<th>Area</th>" })
 </tr>
 </thead>
