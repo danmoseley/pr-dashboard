@@ -53,7 +53,7 @@ function ConvertTo-UserHtml([string]$text) {
             "<a href=`"https://github.com/apps/$name`">@$name</a>"
         } else {
             $u = $full
-            "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D; only</a></span>"
+            "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D;</a></span>"
         }
     })
 }
@@ -78,9 +78,9 @@ $rows = foreach ($pr in $prs) {
         $ciTitle = " title=`"Build Analysis passed; $ciFailCount non-blocking check(s) failed`""
         $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
     }
-    $communityBadge = if ($pr.is_community) { ' <span class="badge community">community</span>' } else { "" }
+    $communityBadge = if ($pr.is_community) { ' <span class="badge community" title="community">C</span>' } else { "" }
     # Show community badge in Who column when it contains the community PR author
-    $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community">community</span>' } else { "" }
+    $whoCommunityBadge = if ($pr.is_community -and $pr.who -match [regex]::Escape($pr.author)) { ' <span class="badge community" title="community">C</span>' } else { "" }
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
     if ($pr.author -match "copilot-swe-agent") {
         if ($pr.copilot_trigger) {
@@ -103,6 +103,17 @@ $rows = foreach ($pr in $prs) {
     # Escape HTML in title
     $safeTitle = [System.Net.WebUtility]::HtmlEncode($pr.title)
 
+    # Area label badges (shown before title)
+    $areaLabelHtml = ""
+    if ($pr.area_labels) {
+        $areaLabelHtml = ($pr.area_labels | ForEach-Object {
+            $name = $_ -replace '^area-', ''
+            $safeName = [System.Net.WebUtility]::HtmlEncode($name)
+            $safeFullName = [System.Net.WebUtility]::HtmlEncode($_)
+            " <a class=`"badge area-label`" href=`"#`" onclick=`"filterByLabel('$safeFullName');return false`" title=`"Show only $safeFullName`">$safeName</a>"
+        }) -join ""
+    }
+
     # Heat classes for age, staleness, and discussion
     $ageHeat = if ($pr.age_days -ge 60) { " heat-3" } elseif ($pr.age_days -ge 30) { " heat-2" } elseif ($pr.age_days -ge 14) { " heat-1" } else { "" }
     $updateHeat = if ($pr.days_since_update -ge 30) { " heat-3" } elseif ($pr.days_since_update -ge 14) { " heat-2" } elseif ($pr.days_since_update -ge 7) { " heat-1" } else { "" }
@@ -118,21 +129,24 @@ $rows = foreach ($pr in $prs) {
     if ($pr.copilot_trigger) { $allText += " @$($pr.copilot_trigger)" }
     $people = @([regex]::Matches($allText, '@([\w-]+)') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique) -join ','
 
+    $labelsList = if ($pr.area_labels) { ($pr.area_labels -join ',') } else { "" }
+
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
 
     @"
-<tr$moreClass data-people="$people">
+<tr$moreClass data-people="$people" data-labels="$labelsList">
   <td class="score" title="$safeWhy">$($pr.score)</td>
   <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
-  <td class="who">$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))$whoCommunityBadge</td>
+  <td class="who">$whoCommunityBadge$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.who)))</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)p</td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
-  <td class="author">$authorDisplay$communityBadge</td>
+  <td class="author">$communityBadge$authorDisplay</td>
+  <td class="area-col">$areaLabelHtml</td>
 </tr>
 "@
 }
@@ -218,7 +232,7 @@ $html = @"
 <title>$([System.Net.WebUtility]::HtmlEncode($Title)) - PR Dashboard</title>
 <style>
   :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
-           --badge-community: #238636; --hover: #161b22; --header-bg: #161b22; }
+           --badge-community: #238636; --badge-area: #d4c5f9; --hover: #161b22; --header-bg: #161b22; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
          background: var(--bg); color: var(--fg); padding: 1em 2em; }
@@ -230,25 +244,30 @@ $html = @"
   table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
-       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; }
+       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
   td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; }
-  .pr-num { white-space: nowrap; }
-  .title { max-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .who, .action { white-space: nowrap; }
-  .ci { white-space: nowrap; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; width: 1%; }
+  .pr-num { white-space: nowrap; width: 1%; }
+  .title { min-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; width: 1%; }
+  .who { white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+  .action { min-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
-  .disc, .num { text-align: right; white-space: nowrap; }
+  .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
+  .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; }
+  .author { white-space: nowrap; max-width: 165px; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
-  .badge.community { background: var(--badge-community); color: #fff; }
+  .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
+  .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
+  .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
   .observations { margin-top: 1.5em; max-width: 900px; }
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
@@ -293,7 +312,7 @@ $(if ($prCount -eq 0) {
 <thead>
 <tr>
   <th>Score</th><th>PR</th><th>Title</th><th>Who</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Updated</th><th>Files</th><th>Author</th>
+  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th><th>Area</th>
 </tr>
 </thead>
 <tbody>
@@ -305,6 +324,25 @@ $($rows -join "`n")
 $toggleHtml
 $obsHtml
 <script>
+function filterByLabel(label) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
+    }
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = label;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+}
 function filterByUser(name) {
   var rows = document.querySelectorAll('#pr-table tbody tr');
   var count = 0;
@@ -334,11 +372,32 @@ function clearFilter() {
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
 }
-// Apply ?user=X filter on page load
+// Apply ?user=X or ?label=X filter on page load
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
+  var label = params.get('label');
   if (user) filterByUser(user);
+  else if (label) filterByLabel(label);
+})();
+// Resizable columns: drag right edge of any <th> to resize
+(function() {
+  var ths = document.querySelectorAll('thead th');
+  ths.forEach(function(th) {
+    var grip = document.createElement('div');
+    grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
+    th.style.position = 'relative';
+    grip.addEventListener('mousedown', function(e) {
+      var startX = e.pageX, startW = th.offsetWidth;
+      function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
+      function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+      e.preventDefault();
+    });
+    th.appendChild(grip);
+  });
+  document.querySelector('table').style.tableLayout = 'fixed';
 })();
 </script>
 </body>

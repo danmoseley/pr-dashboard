@@ -612,6 +612,7 @@ foreach ($pr in $candidates) {
         mergeable = $pr.mergeable
         approval_count = $approvalCount
         is_community = $isCommunity
+        area_labels = @($labelNames | Where-Object { $_ -match "^area-" })
         age_days = [int]$ageInDays
         days_since_update = [int]$daysSinceUpdate
         changed_files = $pr.changedFiles
