@@ -606,7 +606,7 @@ foreach ($pr in $candidates) {
 
     $results += [PSCustomObject]@{
         number = $n
-        title = $pr.title.Substring(0, [Math]::Min(70, $pr.title.Length))
+        title = $pr.title
         author = $pr.author.login
         copilot_trigger = $botTrigger
         score = $composite

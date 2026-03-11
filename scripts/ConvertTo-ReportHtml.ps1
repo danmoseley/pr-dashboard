@@ -137,7 +137,7 @@ $rows = foreach ($pr in $prs) {
     @"
 <tr$moreClass data-people="$people" data-labels="$labelsList">
   <td class="score" title="$safeWhy">$($pr.score)</td>
-  <td class="pr-num"><a href="$prUrl">#$($pr.number)</a></td>
+  <td class="pr-num"><a href="$prUrl" title="$safeTitle">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
@@ -241,7 +241,7 @@ $html = @"
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -249,11 +249,11 @@ $html = @"
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; width: 1%; }
-  .pr-num { white-space: nowrap; width: 1%; }
-  .title { min-width: 350px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .area-col { white-space: nowrap; width: 1%; }
-  .action { min-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .ci { white-space: nowrap; padding: 5px 4px; }
   .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
   .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
@@ -261,7 +261,7 @@ $html = @"
   .heat-1 { background: rgba(187, 128, 9, 0.15); }
   .heat-2 { background: rgba(210, 105, 30, 0.22); }
   .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; max-width: 165px; overflow: hidden; text-overflow: ellipsis; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
   .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
   .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
@@ -308,6 +308,19 @@ $(if ($prCount -eq 0) {
 } else {
 @"
 <table id="pr-table">
+<colgroup>
+  <col style="width:3%">
+  <col style="width:4%">
+  <col>
+  <col style="width:28%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  $(if ($hasAnyAreaLabels) { '<col style="width:7%">' })
+</colgroup>
 <thead>
 <tr>
   <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
@@ -387,6 +400,7 @@ function clearFilter() {
     grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
     th.style.position = 'relative';
     grip.addEventListener('mousedown', function(e) {
+      lockLayout();
       var startX = e.pageX, startW = th.offsetWidth;
       function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
       function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
@@ -396,7 +410,11 @@ function clearFilter() {
     });
     th.appendChild(grip);
   });
-  document.querySelector('table').style.tableLayout = 'fixed';
+  // On first drag, snapshot auto widths so resizing works predictably
+  var tbl = document.querySelector('table'), locked = false;
+  function lockLayout() {
+    if (locked) return; locked = true;
+  }
 })();
 </script>
 </body>
