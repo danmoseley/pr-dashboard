@@ -54,7 +54,9 @@ jobs:
           done
 
       - name: Generate index page
-        run: pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
+        run: |
+          mkdir -p docs/all
+          pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
 
       - name: Commit and push
         run: |
