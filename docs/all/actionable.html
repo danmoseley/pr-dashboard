@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actionable PRs — All Repos - PR Dashboard</title>
+<style>
+  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
+           --badge-community: #238636; --badge-area: #d4c5f9; --hover: #161b22; --header-bg: #161b22; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); padding: 1em 2em; }
+  nav { margin-bottom: 1em; font-size: 0.9em; }
+  nav a { color: var(--link); text-decoration: none; margin: 0 0.3em; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-size: 1.4em; margin-bottom: 0.2em; }
+  .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* User input area */
+  .user-input { margin-bottom: 1em; display: flex; align-items: center; gap: 8px; }
+  .user-input input { background: var(--header-bg); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 12px; font-size: 0.95em; width: 220px; }
+  .user-input input::placeholder { color: #484f58; }
+  .user-input input:focus { outline: none; border-color: var(--link); }
+  .user-input button { background: #238636; color: #fff; border: none; border-radius: 6px;
+    padding: 6px 16px; font-size: 0.9em; cursor: pointer; font-weight: 500; }
+  .user-input button:hover { background: #2ea043; }
+
+  /* Summary bar */
+  .summary-bar { background: var(--header-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 14px; margin-bottom: 1em; font-size: 0.9em; display: none; }
+  .summary-bar .total { font-weight: 600; }
+  .summary-bar .repo-breakdown { color: #8b949e; margin-left: 8px; }
+
+  /* Loading / error */
+  .status { color: #8b949e; font-size: 0.9em; margin: 2em 0; }
+  .error { color: #f85149; }
+
+  /* PR table — matches ConvertTo-ReportHtml.ps1 */
+  table#pr-table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
+  #pr-table thead { position: sticky; top: 0; z-index: 1; }
+  #pr-table th { background: var(--header-bg); padding: 6px 10px; text-align: left;
+    border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  #pr-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  #pr-table tr:hover { background: var(--hover); }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .pr-num { white-space: nowrap; }
+  .repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9em; }
+  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ci { white-space: nowrap; padding: 5px 4px; }
+  .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
+  .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
+  .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
+  .heat-1 { background: rgba(187, 128, 9, 0.15); }
+  .heat-2 { background: rgba(210, 105, 30, 0.22); }
+  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
+  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
+  .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
+  .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
+  .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
+  .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
+  .user-ref { position: relative; display: inline-block; }
+  .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
+    text-decoration: none !important; cursor: pointer; filter: grayscale(1) opacity(0.5); }
+  .filter-btn:hover { color: var(--link); border-color: var(--link); filter: none; }
+  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
+  .filter-banner a { margin-left: 8px; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
+  .scoring p { margin: 0.5em 0; line-height: 1.4; }
+  .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
+  .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
+  a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
+    border-radius: 10px; text-decoration: none; margin-left: 4px; }
+  a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
+             --hover: #f6f8fa; --header-bg: #f6f8fa; }
+    .heat-1 { background: rgba(187, 128, 9, 0.1); }
+    .heat-2 { background: rgba(210, 105, 30, 0.15); }
+    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+    a.feedback { background: #0969da; }
+    a.feedback:hover { background: #0550ae; }
+  }
+</style>
+</head>
+<body>
+<nav>
+  <a href="../index.html">Dashboard</a> |
+  <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20all/actionable.html" target="_blank">&#x1F4AC; Feedback</a>
+</nav>
+<h1>Actionable PRs &#8212; All Repos</h1>
+<p class="meta" id="meta-line">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
+
+<div class="user-input">
+  <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
+  <button id="go-btn" onclick="applyUser()">Go</button>
+</div>
+
+<details class="scoring">
+  <summary>How is the score calculated?</summary>
+  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
+  <table class="scoring-table">
+    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
+    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
+    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
+    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
+    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
+    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
+    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
+    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+  </table>
+  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.).
+  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+</details>
+
+<div class="summary-bar" id="summary-bar"></div>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearSecondaryFilter();return false">&#x2715; Clear</a></div>
+
+<div id="status" class="status">Loading repository data&#8230;</div>
+<div id="content"></div>
+
+<script>
+(function() {
+  'use strict';
+
+  // --- State ---
+  var allPrs = [];        // merged from all repos, each with .slug and .repo
+  var repoList = [];      // [{slug, repo}]
+  var currentUser = '';    // primary filter username
+  var loaded = false;
+
+  var LS_KEY = 'pr-dashboard-user';
+
+  // --- Init ---
+  var params = new URLSearchParams(location.search);
+  var urlUser = params.get('user') || '';
+  var savedUser = '';
+  try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
+  var initialUser = urlUser || savedUser;
+  if (initialUser) {
+    document.getElementById('user-field').value = initialUser;
+  }
+
+  // Enter key on input
+  document.getElementById('user-field').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') applyUser();
+  });
+
+  // Start fetching
+  fetchData();
+
+  // --- Data loading ---
+  function fetchData() {
+    fetch('../repos.json')
+      .then(function(r) { return r.json(); })
+      .then(function(repos) {
+        repoList = repos;
+        var fetches = repos.map(function(repo) {
+          var scanP = fetch('../' + repo.slug + '/scan.json')
+            .then(function(r) { return r.json(); })
+            .catch(function() { return { prs: [] }; });
+          var metaP = fetch('../' + repo.slug + '/meta.json')
+            .then(function(r) { return r.json(); })
+            .catch(function() { return {}; });
+          return Promise.all([scanP, metaP]).then(function(pair) {
+            var data = pair[0], meta = pair[1];
+            var slug = repo.slug;
+            var repoName = data.repo || repo.repo;
+            (data.prs || []).forEach(function(pr) {
+              pr._slug = slug;
+              pr._repo = repoName;
+            });
+            return { slug: slug, repo: repoName, prs: data.prs || [], updated: meta.updated || null };
+          });
+        });
+        return Promise.all(fetches);
+      })
+      .then(function(results) {
+        allPrs = [];
+        var timestamps = [];
+        results.forEach(function(r) {
+          allPrs = allPrs.concat(r.prs);
+          if (r.updated) timestamps.push(new Date(r.updated));
+        });
+        allPrs.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+        loaded = true;
+        document.getElementById('status').style.display = 'none';
+
+        // Show update timestamp
+        if (timestamps.length > 0) {
+          timestamps.sort(function(a, b) { return a - b; });
+          var oldest = timestamps[0];
+          var ts = oldest.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+          document.getElementById('meta-line').textContent =
+            'Updated every 12h, last at ' + ts + ' \u00B7 ' + allPrs.length + ' PRs across ' + results.length + ' repos';
+        }
+
+        if (initialUser) {
+          currentUser = initialUser;
+          saveUser(initialUser);
+          renderFiltered(initialUser);
+        } else {
+          renderPrompt();
+        }
+      })
+      .catch(function(err) {
+        document.getElementById('status').className = 'status error';
+        document.getElementById('status').textContent = 'Failed to load data: ' + err.message;
+      });
+  }
+
+  // --- Actions (global) ---
+  window.applyUser = function() {
+    var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
+    if (!name) return;
+    currentUser = name;
+    saveUser(name);
+    history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+    if (loaded) renderFiltered(name);
+  };
+
+  window.filterByUser = function(name) {
+    document.getElementById('user-field').value = name;
+    currentUser = name;
+    saveUser(name);
+    history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+    renderFiltered(name);
+  };
+
+  window.filterByLabel = function(label) {
+    // Secondary filter within current view
+    var rows = document.querySelectorAll('#pr-table tbody tr');
+    rows.forEach(function(r) {
+      var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+      r.style.display = labels.indexOf(',' + label.toLowerCase() + ',') >= 0 ? '' : 'none';
+    });
+    document.getElementById('filter-name').textContent = label;
+    document.getElementById('filter-banner').style.display = 'block';
+  };
+
+  window.clearSecondaryFilter = function() {
+    var rows = document.querySelectorAll('#pr-table tbody tr');
+    rows.forEach(function(r) { r.style.display = ''; });
+    document.getElementById('filter-banner').style.display = 'none';
+  };
+
+  window.clearUser = function() {
+    currentUser = '';
+    document.getElementById('user-field').value = '';
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('summary-bar').style.display = 'none';
+    document.getElementById('filter-banner').style.display = 'none';
+    if (loaded) renderPrompt();
+  };
+
+  function saveUser(name) {
+    try { localStorage.setItem(LS_KEY, name); } catch(e) {}
+  }
+
+  // --- Rendering ---
+  function renderPrompt() {
+    var count = allPrs.length;
+    var repoCount = repoList.length;
+    document.getElementById('content').innerHTML =
+      '<p class="status" style="margin:2em 0">Enter a GitHub username above to see actionable PRs across ' +
+      repoCount + ' repositories (' + count + ' open PRs).</p>';
+  }
+
+  function renderFiltered(username) {
+    var lc = username.toLowerCase();
+    var filtered = allPrs.filter(function(pr) {
+      var people = getPeople(pr);
+      return people.indexOf(lc) >= 0;
+    });
+    filtered.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+
+    // Summary bar
+    var repoCounts = {};
+    filtered.forEach(function(pr) {
+      repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1;
+    });
+    var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
+      .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
+    var bar = document.getElementById('summary-bar');
+    bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' +
+      ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
+      '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
+      (breakdown ? ': ' + breakdown : '') + '</span>';
+    bar.style.display = 'block';
+    document.getElementById('filter-banner').style.display = 'none';
+
+    renderTable(filtered);
+  }
+
+  function renderTable(prs) {
+    if (prs.length === 0) {
+      document.getElementById('content').innerHTML =
+        '<p class="status" style="margin:2em 0">No PRs found' +
+        (currentUser ? ' for @' + escHtml(currentUser) : '') + '.</p>';
+      return;
+    }
+
+    // Detect if any PR has area labels
+    var hasArea = prs.some(function(pr) { return pr.area_labels && pr.area_labels.length > 0; });
+
+    var html = '<table id="pr-table"><colgroup>' +
+      '<col style="width:3%">' +     // Score
+      '<col style="width:3.5%">' +    // PR
+      '<col style="width:6%">' +      // Repo
+      '<col>' +                       // Title (flex)
+      '<col style="width:25%">' +     // Next Action
+      '<col style="width:6%">' +      // CI
+      '<col style="width:3%">' +      // Disc
+      '<col style="width:2.5%">' +    // Age
+      '<col style="width:2.5%">' +    // Upd
+      '<col style="width:2.5%">' +    // Files
+      '<col style="width:8%">' +      // Author
+      (hasArea ? '<col style="width:7%">' : '') +
+      '</colgroup><thead><tr>' +
+      '<th>Score</th><th>PR</th><th>Repo</th><th>Title</th><th>Next Action</th>' +
+      '<th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>' +
+      (hasArea ? '<th>Area</th>' : '') +
+      '</tr></thead><tbody>';
+
+    for (var i = 0; i < prs.length; i++) {
+      html += renderRow(prs[i], hasArea);
+    }
+    html += '</tbody></table>';
+
+    document.getElementById('content').innerHTML = html;
+  }
+
+  function renderRow(pr, hasArea) {
+    var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
+    var repoUrl = '../' + pr._slug + '/actionable.html';
+
+    // CI emoji
+    var ciEmoji = pr.ci === 'SUCCESS' ? '&#x2705;' :
+                  pr.ci === 'FAILURE' ? '&#x274C;' :
+                  pr.ci === 'IN_PROGRESS' ? '&#x23F3;' : '&#x26A0;&#xFE0F;';
+    var ciFailCount = 0;
+    if (pr.ci_detail && /^(\d+)\/(\d+)\/(\d+)$/.test(pr.ci_detail)) {
+      ciFailCount = parseInt(RegExp.$2);
+    }
+    var ciTitle = '';
+    var ciFailHint = '';
+    if (pr.ci === 'SUCCESS' && ciFailCount > 0) {
+      ciTitle = ' title="Build Analysis passed; ' + ciFailCount + ' non-blocking check(s) failed"';
+      ciFailHint = '<sup class="ci-warn">' + ciFailCount + '</sup>';
+    }
+
+    // Next action emoji
+    var na = pr.next_action || '';
+    var actionEmoji = /Ready to merge/.test(na) ? '&#x1F7E2; ' :
+                      /review needed/.test(na) ? '&#x1F441; ' :
+                      /resolve conflicts/.test(na) ? '&#x1F6D1; ' :
+                      /fix CI/.test(na) ? '&#x1F6D1; ' :
+                      /Wait for CI/.test(na) ? '&#x23F3; ' :
+                      /merge main/.test(na) ? '&#x1F504; ' : '';
+
+    // Heat classes
+    var ageHeat = pr.age_days >= 60 ? ' heat-3' : pr.age_days >= 30 ? ' heat-2' : pr.age_days >= 14 ? ' heat-1' : '';
+    var updateHeat = pr.days_since_update >= 30 ? ' heat-3' : pr.days_since_update >= 14 ? ' heat-2' : pr.days_since_update >= 7 ? ' heat-1' : '';
+    var discHeat = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? ' heat-3' :
+                   (pr.total_threads > 8 || pr.distinct_commenters > 3) ? ' heat-2' :
+                   pr.total_threads > 4 ? ' heat-1' : '';
+    var discEmoji = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? '&#x1F525; ' : '';
+    var filesHeat = (pr.changed_files > 20 || pr.lines_changed > 500) ? ' heat-2' :
+                    (pr.changed_files > 5 || pr.lines_changed > 200) ? ' heat-1' : '';
+
+    // Author
+    var authorHtml = '';
+    var communityBadge = pr.is_community ? ' <span class="badge community" title="community">C</span>' : '';
+    if (/copilot-swe-agent/.test(pr.author)) {
+      if (pr.copilot_trigger) {
+        authorHtml = userHtml(pr.copilot_trigger) + ' <span class="badge" title="authored by Copilot">via &#x1F916;</span>';
+      } else {
+        authorHtml = '&#x1F916; copilot';
+      }
+    } else {
+      authorHtml = userHtml(pr.author);
+    }
+
+    // Area labels
+    var areaHtml = '';
+    if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
+      areaHtml = pr.area_labels.map(function(lbl) {
+        var short = lbl.replace(/^area-/, '');
+        return ' <a class="badge area-label" href="#" onclick="filterByLabel(\'' + escAttr(lbl) + '\');return false" title="Show only ' + escHtml(lbl) + '">' + escHtml(short) + '</a>';
+      }).join('');
+    }
+
+    var people = getPeople(pr).join(',');
+    var labels = (pr.area_labels || []).join(',');
+    var safeTitle = escHtml(pr.title);
+    var safeWhy = pr.why || '';
+    var safeBlockers = escHtml(pr.blockers || '');
+
+    return '<tr data-people="' + people + '" data-labels="' + escAttr(labels) + '">' +
+      '<td class="score" title="' + escAttr(safeWhy) + '">' + pr.score + '</td>' +
+      '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(safeTitle) + '">#' + pr.number + '</a></td>' +
+      '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
+      '<td class="title">' + safeTitle + '</td>' +
+      '<td class="action" title="' + escAttr(safeBlockers) + '">' + actionEmoji + convertUserRefs(escHtml(na)) + '</td>' +
+      '<td class="ci"' + ciTitle + '>' + ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '') + '</td>' +
+      '<td class="disc' + discHeat + '">' + discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p</td>' +
+      '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
+      '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
+      '<td class="num' + filesHeat + '" title="' + (pr.lines_changed || 0) + ' lines changed">' + (pr.changed_files || 0) + '</td>' +
+      '<td class="author">' + communityBadge + authorHtml + '</td>' +
+      (hasArea ? '<td class="area-col">' + areaHtml + '</td>' : '') +
+      '</tr>';
+  }
+
+  // --- Helpers ---
+  function getPeople(pr) {
+    var text = (pr.who || '') + ' @' + (pr.author || '') + ' ' + (pr.next_action || '');
+    if (pr.copilot_trigger) text += ' @' + pr.copilot_trigger;
+    var matches = text.match(/@([\w-]+)/g) || [];
+    var seen = {};
+    return matches.map(function(m) { return m.slice(1).toLowerCase(); })
+      .filter(function(u) { if (seen[u]) return false; seen[u] = true; return true; });
+  }
+
+  function userHtml(username) {
+    if (!username) return '';
+    var u = username.replace(/^@/, '');
+    if (/^app\//.test(u)) {
+      var name = u.replace(/^app\//, '');
+      return '<a href="https://github.com/apps/' + name + '">@' + escHtml(name) + '</a>';
+    }
+    return '<span class="user-ref"><img class="avatar" src="https://github.com/' + u + '.png?size=32" alt="' + u + '">' +
+      '<a href="https://github.com/' + u + '">@' + escHtml(u) + '</a>' +
+      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(u) + '\');return false" title="Show only @' + u + '">&#x1F50D;</a></span>';
+  }
+
+  function convertUserRefs(text) {
+    return text.replace(/@((?:app\/)?[\w-]+)/g, function(match, name) {
+      if (/^app\//.test(name)) {
+        var botName = name.replace(/^app\//, '');
+        return '<a href="https://github.com/apps/' + botName + '">@' + escHtml(botName) + '</a>';
+      }
+      return '<span class="user-ref"><img class="avatar" src="https://github.com/' + name + '.png?size=32" alt="' + name + '">' +
+        '<a href="https://github.com/' + name + '">@' + escHtml(name) + '</a>' +
+        '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + name + '">&#x1F50D;</a></span>';
+    });
+  }
+
+  function escHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function escAttr(s) {
+    return escHtml(s).replace(/'/g, '&#39;');
+  }
+})();
+</script>
+</body>
+</html>
