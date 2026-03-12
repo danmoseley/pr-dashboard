@@ -37,6 +37,16 @@ if ($ReportTypes.Count -eq 1 -and $ReportTypes[0] -match ',') {
 }
 
 $scan = Get-Content $ScanFile -Raw | ConvertFrom-Json
+
+# Validate scan data
+if (-not $scan -or -not $scan.prs) {
+    if ($scan.error) {
+        Write-Host "::warning::Scan reported error for ${Repo}: $($scan.error) — generating empty reports"
+        $scan = @{ scanned = 0; analyzed = 0; prs = @() }
+    } else {
+        throw "Invalid scan file: $ScanFile — missing or has no .prs array"
+    }
+}
 $allPrs = $scan.prs
 $timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm 'UTC'")
 $timestampIso = (Get-Date).ToUniversalTime().ToString("o")

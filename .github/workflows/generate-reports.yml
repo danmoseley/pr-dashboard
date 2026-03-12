@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout dashboard repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # - name: Install gh-models extension
       #   env:
@@ -25,6 +25,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          failed=()
           repos=(
             "dotnet/runtime:runtime"
             "dotnet/aspnetcore:aspnetcore"
@@ -49,9 +50,34 @@ jobs:
             if [ -n "$maintainers" ]; then
               maintainer_args="-Maintainers $maintainers"
             fi
-            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json"
-            pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 12 -SkipAI
+            # Write scan to temp file; only overwrite scan.json if valid JSON
+            scan_ok=true
+            if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json.tmp"; then
+              echo "::warning::Scan failed for $repo"
+              scan_ok=false
+            fi
+            # Validate the output is parseable JSON with a prs array
+            if $scan_ok && pwsh -Command "(\$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json) -and \$j.prs -ne \$null" > /dev/null 2>&1; then
+              mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+            else
+              echo "::warning::Invalid or empty scan output for $repo — keeping previous data"
+              rm -f "docs/${slug}/scan.json.tmp"
+              if [ ! -f "docs/${slug}/scan.json" ]; then
+                echo "::warning::No previous scan.json for $repo — skipping reports"
+                failed+=("$repo")
+                continue
+              fi
+            fi
+            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 12 -SkipAI; then
+              echo "::warning::Report generation failed for $repo"
+              failed+=("$repo")
+              continue
+            fi
           done
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::warning::Failed repos: ${failed[*]}"
+            echo "FAILED_REPOS=${failed[*]}" >> "$GITHUB_ENV"
+          fi
 
       - name: Generate index page
         run: |
@@ -80,3 +106,9 @@ jobs:
             git reset HEAD~1
             sleep 5
           done
+
+      - name: Report failures
+        if: env.FAILED_REPOS != ''
+        run: |
+          echo "::error::The following repos had scan/report failures: $FAILED_REPOS"
+          exit 1

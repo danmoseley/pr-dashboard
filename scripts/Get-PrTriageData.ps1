@@ -73,6 +73,8 @@ if ($Maintainers.Count -eq 1 -and $Maintainers[0] -match ',') {
 }
 $scriptStart = Get-Date
 
+try {   # Top-level catch ensures stdout is always valid JSON
+
 # --- Area owners lookup (parsed from docs/area-owners.md) ---
 $areaOwners = @{}
 $repoParts = $Repo -split '/'
@@ -717,4 +719,19 @@ if ($OutputCsv) {
     $lines -join "`n"
 } else {
     $output | ConvertTo-Json -Depth 5
+}
+
+} catch {
+    # Ensure stdout is always valid JSON so downstream scripts don't crash
+    Write-Warning "Get-PrTriageData failed for ${Repo}: $_"
+    @{
+        repo = $Repo
+        scanned = 0
+        analyzed = 0
+        total_after_filters = 0
+        prs = @()
+        error = "$_"
+        elapsed_seconds = [Math]::Round(((Get-Date) - $scriptStart).TotalSeconds, 1)
+    } | ConvertTo-Json -Depth 5
+    exit 1
 }
