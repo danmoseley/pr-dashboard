@@ -24,6 +24,7 @@ param(
     [string]$Repo = "dotnet/runtime",
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
+    [string]$TimestampIso = (Get-Date).ToUniversalTime().ToString("o"),
     [int]$ScheduleHours = 0,
     [hashtable]$NavLinks = @{}
 )
@@ -300,7 +301,7 @@ $html = @"
   a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
-<body>
+<body data-server-updated="$TimestampIso">
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
@@ -420,6 +421,7 @@ function clearFilter() {
   }
 })();
 </script>
+<script src="../pr-refresh.js"></script>
 </body>
 </html>
 "@

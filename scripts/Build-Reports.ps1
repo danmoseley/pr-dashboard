@@ -155,6 +155,7 @@ Do NOT repeat what's in the table. Output ONLY the bullet points, each starting 
         Repo          = $Repo
         OutputFile    = Join-Path $outDir $report.File
         Timestamp     = $timestamp
+        TimestampIso  = $timestampIso
         ScheduleHours = $ScheduleHours
         NavLinks      = $navLinks
     }
