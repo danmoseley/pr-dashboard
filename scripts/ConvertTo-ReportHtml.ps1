@@ -13,6 +13,9 @@
     Path to write the HTML output.
 .PARAMETER Timestamp
     ISO 8601 timestamp string for the "Updated" line.
+.PARAMETER TimestampIso
+    ISO 8601 UTC timestamp used for the page's data-server-updated attribute,
+    which enables client-side cache invalidation for per-PR refresh.
 .PARAMETER NavLinks
     Hashtable of name→filename for navigation links.
 #>
