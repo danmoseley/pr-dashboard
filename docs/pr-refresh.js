@@ -14,18 +14,14 @@
   // --- Inject CSS ---
   var style = document.createElement('style');
   style.textContent =
-    '.pr-refresh-btn { display:none; position:absolute; right:2px; top:50%; transform:translateY(-50%);' +
-    '  background:none; border:none; cursor:pointer; font-size:0.75em; padding:0 2px; opacity:0.5;' +
-    '  line-height:1; z-index:1; color:inherit; }' +
-    '.pr-refresh-btn:hover { opacity:1; }' +
+    '.pr-refresh-btn { display:none; position:absolute; right:0; top:50%; transform:translateY(-50%);' +
+    '  background:var(--bg,#0d1117); border:none; cursor:pointer; font-size:1.4em; padding:0 3px;' +
+    '  line-height:1; z-index:10; color:#2f81f7; font-weight:bold; }' +
+    '.pr-refresh-btn:hover { color:#58a6ff; }' +
     'tr:hover .pr-refresh-btn { display:inline-block; }' +
     '.pr-num { position:relative; }' +
     '@keyframes pr-spin { to { transform:translateY(-50%) rotate(360deg); } }' +
-    '.pr-refresh-btn.loading { display:inline-block; animation: pr-spin 0.8s linear infinite; opacity:0.7; }' +
-    'tr.pr-merged td { opacity:0.45; }' +
-    'tr.pr-merged td.pr-num { opacity:1; }' +
-    '.pr-merged-badge { background:#8957e5; color:#fff; font-size:0.7em; padding:1px 5px; border-radius:8px; margin-left:4px; font-weight:600; }' +
-    '.pr-closed-badge { background:#da3633; color:#fff; font-size:0.7em; padding:1px 5px; border-radius:8px; margin-left:4px; font-weight:600; }';
+    '.pr-refresh-btn.loading { display:inline-block; animation: pr-spin 0.8s linear infinite; opacity:0.7; }';
   document.head.appendChild(style);
 
   // --- Get server timestamp for cache expiry ---
@@ -81,7 +77,7 @@
       if (!cell || cell.querySelector('.pr-refresh-btn')) return;
       var btn = document.createElement('button');
       btn.className = 'pr-refresh-btn';
-      btn.innerHTML = '&#x1F504;';
+      btn.innerHTML = '&#x21bb;';
       btn.title = 'Refresh this PR from GitHub';
       btn.setAttribute('aria-label', 'Refresh PR #' + info.number);
       btn.addEventListener('click', function(e) {
@@ -185,29 +181,9 @@
 
   // --- Apply refresh result to a DOM row ---
   function applyResultToRow(tr, result) {
-    // Merged?
-    if (result.merged) {
-      tr.classList.add('pr-merged');
-      var numCell = tr.querySelector('.pr-num');
-      if (numCell && !numCell.querySelector('.pr-merged-badge')) {
-        var badge = document.createElement('span');
-        badge.className = 'pr-merged-badge';
-        badge.textContent = 'merged';
-        numCell.appendChild(badge);
-      }
-      return;
-    }
-
-    // Closed (not merged)?
-    if (result.state === 'closed') {
-      tr.classList.add('pr-merged');
-      var numCell2 = tr.querySelector('.pr-num');
-      if (numCell2 && !numCell2.querySelector('.pr-closed-badge')) {
-        var badge2 = document.createElement('span');
-        badge2.className = 'pr-closed-badge';
-        badge2.textContent = 'closed';
-        numCell2.appendChild(badge2);
-      }
+    // Merged or closed — remove from the list
+    if (result.merged || result.state === 'closed') {
+      tr.style.display = 'none';
       return;
     }
 
@@ -284,17 +260,27 @@
   }
 
   // Re-inject buttons when the cross-repo page dynamically renders tables
-  var observer = new MutationObserver(function(mutations) {
-    for (var i = 0; i < mutations.length; i++) {
-      if (mutations[i].addedNodes.length > 0) {
-        injectButtons();
-        applyCachedRefreshes();
-        break;
-      }
-    }
-  });
   var content = document.getElementById('content');
   if (content) {
+    var debounceTimer = null;
+    var observer = new MutationObserver(function(mutations) {
+      // Only react to new table rows or tables, not our own button/style additions
+      var hasNewRows = false;
+      for (var i = 0; i < mutations.length; i++) {
+        var nodes = mutations[i].addedNodes;
+        for (var j = 0; j < nodes.length; j++) {
+          var tag = nodes[j].nodeName;
+          if (tag === 'TR' || tag === 'TBODY' || tag === 'TABLE') { hasNewRows = true; break; }
+        }
+        if (hasNewRows) break;
+      }
+      if (!hasNewRows) return;
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function() {
+        injectButtons();
+        applyCachedRefreshes();
+      }, 100);
+    });
     observer.observe(content, { childList: true, subtree: true });
   }
 })();
