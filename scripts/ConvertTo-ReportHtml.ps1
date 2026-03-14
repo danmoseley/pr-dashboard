@@ -97,9 +97,9 @@ $rows = foreach ($pr in $prs) {
 
     # Emoji prefix for next action
     $actionEmoji = if ($pr.next_action -match "Ready to merge") { "&#x1F7E2; " }       # 🟢
-                   elseif ($pr.next_action -match "review needed") { "&#x1F441; " }     # 👁
                    elseif ($pr.next_action -match "resolve conflicts") { "&#x1F6D1; " } # 🛑
                    elseif ($pr.next_action -match "fix CI") { "&#x1F6D1; " }            # 🛑
+                   elseif ($pr.next_action -match "review needed") { "&#x1F441; " }     # 👁
                    elseif ($pr.next_action -match "respond to") { "" }                    # no emoji, text is clear
                    elseif ($pr.next_action -match "Wait for CI") { "&#x23F3; " }        # ⏳
                    elseif ($pr.next_action -match "merge main") { "&#x1F504; " }        # 🔄
