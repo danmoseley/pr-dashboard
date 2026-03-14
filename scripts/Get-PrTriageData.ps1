@@ -399,10 +399,14 @@ foreach ($pr in $candidates) {
     $approvalCount = 0
     $reviewerLogins = @()
     $approverLogins = @()
+    # Determine effective author (human behind copilot PRs)
+    $effectiveAuthor = if ($botTrigger) { $botTrigger } else { $pr.author.login }
     foreach ($rev in $reviews) {
         $login = $rev.author.login
+        # Skip self-approvals (author signing off on their own PR isn't meaningful)
+        $isSelfReview = ($login -eq $pr.author.login) -or ($login -eq $botTrigger)
         $reviewerLogins += $login
-        if ($rev.state -eq "APPROVED") {
+        if ($rev.state -eq "APPROVED" -and -not $isSelfReview) {
             $approvalCount++
             $hasAnyApproval = $true
             $approverLogins += $login
