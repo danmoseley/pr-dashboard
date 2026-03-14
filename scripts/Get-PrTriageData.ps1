@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -419,6 +419,14 @@ foreach ($pr in $candidates) {
     $reviewerLogins = @($reviewerLogins | Select-Object -Unique)
     $hasAnyReview = $reviews.Count -gt 0
 
+    # Extract explicitly requested reviewers (GitHub "Reviewers" sidebar)
+    $requestedReviewerLogins = @()
+    if ($gql -and $gql.reviewRequests.nodes) {
+        $requestedReviewerLogins = @($gql.reviewRequests.nodes | ForEach-Object {
+            if ($_.requestedReviewer.login) { $_.requestedReviewer.login }
+        } | Where-Object { $_ } | Select-Object -Unique)
+    }
+
     # Labels
     $isCommunity = ($labelNames | Where-Object { $_ -match '^community' }).Count -gt 0
     $hasAreaLabel = ($labelNames | Where-Object { $_ -match "^area-" }).Count -gt 0
@@ -491,8 +499,21 @@ foreach ($pr in $candidates) {
         $who = @($authorLogin)
     }
     elseif ($baConclusion -eq "FAILURE") {
-        $prNextAction = "@$($authorLogin): fix CI failures"
-        $who = @($authorLogin)
+        if ($hasAnyApproval) {
+            # Reviews done — CI is the real blocker
+            $prNextAction = "@$($authorLogin): fix CI failures"
+            $who = @($authorLogin)
+        } else {
+            # No approvals yet — review is the more actionable need; CI column shows the failure
+            $prNextAction = "Maintainer: review needed"
+            if ($requestedReviewerLogins.Count -gt 0) {
+                $who = @($requestedReviewerLogins | Select-Object -First 2)
+            } elseif ($prOwners.Count -gt 0) {
+                $who = @($prOwners | Select-Object -First 2)
+            } else {
+                $who = @("area owner")
+            }
+        }
     }
     elseif ($hasNeedsAuthorAction) {
         $prNextAction = "@$($authorLogin): address feedback (needs-author-action)"
@@ -509,8 +530,10 @@ foreach ($pr in $candidates) {
     }
     elseif (-not $hasAnyReview) {
         $prNextAction = "Maintainer: review needed"
-        # Pick specific owners to tag: prefer owners who have reviewed similar PRs
-        if ($prOwners.Count -gt 0) {
+        # Prefer explicitly requested reviewers, then area owners
+        if ($requestedReviewerLogins.Count -gt 0) {
+            $who = @($requestedReviewerLogins | Select-Object -First 2)
+        } elseif ($prOwners.Count -gt 0) {
             $who = @($prOwners | Select-Object -First 2)
         } else {
             $who = @("area owner")
@@ -538,10 +561,14 @@ foreach ($pr in $candidates) {
     }
     elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
         $prNextAction = "Maintainer: review needed"
-        # Already have community review but need owner; pick owners not yet reviewing
-        $nonReviewingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
-        if ($nonReviewingOwners.Count -gt 0) { $who = $nonReviewingOwners }
-        elseif ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+        # Prefer explicitly requested reviewers, then owners not yet reviewing
+        if ($requestedReviewerLogins.Count -gt 0) {
+            $who = @($requestedReviewerLogins | Select-Object -First 2)
+        } else {
+            $nonReviewingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
+            if ($nonReviewingOwners.Count -gt 0) { $who = $nonReviewingOwners }
+            elseif ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+        }
     }
     elseif ($baConclusion -eq "IN_PROGRESS" -or $baConclusion -eq "ABSENT") {
         $prNextAction = "Wait for CI"
@@ -550,6 +577,42 @@ foreach ($pr in $candidates) {
     else {
         $prNextAction = "Maintainer: review/merge"
         if ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+    }
+
+    # If primary action is resolve conflicts, also note if review is pending
+    if ($prNextAction -match 'resolve conflicts') {
+        $reviewWho = @()
+        $reviewNote = ""
+        if (-not $hasAnyReview) {
+            $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
+                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         else { @() }
+            $reviewNote = "review needed"
+        }
+        elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
+            $staleReviewers = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
+            $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
+                         elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
+                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         else { @() }
+            $reviewNote = "re-review needed"
+        }
+        elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
+            $pendingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
+            $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
+                         elseif ($pendingOwners.Count -gt 0) { $pendingOwners }
+                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         else { @() }
+            $reviewNote = "review needed"
+        }
+        if ($reviewNote) {
+            if ($reviewWho.Count -gt 0) {
+                $prNextAction += "; @$($reviewWho -join ', @'): $reviewNote"
+                $who += $reviewWho
+            } else {
+                $prNextAction += "; $reviewNote"
+            }
+        }
     }
 
     # For bot-authored PRs, substitute the human trigger person
