@@ -74,10 +74,10 @@
   a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
-<body data-server-updated="2026-03-14T02:46:52.8870131Z">
+<body data-server-updated="2026-03-14T05:08:15.4526332Z">
 <nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/extensions/actionable.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Most Actionable PRs — dotnet/extensions</h1>
-<p class="meta">Updated every 12h, last at 2026-03-14 02:46 UTC &middot; 16 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-14 05:08 UTC &middot; 16 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
 <details class="scoring">
   <summary>How is the score calculated?</summary>
   <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
@@ -88,13 +88,13 @@
     <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
     <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
     <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
-    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last activity (update or review comment)</td></tr>
+    <tr><td>1.5</td><td>Discussion</td><td>Recent review engagement boosts score; stale heavy discussion penalized</td></tr>
     <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity (update or review comment)</td></tr>
     <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
     <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum (recent review activity)</td></tr>
   </table>
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
@@ -142,10 +142,23 @@
   <td class="ci">&#x2705; 1/0/0</td>
   <td class="disc heat-1">2/5t 1p</td>
   <td class="num">2d</td>
-  <td class="num">1d</td>
+  <td class="num">2d</td>
   <td class="num heat-2" title="1028 lines changed">8</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jeffhandley.png?size=32" alt="jeffhandley"><a href="https://github.com/jeffhandley">@jeffhandley</a><a class="filter-btn" href="#" onclick="filterByUser('jeffhandley');return false" title="Show only @jeffhandley">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-infrastructure');return false" title="Show only area-infrastructure">infrastructure</a></td>
+</tr>
+<tr data-people="jozkee,app,stephentoub" data-labels="area-ai">
+  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change">7.4</td>
+  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7394" title="Make HostedFileDownloadStream explicitly read-only">#7394</a></td>
+  <td class="title">Make HostedFileDownloadStream explicitly read-only</td>
+  <td class="action" title="No review">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/jozkee.png?size=32" alt="jozkee"><a href="https://github.com/jozkee">@jozkee</a><a class="filter-btn" href="#" onclick="filterByUser('jozkee');return false" title="Show only @jozkee">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci">&#x2705; 6/0/0</td>
+  <td class="disc">0/0t 0p</td>
+  <td class="num">0d</td>
+  <td class="num">0d</td>
+  <td class="num" title="87 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-ai');return false" title="Show only area-ai">ai</a></td>
 </tr>
 <tr data-people="area,jeffhandley" data-labels="area-ai-templates">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change">7</td>
@@ -161,43 +174,30 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-ai-templates');return false" title="Show only area-ai-templates">ai-templates</a></td>
 </tr>
 <tr data-people="stephentoub,app,copilot-pull-request-reviewer,jozkee" data-labels="area-ai">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 7 unresolved &#183; &#x1F5E8;&#xFE0F; active (15 threads) &#183; &#x1F4E6; large (9 files, 822 lines)">6.5</td>
+  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 7 unresolved &#183; &#x1F5E8;&#xFE0F; active (15 threads) &#183; &#x1F4E6; large (9 files, 822 lines)">6.7</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7377" title="Add HostedToolSearchTool with DeferredTools/NonDeferredTools for tool search / deferred loading support">#7377</a></td>
   <td class="title">Add HostedToolSearchTool with DeferredTools/NonDeferredTools for tool search / deferred loading support</td>
   <td class="action" title="7 threads, No owner approval"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span>: respond to 7 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/jozkee.png?size=32" alt="jozkee"><a href="https://github.com/jozkee">@jozkee</a><a class="filter-btn" href="#" onclick="filterByUser('jozkee');return false" title="Show only @jozkee">&#x1F50D;</a></span></td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc heat-2">7/15t 4p</td>
-  <td class="num">4d</td>
+  <td class="num">5d</td>
   <td class="num">3d</td>
   <td class="num heat-2" title="822 lines changed">9</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-ai');return false" title="Show only area-ai">ai</a></td>
 </tr>
 <tr data-people="mokarchi" data-labels="area-caching-hybrid">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; large (10 files, 855 lines) &#183; &#x23F3; stale (105d) &#183; &#x1F570;&#xFE0F; old (166d)">6.2</td>
+  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; large (10 files, 855 lines) &#183; &#x23F3; stale (106d) &#183; &#x1F570;&#xFE0F; old (167d)">6.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6862" title="Implementation Plan for HybridCache ReportTagMetrics">#6862</a></td>
   <td class="title">Implementation Plan for HybridCache ReportTagMetrics</td>
-  <td class="action" title="No owner approval, Stale 105d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span>: merge main (stale 105d)</td>
+  <td class="action" title="No owner approval, Stale 106d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span>: merge main (stale 106d)</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">0/3t 2p</td>
-  <td class="num heat-3">166d</td>
-  <td class="num heat-3">105d</td>
+  <td class="num heat-3">167d</td>
+  <td class="num heat-3">106d</td>
   <td class="num heat-2" title="855 lines changed">10</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-caching-hybrid');return false" title="Show only area-caching-hybrid">caching-hybrid</a></td>
-</tr>
-<tr data-people="jozkee,app,stephentoub" data-labels="">
-  <td class="score" title="&#x1F7E1; CI pending &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change">6.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7394" title="Make HostedFileDownloadStream explicitly read-only">#7394</a></td>
-  <td class="title">Make HostedFileDownloadStream explicitly read-only</td>
-  <td class="action" title="CI running, No review">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/jozkee.png?size=32" alt="jozkee"><a href="https://github.com/jozkee">@jozkee</a><a class="filter-btn" href="#" onclick="filterByUser('jozkee');return false" title="Show only @jozkee">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x23F3; 1/0/4</td>
-  <td class="disc">0/0t 0p</td>
-  <td class="num">0d</td>
-  <td class="num">0d</td>
-  <td class="num" title="87 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
-  <td class="area-col"></td>
 </tr>
 <tr data-people="evgenyfedorov2,app,joperezr" data-labels="area-telemetry">
   <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F5E8;&#xFE0F; active (8 threads) &#183; &#x1F4E6; small change &#183; &#x23F3; stale (56d) &#183; &#x1F570;&#xFE0F; old (113d)">5.9</td>
@@ -239,23 +239,23 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-ai-templates');return false" title="Show only area-ai-templates">ai-templates</a></td>
 </tr>
 <tr data-people="adamsitnik,eiriktsarpalis" data-labels="area-data-ingestion">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (30 files, 593 lines) &#183; &#x1F570;&#xFE0F; old (106d)">5.2</td>
+  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4E6; large (30 files, 593 lines) &#183; &#x1F570;&#xFE0F; old (107d)">5.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7090" title="[MEDI] Allow Pipeline and Reader to work with any Source">#7090</a></td>
   <td class="title">[MEDI] Allow Pipeline and Reader to work with any Source</td>
   <td class="action" title="Conflicts, No review">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/adamsitnik.png?size=32" alt="adamsitnik"><a href="https://github.com/adamsitnik">@adamsitnik</a><a class="filter-btn" href="#" onclick="filterByUser('adamsitnik');return false" title="Show only @adamsitnik">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/eiriktsarpalis.png?size=32" alt="eiriktsarpalis"><a href="https://github.com/eiriktsarpalis">@eiriktsarpalis</a><a class="filter-btn" href="#" onclick="filterByUser('eiriktsarpalis');return false" title="Show only @eiriktsarpalis">&#x1F50D;</a></span>: review needed</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">0/3t 1p</td>
-  <td class="num heat-3">106d</td>
+  <td class="num heat-3">107d</td>
   <td class="num">2d</td>
   <td class="num heat-2" title="593 lines changed">30</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/adamsitnik.png?size=32" alt="adamsitnik"><a href="https://github.com/adamsitnik">@adamsitnik</a><a class="filter-btn" href="#" onclick="filterByUser('adamsitnik');return false" title="Show only @adamsitnik">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-data-ingestion');return false" title="Show only area-data-ingestion">data-ingestion</a></td>
 </tr>
-<tr data-people="area,BowenYang666" data-labels="area-telemetry">
+<tr data-people="BowenYang666,dariusclay" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x23F3; stale (205d) &#183; &#x1F570;&#xFE0F; old (344d)">4.5</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6244" title="add CommTagAttribute for metric code generator">#6244</a></td>
   <td class="title">add CommTagAttribute for metric code generator</td>
-  <td class="action" title="CI fail (2 failed), 1 threads, No owner approval, Stale 205d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">&#x1F50D;</a></span> owner: review needed</td>
+  <td class="action" title="CI fail (2 failed), 1 threads, No owner approval, Stale 205d"><span class="user-ref"><img class="avatar" src="https://github.com/BowenYang666.png?size=32" alt="BowenYang666"><a href="https://github.com/BowenYang666">@BowenYang666</a><a class="filter-btn" href="#" onclick="filterByUser('BowenYang666');return false" title="Show only @BowenYang666">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/dariusclay.png?size=32" alt="dariusclay"><a href="https://github.com/dariusclay">@dariusclay</a><a class="filter-btn" href="#" onclick="filterByUser('dariusclay');return false" title="Show only @dariusclay">&#x1F50D;</a></span></td>
   <td class="ci">&#x274C; 4/2/0</td>
   <td class="disc">1/1t 1p</td>
   <td class="num heat-3">344d</td>
@@ -268,7 +268,7 @@
   <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; large (4 files, 559 lines) &#183; &#x23F3; stale (35d)">4.2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7251" title="Add IterationCompleted delegate to FunctionInvokingChatClient to facilitate agentic patterns">#7251</a></td>
   <td class="title">Add IterationCompleted delegate to FunctionInvokingChatClient to facilitate agentic patterns</td>
-  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 35d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/PederHP.png?size=32" alt="PederHP"><a href="https://github.com/PederHP">@PederHP</a><a class="filter-btn" href="#" onclick="filterByUser('PederHP');return false" title="Show only @PederHP">&#x1F50D;</a></span>: resolve conflicts; review needed</td>
+  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 35d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/PederHP.png?size=32" alt="PederHP"><a href="https://github.com/PederHP">@PederHP</a><a class="filter-btn" href="#" onclick="filterByUser('PederHP');return false" title="Show only @PederHP">&#x1F50D;</a></span>: resolve conflicts; respond to 1 thread(s)</td>
   <td class="ci">&#x2705; 6/0/0</td>
   <td class="disc">1/1t 2p</td>
   <td class="num heat-2">41d</td>
@@ -290,11 +290,11 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Youssef1313.png?size=32" alt="Youssef1313"><a href="https://github.com/Youssef1313">@Youssef1313</a><a class="filter-btn" href="#" onclick="filterByUser('Youssef1313');return false" title="Show only @Youssef1313">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
-<tr data-people="area,amadeuszl" data-labels="area-telemetry">
+<tr data-people="amadeuszl,evgenyfedorov2" data-labels="area-telemetry">
   <td class="score" title="&#x274C; CI failing &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x23F3; stale (38d)">4.1</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7253" title="Move Microsoft.Extensions.Diagnostics.ResourceMonitoring.Kubernetes to stable">#7253</a></td>
   <td class="title">Move Microsoft.Extensions.Diagnostics.ResourceMonitoring.Kubernetes to stable</td>
-  <td class="action" title="CI fail (3 failed), 1 threads, No owner approval, Stale 38d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">&#x1F50D;</a></span> owner: review needed</td>
+  <td class="action" title="CI fail (3 failed), 1 threads, No owner approval, Stale 38d"><span class="user-ref"><img class="avatar" src="https://github.com/amadeuszl.png?size=32" alt="amadeuszl"><a href="https://github.com/amadeuszl">@amadeuszl</a><a class="filter-btn" href="#" onclick="filterByUser('amadeuszl');return false" title="Show only @amadeuszl">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/evgenyfedorov2.png?size=32" alt="evgenyfedorov2"><a href="https://github.com/evgenyfedorov2">@evgenyfedorov2</a><a class="filter-btn" href="#" onclick="filterByUser('evgenyfedorov2');return false" title="Show only @evgenyfedorov2">&#x1F50D;</a></span></td>
   <td class="ci">&#x274C; 2/3/0</td>
   <td class="disc">1/2t 3p</td>
   <td class="num heat-2">40d</td>
@@ -303,28 +303,28 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amadeuszl.png?size=32" alt="amadeuszl"><a href="https://github.com/amadeuszl">@amadeuszl</a><a class="filter-btn" href="#" onclick="filterByUser('amadeuszl');return false" title="Show only @amadeuszl">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
-<tr data-people="stephentoub,jozkee,app" data-labels="area-ai">
-  <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 7 unresolved &#183; &#x1F5E8;&#xFE0F; active (10 threads)">3.8</td>
+<tr data-people="stephentoub,app" data-labels="area-ai">
+  <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 7 unresolved &#183; &#x1F5E8;&#xFE0F; active (10 threads)">3.9</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7158" title="[WIP] Fix message ordering when processing function approval responses">#7158</a></td>
   <td class="title">[WIP] Fix message ordering when processing function approval responses</td>
-  <td class="action" title="Conflicts, CI fail (4 failed), 7 threads, No owner approval">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/jozkee.png?size=32" alt="jozkee"><a href="https://github.com/jozkee">@jozkee</a><a class="filter-btn" href="#" onclick="filterByUser('jozkee');return false" title="Show only @jozkee">&#x1F50D;</a></span>: review needed</td>
+  <td class="action" title="Conflicts, CI fail (4 failed), 7 threads, No owner approval">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span>: resolve conflicts; respond to 7 thread(s)</td>
   <td class="ci">&#x274C; 1/4/0</td>
   <td class="disc heat-2">7/10t 3p</td>
-  <td class="num heat-3">87d</td>
+  <td class="num heat-3">88d</td>
   <td class="num">4d</td>
   <td class="num heat-1" title="492 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stephentoub.png?size=32" alt="stephentoub"><a href="https://github.com/stephentoub">@stephentoub</a><a class="filter-btn" href="#" onclick="filterByUser('stephentoub');return false" title="Show only @stephentoub">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-ai');return false" title="Show only area-ai">ai</a></td>
 </tr>
-<tr data-people="IbrahimMNada,dariusclay" data-labels="area-telemetry">
-  <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (27 files, 2236 lines) &#183; &#x23F3; stale (130d) &#183; &#x1F570;&#xFE0F; old (266d)">2</td>
+<tr data-people="IbrahimMNada" data-labels="area-telemetry">
+  <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (27 files, 2236 lines) &#183; &#x23F3; stale (131d) &#183; &#x1F570;&#xFE0F; old (266d)">2</td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6530" title="introduce JsonEmitterBase completion of  ( Tweak MetaData Report format for better readability #5929)">#6530</a></td>
   <td class="title">introduce JsonEmitterBase completion of  ( Tweak MetaData Report format for better readability #5929)</td>
-  <td class="action" title="Conflicts, CI fail (2 failed), 2 threads, No review, Stale 130d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/dariusclay.png?size=32" alt="dariusclay"><a href="https://github.com/dariusclay">@dariusclay</a><a class="filter-btn" href="#" onclick="filterByUser('dariusclay');return false" title="Show only @dariusclay">&#x1F50D;</a></span>: review needed</td>
+  <td class="action" title="Conflicts, CI fail (2 failed), 2 threads, No review, Stale 131d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span>: resolve conflicts; respond to 2 thread(s)</td>
   <td class="ci">&#x274C; 4/2/0</td>
   <td class="disc">2/3t 1p</td>
   <td class="num heat-3">266d</td>
-  <td class="num heat-3">130d</td>
+  <td class="num heat-3">131d</td>
   <td class="num heat-2" title="2236 lines changed">27</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
