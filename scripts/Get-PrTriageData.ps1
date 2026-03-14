@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -390,6 +390,19 @@ foreach ($pr in $candidates) {
     $totalComments = $prCommentCount + $threadCommentSum
     $distinctCommenters = $allCommenters.Count
 
+    # Find the most recent review comment date (for engagement freshness)
+    $lastReviewCommentDate = $null
+    if ($gql -and $gql.reviewThreads.nodes) {
+        $commentDates = @($gql.reviewThreads.nodes | ForEach-Object {
+            $_.comments.nodes | ForEach-Object {
+                if ($_.createdAt) { [DateTime]::Parse($_.createdAt) }
+            }
+        } | Where-Object { $_ })
+        if ($commentDates.Count -gt 0) {
+            $lastReviewCommentDate = ($commentDates | Sort-Object -Descending | Select-Object -First 1)
+        }
+    }
+
     # Classify reviewers
     $hasOwnerApproval = $false
     $hasCurrentOwnerApproval = $false
@@ -453,14 +466,21 @@ foreach ($pr in $candidates) {
     }
 
     # --- DIMENSION SCORING ---
+    # Use the most recent activity date (PR update or review comment, whichever is newer)
+    $effectiveUpdateDate = $updatedAt
+    if ($lastReviewCommentDate -and $lastReviewCommentDate -gt $updatedAt) {
+        $effectiveUpdateDate = $lastReviewCommentDate
+    }
+    $daysSinceActivity = ($now - $effectiveUpdateDate).TotalDays
+
     $ciScore = switch ($baConclusion) { "SUCCESS" { 1.0 } "ABSENT" { 0.5 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
-    $stalenessScore = if ($daysSinceUpdate -le 3) { 1.0 } elseif ($daysSinceUpdate -le 14) { 0.5 } else { 0.0 }
+    $stalenessScore = if ($daysSinceActivity -le 3) { 1.0 } elseif ($daysSinceActivity -le 14) { 0.5 } else { 0.0 }
     $maintScore = if ($hasOwnerApproval) { 1.0 } elseif ($hasTriagerApproval) { 0.75 } elseif ($hasAnyReview) { 0.5 } else { 0.0 }
     $hasNeedsAuthorAction = $labelNames -contains "needs-author-action"
     $feedbackScore = if ($hasNeedsAuthorAction) { 0.0 } elseif ($unresolvedThreads -eq 0) { 1.0 } else { 0.5 }
     $conflictScore = switch ($pr.mergeable) { "MERGEABLE" { 1.0 } "UNKNOWN" { 0.5 } "CONFLICTING" { 0.0 } default { 0.5 } }
     $alignScore = if ($isUntriaged -or -not $hasAreaLabel) { 0.0 } else { 1.0 }
-    $freshScore = if ($daysSinceUpdate -le 14) { 1.0 } elseif ($daysSinceUpdate -le 30) { 0.5 } else { 0.0 }
+    $freshScore = if ($daysSinceActivity -le 14) { 1.0 } elseif ($daysSinceActivity -le 30) { 0.5 } else { 0.0 }
     $totalLines = $pr.additions + $pr.deletions
     $sizeScore = if ($pr.changedFiles -le 5 -and $totalLines -le 200) { 1.0 } elseif ($pr.changedFiles -le 20 -and $totalLines -le 500) { 0.5 } else { 0.0 }
     $communityScore = if ($isCommunity) { 0.5 } else { 1.0 }
@@ -472,10 +492,11 @@ foreach ($pr in $candidates) {
                      else { 0.0 }
     if ($hasStaleApproval -and $approvalScore -gt 0) { $approvalScore = [Math]::Max(0, $approvalScore - 0.25) }
     $velocityScore = if ($reviews.Count -eq 0) { if ($ageInDays -le 14) { 0.5 } else { 0.0 } }
-                     elseif ($daysSinceUpdate -le 7) { 1.0 } elseif ($daysSinceUpdate -le 14) { 0.5 } else { 0.0 }
-    # Discussion complexity: many threads/commenters = harder to push forward
-    # Light (≤5 threads, ≤2 commenters) = 1.0, moderate = 0.5, heavy (>15 threads or >5 commenters) = 0.0
+                     elseif ($daysSinceActivity -le 7) { 1.0 } elseif ($daysSinceActivity -le 14) { 0.5 } else { 0.0 }
+    # Discussion: light discussion or recent engagement is positive; stale heavy discussion is harder to push forward
+    $daysSinceReview = if ($lastReviewCommentDate) { ($now - $lastReviewCommentDate).TotalDays } else { $daysSinceUpdate }
     $discussionScore = if ($totalThreads -le 5 -and $distinctCommenters -le 2) { 1.0 }
+                       elseif ($daysSinceReview -le 14) { 0.75 }
                        elseif ($totalThreads -le 15 -and $distinctCommenters -le 5) { 0.5 }
                        else { 0.0 }
 

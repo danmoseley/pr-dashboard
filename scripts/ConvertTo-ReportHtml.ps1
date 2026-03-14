@@ -212,13 +212,13 @@ $scoringHtml = @"
     <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
     <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
     <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last update</td></tr>
-    <tr><td>1.5</td><td>Discussion complexity</td><td>Thread count and distinct commenters</td></tr>
+    <tr><td>1.5</td><td>Staleness</td><td>Days since last activity (update or review comment)</td></tr>
+    <tr><td>1.5</td><td>Discussion</td><td>Recent review engagement boosts score; stale heavy discussion penalized</td></tr>
     <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity</td></tr>
+    <tr><td>1.0</td><td>Freshness</td><td>Recent activity (update or review comment)</td></tr>
     <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
     <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum</td></tr>
+    <tr><td>0.5</td><td>Velocity</td><td>Review momentum (recent review activity)</td></tr>
   </table>
   <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
   See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
