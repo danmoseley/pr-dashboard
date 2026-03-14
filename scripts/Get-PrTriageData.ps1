@@ -501,8 +501,18 @@ foreach ($pr in $candidates) {
         $who = @($authorLogin)
     }
     elseif ($baConclusion -eq "FAILURE") {
-        if ($hasAnyApproval) {
-            # Reviews done — CI is the real blocker
+        if ($hasNeedsAuthorAction) {
+            $prNextAction = "@$($authorLogin): address feedback (needs-author-action)"
+            $who = @($authorLogin)
+        } elseif ($unresolvedThreads -gt 0) {
+            $prNextAction = "@$($authorLogin): respond to $unresolvedThreads thread(s)"
+            $who = @($authorLogin)
+            $waitingOn = @($threadAuthors | Where-Object { $_ -ne $authorLogin }) | Select-Object -First 2
+            if ($waitingOn.Count -gt 0) {
+                $prNextAction += " from @$($waitingOn -join ', @')"
+            }
+        } elseif ($hasAnyApproval) {
+            # Reviews done, no open threads — CI is the real blocker
             $prNextAction = "@$($authorLogin): fix CI failures"
             $who = @($authorLogin)
         } else {
@@ -581,15 +591,24 @@ foreach ($pr in $candidates) {
         if ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
     }
 
-    # If primary action is resolve conflicts, also note if review is pending
+    # If primary action is resolve conflicts, also note the next most important secondary action
     if ($prNextAction -match 'resolve conflicts') {
-        $reviewWho = @()
-        $reviewNote = ""
-        if (-not $hasAnyReview) {
+        if ($hasNeedsAuthorAction) {
+            $prNextAction += "; address feedback (needs-author-action)"
+        }
+        elseif ($unresolvedThreads -gt 0) {
+            $prNextAction += "; respond to $unresolvedThreads thread(s)"
+        }
+        elseif (-not $hasAnyReview) {
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
                          else { @() }
-            $reviewNote = "review needed"
+            if ($reviewWho.Count -gt 0) {
+                $prNextAction += "; @$($reviewWho -join ', @'): review needed"
+                $who += $reviewWho
+            } else {
+                $prNextAction += "; review needed"
+            }
         }
         elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
             $staleReviewers = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
@@ -597,7 +616,12 @@ foreach ($pr in $candidates) {
                          elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
                          elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
                          else { @() }
-            $reviewNote = "re-review needed"
+            if ($reviewWho.Count -gt 0) {
+                $prNextAction += "; @$($reviewWho -join ', @'): re-review needed"
+                $who += $reviewWho
+            } else {
+                $prNextAction += "; re-review needed"
+            }
         }
         elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
             $pendingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
@@ -605,14 +629,11 @@ foreach ($pr in $candidates) {
                          elseif ($pendingOwners.Count -gt 0) { $pendingOwners }
                          elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
                          else { @() }
-            $reviewNote = "review needed"
-        }
-        if ($reviewNote) {
             if ($reviewWho.Count -gt 0) {
-                $prNextAction += "; @$($reviewWho -join ', @'): $reviewNote"
+                $prNextAction += "; @$($reviewWho -join ', @'): review needed"
                 $who += $reviewWho
             } else {
-                $prNextAction += "; $reviewNote"
+                $prNextAction += "; review needed"
             }
         }
     }
