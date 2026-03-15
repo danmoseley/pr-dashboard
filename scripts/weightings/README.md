@@ -7,7 +7,12 @@ Full writeup: https://gist.github.com/danmoseley/ecfdccef799ade09f53ebfaa1ef9b46
 
 ## Quick Results
 
-### Recommended Single-Score Weight Changes
+### Two Scores, Not One
+
+The analysis reveals that "closeness to merge" and "deserves attention" are
+**anti-correlated (r=-0.63)**. A single score conflates them. We recommend two:
+
+#### Score 1: Merge Readiness (how close to merging?)
 
 | Feature | Current | Recommended | Confidence |
 |---------|---------|-------------|------------|
@@ -24,6 +29,39 @@ Full writeup: https://gist.github.com/danmoseley/ecfdccef799ade09f53ebfaa1ef9b46
 | alignScore | 1.0 | **0.5** | Lower |
 | velocityScore | 0.5 | **0.3** | Low |
 | **TOTAL** | **20.0** | **20.0** | |
+
+#### Score 2: Deserves Attention (how much should a maintainer prioritize this?)
+
+Several features have **opposite** directions vs merge readiness: CI failing,
+missing approval, large size, and community authorship all _lower_ merge readiness
+but _raise_ the need for attention. Issue engagement is entirely new signal.
+
+| Component | Inputs | Points | Direction vs Merge |
+|-----------|--------|--------|--------------------|
+| **Urgency** | regression label | +4 | New signal |
+| | security label | +4 | New signal |
+| | bug label | +1 | New signal |
+| | has milestone | +1 | New signal |
+| **Community demand** | issue thumbsup >= 10 | +2 | New signal |
+| | issue thumbsup >= 3 | +1 | New signal |
+| | issue comments >= 20 | +1.5 | New signal |
+| | cross-references >= 3 | +1 | New signal |
+| **Effort at risk** | community author | +2 | **Opposite** |
+| | has reviews but no approval | +1 | **Opposite** |
+| | large change (>200 lines) | +0.5 | **Opposite** |
+| **Blocked** | CI failing | +1 | **Opposite** |
+| | unresolved review feedback | +1 | Aligned |
+| | no approval | +1.5 | **Opposite** |
+
+Quadrant analysis of 980 PRs (split at median of each score):
+
+| | High merge readiness | Low merge readiness |
+|--|--|--|
+| **High attention** | **Q1** "Help across finish line" (n=176, 72% community) | **Q2** "Invest review time" (n=355, 59% community) |
+| **Low attention** | **Q3** "Will merge on its own" (n=337, 0% community) | **Q4** "Deprioritize" (n=112, 0% community) |
+
+Key: community PRs dominate Q1+Q2; internal PRs dominate Q3+Q4. The attention
+score primarily surfaces community contributions that need maintainer action.
 
 ### Top Findings
 
