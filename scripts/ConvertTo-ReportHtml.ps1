@@ -176,6 +176,9 @@ $rows = foreach ($pr in $prs) {
         $actionEmoji2 = "<span style=`"opacity:$boltOpacity`">&#x26A1;</span> "
     }
 
+    $filesWord = if ($pr.changed_files -eq 1) { "file" } else { "files" }
+    $linesWord = if ($pr.lines_changed -eq 1) { "line" } else { "lines" }
+
     @"
 <tr$moreClass data-people="$people" data-labels="$labelsList">
   <td class="score$readyClass">$($pr.merge_readiness)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeWhy" aria-label="Show Ready score breakdown">?</button></td>
@@ -188,8 +191,6 @@ $rows = foreach ($pr in $prs) {
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
-  $filesWord = if ($pr.changed_files -eq 1) { "file" } else { "files" }
-  $linesWord = if ($pr.lines_changed -eq 1) { "line" } else { "lines" }
   <td class="num$filesHeat" title="$($pr.changed_files) $filesWord, $($pr.lines_changed) $linesWord (additions + deletions)">$sizeIcon$($pr.lines_changed)</td>
   <td class="author">$communityBadge$authorDisplay</td>
   $(if ($hasAnyAreaLabels) { "<td class=`"area-col`">$areaLabelHtml</td>" })
