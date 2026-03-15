@@ -333,7 +333,7 @@
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
-      html += renderRow(prs[i], hasArea, i, trivialThreshold);
+      html += renderRow(prs[i], hasArea, i, trivialThreshold, trivialEnabled);
     }
     html += '</tbody></table>';
 
@@ -367,7 +367,7 @@
     } catch(e) {}
   }
 
-  function renderRow(pr, hasArea, idx, trivialThreshold) {
+  function renderRow(pr, hasArea, idx, trivialThreshold, trivialEnabled) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
     var moreClass = idx >= 100 ? ' class="more-row" style="display:none"' : '';
