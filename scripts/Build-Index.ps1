@@ -7,6 +7,9 @@
     Includes client-side JS for live "Xh ago" relative timestamps.
 .PARAMETER DocsDir
     Root docs directory (default: docs/).
+.PARAMETER ScheduleDesc
+    Human-readable schedule description (e.g., "~twice daily") displayed
+    alongside the relative timestamps in the generated index page.
 #>
 [CmdletBinding()]
 param(

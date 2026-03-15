@@ -19,6 +19,9 @@
 .PARAMETER SkipHistory
     If set, skip fetching merged PR stats via GraphQL and updating history.json.
     Use for offline/CI validation where API access is unavailable.
+.PARAMETER ScheduleDesc
+    Human-readable schedule description (e.g., "~twice daily") displayed in
+    the report meta line. Passed through to ConvertTo-ReportHtml.
 #>
 [CmdletBinding()]
 param(

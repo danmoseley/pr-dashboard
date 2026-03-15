@@ -18,6 +18,9 @@
     which enables client-side cache invalidation for per-PR refresh.
 .PARAMETER NavLinks
     Hashtable of name→filename for navigation links.
+.PARAMETER ScheduleDesc
+    Human-readable schedule description (e.g., "~twice daily") displayed in
+    the report meta line alongside the relative timestamp. Plain text, no HTML.
 #>
 [CmdletBinding()]
 param(
