@@ -40,7 +40,10 @@ function Write-ChangelogHtml {
     $entriesHtml = foreach ($entry in $Entries) {
         # Sort: feature first, then normal, then trivial
         $tierOrder = @{ feature = 0; normal = 1; trivial = 2 }
-        $sorted = @($entry.bullets | Sort-Object { $tierOrder[($_.tier ?? 'normal')] })
+        $sorted = @($entry.bullets | Sort-Object {
+            $t = if ($_.tier -and $tierOrder.ContainsKey($_.tier)) { $_.tier } else { 'normal' }
+            $tierOrder[$t]
+        })
 
         $bulletsHtml = ($sorted | ForEach-Object {
             $text = [System.Net.WebUtility]::HtmlEncode($_.text)
@@ -146,12 +149,12 @@ if ($entries.Count -gt 0) {
     # Fetch from start of latest day so re-generation gets ALL commits for that day
     $latestDayStart = [datetime]::ParseExact($latestEntryDay, "yyyy-MM-dd", $null)
     $latestDayStartUtc = [System.TimeZoneInfo]::ConvertTimeToUtc($latestDayStart, $pacific)
-    $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$($latestDayStartUtc.ToString('o'))")
+    $gitArgs = @("log", "origin/main", "--format=%H%x1f%s%x1f%cI", "--since=$($latestDayStartUtc.ToString('o'))")
 } else {
     $latestEntryDay = $null
     $latestEntry = $null
     $cutoff = (Get-Date).AddDays(-$MaxDays).ToString("yyyy-MM-dd")
-    $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$cutoff")
+    $gitArgs = @("log", "origin/main", "--format=%H%x1f%s%x1f%cI", "--since=$cutoff")
 }
 
 Write-Host "Fetching commits..."
@@ -161,12 +164,13 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-$rawCommits = @($logOutput | Where-Object { $_ -match '\|\|' })
+$sep = [char]0x1f
+$rawCommits = @($logOutput | Where-Object { $_ -match $sep })
 Write-Host "  Found $($rawCommits.Count) total commits"
 
 # Filter out automated report-update commits and merge commits
 $meaningful = @($rawCommits | Where-Object {
-    $parts = $_ -split '\|\|', 3
+    $parts = $_ -split $sep, 3
     $msg = $parts[1].Trim()
     $msg -notmatch '^Update reports ' -and
     $msg -notmatch '^Merge (pull request|branch) '
@@ -184,7 +188,7 @@ if ($meaningful.Count -eq 0) {
 # Group commits by Pacific calendar day
 $grouped = [ordered]@{}
 foreach ($line in $meaningful) {
-    $parts = $line -split '\|\|', 3
+    $parts = $line -split $sep, 3
     $sha = $parts[0].Trim()
     $msg = $parts[1].Trim()
     $dateUtc = [DateTimeOffset]::Parse($parts[2].Trim()).UtcDateTime
