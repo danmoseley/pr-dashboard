@@ -25,7 +25,8 @@ param(
     [Parameter(Mandatory)][string]$Slug,
     [string[]]$ReportTypes = @("top15", "community", "quick-wins", "stale-close"),
     [int]$ScheduleHours = 0,
-    [switch]$SkipAI
+    [switch]$SkipAI,
+    [switch]$SkipHistory
 )
 
 $ErrorActionPreference = "Stop"
@@ -180,6 +181,9 @@ $meta = @{
 $meta | ConvertTo-Json -Depth 3 | Out-File -FilePath (Join-Path $outDir "meta.json") -Encoding utf8
 
 # --- Fetch recently merged PRs and append history ---
+if ($SkipHistory) {
+    Write-Host "  Skipping history update (-SkipHistory)"
+} else {
 $historyFile = Join-Path $outDir "history.json"
 [System.Collections.ArrayList]$existingHistory = @()
 if (Test-Path $historyFile) {
@@ -255,5 +259,6 @@ $cutoffDate = (Get-Date).AddDays(-90).ToUniversalTime().ToString("o")
 $trimmed = @($existingHistory | Where-Object { $_.date -gt $cutoffDate })
 ConvertTo-Json -InputObject @($trimmed) -Depth 4 | Out-File -FilePath $historyFile -Encoding utf8
 Write-Host "  History: $($trimmed.Count) entries in $historyFile"
+} # end if (-not $SkipHistory)
 
 Write-Host "Done! $($reports.Count) reports in $outDir/"

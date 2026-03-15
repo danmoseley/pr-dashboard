@@ -12,7 +12,9 @@
     Exits non-zero if any critical check fails.
 #>
 [CmdletBinding()]
-param()
+param(
+    [string]$ArtifactDir = ""
+)
 
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
@@ -45,13 +47,15 @@ foreach ($f in $ps1Files) {
 # ─── T2: JavaScript Syntax Validation ─────────────────────────────────
 Write-Host "`n=== T2: JavaScript Syntax Validation ===" -ForegroundColor Cyan
 $jsFile = Join-Path $root "docs/pr-refresh.js"
-if (Test-Path $jsFile) {
+if (-not (Test-Path $jsFile)) {
+    Write-Check -Name "JS syntax: pr-refresh.js" -Ok $false -Detail "File not found"
+} elseif (-not (Get-Command node -ErrorAction SilentlyContinue)) {
+    Write-Host "  SKIP: node not found on PATH, skipping JS syntax check" -ForegroundColor Yellow
+} else {
     $jsOutput = & node --check $jsFile 2>&1
     $jsOk = $LASTEXITCODE -eq 0
     $jsDetail = if (-not $jsOk) { ($jsOutput | Out-String).Trim() } else { "" }
     Write-Check -Name "JS syntax: pr-refresh.js" -Ok $jsOk -Detail $jsDetail
-} else {
-    Write-Check -Name "JS syntax: pr-refresh.js" -Ok $false -Detail "File not found"
 }
 
 # ─── T3: JSON Config Validation ───────────────────────────────────────
@@ -68,11 +72,20 @@ try {
     if ($keys.Count -eq 0) {
         $maintainersDetail = "No repo entries found"
     } else {
-        $badKeys = @($keys | Where-Object { $_ -notmatch '^\w+/\w+' })
+        $badKeys = @($keys | Where-Object { $_ -notmatch '^[\w.-]+/[\w.-]+$' })
         if ($badKeys.Count -gt 0) {
             $maintainersDetail = "Invalid repo keys: $($badKeys -join ', ')"
         } else {
-            $maintainersOk = $true
+            # Verify each value is an array
+            $badValues = @($keys | Where-Object {
+                $val = $m.$_
+                $val -isnot [System.Collections.IEnumerable] -or $val -is [string]
+            })
+            if ($badValues.Count -gt 0) {
+                $maintainersDetail = "Values must be arrays: $($badValues -join ', ')"
+            } else {
+                $maintainersOk = $true
+            }
         }
     }
 } catch {
@@ -106,15 +119,21 @@ Write-Check -Name "JSON: repos.json" -Ok $reposJsonOk -Detail $reposJsonDetail
 Write-Host "`n=== T4: HTML Generation Smoke Test ===" -ForegroundColor Cyan
 
 # Pick the 2 smallest scan.json files for speed
-$scanFiles = Get-ChildItem -Path (Join-Path $root "docs") -Filter "scan.json" -Recurse |
+$scanFiles = @(Get-ChildItem -Path (Join-Path $root "docs") -Filter "scan.json" -Recurse |
     Sort-Object Length |
-    Select-Object -First 2
+    Select-Object -First 2)
 
 if ($scanFiles.Count -eq 0) {
     Write-Check -Name "Smoke test" -Ok $false -Detail "No scan.json files found (need at least one committed)"
 } else {
-    # Create a temp output directory so we don't pollute the working tree
-    $tempDocs = Join-Path ([System.IO.Path]::GetTempPath()) "pr-dashboard-ci-$(Get-Random)"
+    # Create output directory (use ArtifactDir if specified, otherwise temp)
+    if ($ArtifactDir) {
+        $tempDocs = $ArtifactDir
+        $cleanupTempDocs = $false
+    } else {
+        $tempDocs = Join-Path ([System.IO.Path]::GetTempPath()) "pr-dashboard-ci-$(Get-Random)"
+        $cleanupTempDocs = $true
+    }
     New-Item -ItemType Directory -Path $tempDocs -Force | Out-Null
 
     $smokeOk = $true
@@ -151,7 +170,8 @@ if ($scanFiles.Count -eq 0) {
                 -Slug $slug `
                 -DocsDir $tempDocs `
                 -ScheduleHours 12 `
-                -SkipAI
+                -SkipAI `
+                -SkipHistory
         } catch {
             $smokeOk = $false
             $smokeDetail += "Build-Reports failed for ${slug}: $_  "
@@ -255,8 +275,10 @@ if ($scanFiles.Count -eq 0) {
         Write-Host "  SKIP: Completeness checks (smoke test failed)" -ForegroundColor Yellow
     }
 
-    # Cleanup temp directory
-    Remove-Item $tempDocs -Recurse -Force -ErrorAction SilentlyContinue
+    # Cleanup temp directory (only if we created it)
+    if ($cleanupTempDocs) {
+        Remove-Item $tempDocs -Recurse -Force -ErrorAction SilentlyContinue
+    }
 }
 
 # ─── Summary ──────────────────────────────────────────────────────────

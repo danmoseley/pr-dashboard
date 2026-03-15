@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch: {}
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -13,12 +16,13 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Run validation checks
-        run: pwsh ./scripts/Test-CiValidation.ps1
+        run: pwsh ./scripts/Test-CiValidation.ps1 -ArtifactDir "${{ runner.temp }}/ci-output"
 
       - name: Screenshot dashboard (optional)
         if: success() || failure()
         continue-on-error: true
         run: |
+          CI_OUTPUT="${{ runner.temp }}/ci-output"
           # Install headless Chrome dependencies
           sudo apt-get update -qq && sudo apt-get install -y -qq chromium-browser > /dev/null 2>&1 || true
           CHROME=$(which chromium-browser || which chromium || which google-chrome || echo "")
@@ -27,11 +31,12 @@ jobs:
             exit 0
           fi
           mkdir -p screenshots
-          "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/index.png --window-size=1400,900 "file://$(pwd)/docs/index.html" 2>/dev/null || true
-          # Pick a small repo report for the second screenshot
+          if [ -f "$CI_OUTPUT/index.html" ]; then
+            "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/index.png --window-size=1400,900 "file://$CI_OUTPUT/index.html" 2>/dev/null || true
+          fi
           for slug in extensions machinelearning runtime; do
-            if [ -f "docs/${slug}/actionable.html" ]; then
-              "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${slug}-actionable.png --window-size=1400,900 "file://$(pwd)/docs/${slug}/actionable.html" 2>/dev/null || true
+            if [ -f "$CI_OUTPUT/${slug}/actionable.html" ]; then
+              "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${slug}-actionable.png --window-size=1400,900 "file://$CI_OUTPUT/${slug}/actionable.html" 2>/dev/null || true
               break
             fi
           done
