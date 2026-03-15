@@ -23,13 +23,15 @@
 param(
     [Parameter(Mandatory)][string]$InputFile,
     [Parameter(Mandatory)][string]$Title,
+    [string]$Description = "",
     [string]$Observations = "",
     [string]$Repo = "dotnet/runtime",
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
     [string]$TimestampIso = (Get-Date).ToUniversalTime().ToString("o"),
     [int]$ScheduleHours = 0,
-    [hashtable]$NavLinks = @{}
+    [hashtable]$NavLinks = @{},
+    [string]$DefaultSort = "action"
 )
 
 $ErrorActionPreference = "Stop"
@@ -42,10 +44,17 @@ $hasAnyAreaLabels = @($prs | Where-Object { $_.area_labels -and $_.area_labels.C
 # Build nav HTML
 $navHtml = ""
 if ($NavLinks.Count -gt 0) {
-    $links = $NavLinks.GetEnumerator() | Sort-Object Name | ForEach-Object {
-        "<a href=`"$($_.Value)`">$($_.Name)</a>"
+    $homeLink = ""
+    $otherLinks = @()
+    foreach ($entry in ($NavLinks.GetEnumerator() | Sort-Object Name)) {
+        if ($entry.Name -eq "Home") {
+            $homeLink = "<a href=`"$($entry.Value)`">$($entry.Name)</a>"
+        } else {
+            $otherLinks += "<a href=`"$($entry.Value)`">$($entry.Name)</a>"
+        }
     }
-    $navHtml = "<nav>$($links -join ' | ') | <a class=`"feedback`" href=`"https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20$Repo/$($OutputFile | Split-Path -Leaf)`" target=`"_blank`">&#x1F4AC; Feedback</a></nav>"
+    $allLinks = if ($homeLink) { @($homeLink) + $otherLinks } else { $otherLinks }
+    $navHtml = "<nav>$($allLinks -join ' | ') | <a class=`"feedback`" href=`"https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20$Repo/$($OutputFile | Split-Path -Leaf)`" target=`"_blank`">&#x1F4AC; Feedback</a></nav>"
 }
 
 # Helper: replace @username with avatar + linked username + filter button
@@ -81,9 +90,13 @@ $rows = foreach ($pr in $prs) {
     if ($pr.ci_detail -match '^(\d+)/(\d+)/(\d+)$') { $ciFailCount = [int]$Matches[2] }
     $ciTitle = ""
     $ciFailHint = ""
-    if ($pr.ci -eq "SUCCESS" -and $ciFailCount -gt 0) {
-        $ciTitle = " title=`"Build Analysis passed; $ciFailCount non-blocking check(s) failed`""
-        $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
+    if ($pr.ci_detail -match '^(\d+)/(\d+)/(\d+)$') {
+        $ciPassed = $Matches[1]; $ciFailed = $Matches[2]; $ciRunning = $Matches[3]
+        $ciTitle = " title=`"$ciPassed passed, $ciFailed failed, $ciRunning running`""
+        if ($pr.ci -eq "SUCCESS" -and $ciFailCount -gt 0) {
+            $ciTitle = " title=`"Build Analysis passed; $ciFailCount non-blocking check(s) failed&#10;$ciPassed passed, $ciFailed failed, $ciRunning running`""
+            $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
+        }
     }
     $communityBadge = if ($pr.is_community) { ' <span class="badge community" title="community">C</span>' } else { "" }
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
@@ -138,14 +151,30 @@ $rows = foreach ($pr in $prs) {
 
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
 
+    $safeValueWhy = $pr.value_why
+    $safeActionWhy = $pr.action_why
+
+    $readyClass = if ([double]$pr.merge_readiness -ge 6) { " ready-high" } else { "" }
+    $actionClass = if ([double]$pr.action_score -ge 5) { " action-hot" } elseif ([double]$pr.action_score -ge 4) { " action-warm" } else { "" }
+    $actionEmoji2 = ""
+    if ([double]$pr.action_score -ge 5) {
+        $actionEmoji2 = "&#x1F3AF; "
+    } elseif ([double]$pr.action_score -ge 4) {
+        # Opacity scales from 0.3 at 4.0 to 0.9 at 4.9
+        $boltOpacity = [Math]::Round(0.3 + (([double]$pr.action_score - 4.0) / 1.0) * 0.6, 2)
+        $actionEmoji2 = "<span style=`"opacity:$boltOpacity`">&#x26A1;</span> "
+    }
+
     @"
 <tr$moreClass data-people="$people" data-labels="$labelsList">
-  <td class="score" title="$safeWhy">$($pr.score)</td>
+  <td class="score$readyClass">$($pr.merge_readiness)<span class="why-btn" onclick="showWhy(this)" data-why="$safeWhy">?</span></td>
+  <td class="score">$($pr.value_score)<span class="why-btn" onclick="showWhy(this)" data-why="$safeValueWhy">?</span></td>
+  <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<span class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy">?</span></td>
   <td class="pr-num"><a href="$prUrl" title="$safeTitle">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
-  <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)p</td>
+  <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<span class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters">?</span></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
@@ -203,25 +232,50 @@ if ($prCount -gt 100) {
 # Scoring explainer
 $scoringHtml = @"
 <details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last activity (update or review comment)</td></tr>
-    <tr><td>1.5</td><td>Discussion</td><td>Recent review engagement boosts score; stale heavy discussion penalized</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity (update or review comment)</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum (recent review activity)</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+  <summary>How are the scores calculated?</summary>
+  <p>Each PR has three scores on a 0&ndash;10 scale:</p>
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>3.0</td><td>No merge conflicts</td></tr>
+        <tr><td>2.5</td><td>CI passing</td></tr>
+        <tr><td>2.5</td><td>Has approval</td></tr>
+        <tr><td>2.5</td><td>Feedback addressed</td></tr>
+        <tr><td>2.5</td><td>Discussion healthy</td></tr>
+        <tr><td>2.0</td><td>Small, easy to review</td></tr>
+        <tr><td>1.5</td><td>Has maintainer review</td></tr>
+        <tr><td>1.0</td><td>Recently active</td></tr>
+        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>0.7</td><td>Recently updated</td></tr>
+        <tr><td>0.5</td><td>Well labeled</td></tr>
+        <tr><td>0.3</td><td>Good review momentum</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from attention?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>1.5</td><td>No approval yet</td></tr>
+        <tr><td>1.5</td><td>Pending feedback, author silent &gt;14d</td></tr>
+        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
+        <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
+        <tr><td>1.0</td><td>High interest</td></tr>
+        <tr><td>0.5</td><td>Pending feedback, author slow (7&ndash;14d)</td></tr>
+        <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
+      <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
+      <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
+      <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+  </div>
+  <p style="font-size:0.85em; margin-top:0.8em;">Click any column header to re-sort. See <a href="https://github.com/danmoseley/pr-dashboard/pull/4">weight calibration analysis</a> for methodology.</p>
 </details>
 "@
 
@@ -245,7 +299,8 @@ $html = @"
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
+  .report-desc { font-size: 0.9em; margin: 0.3em 0 0.8em; line-height: 1.4; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: auto; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -253,7 +308,25 @@ $html = @"
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; }
+  .ready-high { background: rgba(35, 134, 54, 0.12); }
+  .action-score { font-weight: 800; text-align: right; white-space: nowrap; font-size: 1.25em; color: #f0c674;
+    background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3); border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; }
+  .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
+  .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
+  .why-btn { display: inline-block; font-size: 0.7em; color: #484f58; cursor: pointer; margin-left: 3px;
+    vertical-align: middle; font-weight: normal; text-decoration: none; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); }
+  .why-btn:hover { opacity: 1; color: var(--link); border-color: var(--link); filter: none; }
+  .action-why-btn { color: #8b7640; }
+  .action-why-btn:hover { color: #f0c674; border-color: #f0c674; }
+  .why-popup { position: fixed; background: #1c2128; border: 1px solid #444c56; border-radius: 6px; padding: 10px 14px;
+    font-size: 0.85em; color: #e6edf3; z-index: 100; max-width: 350px; white-space: pre-line; line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: auto; }
+  th.action-col { background: rgba(240, 198, 116, 0.15) !important; color: #f0c674; font-weight: 700; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--link); }
+  th.sorted { color: var(--link); }
   .pr-num { white-space: nowrap; }
   .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -275,7 +348,7 @@ $html = @"
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: var(--fg); font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -298,6 +371,8 @@ $html = @"
     .heat-1 { background: rgba(187, 128, 9, 0.1); }
     .heat-2 { background: rgba(210, 105, 30, 0.15); }
     .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+    .action-score { color: #9a6700; background: rgba(154, 103, 0, 0.06); border-color: rgba(154, 103, 0, 0.2); }
+    th.action-col { background: rgba(154, 103, 0, 0.1) !important; color: #9a6700; }
   }
   a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
               border-radius: 10px; text-decoration: none; margin-left: 4px; }
@@ -308,18 +383,30 @@ $html = @"
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
+$(if ($Description) { "<p class=`"report-desc`">$Description</p>" })
 $scoringHtml
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 $(if ($prCount -eq 0) {
 '<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
 } else {
+$sortedMerge = if ($DefaultSort -eq "merge") { ' sorted desc' } else { '' }
+$sortedValue = if ($DefaultSort -eq "value") { ' sorted desc' } else { '' }
+$sortedAction = if ($DefaultSort -eq "action") { ' sorted desc' } else { '' }
+$sortedUpd = if ($DefaultSort -eq "upd") { ' sorted desc' } else { '' }
+$arrowMerge = if ($DefaultSort -eq "merge") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
+$arrowValue = if ($DefaultSort -eq "value") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
+$arrowAction = if ($DefaultSort -eq "action") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
+$arrowUpd = if ($DefaultSort -eq "upd") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
+
 @"
 <table id="pr-table">
 <colgroup>
-  <col style="width:3%">
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
   <col style="width:4%">
   <col>
-  <col style="width:28%">
+  <col style="width:24%">
   <col style="width:7%">
   <col style="width:3%">
   <col style="width:2.5%">
@@ -330,8 +417,8 @@ $(if ($prCount -eq 0) {
 </colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>$(if ($hasAnyAreaLabels) { "<th>Area</th>" })
+  <th class="sortable$sortedMerge" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready$arrowMerge</th><th class="sortable$sortedValue" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need$arrowValue</th><th class="sortable$sortedAction action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action$arrowAction</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of threads + commenters">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable$sortedUpd" data-sort="num" title="Days since last update (push, comment, or review)">Upd$arrowUpd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
 </tr>
 </thead>
 <tbody>
@@ -343,6 +430,7 @@ $($rows -join "`n")
 $toggleHtml
 $obsHtml
 <script>
+var _filterKey = 'prFilter:' + location.pathname;
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
@@ -361,6 +449,7 @@ function filterByLabel(label) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
 }
 function filterByUser(name) {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -380,6 +469,7 @@ function filterByUser(name) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -390,14 +480,22 @@ function clearFilter() {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
+  try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
-// Apply ?user=X or ?label=X filter on page load
+// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
   var label = params.get('label');
   if (user) filterByUser(user);
   else if (label) filterByLabel(label);
+  else {
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') filterByUser(saved.value);
+      else if (saved && saved.type === 'label') filterByLabel(saved.value);
+    } catch(e) {}
+  }
 })();
 // Resizable columns: drag right edge of any <th> to resize
 (function() {
@@ -422,6 +520,92 @@ function clearFilter() {
   function lockLayout() {
     if (locked) return; locked = true;
   }
+})();
+// Show tooltip popup on [?] click
+var activePopup = null;
+var activePopupBtn = null;
+function showWhy(el) {
+  if (activePopup) {
+    activePopup.remove();
+    var wasSame = (activePopupBtn === el);
+    activePopup = null; activePopupBtn = null;
+    if (wasSame) return; // 2nd click on same [?] dismisses
+  }
+  var why = (el.getAttribute('data-why') || '').replace(/&#10;/g, '\n');
+  if (!why) return;
+  var popup = document.createElement('div');
+  popup.className = 'why-popup';
+  popup.textContent = why;
+  document.body.appendChild(popup);
+  var rect = el.getBoundingClientRect();
+  popup.style.left = Math.min(rect.right + 5, window.innerWidth - 360) + 'px';
+  popup.style.top = rect.top + 'px';
+  activePopup = popup;
+  activePopupBtn = el;
+  // Dismiss on click outside
+  setTimeout(function() {
+    function dismissClick(e) {
+      if (!popup.parentNode) { document.removeEventListener('click', dismissClick); return; }
+      if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); }
+    }
+    document.addEventListener('click', dismissClick);
+  }, 0);
+  // Dismiss when mouse moves ~50px away from popup
+  function dismissMouse(e) {
+    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); return; }
+    var r = popup.getBoundingClientRect();
+    var pad = 50;
+    if (e.clientX < r.left - pad || e.clientX > r.right + pad || e.clientY < r.top - pad || e.clientY > r.bottom + pad) {
+      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse);
+    }
+  }
+  document.addEventListener('mousemove', dismissMouse);
+}
+// Sortable columns: click any th.sortable to sort the table
+(function() {
+  var table = document.getElementById('pr-table');
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+  var headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, colIdx) {
+    if (!th.classList.contains('sortable')) return;
+    th.addEventListener('click', function(e) {
+      if (e.target.style && e.target.style.cursor === 'col-resize') return;
+      var isDesc = th.classList.contains('desc');
+      var newDir = isDesc ? 'asc' : 'desc';
+      headers.forEach(function(h) {
+        h.classList.remove('sorted','asc','desc');
+        var old = h.querySelector('.sort-arrow');
+        if (old) old.remove();
+      });
+      th.classList.add('sorted', newDir);
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = newDir === 'desc' ? ' \u25BC' : ' \u25B2';
+      th.insertBefore(arrow, th.querySelector('div'));
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      var sortType = th.getAttribute('data-sort') || 'num';
+      rows.sort(function(a, b) {
+        var aCell = a.cells[colIdx], bCell = b.cells[colIdx];
+        if (!aCell || !bCell) return 0;
+        if (sortType === 'alpha') {
+          var aText = aCell.textContent.trim().toLowerCase();
+          var bText = bCell.textContent.trim().toLowerCase();
+          var cmp = aText < bText ? -1 : aText > bText ? 1 : 0;
+          return newDir === 'desc' ? -cmp : cmp;
+        }
+        // Numeric: sum all numbers found in cell (handles "2/5t 3ppl" → 10)
+        var aText = aCell.textContent.replace(/[#?]/g, '');
+        var bText = bCell.textContent.replace(/[#?]/g, '');
+        var aNums = aText.match(/[\d.]+/g) || [0];
+        var bNums = bText.match(/[\d.]+/g) || [0];
+        var aVal = aNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        var bVal = bNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        return newDir === 'desc' ? bVal - aVal : aVal - bVal;
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
 })();
 </script>
 <script src="../pr-refresh.js"></script>
