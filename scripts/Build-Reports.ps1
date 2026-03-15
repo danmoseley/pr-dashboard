@@ -86,7 +86,7 @@ foreach ($pr in $allPrs) {
     $mergeRaw = ($ciS * 2.5) + ($conflictS * 3.0) + ($approvalS * 2.5) + ($maintS * 1.5) +
         ($feedbackS * 2.5) + ($discussionS * 2.5) + ($sizeS * 2.0) + ($communityS * 1.0) +
         ($stalenessS * 1.0) + ($freshS * 0.7) + ($alignS * 0.5) + ($velocityS * 0.3)
-    $mergeReadiness = [Math]::Round(($mergeRaw / 20.0) * 10, 1)
+    $mergeReadiness = [Math]::Round([Math]::Min(($mergeRaw / 20.0) * 10, 10.0), 1)
 
     # Merge tooltip with point contributions
     $mComps = @(

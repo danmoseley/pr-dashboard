@@ -568,7 +568,7 @@ foreach ($pr in $candidates) {
         ($maintScore * 1.5) + ($feedbackScore * 2.5) + ($discussionScore * 2.5) +
         ($sizeScore * 2.0) + ($communityScore * 1.0) + ($stalenessScore * 1.0) +
         ($freshScore * 0.7) + ($alignScore * 0.5) + ($velocityScore * 0.3)
-    $mergeReadiness = [Math]::Round(($rawScore / $rawMax) * 10, 1)
+    $mergeReadiness = [Math]::Round([Math]::Min(($rawScore / $rawMax) * 10, 10.0), 1)
 
     # Value/Attention score — signals that this PR deserves maintainer time
     $valueRaw = 0.0

@@ -31,6 +31,8 @@ The analysis reveals that "closeness to merge" and "deserves attention" are
 | velocityScore | 0.5 | **0.3** | Low |
 | **TOTAL** | **20.0** | **20.0** | |
 
+> The trivial sizeScore (1.5) can push the raw sum to 21.0; merge readiness is clamped to 10.0.
+
 #### Score 2: Deserves Attention (how much should a maintainer prioritize this?)
 
 Several features have **opposite** directions vs merge readiness: CI failing,
