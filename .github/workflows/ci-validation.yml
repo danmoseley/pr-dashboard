@@ -1,0 +1,52 @@
+name: CI Validation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Run validation checks
+        run: pwsh ./scripts/Test-CiValidation.ps1 -ArtifactDir "${{ runner.temp }}/ci-output"
+
+      - name: Screenshot dashboard (optional)
+        if: success() || failure()
+        continue-on-error: true
+        run: |
+          CI_OUTPUT="${{ runner.temp }}/ci-output"
+          # Use pre-installed browser (ubuntu-latest includes google-chrome)
+          CHROME=$(which google-chrome || which chromium-browser || which chromium || echo "")
+          if [ -z "$CHROME" ]; then
+            echo "::notice::No browser found, skipping screenshots"
+            exit 0
+          fi
+          mkdir -p screenshots
+          if [ -f "$CI_OUTPUT/index.html" ]; then
+            "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/index.png --window-size=1400,900 "file://$CI_OUTPUT/index.html" 2>/dev/null || true
+          fi
+          # Find the first generated report dynamically
+          REPORT=$(find "$CI_OUTPUT" -name "actionable.html" -path "*/*/actionable.html" 2>/dev/null | head -1)
+          if [ -n "$REPORT" ]; then
+            SLUG=$(basename "$(dirname "$REPORT")")
+            "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${SLUG}-actionable.png --window-size=1400,900 "file://$REPORT" 2>/dev/null || true
+          fi
+          ls -la screenshots/ 2>/dev/null || echo "No screenshots produced"
+
+      - name: Upload screenshots
+        if: success() || failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
