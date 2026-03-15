@@ -543,7 +543,8 @@ foreach ($pr in $candidates) {
     $alignScore = if ($isUntriaged -or -not $hasAreaLabel) { 0.0 } else { 1.0 }
     $freshScore = if ($daysSinceActivity -le 14) { 1.0 } elseif ($daysSinceActivity -le 30) { 0.5 } else { 0.0 }
     $totalLines = $pr.additions + $pr.deletions
-    $sizeScore = if ($pr.changedFiles -le 5 -and $totalLines -le 200) { 1.0 } elseif ($pr.changedFiles -le 20 -and $totalLines -le 500) { 0.5 } else { 0.0 }
+    $isTrivial = $pr.changedFiles -le 2 -and $totalLines -le 20
+    $sizeScore = if ($isTrivial) { 1.5 } elseif ($pr.changedFiles -le 5 -and $totalLines -le 200) { 1.0 } elseif ($pr.changedFiles -le 20 -and $totalLines -le 500) { 0.5 } else { 0.0 }
     $communityScore = if ($isCommunity) { 0.5 } else { 1.0 }
     # Stale approval: reduce approval score if approval is not on current commit
     $approvalScore = if ($approvalCount -ge 2 -and $hasOwnerApproval) { 1.0 }
@@ -579,13 +580,14 @@ foreach ($pr in $candidates) {
     if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $valueRaw += 1.0 }   # high interest
     elseif ($totalThreads -gt 5) { $valueRaw += 0.5 }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueRaw += 0.5 }     # old but active
+    if ($isTrivial -and $unresolvedThreads -eq 0) { $valueRaw += 0.5 }           # quick win — trivial review
     # Author response latency: if ball is in author's court, reduce attention (maintainer can't help)
     $daysSinceAuthorComment = if ($lastAuthorCommentDate) { ($now - $lastAuthorCommentDate).TotalDays } else { $ageInDays }
     if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw -= 1.5 }   # author silent — not actionable
     elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $valueRaw -= 0.5 } # author slow — less actionable
     $valueClamped = $valueRaw -lt 0
     $valueRaw = [Math]::Max($valueRaw, 0.0)
-    $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
+    $valueScore = [Math]::Round([Math]::Min(($valueRaw / 9.0) * 10, 10.0), 1)
 
     # Value "why" tooltip
     $valueWhy = @()
@@ -602,6 +604,7 @@ foreach ($pr in $candidates) {
     if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7 -and $daysSinceAuthorComment -le 14) { $valueWhy += "author slow $([int]$daysSinceAuthorComment)d, ball in their court (-0.5)" }
     if ($totalLines -gt 200) { $valueWhy += "large change: $totalLines lines (+0.5)" }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueWhy += "old but active: $([int]$ageInDays)d age (+0.5)" }
+    if ($isTrivial -and $unresolvedThreads -eq 0) { $valueWhy += "trivial change, quick win (+0.5)" }
     if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
     if ($valueClamped) { $valueWhy += "(net negative, floored to 0)" }
     $valueWhyStr = $valueWhy -join "&#10;"
@@ -613,7 +616,7 @@ foreach ($pr in $candidates) {
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
         [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -eq 1.0) { "feedback addressed" } elseif ($feedbackScore -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackScore; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
-        [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
+        [PSCustomObject]@{ key = "size"; text = if ($isTrivial) { "trivial change, 30-second review" } elseif ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }
         [PSCustomObject]@{ key = "staleness"; text = if ($stalenessScore -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessScore; w = 1.0 }
         [PSCustomObject]@{ key = "community author"; text = if ($isCommunity) { "community author" } else { "team author" }; val = $communityScore; w = 1.0 }

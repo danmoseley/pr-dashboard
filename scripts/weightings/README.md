@@ -23,6 +23,7 @@ The analysis reveals that "closeness to merge" and "deserves attention" are
 | feedbackScore | 2.0 | **2.5** | High |
 | discussionScore | 1.5 | **2.5** | Very High |
 | sizeScore | 1.0 | **2.0** | High |
+| ↳ trivial | — | **(+1.0 bonus)** | Hand-tuned |
 | communityScore | 0.5 | **1.0** | High |
 | stalenessScore | 1.5 | **1.0** | Low |
 | freshScore | 1.0 | **0.7** | Low |
@@ -49,6 +50,7 @@ but _raise_ the need for attention. Issue engagement is entirely new signal.
 | **Effort at risk** | community author | +2 | **Opposite** |
 | | has reviews but no approval | +1 | **Opposite** |
 | | large change (>200 lines) | +0.5 | **Opposite** |
+| | trivial change (≤2 files, ≤20 lines) | +0.5 | Aligned |
 | **Blocked** | CI failing | +1 | **Opposite** |
 | | unresolved review feedback | +1 | Aligned |
 | | no approval | +1.5 | **Opposite** |
@@ -77,6 +79,9 @@ score primarily surfaces community contributions that need maintainer action.
 4. **Size matters more than expected** (significant in 6/11 repos). Changed files,
    total lines, and additions-only all correlate similarly with merge time (r≈0.27–0.30
    on log scale), so the combined threshold approach in the dashboard is reasonable.
+   Post-analysis refinement: trivial PRs (≤2 files, ≤20 lines) get a sizeScore of
+   1.5 (vs 1.0 for small) and a +0.5 Need bonus — these are quick wins where a
+   30-second review can close out a contribution.
 
 5. **Raw discussion count creates a death spiral**. Recommend splitting into
    actionable feedback (unresolved threads) + engagement (distinct commenters, capped).
