@@ -56,8 +56,9 @@ $allPrs = $scan.prs
 # --- Enrich PRs with triple scores (merge readiness, value, action) ---
 # Computes from cached fields so Regen-Html works without API calls.
 foreach ($pr in $allPrs) {
-    # Skip if already computed (future: Get-PrTriageData.ps1 will emit these)
-    if ($null -ne $pr.action_score) { continue }
+    # Skip if already fully computed (all fields present from live API path)
+    if ($null -ne $pr.action_score -and $null -ne $pr.merge_readiness -and
+        $null -ne $pr.value_score -and $null -ne $pr.value_why -and $null -ne $pr.action_why) { continue }
 
     # --- Merge Readiness: calibrated weights from analysis (total 20.0) ---
     $ciS = switch ($pr.ci) { "SUCCESS" { 1.0 } "ABSENT" { 0.5 } "IN_PROGRESS" { 0.5 } default { 0.0 } }

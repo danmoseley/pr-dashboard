@@ -383,7 +383,7 @@ $html = @"
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
-$(if ($Description) { "<p class=`"report-desc`">$Description</p>" })
+$(if ($Description) { "<p class=`"report-desc`">$Description</p><!-- Description is trusted HTML from hardcoded report definitions -->" })
 $scoringHtml
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 $(if ($prCount -eq 0) {
