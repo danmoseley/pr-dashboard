@@ -88,10 +88,10 @@ foreach ($pr in $allPrs) {
 
     # Merge tooltip with point contributions
     $mComps = @(
-        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictS -ge 0.5) { "no merge conflicts" } else { "has merge conflicts" }; val = $conflictS; w = 3.0 }
-        [PSCustomObject]@{ key = "ci"; text = if ($ciS -ge 0.5) { "CI passing" } else { "CI failing" }; val = $ciS; w = 2.5 }
+        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictS -eq 1.0) { "no merge conflicts" } elseif ($conflictS -eq 0) { "has merge conflicts" } else { "mergeability unknown" }; val = $conflictS; w = 3.0 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciS -eq 1.0) { "CI passing" } elseif ($ciS -eq 0) { "CI failing" } else { "CI pending/absent" }; val = $ciS; w = 2.5 }
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalS -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalS; w = 2.5 }
-        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackS -ge 0.5) { "feedback addressed" } else { "has unresolved feedback" }; val = $feedbackS; w = 2.5 }
+        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackS -eq 1.0) { "feedback addressed" } elseif ($feedbackS -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackS; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionS -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionS; w = 2.5 }
         [PSCustomObject]@{ key = "size"; text = if ($sizeS -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeS; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintS -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintS; w = 1.5 }

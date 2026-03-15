@@ -418,7 +418,7 @@ foreach ($pr in $candidates) {
         }
         # Find most recent comment by the PR author (for response latency)
         $authorCommentDates = @($gql.reviewThreads.nodes | ForEach-Object {
-            $_.comments.nodes | Where-Object { $_.author.login -eq $pr.author.login } | ForEach-Object {
+            $_.comments.nodes | Where-Object { $_.author.login -eq $authorLogin } | ForEach-Object {
                 if ($_.createdAt) { [DateTime]::Parse($_.createdAt) }
             }
         } | Where-Object { $_ })
@@ -599,10 +599,10 @@ foreach ($pr in $candidates) {
 
     # Merge readiness tooltip components (used for both merge tooltip and action tooltip)
     $mergeComponents = @(
-        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -ge 0.5) { "no merge conflicts" } else { "has merge conflicts" }; val = $conflictScore; w = 3.0 }
-        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -ge 0.5) { "CI passing" } else { "CI failing" }; val = $ciScore; w = 2.5 }
+        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -eq 1.0) { "no merge conflicts" } elseif ($conflictScore -eq 0) { "has merge conflicts" } else { "mergeability unknown" }; val = $conflictScore; w = 3.0 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -eq 1.0) { "CI passing" } elseif ($ciScore -eq 0) { "CI failing" } else { "CI pending/absent" }; val = $ciScore; w = 2.5 }
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
-        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -ge 0.5) { "feedback addressed" } else { "has unresolved feedback" }; val = $feedbackScore; w = 2.5 }
+        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -eq 1.0) { "feedback addressed" } elseif ($feedbackScore -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackScore; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
         [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }

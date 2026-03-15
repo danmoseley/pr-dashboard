@@ -167,9 +167,9 @@ $rows = foreach ($pr in $prs) {
 
     @"
 <tr$moreClass data-people="$people" data-labels="$labelsList">
-  <td class="score$readyClass">$($pr.merge_readiness)<span class="why-btn" onclick="showWhy(this)" data-why="$safeWhy">?</span></td>
-  <td class="score">$($pr.value_score)<span class="why-btn" onclick="showWhy(this)" data-why="$safeValueWhy">?</span></td>
-  <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<span class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy">?</span></td>
+  <td class="score$readyClass">$($pr.merge_readiness)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeWhy" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">$($pr.value_score)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeValueWhy" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="$prUrl" title="$safeTitle">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
@@ -247,7 +247,7 @@ $scoringHtml = @"
         <tr><td>2.0</td><td>Small, easy to review</td></tr>
         <tr><td>1.5</td><td>Has maintainer review</td></tr>
         <tr><td>1.0</td><td>Recently active</td></tr>
-        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>1.0</td><td>Team or known author</td></tr>
         <tr><td>0.7</td><td>Recently updated</td></tr>
         <tr><td>0.5</td><td>Well labeled</td></tr>
         <tr><td>0.3</td><td>Good review momentum</td></tr>
@@ -314,9 +314,9 @@ $html = @"
     background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3); border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; }
   .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
   .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
-  .why-btn { display: inline-block; font-size: 0.7em; color: #484f58; cursor: pointer; margin-left: 3px;
+  .why-btn { display: inline-block; font-size: 0.7em; font-family: inherit; color: #484f58; cursor: pointer; margin-left: 3px;
     vertical-align: middle; font-weight: normal; text-decoration: none; padding: 0 3px; border-radius: 3px;
-    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); }
+    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); line-height: 1.4; }
   .why-btn:hover { opacity: 1; color: var(--link); border-color: var(--link); filter: none; }
   .action-why-btn { color: #8b7640; }
   .action-why-btn:hover { color: #f0c674; border-color: #f0c674; }
@@ -418,7 +418,7 @@ $arrowUpd = if ($DefaultSort -eq "upd") { '<span class="sort-arrow"> &#x25BC;</s
 <thead>
 <tr>
   <th class="sortable$sortedMerge" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready$arrowMerge</th><th class="sortable$sortedValue" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need$arrowValue</th><th class="sortable$sortedAction action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action$arrowAction</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of threads + commenters">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable$sortedUpd" data-sort="num" title="Days since last update (push, comment, or review)">Upd$arrowUpd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable$sortedUpd" data-sort="num" title="Days since last update (push, comment, or review)">Upd$arrowUpd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
 </tr>
 </thead>
 <tbody>
@@ -538,8 +538,8 @@ function showWhy(el) {
   popup.textContent = why;
   document.body.appendChild(popup);
   var rect = el.getBoundingClientRect();
-  popup.style.left = Math.min(rect.right + 5, window.innerWidth - 360) + 'px';
-  popup.style.top = rect.top + 'px';
+  popup.style.left = Math.max(0, Math.min(rect.right + 5, window.innerWidth - 360)) + 'px';
+  popup.style.top = Math.max(0, rect.top) + 'px';
   activePopup = popup;
   activePopupBtn = el;
   // Dismiss on click outside
