@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments(last:20){totalCount nodes{author{login}}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -406,6 +406,7 @@ foreach ($pr in $candidates) {
 
     # Find the most recent review comment date (for engagement freshness)
     $lastReviewCommentDate = $null
+    $lastAuthorCommentDate = $null
     if ($gql -and $gql.reviewThreads.nodes) {
         $commentDates = @($gql.reviewThreads.nodes | ForEach-Object {
             $_.comments.nodes | ForEach-Object {
@@ -414,6 +415,21 @@ foreach ($pr in $candidates) {
         } | Where-Object { $_ })
         if ($commentDates.Count -gt 0) {
             $lastReviewCommentDate = ($commentDates | Sort-Object -Descending | Select-Object -First 1)
+        }
+        # Find most recent comment by the PR author (for response latency)
+        # Include both review thread comments and PR conversation comments
+        $authorCommentDates = @($gql.reviewThreads.nodes | ForEach-Object {
+            $_.comments.nodes | Where-Object { $_.author.login -eq $authorLogin } | ForEach-Object {
+                if ($_.createdAt) { [DateTime]::Parse($_.createdAt) }
+            }
+        } | Where-Object { $_ })
+        if ($gql.comments.nodes) {
+            $authorCommentDates += @($gql.comments.nodes | Where-Object { $_.author.login -eq $authorLogin -and $_.createdAt } | ForEach-Object {
+                [DateTime]::Parse($_.createdAt)
+            })
+        }
+        if ($authorCommentDates.Count -gt 0) {
+            $lastAuthorCommentDate = ($authorCommentDates | Sort-Object -Descending | Select-Object -First 1)
         }
     }
 
@@ -545,14 +561,94 @@ foreach ($pr in $candidates) {
                        elseif ($totalThreads -le 15 -and $distinctCommenters -le 5) { 0.5 }
                        else { 0.0 }
 
-    # Composite: weighted sum normalized to 0-10 scale
+    # Composite: weighted sum normalized to 0-10 scale (calibrated weights, total=20.0)
     $rawMax = 20.0
-    $rawScore = ($ciScore * 3) + ($conflictScore * 3) + ($maintScore * 3) +
-        ($feedbackScore * 2) + ($approvalScore * 2) + ($stalenessScore * 1.5) +
-        ($discussionScore * 1.5) +
-        ($alignScore * 1) + ($freshScore * 1) + ($sizeScore * 1) +
-        ($communityScore * 0.5) + ($velocityScore * 0.5)
-    $composite = [Math]::Round(($rawScore / $rawMax) * 10, 1)
+    $rawScore = ($ciScore * 2.5) + ($conflictScore * 3.0) + ($approvalScore * 2.5) +
+        ($maintScore * 1.5) + ($feedbackScore * 2.5) + ($discussionScore * 2.5) +
+        ($sizeScore * 2.0) + ($communityScore * 1.0) + ($stalenessScore * 1.0) +
+        ($freshScore * 0.7) + ($alignScore * 0.5) + ($velocityScore * 0.3)
+    $mergeReadiness = [Math]::Round(($rawScore / $rawMax) * 10, 1)
+
+    # Value/Attention score — signals that this PR deserves maintainer time
+    $valueRaw = 0.0
+    if ($isCommunity) { $valueRaw += 1.0 }                                         # community effort at risk
+    if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $valueRaw += 1.0 }        # reviewed but not approved
+    if ($totalLines -gt 200) { $valueRaw += 0.5 }                                  # large change
+    if ($unresolvedThreads -gt 0) { $valueRaw += 1.0 }                             # active feedback
+    if ($approvalCount -eq 0) { $valueRaw += 1.5 }                                 # needs reviewer
+    if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $valueRaw += 1.0 }   # high interest
+    elseif ($totalThreads -gt 5) { $valueRaw += 0.5 }
+    if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueRaw += 0.5 }     # old but active
+    # Author response latency: unresponsive author with pending feedback = needs nudge
+    $daysSinceAuthorComment = if ($lastAuthorCommentDate) { ($now - $lastAuthorCommentDate).TotalDays } else { $ageInDays }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw += 1.5 }   # stale author response
+    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $valueRaw += 0.5 } # slow author response
+    $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
+
+    # Value "why" tooltip
+    $valueWhy = @()
+    if ($isCommunity) { $valueWhy += "community author (+1.0)" }
+    if ($approvalCount -eq 0) { $valueWhy += "no approval yet (+1.5)" }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueWhy += "pending feedback, author silent $([int]$daysSinceAuthorComment)d (+1.5)" }
+    if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $valueWhy += "reviewed, not approved (+1.0)" }
+    if ($unresolvedThreads -gt 0) { $valueWhy += "unresolved feedback (+1.0)" }
+    if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $valueWhy += "high interest: ${totalThreads}t ${distinctCommenters}ppl (+1.0)" }
+    elseif ($totalThreads -gt 5) {
+        if ($unresolvedThreads -gt 0) { $valueWhy += "active discussion: ${totalThreads}t, $unresolvedThreads unresolved (+0.5)" }
+        else { $valueWhy += "thorough review: $totalThreads resolved threads (+0.5)" }
+    }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7 -and $daysSinceAuthorComment -le 14) { $valueWhy += "pending feedback, author slow $([int]$daysSinceAuthorComment)d (+0.5)" }
+    if ($totalLines -gt 200) { $valueWhy += "large change: $totalLines lines (+0.5)" }
+    if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueWhy += "old but active: $([int]$ageInDays)d age (+0.5)" }
+    if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
+    $valueWhyStr = $valueWhy -join "&#10;"
+
+    # Merge readiness tooltip components (used for both merge tooltip and action tooltip)
+    $mergeComponents = @(
+        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -eq 1.0) { "no merge conflicts" } elseif ($conflictScore -eq 0) { "has merge conflicts" } else { "mergeability unknown" }; val = $conflictScore; w = 3.0 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -eq 1.0) { "CI passing" } elseif ($ciScore -eq 0) { "CI failing" } else { "CI pending/absent" }; val = $ciScore; w = 2.5 }
+        [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
+        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -eq 1.0) { "feedback addressed" } elseif ($feedbackScore -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackScore; w = 2.5 }
+        [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
+        [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
+        [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }
+        [PSCustomObject]@{ key = "staleness"; text = if ($stalenessScore -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessScore; w = 1.0 }
+        [PSCustomObject]@{ key = "community author"; text = if ($isCommunity) { "community author" } else { "team author" }; val = $communityScore; w = 1.0 }
+        [PSCustomObject]@{ key = "freshness"; text = if ($freshScore -ge 0.5) { "recently updated" } else { "no recent updates" }; val = $freshScore; w = 0.7 }
+        [PSCustomObject]@{ key = "triage"; text = if ($alignScore -ge 0.5) { "well labeled" } else { "missing area labels" }; val = $alignScore; w = 0.5 }
+        [PSCustomObject]@{ key = "momentum"; text = if ($velocityScore -ge 0.5) { "good review momentum" } else { "slow review momentum" }; val = $velocityScore; w = 0.3 }
+    )
+
+    # Combined Action score: multiplicative (merge+1)*(value+1) normalized to 0-10
+    $actionRaw = ($mergeReadiness + 1) * ($valueScore + 1)
+    $actionScore = [Math]::Round(($actionRaw / 121.0) * 10, 1)
+
+    # Action tooltip: unified contributors from both scores, overlapping concepts combined
+    $allContribs = @()
+    foreach ($mc in $mergeComponents) {
+        $c = [Math]::Round($mc.val * $mc.w, 1)
+        if ($c -gt 0) { $allContribs += [PSCustomObject]@{ key = $mc.key; text = $mc.text; pts = $c } }
+    }
+    if ($isCommunity) { $allContribs += [PSCustomObject]@{ key = "community author"; text = "community author"; pts = 1.0 } }
+    if ($approvalCount -eq 0) { $allContribs += [PSCustomObject]@{ key = "needs approval"; text = "needs approval"; pts = 1.5 } }
+    if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $allContribs += [PSCustomObject]@{ key = "reviewed, not approved"; text = "reviewed, not approved"; pts = 1.0 } }
+    if ($unresolvedThreads -gt 0) { $allContribs += [PSCustomObject]@{ key = "unresolved feedback"; text = "has unresolved feedback"; pts = 1.0 } }
+    if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $allContribs += [PSCustomObject]@{ key = "high interest"; text = "high interest"; pts = 1.0 } }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author silent $([int]$daysSinceAuthorComment)d"; pts = 1.5 } }
+    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author slow $([int]$daysSinceAuthorComment)d"; pts = 0.5 } }
+    # Group by key, sum points, keep best text
+    $grouped = $allContribs | Group-Object key | ForEach-Object {
+        $total = ($_.Group | Measure-Object pts -Sum).Sum
+        $bestText = ($_.Group | Sort-Object pts -Descending | Select-Object -First 1).text
+        [PSCustomObject]@{ text = $bestText; pts = [Math]::Round($total, 1) }
+    }
+    $topContribs = @($grouped | Sort-Object pts -Descending | ForEach-Object {
+        "$($_.text) (+$($_.pts))"
+    })
+    $actionWhyStr = ($topContribs -join "&#10;")
+
+    # Keep composite as legacy score for backward compatibility
+    $composite = $mergeReadiness
 
     # --- WHO OWNS NEXT ACTION ---
     # Identify 1-2 specific people responsible for the next step
@@ -717,7 +813,7 @@ foreach ($pr in $candidates) {
     if ($whoStr -and $prNextAction -match '^Maintainer:\s*(.+)') {
         $prNextAction = "$whoStr`: $($Matches[1])"
     } elseif ($whoStr -and $prNextAction -eq "Ready to merge") {
-        $prNextAction = "$whoStr`: Ready to merge"
+        $prNextAction = "$whoStr or other maintainer: Ready to merge"
     }
 
     # Blockers
@@ -735,25 +831,11 @@ foreach ($pr in $candidates) {
     if ($copilotReviewFailed) { $blockers += "Copilot review errored" }
     $blockersStr = if ($blockers.Count -gt 0) { $blockers -join ", " } else { "—" }
 
-    # Why (use HTML entities for emojis to avoid encoding issues across platforms)
-    $why = @()
-    $why += if ($ciScore -eq 1) { "&#x2705; CI passed" } elseif ($ciScore -eq 0) { "&#x274C; CI failing" } else { "&#x1F7E1; CI pending" }
-    if ($conflictScore -eq 0) { $why += "&#x26A0;&#xFE0F; has conflicts" }
-    if ($hasOwnerApproval) { $why += "&#x1F44D; owner approved" }
-    elseif ($hasTriagerApproval) { $why += "&#x1F44D; triager approved" }
-    elseif ($hasAnyApproval) { $why += "&#x1F44D; community reviewed" }
-    elseif ($hasAnyReview) { $why += "&#x1F440; reviewed, not approved" }
-    else { $why += "&#x1F50D; no review yet" }
-    if ($hasStaleApproval) { $why += "&#x26A0;&#xFE0F; approval on older commit" }
-    if ($unresolvedThreads -gt 0) { $why += "&#x1F4AC; $unresolvedThreads unresolved" }
-    if ($totalThreads -gt 15) { $why += "&#x1F5E8;&#xFE0F; busy ($totalThreads threads, $distinctCommenters people)" }
-    elseif ($totalThreads -gt 5) { $why += "&#x1F5E8;&#xFE0F; active ($totalThreads threads)" }
-    if ($isCommunity) { $why += "&#x1F310; community" }
-    if ($sizeScore -eq 1) { $why += "&#x1F4E6; small change" }
-    elseif ($sizeScore -eq 0) { $why += "&#x1F4E6; large ($($pr.changedFiles) files, $($totalLines) lines)" }
-    if ($daysSinceUpdate -gt 14) { $why += "&#x23F3; stale ($([int]$daysSinceUpdate)d)" }
-    if ($ageInDays -gt 90) { $why += "&#x1F570;&#xFE0F; old ($([int]$ageInDays)d)" }
-    $whyStr = $why -join " &#183; "
+    # Why — merge readiness tooltip with point contributions (descending by weighted value)
+    $mergeWhy = @($mergeComponents | Sort-Object { $_.val * $_.w } -Descending | Where-Object { ($_.val * $_.w) -gt 0 } | ForEach-Object {
+        $c = [Math]::Round($_.val * $_.w, 1); "$($_.text) (+$c)"
+    })
+    $whyStr = $mergeWhy -join "&#10;"
 
     $results += [PSCustomObject]@{
         number = $n
@@ -761,6 +843,11 @@ foreach ($pr in $candidates) {
         author = $pr.author.login
         copilot_trigger = $botTrigger
         score = $composite
+        merge_readiness = $mergeReadiness
+        value_score = $valueScore
+        value_why = $valueWhyStr
+        action_score = $actionScore
+        action_why = $actionWhyStr
         ci = $baConclusion
         ci_detail = "$passed/$failed/$running"
         unresolved_threads = $unresolvedThreads
@@ -773,6 +860,8 @@ foreach ($pr in $candidates) {
         area_labels = @($labelNames | Where-Object { $_ -match "^area-" })
         age_days = [int]$ageInDays
         days_since_update = [int]$daysSinceUpdate
+        days_since_author_review_comment = [int]$daysSinceAuthorComment
+        days_since_review = [int]$daysSinceReview
         changed_files = $pr.changedFiles
         lines_changed = $totalLines
         next_action = $prNextAction
@@ -782,8 +871,8 @@ foreach ($pr in $candidates) {
     }
 }
 
-# Sort by score descending
-$results = $results | Sort-Object -Property score -Descending
+# Sort by action_score descending (combined merge readiness + value)
+$results = $results | Sort-Object -Property action_score -Descending
 
 # --- Post-scoring filters ---
 if ($MinApprovals -gt 0) {
