@@ -85,7 +85,7 @@
       var btn = document.createElement('button');
       btn.className = 'pr-refresh-btn';
       btn.innerHTML = '&#x21bb;';
-      btn.title = 'Refresh this PR from GitHub';
+      btn.title = 'Check if this PR was merged or closed';
       btn.setAttribute('aria-label', 'Refresh PR #' + info.number);
       btn.addEventListener('click', function(e) {
         e.preventDefault();

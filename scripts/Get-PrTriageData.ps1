@@ -534,7 +534,7 @@ foreach ($pr in $candidates) {
     }
     $daysSinceActivity = ($now - $effectiveUpdateDate).TotalDays
 
-    $ciScore = switch ($baConclusion) { "SUCCESS" { 1.0 } "ABSENT" { 0.5 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
+    $ciScore = switch ($baConclusion) { "SUCCESS" { 1.0 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
     $stalenessScore = if ($daysSinceActivity -le 3) { 1.0 } elseif ($daysSinceActivity -le 14) { 0.5 } else { 0.0 }
     $maintScore = if ($hasOwnerApproval) { 1.0 } elseif ($hasTriagerApproval) { 0.75 } elseif ($hasAnyReview) { 0.5 } else { 0.0 }
     $hasNeedsAuthorAction = $labelNames -contains "needs-author-action"
@@ -612,7 +612,7 @@ foreach ($pr in $candidates) {
     # Merge readiness tooltip components (used for both merge tooltip and action tooltip)
     $mergeComponents = @(
         [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -eq 1.0) { "no merge conflicts" } elseif ($conflictScore -eq 0) { "has merge conflicts" } else { "mergeability unknown" }; val = $conflictScore; w = 3.0 }
-        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -eq 1.0) { "CI passing" } elseif ($ciScore -eq 0) { "CI failing" } else { "CI pending/absent" }; val = $ciScore; w = 2.5 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -eq 1.0) { "CI passing" } elseif ($ciScore -eq 0.5) { "CI pending" } else { "CI failing/absent" }; val = $ciScore; w = 2.5 }
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
         [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -eq 1.0) { "feedback addressed" } elseif ($feedbackScore -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackScore; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
