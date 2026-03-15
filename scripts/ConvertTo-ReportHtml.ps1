@@ -280,6 +280,7 @@ $scoringHtml = @"
 "@
 
 $scheduleNote= if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
+$defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 $html = @"
 <!DOCTYPE html>
@@ -308,7 +309,6 @@ $scoringHtml
 $(if ($prCount -eq 0) {
 '<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
 } else {
-$defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 @"
 <table id="pr-table">
@@ -410,8 +410,7 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-initTableSort('pr-table', $defaultColIndex);
-initResizableColumns('pr-table');
+$(if ($prCount -gt 0) { "initTableSort('pr-table', $defaultColIndex);`ninitResizableColumns('pr-table');" })
 </script>
 <script src="../pr-refresh.js"></script>
 </body>
