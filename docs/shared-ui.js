@@ -112,12 +112,10 @@
     function lockLayout() {
       if (locked) return; locked = true;
       // Freeze current column widths then switch to fixed layout
-      var totalW = table.offsetWidth;
       ths.forEach(function(h) {
         var w = h.offsetWidth + 'px';
         h.style.width = w; h.style.minWidth = w; h.style.maxWidth = w;
       });
-      table.style.width = totalW + 'px';
       table.style.tableLayout = 'fixed';
     }
     ths.forEach(function(th) {
