@@ -80,7 +80,7 @@ function ConvertTo-UserHtml([string]$text) {
 # Compute 10th percentile of lines_changed for "trivial" icon
 $sortedLines = @($prs | ForEach-Object { [int]$_.lines_changed } | Sort-Object)
 $trivialThreshold = if ($sortedLines.Count -ge 10) {
-    $idx = [Math]::Floor($sortedLines.Count * 0.10)
+    $idx = [Math]::Floor(($sortedLines.Count - 1) * 0.10)
     $sortedLines[$idx]
 } else { 0 }
 
@@ -188,7 +188,9 @@ $rows = foreach ($pr in $prs) {
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
-  <td class="num$filesHeat" title="$($pr.changed_files) files, $($pr.lines_changed) lines (additions + deletions)">$sizeIcon$($pr.lines_changed)</td>
+  $filesWord = if ($pr.changed_files -eq 1) { "file" } else { "files" }
+  $linesWord = if ($pr.lines_changed -eq 1) { "line" } else { "lines" }
+  <td class="num$filesHeat" title="$($pr.changed_files) $filesWord, $($pr.lines_changed) $linesWord (additions + deletions)">$sizeIcon$($pr.lines_changed)</td>
   <td class="author">$communityBadge$authorDisplay</td>
   $(if ($hasAnyAreaLabels) { "<td class=`"area-col`">$areaLabelHtml</td>" })
 </tr>

@@ -297,7 +297,7 @@
 
     // Compute 10th percentile of lines_changed for "trivial" icon
     var sortedLines = prs.map(function(pr) { return pr.lines_changed || 0; }).sort(function(a,b) { return a - b; });
-    var trivialThreshold = sortedLines.length >= 10 ? sortedLines[Math.floor(sortedLines.length * 0.10)] : 0;
+    var trivialThreshold = sortedLines.length >= 10 ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
 
     var html = '<table id="pr-table"><colgroup>' +
       '<col style="width:2.5%">' +     // Ready
@@ -458,7 +458,7 @@
       '<td class="disc' + discHeat + '">' + discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button></td>' +
       '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
       '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
-      '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' files, ' + linesChanged + ' lines (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
+      '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' ' + ((pr.changed_files || 0) === 1 ? 'file' : 'files') + ', ' + linesChanged + ' ' + (linesChanged === 1 ? 'line' : 'lines') + ' (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
       '<td class="author">' + communityBadge + authorHtml + '</td>' +
       (hasArea ? '<td class="area-col">' + areaHtml + '</td>' : '') +
       '</tr>';
