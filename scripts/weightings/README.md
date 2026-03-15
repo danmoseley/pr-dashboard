@@ -149,12 +149,22 @@ Could default to multiplicative and let users toggle mode.
 ### Data
 
 Collected data files (~1.9MB total, ~30 min to regenerate) are stored locally
-at `C:\git\pr_data\` rather than checked in:
+rather than checked in. By default, scripts read/write to a `data/` subdirectory
+alongside the scripts. Override with the `WEIGHTINGS_DATA_DIR` environment variable:
+
+```bash
+# Use default (scripts/weightings/data/)
+python collect_pr_data.py
+
+# Or point to a custom location
+export WEIGHTINGS_DATA_DIR=/path/to/data
+python collect_pr_data.py
+```
+
+Files:
 - `merged_pr_features.json` — 980 PR feature vectors (the core dataset).
 - `inferred_maintainers.json` — Per-repo maintainer sets from mergedBy history.
 - `linked_issues.json` — Linked issue metadata for all 980 PRs.
-
-To regenerate, run the collection scripts below.
 
 ## Reproducing
 

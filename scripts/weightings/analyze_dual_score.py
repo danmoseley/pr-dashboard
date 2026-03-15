@@ -8,15 +8,18 @@ import json
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 import warnings
 warnings.filterwarnings('ignore')
 
-DATA_FILE = r"C:\git\pr_data\merged_pr_features.json"
-MAINTAINERS_FILE = r"C:\git\pr_data\inferred_maintainers.json"
-ISSUES_FILE = r"C:\git\pr_data\linked_issues.json"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_DATA_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(_SCRIPT_DIR / "data"))
+DATA_FILE = os.path.join(_DATA_DIR, "merged_pr_features.json")
+MAINTAINERS_FILE = os.path.join(_DATA_DIR, "inferred_maintainers.json")
+ISSUES_FILE = os.path.join(_DATA_DIR, "linked_issues.json")
 
 def load():
     with open(DATA_FILE, "r", encoding="utf-8") as f:

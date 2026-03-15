@@ -1,6 +1,5 @@
 """
 Quick fetch of mergedBy for all repos to infer maintainer sets.
-Also re-derive features using Build Analysis specifically.
 """
 
 import subprocess
@@ -8,10 +7,11 @@ import json
 import time
 import os
 import sys
+from pathlib import Path
 from collections import defaultdict
 
-OUTPUT_DIR = r"C:\git\pr_data"
-DATA_FILE = os.path.join(OUTPUT_DIR, "merged_pr_features.json")
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
 
 REPOS = [
     "dotnet/runtime", "dotnet/aspire", "dotnet/aspnetcore",

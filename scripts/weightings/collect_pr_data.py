@@ -8,6 +8,7 @@ import json
 import sys
 import time
 import os
+from pathlib import Path
 from datetime import datetime, timezone
 
 REPOS = [
@@ -28,7 +29,8 @@ REPOS = [
 # We'll use this to distinguish owner/triager approvals
 MAINTAINERS = set()
 
-OUTPUT_DIR = r"C:\git\pr_data"
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
 
 def gh_graphql(query, variables=None, retries=2):
     """Execute a GraphQL query via gh CLI."""
@@ -55,6 +57,19 @@ def gh_graphql(query, variables=None, retries=2):
 def fetch_maintainers():
     """Fetch maintainers list from the dashboard repo."""
     global MAINTAINERS
+    # Try local config first, fall back to GitHub API
+    local_config = SCRIPT_DIR.parent.parent / "config" / "maintainers.json"
+    try:
+        if local_config.exists():
+            data = json.loads(local_config.read_text(encoding="utf-8"))
+            for repo, users in data.items():
+                if isinstance(users, list):
+                    MAINTAINERS.update(u.lower() for u in users)
+            print(f"Loaded {len(MAINTAINERS)} maintainers from {local_config}")
+            return
+    except Exception as e:
+        print(f"Warning: couldn't read local maintainers: {e}")
+
     try:
         result = subprocess.run(
             ["gh", "api", "repos/danmoseley/pr-dashboard/contents/config/maintainers.json",
@@ -63,11 +78,10 @@ def fetch_maintainers():
         )
         if result.returncode == 0:
             data = json.loads(result.stdout)
-            # It's a dict of repo -> list of maintainers, flatten all
             for repo, users in data.items():
                 if isinstance(users, list):
                     MAINTAINERS.update(u.lower() for u in users)
-            print(f"Loaded {len(MAINTAINERS)} maintainers across repos")
+            print(f"Loaded {len(MAINTAINERS)} maintainers from GitHub API")
     except Exception as e:
         print(f"Warning: couldn't fetch maintainers: {e}")
 
@@ -325,10 +339,15 @@ def extract_pr_features(pr, repo_slug):
 
     last_commit_dt = max(commit_dates) if commit_dates else created_dt
 
-    # Stale approval check: was there a commit after the last approval?
+    # Stale approval check: was there a commit after the latest approval?
     has_stale_approval = False
-    if first_approval_dt and commit_dates:
-        has_stale_approval = any(cd > first_approval_dt for cd in commit_dates)
+    last_approval_dt = max(
+        (datetime.fromisoformat(r["submittedAt"].replace("Z", "+00:00"))
+         for r in reviews if r.get("state") == "APPROVED" and r.get("submittedAt")),
+        default=None
+    )
+    if last_approval_dt and commit_dates:
+        has_stale_approval = any(cd > last_approval_dt for cd in commit_dates)
 
     # Days from last activity to merge
     all_event_dates = []

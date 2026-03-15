@@ -8,6 +8,7 @@ import json
 import sys
 import time
 import os
+from pathlib import Path
 from datetime import datetime, timezone
 
 # Only fetch more for repos where we want deeper analysis
@@ -20,11 +21,12 @@ REPOS_EXTRA = [
     ("dotnet/msbuild", 120),       # Approval-gated
 ]
 
-OUTPUT_DIR = r"C:\git\pr_data"
+SCRIPT_DIR = Path(__file__).resolve().parent
+OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
 DATA_FILE = os.path.join(OUTPUT_DIR, "merged_pr_features.json")
 
-# Import from the main collection script
-sys.path.insert(0, r"C:\git")
+# Import from the main collection script (same directory)
+sys.path.insert(0, str(SCRIPT_DIR))
 from collect_pr_data import (
     fetch_maintainers, fetch_merged_prs, extract_pr_features, MAINTAINERS
 )

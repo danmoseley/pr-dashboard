@@ -8,6 +8,7 @@ import os
 import sys
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.model_selection import cross_val_score
@@ -15,8 +16,10 @@ import statsmodels.api as sm
 import warnings
 warnings.filterwarnings('ignore')
 
-DATA_FILE = r"C:\git\pr_data\merged_pr_features.json"
-OUTPUT_DIR = r"C:\git\pr_data"
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_DATA_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(_SCRIPT_DIR / "data"))
+DATA_FILE = os.path.join(_DATA_DIR, "merged_pr_features.json")
+OUTPUT_DIR = _DATA_DIR
 
 # Current dashboard weights for comparison
 CURRENT_WEIGHTS = {

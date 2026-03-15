@@ -8,10 +8,13 @@ import json
 import time
 import os
 import sys
+from pathlib import Path
 from datetime import datetime, timezone
 
-DATA_FILE = r"C:\git\pr_data\merged_pr_features.json"
-OUTPUT_FILE = r"C:\git\pr_data\linked_issues.json"
+SCRIPT_DIR = Path(__file__).resolve().parent
+_DATA_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
+DATA_FILE = os.path.join(_DATA_DIR, "merged_pr_features.json")
+OUTPUT_FILE = os.path.join(_DATA_DIR, "linked_issues.json")
 
 def gh_graphql(query, retries=2):
     cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
