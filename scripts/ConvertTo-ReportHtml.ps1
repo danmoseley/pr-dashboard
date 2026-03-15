@@ -79,7 +79,8 @@ function ConvertTo-UserHtml([string]$text) {
 
 # Compute 10th percentile of lines_changed for "trivial" icon
 $sortedLines = @($prs | ForEach-Object { [int]$_.lines_changed } | Sort-Object)
-$trivialThreshold = if ($sortedLines.Count -ge 10) {
+$trivialEnabled = $sortedLines.Count -ge 10
+$trivialThreshold = if ($trivialEnabled) {
     $idx = [Math]::Floor(($sortedLines.Count - 1) * 0.10)
     $sortedLines[$idx]
 } else { 0 }
@@ -148,7 +149,7 @@ $rows = foreach ($pr in $prs) {
     $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
     $filesHeat = if ($pr.changed_files -gt 20 -or $pr.lines_changed -gt 500) { " heat-2" } elseif ($pr.changed_files -gt 5 -or $pr.lines_changed -gt 200) { " heat-1" } else { "" }
-    $sizeIcon = if ($trivialThreshold -gt 0 -and [int]$pr.lines_changed -le $trivialThreshold) { "&#x1F401; " } else { "" }
+    $sizeIcon = if ($trivialEnabled -and [int]$pr.lines_changed -le $trivialThreshold) { "&#x1F401; " } else { "" }
 
     $safeWhy = $pr.why
     $safeBlockers = [System.Net.WebUtility]::HtmlEncode($pr.blockers)

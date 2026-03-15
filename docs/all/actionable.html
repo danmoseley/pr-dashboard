@@ -297,7 +297,8 @@
 
     // Compute 10th percentile of lines_changed for "trivial" icon
     var sortedLines = prs.map(function(pr) { return pr.lines_changed || 0; }).sort(function(a,b) { return a - b; });
-    var trivialThreshold = sortedLines.length >= 10 ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
+    var trivialEnabled = sortedLines.length >= 10;
+    var trivialThreshold = trivialEnabled ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
 
     var html = '<table id="pr-table"><colgroup>' +
       '<col style="width:2.5%">' +     // Ready
@@ -403,7 +404,7 @@
                    pr.total_threads > 4 ? ' heat-1' : '';
     var discEmoji = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? '&#x1F525; ' : '';
     var linesChanged = pr.lines_changed || 0;
-    var sizeIcon = (trivialThreshold > 0 && linesChanged <= trivialThreshold) ? '&#x1F401; ' : '';
+    var sizeIcon = (trivialEnabled && linesChanged <= trivialThreshold) ? '&#x1F401; ' : '';
     var filesHeat = (pr.changed_files > 20 || linesChanged > 500) ? ' heat-2' :
                      (pr.changed_files > 5 || linesChanged > 200) ? ' heat-1' : '';
 
