@@ -1,5 +1,7 @@
 # PR Dashboard
 
+[![Generate All Reports](https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg)](https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml)
+
 Automated PR triage dashboard for dotnet repositories, updated via GitHub Actions.
 
 ## **➡️[View Dashboard](https://danmoseley.github.io/pr-dashboard/)⬅️**
