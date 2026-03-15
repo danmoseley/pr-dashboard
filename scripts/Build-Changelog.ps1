@@ -136,6 +136,12 @@ function Get-BulletTier([string]$text) {
 
 try {
 
+# Determine which ref to use for commit history
+$mainRef = if (& git rev-parse --verify "origin/main" 2>$null) { "origin/main" }
+           elseif (& git rev-parse --verify "main" 2>$null) { "main" }
+           else { "HEAD" }
+Write-Host "Using ref: $mainRef"
+
 # Load existing changelog entries
 $entries = @()
 if (Test-Path $changelogJson) {
@@ -149,12 +155,12 @@ if ($entries.Count -gt 0) {
     # Fetch from start of latest day so re-generation gets ALL commits for that day
     $latestDayStart = [datetime]::ParseExact($latestEntryDay, "yyyy-MM-dd", $null)
     $latestDayStartUtc = [System.TimeZoneInfo]::ConvertTimeToUtc($latestDayStart, $pacific)
-    $gitArgs = @("log", "origin/main", "--format=%H%x1f%s%x1f%cI", "--since=$($latestDayStartUtc.ToString('o'))")
+    $gitArgs = @("log", $mainRef, "--format=%H%x1f%s%x1f%cI", "--since=$($latestDayStartUtc.ToString('o'))")
 } else {
     $latestEntryDay = $null
     $latestEntry = $null
     $cutoff = (Get-Date).AddDays(-$MaxDays).ToString("yyyy-MM-dd")
-    $gitArgs = @("log", "origin/main", "--format=%H%x1f%s%x1f%cI", "--since=$cutoff")
+    $gitArgs = @("log", $mainRef, "--format=%H%x1f%s%x1f%cI", "--since=$cutoff")
 }
 
 Write-Host "Fetching commits..."
@@ -261,7 +267,7 @@ $commitMessages
                         $tier = $Matches[1]
                         $line = ($line -replace '^\[(feature|normal|trivial)\]\s*', '').Trim()
                     }
-                    [ordered]@{ text = $line; tier = $tier }
+                    [pscustomobject][ordered]@{ text = $line; tier = $tier }
                 } | Where-Object { $_.text })
             } else {
                 Write-Warning "AI summarization failed for $dayKey, falling back to raw commits"
@@ -278,14 +284,14 @@ $commitMessages
         $bullets = @($dayCommits | ForEach-Object {
             ($_.message -replace $trivialSuffixes, '').Trim()
         } | Sort-Object -Unique | ForEach-Object {
-            [ordered]@{ text = $_; tier = (Get-BulletTier $_) }
+            [pscustomobject][ordered]@{ text = $_; tier = (Get-BulletTier $_) }
         })
     }
 
     $pacificDate = [datetime]::ParseExact($dayKey, "yyyy-MM-dd", $null)
     $displayDate = $pacificDate.ToString("MMMM d, yyyy")
 
-    $entry = [ordered]@{
+    $entry = [pscustomobject][ordered]@{
         day          = $dayKey
         date_utc     = $dayCommits[0].date_utc  # newest commit (git log is newest-first)
         display      = $displayDate
