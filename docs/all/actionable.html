@@ -224,7 +224,12 @@
     });
     document.getElementById('filter-banner').style.display = 'none';
     var btn = document.getElementById('toggle-more');
-    if (btn) btn.style.display = '';
+    if (btn) {
+      btn.style.display = '';
+      // Reset label to "Show N more" in case it was toggled to "Show fewer"
+      var moreCount = document.querySelectorAll('.more-row').length;
+      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+    }
     try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
   };
 
@@ -235,6 +240,7 @@
     document.getElementById('summary-bar').style.display = 'none';
     document.getElementById('filter-banner').style.display = 'none';
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
     if (loaded) renderTable(allPrs);
   };
 
