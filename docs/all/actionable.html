@@ -295,6 +295,10 @@
     // Detect if any PR has area labels
     var hasArea = prs.some(function(pr) { return pr.area_labels && pr.area_labels.length > 0; });
 
+    // Compute 10th percentile of lines_changed for "trivial" icon
+    var sortedLines = prs.map(function(pr) { return pr.lines_changed || 0; }).sort(function(a,b) { return a - b; });
+    var trivialThreshold = sortedLines.length >= 10 ? sortedLines[Math.floor(sortedLines.length * 0.10)] : 0;
+
     var html = '<table id="pr-table"><colgroup>' +
       '<col style="width:2.5%">' +     // Ready
       '<col style="width:2.5%">' +     // Need
@@ -307,7 +311,7 @@
       '<col style="width:3%">' +      // Disc
       '<col style="width:2.5%">' +    // Age
       '<col style="width:2.5%">' +    // Upd
-      '<col style="width:2.5%">' +    // Files
+      '<col style="width:2.5%">' +    // Size
       '<col style="width:8%">' +      // Author
       (hasArea ? '<col style="width:7%">' : '') +
       '</colgroup><thead><tr>' +
@@ -322,13 +326,13 @@
       '<th class="sortable" data-sort="num" title="Discussion: unresolved/total review threads and distinct commenters">Disc</th>' +
       '<th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th>' +
       '<th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th>' +
-      '<th class="sortable" data-sort="num" title="Number of files changed">Files</th>' +
+      '<th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th>' +
       '<th class="sortable" data-sort="alpha" title="PR author">Author</th>' +
       (hasArea ? '<th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>' : '') +
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
-      html += renderRow(prs[i], hasArea, i);
+      html += renderRow(prs[i], hasArea, i, trivialThreshold);
     }
     html += '</tbody></table>';
 
@@ -362,7 +366,7 @@
     } catch(e) {}
   }
 
-  function renderRow(pr, hasArea, idx) {
+  function renderRow(pr, hasArea, idx, trivialThreshold) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
     var moreClass = idx >= 100 ? ' class="more-row" style="display:none"' : '';
@@ -398,8 +402,10 @@
                    (pr.total_threads > 8 || pr.distinct_commenters > 3) ? ' heat-2' :
                    pr.total_threads > 4 ? ' heat-1' : '';
     var discEmoji = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? '&#x1F525; ' : '';
-    var filesHeat = (pr.changed_files > 20 || pr.lines_changed > 500) ? ' heat-2' :
-                    (pr.changed_files > 5 || pr.lines_changed > 200) ? ' heat-1' : '';
+    var linesChanged = pr.lines_changed || 0;
+    var sizeIcon = (trivialThreshold > 0 && linesChanged <= trivialThreshold) ? '&#x1F401; ' : '';
+    var filesHeat = (pr.changed_files > 20 || linesChanged > 500) ? ' heat-2' :
+                     (pr.changed_files > 5 || linesChanged > 200) ? ' heat-1' : '';
 
     // Author
     var authorHtml = '';
@@ -452,7 +458,7 @@
       '<td class="disc' + discHeat + '">' + discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button></td>' +
       '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
       '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
-      '<td class="num' + filesHeat + '" title="' + (pr.lines_changed || 0) + ' lines changed">' + (pr.changed_files || 0) + '</td>' +
+      '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' files, ' + linesChanged + ' lines (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
       '<td class="author">' + communityBadge + authorHtml + '</td>' +
       (hasArea ? '<td class="area-col">' + areaHtml + '</td>' : '') +
       '</tr>';

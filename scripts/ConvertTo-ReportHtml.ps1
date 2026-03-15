@@ -77,6 +77,13 @@ function ConvertTo-UserHtml([string]$text) {
     })
 }
 
+# Compute 10th percentile of lines_changed for "trivial" icon
+$sortedLines = @($prs | ForEach-Object { [int]$_.lines_changed } | Sort-Object)
+$trivialThreshold = if ($sortedLines.Count -ge 10) {
+    $idx = [Math]::Floor($sortedLines.Count * 0.10)
+    $sortedLines[$idx]
+} else { 0 }
+
 # Build table rows
 $rowIndex = 0
 $rows = foreach ($pr in $prs) {
@@ -141,6 +148,7 @@ $rows = foreach ($pr in $prs) {
     $discHeat = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { " heat-3" } elseif ($pr.total_threads -gt 8 -or $pr.distinct_commenters -gt 3) { " heat-2" } elseif ($pr.total_threads -gt 4) { " heat-1" } else { "" }
     $discEmoji = if ($pr.total_threads -gt 15 -or $pr.distinct_commenters -gt 5) { "&#x1F525; " } else { "" }
     $filesHeat = if ($pr.changed_files -gt 20 -or $pr.lines_changed -gt 500) { " heat-2" } elseif ($pr.changed_files -gt 5 -or $pr.lines_changed -gt 200) { " heat-1" } else { "" }
+    $sizeIcon = if ($trivialThreshold -gt 0 -and [int]$pr.lines_changed -le $trivialThreshold) { "&#x1F401; " } else { "" }
 
     $safeWhy = $pr.why
     $safeBlockers = [System.Net.WebUtility]::HtmlEncode($pr.blockers)
@@ -180,7 +188,7 @@ $rows = foreach ($pr in $prs) {
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
-  <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
+  <td class="num$filesHeat" title="$($pr.changed_files) files, $($pr.lines_changed) lines (additions + deletions)">$sizeIcon$($pr.lines_changed)</td>
   <td class="author">$communityBadge$authorDisplay</td>
   $(if ($hasAnyAreaLabels) { "<td class=`"area-col`">$areaLabelHtml</td>" })
 </tr>
@@ -335,7 +343,7 @@ $(if ($prCount -eq 0) {
 <thead>
 <tr>
   <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
 </tr>
 </thead>
 <tbody>
