@@ -141,9 +141,12 @@ if (Test-Path $changelogJson) {
 
 # Determine the cutoff: last entry's newest commit, or MaxDays ago
 if ($entries.Count -gt 0) {
-    $sinceCommit = $entries[0].commit_range -split '\.\.' | Select-Object -Last 1
-    # Try range-based log first (most accurate)
-    $gitArgs = @("log", "$sinceCommit..origin/main", "--format=%H||%s||%cI")
+    $latestEntryDay = $entries[0].day
+    # When we plan to re-generate the latest day, fetch from start of that day
+    # so we get ALL commits for the day, not just ones after the last-seen SHA
+    $latestDayStart = [datetime]::ParseExact($latestEntryDay, "yyyy-MM-dd", $null)
+    $latestDayStartUtc = [System.TimeZoneInfo]::ConvertTimeToUtc($latestDayStart, $pacific)
+    $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$($latestDayStartUtc.ToString('o'))")
 } else {
     $cutoff = (Get-Date).AddDays(-$MaxDays).ToString("yyyy-MM-dd")
     $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$cutoff")
@@ -152,16 +155,8 @@ if ($entries.Count -gt 0) {
 Write-Host "Fetching commits..."
 $logOutput = & git @gitArgs 2>&1
 if ($LASTEXITCODE -ne 0) {
-    # If range-based log fails (e.g., force-pushed history), fall back to date-based
-    if ($entries.Count -gt 0) {
-        Write-Warning "Range-based log failed, falling back to date-based"
-        $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$($entries[0].date_utc)")
-        $logOutput = & git @gitArgs 2>&1
-    }
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "git log failed: $logOutput"
-        exit 0
-    }
+    Write-Warning "git log failed: $logOutput"
+    exit 1
 }
 
 $rawCommits = @($logOutput | Where-Object { $_ -match '\|\|' })
@@ -309,6 +304,5 @@ Write-ChangelogHtml -Entries $allEntries -OutputFile $changelogHtml
 
 } catch {
     Write-Warning "Changelog generation failed: $_"
-    Write-Warning "Continuing without changelog update"
-    exit 0
+    exit 1
 }
