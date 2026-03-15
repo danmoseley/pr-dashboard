@@ -14,10 +14,10 @@
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
 </style>
 </head>
-<body data-server-updated="2026-03-15T15:38:57.9119395Z">
+<body data-server-updated="2026-03-15T17:47:42.9185352Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/winforms/actionable.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Most Actionable PRs — dotnet/winforms</h1>
-<p class="meta">Updated every 12h, last at 2026-03-15 15:38 UTC &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated ~twice daily (weekdays 2x, weekends 1x), last <span id="last-updated" data-updated="2026-03-15T17:47:42.9185352Z">at 2026-03-15 17:47 UTC</span> &middot; 71 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
 <p class="report-desc">All open PRs sorted by Action score. Higher-scored PRs are closer to merge-ready <em>and</em> would benefit most from maintainer attention.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -32,7 +32,7 @@
         <tr><td>2.5</td><td>Has approval</td></tr>
         <tr><td>2.5</td><td>Feedback addressed</td></tr>
         <tr><td>2.5</td><td>Discussion healthy</td></tr>
-        <tr><td>2.0</td><td>Small, easy to review</td></tr>
+        <tr><td>2.0&ndash;3.0</td><td>Small, easy to review (2.0) / trivial &le;2 files, &le;20 lines (3.0)</td></tr>
         <tr><td>1.5</td><td>Has maintainer review</td></tr>
         <tr><td>1.0</td><td>Recently active</td></tr>
         <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>
@@ -51,6 +51,7 @@
         <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
         <tr><td>1.0</td><td>High interest</td></tr>
         <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Trivial change (&le;2 files, &le;20 lines, no unresolved threads)</td></tr>
         <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
         <tr><td>&minus;1.5</td><td>Author silent &gt;14d (ball in their court)</td></tr>
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
@@ -85,7 +86,7 @@
 <thead>
 <tr>
   <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
 </tr>
 </thead>
 <tbody>
@@ -100,7 +101,7 @@
   <td class="disc">1/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num">4d</td>
   <td class="num">3d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -115,7 +116,7 @@
   <td class="disc heat-1">0/7t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 7 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num">4d</td>
   <td class="num">3d</td>
-  <td class="num heat-2" title="1792 lines changed">110</td>
+  <td class="num heat-2" title="110 files, 1792 lines (additions + deletions)">1792</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Clipboard');return false" title="Show only area-Clipboard">Clipboard</a></td>
 </tr>
@@ -130,7 +131,7 @@
   <td class="disc heat-2">0/5t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">95d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="6 lines changed">1</td>
+  <td class="num" title="1 files, 6 lines (additions + deletions)">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -145,7 +146,7 @@
   <td class="disc heat-2">0/2t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">306d</td>
   <td class="num heat-3">117d</td>
-  <td class="num" title="113 lines changed">1</td>
+  <td class="num" title="1 files, 113 lines (additions + deletions)">113</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -160,7 +161,7 @@
   <td class="disc heat-1">5/5t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="5 unresolved of 5 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">52d</td>
   <td class="num">5d</td>
-  <td class="num" title="79 lines changed">3</td>
+  <td class="num" title="3 files, 79 lines (additions + deletions)">79</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/xPaw.png?size=32" alt="xPaw"><a href="https://github.com/xPaw">@xPaw</a><a class="filter-btn" href="#" onclick="filterByUser('xPaw');return false" title="Show only @xPaw">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -175,7 +176,7 @@
   <td class="disc heat-2">0/4t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">207d</td>
   <td class="num heat-3">33d</td>
-  <td class="num heat-1" title="74 lines changed">6</td>
+  <td class="num heat-1" title="6 files, 74 lines (additions + deletions)">74</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -190,7 +191,7 @@
   <td class="disc heat-3">&#x1F525; 0/31t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 31 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">39d</td>
   <td class="num heat-1">12d</td>
-  <td class="num heat-2" title="564 lines changed">10</td>
+  <td class="num heat-2" title="10 files, 564 lines (additions + deletions)">564</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
@@ -205,7 +206,7 @@
   <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">220d</td>
   <td class="num heat-3">192d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
@@ -220,7 +221,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">52d</td>
   <td class="num heat-3">51d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -235,7 +236,7 @@
   <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">97d</td>
   <td class="num heat-3">97d</td>
-  <td class="num" title="104 lines changed">4</td>
+  <td class="num" title="4 files, 104 lines (additions + deletions)">104</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -250,7 +251,7 @@
   <td class="disc heat-2">1/1t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">95d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="188 lines changed">1</td>
+  <td class="num" title="1 files, 188 lines (additions + deletions)">188</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -265,7 +266,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">93d</td>
   <td class="num heat-3">91d</td>
-  <td class="num" title="28 lines changed">2</td>
+  <td class="num" title="2 files, 28 lines (additions + deletions)">28</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -280,7 +281,7 @@
   <td class="disc heat-2">0/5t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">33d</td>
   <td class="num">3d</td>
-  <td class="num" title="130 lines changed">2</td>
+  <td class="num" title="2 files, 130 lines (additions + deletions)">130</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -295,7 +296,7 @@
   <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">173d</td>
   <td class="num heat-3">172d</td>
-  <td class="num" title="18 lines changed">1</td>
+  <td class="num" title="1 files, 18 lines (additions + deletions)">18</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -310,7 +311,7 @@
   <td class="disc">0/2t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">144d</td>
   <td class="num heat-3">139d</td>
-  <td class="num" title="78 lines changed">2</td>
+  <td class="num" title="2 files, 78 lines (additions + deletions)">78</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -325,7 +326,7 @@
   <td class="disc heat-3">&#x1F525; 0/5t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">496d</td>
   <td class="num">4d</td>
-  <td class="num heat-1" title="154 lines changed">6</td>
+  <td class="num heat-1" title="6 files, 154 lines (additions + deletions)">154</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/willibrandon.png?size=32" alt="willibrandon"><a href="https://github.com/willibrandon">@willibrandon</a><a class="filter-btn" href="#" onclick="filterByUser('willibrandon');return false" title="Show only @willibrandon">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -340,7 +341,7 @@
   <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">234d</td>
   <td class="num heat-3">214d</td>
-  <td class="num" title="23 lines changed">1</td>
+  <td class="num" title="1 files, 23 lines (additions + deletions)">23</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
@@ -355,7 +356,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">172d</td>
   <td class="num heat-3">158d</td>
-  <td class="num heat-1" title="90 lines changed">6</td>
+  <td class="num heat-1" title="6 files, 90 lines (additions + deletions)">90</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -370,7 +371,7 @@
   <td class="disc heat-3">&#x1F525; 5/20t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="5 unresolved of 20 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">308d</td>
   <td class="num heat-3">97d</td>
-  <td class="num heat-1" title="240 lines changed">3</td>
+  <td class="num heat-1" title="3 files, 240 lines (additions + deletions)">240</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -385,7 +386,7 @@
   <td class="disc heat-2">0/0t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">614d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="2 lines changed">1</td>
+  <td class="num" title="1 files, 2 lines (additions + deletions)">&#x1F401; 2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -400,7 +401,7 @@
   <td class="disc heat-2">0/1t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">751d</td>
   <td class="num heat-3">33d</td>
-  <td class="num heat-1" title="159 lines changed">7</td>
+  <td class="num heat-1" title="7 files, 159 lines (additions + deletions)">159</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -415,7 +416,7 @@
   <td class="disc">0/0t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">164d</td>
   <td class="num heat-1">8d</td>
-  <td class="num" title="70 lines changed">1</td>
+  <td class="num" title="1 files, 70 lines (additions + deletions)">70</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -430,7 +431,7 @@
   <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">306d</td>
   <td class="num heat-3">283d</td>
-  <td class="num heat-1" title="237 lines changed">6</td>
+  <td class="num heat-1" title="6 files, 237 lines (additions + deletions)">237</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -445,7 +446,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">39d</td>
   <td class="num heat-3">39d</td>
-  <td class="num heat-1" title="207 lines changed">6</td>
+  <td class="num heat-1" title="6 files, 207 lines (additions + deletions)">207</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Clipboard');return false" title="Show only area-Clipboard">Clipboard</a></td>
 </tr>
@@ -460,7 +461,7 @@
   <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">305d</td>
   <td class="num heat-3">305d</td>
-  <td class="num heat-1" title="390 lines changed">3</td>
+  <td class="num heat-1" title="3 files, 390 lines (additions + deletions)">390</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-test coverage');return false" title="Show only area-test coverage">test coverage</a></td>
 </tr>
@@ -475,7 +476,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">82d</td>
   <td class="num heat-3">82d</td>
-  <td class="num" title="14 lines changed">1</td>
+  <td class="num" title="1 files, 14 lines (additions + deletions)">14</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -490,7 +491,7 @@
   <td class="disc">1/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num">5d</td>
   <td class="num">3d</td>
-  <td class="num" title="36 lines changed">2</td>
+  <td class="num" title="2 files, 36 lines (additions + deletions)">36</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-test coverage');return false" title="Show only area-test coverage">test coverage</a></td>
 </tr>
@@ -505,7 +506,7 @@
   <td class="disc">0/0t 0ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;0 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">71d</td>
   <td class="num heat-3">68d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -520,7 +521,7 @@
   <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">76d</td>
   <td class="num heat-3">76d</td>
-  <td class="num" title="11 lines changed">1</td>
+  <td class="num" title="1 files, 11 lines (additions + deletions)">11</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/stumper66.png?size=32" alt="stumper66"><a href="https://github.com/stumper66">@stumper66</a><a class="filter-btn" href="#" onclick="filterByUser('stumper66');return false" title="Show only @stumper66">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
 </tr>
@@ -535,7 +536,7 @@
   <td class="disc heat-3">&#x1F525; 0/4t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">26d</td>
   <td class="num heat-2">20d</td>
-  <td class="num heat-1" title="213 lines changed">4</td>
+  <td class="num heat-1" title="4 files, 213 lines (additions + deletions)">213</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -550,7 +551,7 @@
   <td class="disc heat-2">6/14t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="6 unresolved of 14 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">486d</td>
   <td class="num heat-3">136d</td>
-  <td class="num heat-2" title="4239 lines changed">29</td>
+  <td class="num heat-2" title="29 files, 4239 lines (additions + deletions)">4239</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
 </tr>
@@ -565,7 +566,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">82d</td>
   <td class="num heat-3">82d</td>
-  <td class="num" title="9 lines changed">1</td>
+  <td class="num" title="1 files, 9 lines (additions + deletions)">9</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -580,7 +581,7 @@
   <td class="disc heat-3">&#x1F525; 1/1t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">691d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="68 lines changed">2</td>
+  <td class="num" title="2 files, 68 lines (additions + deletions)">68</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
 </tr>
@@ -595,7 +596,7 @@
   <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">300d</td>
   <td class="num heat-3">152d</td>
-  <td class="num" title="31 lines changed">1</td>
+  <td class="num" title="1 files, 31 lines (additions + deletions)">31</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -610,7 +611,7 @@
   <td class="disc">0/0t 0ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;0 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">39d</td>
   <td class="num heat-3">39d</td>
-  <td class="num" title="26 lines changed">2</td>
+  <td class="num" title="2 files, 26 lines (additions + deletions)">26</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DesignerSupport');return false" title="Show only area-DesignerSupport">DesignerSupport</a></td>
 </tr>
@@ -625,7 +626,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">39d</td>
   <td class="num heat-3">39d</td>
-  <td class="num" title="26 lines changed">2</td>
+  <td class="num" title="2 files, 26 lines (additions + deletions)">26</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DesignerSupport');return false" title="Show only area-DesignerSupport">DesignerSupport</a></td>
 </tr>
@@ -640,7 +641,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">299d</td>
   <td class="num heat-3">212d</td>
-  <td class="num" title="19 lines changed">1</td>
+  <td class="num" title="1 files, 19 lines (additions + deletions)">19</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -655,7 +656,7 @@
   <td class="disc">0/0t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">29d</td>
   <td class="num heat-2">25d</td>
-  <td class="num" title="70 lines changed">2</td>
+  <td class="num" title="2 files, 70 lines (additions + deletions)">70</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -670,7 +671,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">39d</td>
   <td class="num heat-3">39d</td>
-  <td class="num" title="26 lines changed">2</td>
+  <td class="num" title="2 files, 26 lines (additions + deletions)">26</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -685,7 +686,7 @@
   <td class="disc">0/0t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">26d</td>
   <td class="num heat-2">25d</td>
-  <td class="num" title="17 lines changed">1</td>
+  <td class="num" title="1 files, 17 lines (additions + deletions)">17</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/apoorvdarshan.png?size=32" alt="apoorvdarshan"><a href="https://github.com/apoorvdarshan">@apoorvdarshan</a><a class="filter-btn" href="#" onclick="filterByUser('apoorvdarshan');return false" title="Show only @apoorvdarshan">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -700,7 +701,7 @@
   <td class="disc heat-2">0/2t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">180d</td>
   <td class="num heat-3">173d</td>
-  <td class="num" title="6 lines changed">1</td>
+  <td class="num" title="1 files, 6 lines (additions + deletions)">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -715,7 +716,7 @@
   <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">335d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="33 lines changed">2</td>
+  <td class="num" title="2 files, 33 lines (additions + deletions)">33</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -730,7 +731,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">110d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-NRT');return false" title="Show only area-NRT">NRT</a></td>
 </tr>
@@ -745,7 +746,7 @@
   <td class="disc heat-2">0/4t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">54d</td>
   <td class="num heat-3">40d</td>
-  <td class="num" title="48 lines changed">2</td>
+  <td class="num" title="2 files, 48 lines (additions + deletions)">48</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
@@ -760,7 +761,7 @@
   <td class="disc heat-2">0/4t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">81d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="14 lines changed">1</td>
+  <td class="num" title="1 files, 14 lines (additions + deletions)">14</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"></td>
 </tr>
@@ -775,7 +776,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">83d</td>
   <td class="num">5d</td>
-  <td class="num" title="9 lines changed">1</td>
+  <td class="num" title="1 files, 9 lines (additions + deletions)">9</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -790,7 +791,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">70d</td>
   <td class="num heat-1">12d</td>
-  <td class="num" title="12 lines changed">1</td>
+  <td class="num" title="1 files, 12 lines (additions + deletions)">12</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -805,7 +806,7 @@
   <td class="disc heat-2">1/4t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 4 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">23d</td>
   <td class="num heat-1">7d</td>
-  <td class="num" title="35 lines changed">1</td>
+  <td class="num" title="1 files, 35 lines (additions + deletions)">35</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -820,7 +821,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">14d</td>
   <td class="num heat-1">13d</td>
-  <td class="num" title="2 lines changed">1</td>
+  <td class="num" title="1 files, 2 lines (additions + deletions)">&#x1F401; 2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -835,7 +836,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">82d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="22 lines changed">2</td>
+  <td class="num" title="2 files, 22 lines (additions + deletions)">22</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-NRT');return false" title="Show only area-NRT">NRT</a></td>
 </tr>
@@ -850,7 +851,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">95d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="16 lines changed">1</td>
+  <td class="num" title="1 files, 16 lines (additions + deletions)">16</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -865,7 +866,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">101d</td>
   <td class="num heat-3">95d</td>
-  <td class="num" title="10 lines changed">1</td>
+  <td class="num" title="1 files, 10 lines (additions + deletions)">10</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -880,7 +881,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">47d</td>
   <td class="num heat-3">45d</td>
-  <td class="num" title="8 lines changed">1</td>
+  <td class="num" title="1 files, 8 lines (additions + deletions)">8</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -895,7 +896,7 @@
   <td class="disc">0/3t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 3 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">33d</td>
   <td class="num heat-2">23d</td>
-  <td class="num" title="41 lines changed">2</td>
+  <td class="num" title="2 files, 41 lines (additions + deletions)">41</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -910,7 +911,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">41d</td>
   <td class="num heat-2">17d</td>
-  <td class="num" title="26 lines changed">2</td>
+  <td class="num" title="2 files, 26 lines (additions + deletions)">26</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DesignerSupport');return false" title="Show only area-DesignerSupport">DesignerSupport</a></td>
 </tr>
@@ -925,7 +926,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">111d</td>
   <td class="num heat-3">110d</td>
-  <td class="num" title="2 lines changed">1</td>
+  <td class="num" title="1 files, 2 lines (additions + deletions)">&#x1F401; 2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -940,7 +941,7 @@
   <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num">13d</td>
   <td class="num heat-1">11d</td>
-  <td class="num" title="6 lines changed">1</td>
+  <td class="num" title="1 files, 6 lines (additions + deletions)">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -955,7 +956,7 @@
   <td class="disc">1/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">58d</td>
   <td class="num heat-3">47d</td>
-  <td class="num" title="2 lines changed">1</td>
+  <td class="num" title="1 files, 2 lines (additions + deletions)">&#x1F401; 2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -970,7 +971,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">37d</td>
   <td class="num heat-3">35d</td>
-  <td class="num" title="35 lines changed">1</td>
+  <td class="num" title="1 files, 35 lines (additions + deletions)">35</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -985,7 +986,7 @@
   <td class="disc">0/2t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">31d</td>
   <td class="num heat-2">19d</td>
-  <td class="num" title="23 lines changed">3</td>
+  <td class="num" title="3 files, 23 lines (additions + deletions)">23</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -1000,7 +1001,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">157d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="18 lines changed">2</td>
+  <td class="num" title="2 files, 18 lines (additions + deletions)">18</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -1015,7 +1016,7 @@
   <td class="disc">2/2t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="2 unresolved of 2 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">112d</td>
   <td class="num heat-3">110d</td>
-  <td class="num" title="21 lines changed">2</td>
+  <td class="num" title="2 files, 21 lines (additions + deletions)">21</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
 </tr>
@@ -1030,7 +1031,7 @@
   <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">264d</td>
   <td class="num heat-3">178d</td>
-  <td class="num" title="137 lines changed">4</td>
+  <td class="num" title="4 files, 137 lines (additions + deletions)">137</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Clipboard');return false" title="Show only area-Clipboard">Clipboard</a></td>
 </tr>
@@ -1045,7 +1046,7 @@
   <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">172d</td>
   <td class="num heat-3">40d</td>
-  <td class="num" title="124 lines changed">1</td>
+  <td class="num" title="1 files, 124 lines (additions + deletions)">124</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-test coverage');return false" title="Show only area-test coverage">test coverage</a></td>
 </tr>
@@ -1060,7 +1061,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">87d</td>
   <td class="num heat-3">82d</td>
-  <td class="num" title="3 lines changed">1</td>
+  <td class="num" title="1 files, 3 lines (additions + deletions)">&#x1F401; 3</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -1075,7 +1076,7 @@
   <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">82d</td>
   <td class="num heat-3">82d</td>
-  <td class="num" title="4 lines changed">1</td>
+  <td class="num" title="1 files, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -1090,7 +1091,7 @@
   <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">45d</td>
   <td class="num heat-3">41d</td>
-  <td class="num" title="103 lines changed">2</td>
+  <td class="num" title="2 files, 103 lines (additions + deletions)">103</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -1105,7 +1106,7 @@
   <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">45d</td>
   <td class="num heat-3">45d</td>
-  <td class="num" title="14 lines changed">1</td>
+  <td class="num" title="1 files, 14 lines (additions + deletions)">14</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -1120,7 +1121,7 @@
   <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">48d</td>
   <td class="num heat-3">45d</td>
-  <td class="num" title="50 lines changed">2</td>
+  <td class="num" title="2 files, 50 lines (additions + deletions)">50</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
@@ -1135,7 +1136,7 @@
   <td class="disc">0/3t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 3 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">94d</td>
   <td class="num heat-3">93d</td>
-  <td class="num" title="6 lines changed">1</td>
+  <td class="num" title="1 files, 6 lines (additions + deletions)">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
@@ -1150,7 +1151,7 @@
   <td class="disc heat-1">1/6t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 6 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-2">55d</td>
   <td class="num heat-3">47d</td>
-  <td class="num" title="7 lines changed">1</td>
+  <td class="num" title="1 files, 7 lines (additions + deletions)">7</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
@@ -1229,7 +1230,28 @@ function clearFilter() {
 })();
 initTableSort('pr-table', 2);
 initResizableColumns('pr-table');
+// Live relative timestamp for "last Xh ago"
+(function() {
+  function timeAgo(iso) {
+    var ms = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(ms / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+  var el = document.getElementById('last-updated');
+  if (el) {
+    var iso = el.getAttribute('data-updated');
+    el.textContent = timeAgo(iso);
+    setInterval(function() { el.textContent = timeAgo(iso); }, 60000);
+  }
+})();
 </script>
 <script src="../pr-refresh.js"></script>
+<footer style="margin-top:2em;padding-top:1em;border-top:1px solid var(--border);font-size:0.8em;color:#8b949e;text-align:center;">
+  <a href="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml"><img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Generate All Reports" style="vertical-align:middle"></a>
+</footer>
 </body>
 </html>
