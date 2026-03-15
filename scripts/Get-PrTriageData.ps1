@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments{totalCount} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments(first:20){totalCount nodes{author{login}}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -369,8 +369,15 @@ foreach ($pr in $candidates) {
     $threadAuthors = @()
     $allCommenters = @()
     $prCommentCount = 0
+    $prCommentAuthors = @()
     if ($gql) {
         $prCommentCount = if ($gql.comments.totalCount) { $gql.comments.totalCount } else { 0 }
+        # Extract PR (timeline) comment authors for engagement detection
+        if ($gql.comments.nodes) {
+            $prCommentAuthors = @($gql.comments.nodes | ForEach-Object {
+                if ($_.author) { $_.author.login }
+            } | Where-Object { $_ } | Select-Object -Unique)
+        }
     }
     if ($gql -and $gql.reviewThreads.nodes) {
         $totalThreads = $gql.reviewThreads.nodes.Count
@@ -379,10 +386,12 @@ foreach ($pr in $candidates) {
         $threadAuthors = @($unresolved | ForEach-Object {
             if ($_.comments.nodes.Count -gt 0) { $_.comments.nodes[0].author.login }
         } | Where-Object { $_ } | Select-Object -Unique)
-        # All distinct commenters across all threads (resolved + unresolved)
-        $allCommenters = @($gql.reviewThreads.nodes | ForEach-Object {
+        # All distinct commenters across all threads (resolved + unresolved) + PR comments
+        $allCommenters = @(@($gql.reviewThreads.nodes | ForEach-Object {
             $_.comments.nodes | ForEach-Object { $_.author.login }
-        } | Where-Object { $_ } | Select-Object -Unique)
+        }) + @($prCommentAuthors) | Where-Object { $_ } | Select-Object -Unique)
+    } elseif ($prCommentAuthors.Count -gt 0) {
+        $allCommenters = @($prCommentAuthors)
     }
     $threadCommentSum = if ($gql -and $gql.reviewThreads.nodes) {
         ($gql.reviewThreads.nodes | ForEach-Object { $_.comments.nodes.Count } | Measure-Object -Sum).Sum
@@ -441,6 +450,37 @@ foreach ($pr in $candidates) {
             if ($_.requestedReviewer.login) { $_.requestedReviewer.login }
         } | Where-Object { $_ } | Select-Object -Unique)
     }
+
+    # Build engagement-prioritized owner list for $who selection.
+    # Priority: (1) assigned reviewers, (2) area owners, (3) engaged maintainers, (4) remaining.
+    # $prOwners is kept for ownership membership checks (e.g., $hasOwnerApproval).
+    $allMaintainerPool = @(@($prOwners) + @($Maintainers) | Select-Object -Unique)
+    $prioritizedOwners = [System.Collections.ArrayList]@()
+    # Tier 1: Requested reviewers who are maintainers
+    foreach ($r in $requestedReviewerLogins) {
+        if ($r -ne $authorLogin -and $allMaintainerPool -contains $r -and $prioritizedOwners -notcontains $r) {
+            [void]$prioritizedOwners.Add($r)
+        }
+    }
+    # Tier 2: Area owners (from label match)
+    foreach ($o in (Get-OwnersForPr $labelNames)) {
+        if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
+            [void]$prioritizedOwners.Add($o)
+        }
+    }
+    # Tier 3: Maintainers engaged in the PR (reviewers, thread/PR commenters)
+    foreach ($e in @(@($reviewerLogins) + @($allCommenters) | Select-Object -Unique)) {
+        if ($e -ne $authorLogin -and $allMaintainerPool -contains $e -and $prioritizedOwners -notcontains $e) {
+            [void]$prioritizedOwners.Add($e)
+        }
+    }
+    # Tier 4: Remaining from $prOwners (preserves original order)
+    foreach ($m in $prOwners) {
+        if ($m -ne $authorLogin -and $prioritizedOwners -notcontains $m) {
+            [void]$prioritizedOwners.Add($m)
+        }
+    }
+    $prioritizedOwners = @($prioritizedOwners)
 
     # Labels
     $isCommunity = ($labelNames | Where-Object { $_ -match '^community' }).Count -gt 0
@@ -541,8 +581,8 @@ foreach ($pr in $candidates) {
             $prNextAction = "Maintainer: review needed"
             if ($requestedReviewerLogins.Count -gt 0) {
                 $who = @($requestedReviewerLogins | Select-Object -First 2)
-            } elseif ($prOwners.Count -gt 0) {
-                $who = @($prOwners | Select-Object -First 2)
+            } elseif ($prioritizedOwners.Count -gt 0) {
+                $who = @($prioritizedOwners | Select-Object -First 2)
             } else {
                 $who = @("area owner")
             }
@@ -563,11 +603,11 @@ foreach ($pr in $candidates) {
     }
     elseif (-not $hasAnyReview) {
         $prNextAction = "Maintainer: review needed"
-        # Prefer explicitly requested reviewers, then area owners
+        # Prefer explicitly requested reviewers, then prioritized owners
         if ($requestedReviewerLogins.Count -gt 0) {
             $who = @($requestedReviewerLogins | Select-Object -First 2)
-        } elseif ($prOwners.Count -gt 0) {
-            $who = @($prOwners | Select-Object -First 2)
+        } elseif ($prioritizedOwners.Count -gt 0) {
+            $who = @($prioritizedOwners | Select-Object -First 2)
         } else {
             $who = @("area owner")
         }
@@ -580,7 +620,7 @@ foreach ($pr in $candidates) {
         $prNextAction = "Maintainer: re-review needed (approval on older commit)"
         $staleOwners = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
         if ($staleOwners.Count -gt 0) { $who = $staleOwners }
-        elseif ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+        elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
     }
     elseif ($ciScore -eq 1 -and $conflictScore -eq 1 -and $maintScore -ge 0.75 -and $feedbackScore -eq 1) {
         $prNextAction = "Ready to merge"
@@ -588,19 +628,19 @@ foreach ($pr in $candidates) {
         if ($approverLogins.Count -gt 0) {
             $who = @($approverLogins | Where-Object { $prOwners -contains $_ } | Select-Object -First 1)
             if (-not $who -or $who.Count -eq 0) { $who = @($approverLogins | Select-Object -First 1) }
-        } elseif ($prOwners.Count -gt 0) {
-            $who = @($prOwners | Select-Object -First 1)
+        } elseif ($prioritizedOwners.Count -gt 0) {
+            $who = @($prioritizedOwners | Select-Object -First 1)
         }
     }
     elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
         $prNextAction = "Maintainer: review needed"
-        # Prefer explicitly requested reviewers, then owners not yet reviewing
+        # Prefer explicitly requested reviewers, then prioritized owners not yet reviewing
         if ($requestedReviewerLogins.Count -gt 0) {
             $who = @($requestedReviewerLogins | Select-Object -First 2)
         } else {
-            $nonReviewingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
+            $nonReviewingOwners = @($prioritizedOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
             if ($nonReviewingOwners.Count -gt 0) { $who = $nonReviewingOwners }
-            elseif ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+            elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
         }
     }
     elseif ($baConclusion -eq "IN_PROGRESS" -or $baConclusion -eq "ABSENT") {
@@ -609,7 +649,7 @@ foreach ($pr in $candidates) {
     }
     else {
         $prNextAction = "Maintainer: review/merge"
-        if ($prOwners.Count -gt 0) { $who = @($prOwners | Select-Object -First 2) }
+        if ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
     }
 
     # If primary action is resolve conflicts, also note the next most important secondary action
