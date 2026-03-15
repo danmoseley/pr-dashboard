@@ -86,7 +86,7 @@
       btn.className = 'pr-refresh-btn';
       btn.innerHTML = '&#x21bb;';
       btn.title = 'Check if this PR was merged or closed';
-      btn.setAttribute('aria-label', 'Refresh PR #' + info.number);
+      btn.setAttribute('aria-label', 'Check if PR #' + info.number + ' was merged or closed');
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
