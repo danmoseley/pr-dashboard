@@ -140,6 +140,16 @@ if ($scanFiles.Count -eq 0) {
     $smokeDetail = ""
     $testedSlugs = @()
 
+    # Read schedule description from workflow YAML (same logic and fallback as Regen-Html.ps1)
+    $wfFile = Join-Path $root ".github/workflows/generate-reports.yml"
+    $scheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"  # fallback
+    if (Test-Path $wfFile) {
+        $descLine = Get-Content $wfFile | Where-Object { $_ -match '^\s*#\s*schedule-desc:\s*(.+)' } | Select-Object -First 1
+        if ($descLine -and $descLine -match '^\s*#\s*schedule-desc:\s*(.+)') {
+            $scheduleDesc = $Matches[1].Trim()
+        }
+    }
+
     foreach ($sf in $scanFiles) {
         $slug = $sf.Directory.Name
         $testedSlugs += $slug
@@ -169,7 +179,7 @@ if ($scanFiles.Count -eq 0) {
                 -Repo $repoName `
                 -Slug $slug `
                 -DocsDir $tempDocs `
-                -ScheduleHours 12 `
+                -ScheduleDesc $scheduleDesc `
                 -SkipAI `
                 -SkipHistory
         } catch {
@@ -181,7 +191,7 @@ if ($scanFiles.Count -eq 0) {
     # Generate index page
     if ($smokeOk) {
         try {
-            & "$root/scripts/Build-Index.ps1" -DocsDir $tempDocs -ScheduleHours 12
+            & "$root/scripts/Build-Index.ps1" -DocsDir $tempDocs -ScheduleDesc $scheduleDesc
         } catch {
             $smokeOk = $false
             $smokeDetail += "Build-Index failed: $_  "

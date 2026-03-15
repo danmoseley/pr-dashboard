@@ -18,6 +18,9 @@
     which enables client-side cache invalidation for per-PR refresh.
 .PARAMETER NavLinks
     Hashtable of name→filename for navigation links.
+.PARAMETER ScheduleDesc
+    Human-readable schedule description (e.g., "~twice daily") displayed in
+    the report meta line alongside the relative timestamp. Plain text, no HTML.
 #>
 [CmdletBinding()]
 param(
@@ -29,7 +32,7 @@ param(
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
     [string]$TimestampIso = (Get-Date).ToUniversalTime().ToString("o"),
-    [int]$ScheduleHours = 0,
+    [string]$ScheduleDesc = "",
     [hashtable]$NavLinks = @{},
     [string]$DefaultSort = "action"
 )
@@ -279,7 +282,8 @@ $scoringHtml = @"
 </details>
 "@
 
-$scheduleNote= if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
+$safeScheduleDesc = [System.Net.WebUtility]::HtmlEncode($ScheduleDesc)
+$scheduleNote= if ($ScheduleDesc) { "Updated $safeScheduleDesc, last <span id=`"last-updated`" data-updated=`"$TimestampIso`">at $Timestamp</span>" } else { "Updated: <span id=`"last-updated`" data-updated=`"$TimestampIso`">$Timestamp</span>" }
 $defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 $html = @"
@@ -411,6 +415,24 @@ function clearFilter() {
   }
 })();
 $(if ($prCount -gt 0) { "initTableSort('pr-table', $defaultColIndex);`ninitResizableColumns('pr-table');" })
+// Live relative timestamp for "last Xh ago"
+(function() {
+  function timeAgo(iso) {
+    var ms = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(ms / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+  var el = document.getElementById('last-updated');
+  if (el) {
+    var iso = el.getAttribute('data-updated');
+    el.textContent = timeAgo(iso);
+    setInterval(function() { el.textContent = timeAgo(iso); }, 60000);
+  }
+})();
 </script>
 <script src="../pr-refresh.js"></script>
 <footer style="margin-top:2em;padding-top:1em;border-top:1px solid var(--border);font-size:0.8em;color:#8b949e;text-align:center;">

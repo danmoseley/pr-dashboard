@@ -19,6 +19,9 @@
 .PARAMETER SkipHistory
     If set, skip fetching merged PR stats via GraphQL and updating history.json.
     Use for offline/CI validation where API access is unavailable.
+.PARAMETER ScheduleDesc
+    Human-readable schedule description (e.g., "~twice daily") displayed in
+    the report meta line. Passed through to ConvertTo-ReportHtml.
 #>
 [CmdletBinding()]
 param(
@@ -27,7 +30,7 @@ param(
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][string]$Slug,
     [string[]]$ReportTypes = @("top15", "community", "quick-wins", "stale-close"),
-    [int]$ScheduleHours = 0,
+    [string]$ScheduleDesc = "",
     [switch]$SkipAI,
     [switch]$SkipHistory
 )
@@ -303,7 +306,7 @@ Do NOT repeat what's in the table. Output ONLY the bullet points, each starting 
         OutputFile    = Join-Path $outDir $report.File
         Timestamp     = $timestamp
         TimestampIso  = $timestampIso
-        ScheduleHours = $ScheduleHours
+        ScheduleDesc  = $ScheduleDesc
         NavLinks      = $navLinks
     }
     if ($report.DefaultSort) { $htmlParams["DefaultSort"] = $report.DefaultSort }
