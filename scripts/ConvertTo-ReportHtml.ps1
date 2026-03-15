@@ -413,6 +413,9 @@ function clearFilter() {
 $(if ($prCount -gt 0) { "initTableSort('pr-table', $defaultColIndex);`ninitResizableColumns('pr-table');" })
 </script>
 <script src="../pr-refresh.js"></script>
+<footer style="margin-top:2em;padding-top:1em;border-top:1px solid var(--border);font-size:0.8em;color:#8b949e;text-align:center;">
+  <a href="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml"><img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Generate All Reports" style="vertical-align:middle"></a>
+</footer>
 </body>
 </html>
 "@
