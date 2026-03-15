@@ -2,7 +2,8 @@ name: Generate All Reports
 
 on:
   schedule:
-    - cron: '0 */12 * * *'  # every 12 hours
+    - cron: '0 6,18 * * 1-5'  # weekdays: 6am + 6pm UTC (~10pm/10am Pacific)
+    - cron: '0 16 * * 0,6'    # weekends: 4pm UTC (~8am Pacific) — 1x/day
   workflow_dispatch: {}
 
 permissions:
@@ -13,17 +14,33 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     steps:
+      - name: Skip if recent run
+        if: github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Skip this scheduled run if there was a successful run in the last 10 hours
+          cutoff=$(date -u -d '10 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
+          recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&per_page=1" \
+            --jq ".workflow_runs[0].created_at // empty")
+          if [ -n "$recent" ] && [[ "$recent" > "$cutoff" ]]; then
+            echo "Skipping: recent successful run at $recent (cutoff: $cutoff)"
+            echo "SKIP_RUN=true" >> "$GITHUB_ENV"
+          fi
       - name: Checkout dashboard repo
+        if: env.SKIP_RUN != 'true'
         uses: actions/checkout@v6
         with:
           fetch-depth: 0  # full history needed for changelog generation
 
       - name: Install gh-models extension
+        if: env.SKIP_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh extension install github/gh-models
 
       - name: Scan and generate reports
+        if: env.SKIP_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -82,11 +99,13 @@ jobs:
           fi
 
       - name: Generate index page
+        if: env.SKIP_RUN != 'true'
         run: |
           mkdir -p docs/all
           pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
 
       - name: Commit and push
+        if: env.SKIP_RUN != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -113,7 +132,7 @@ jobs:
           done
 
       - name: Report failures
-        if: env.FAILED_REPOS != ''
+        if: env.SKIP_RUN != 'true' && env.FAILED_REPOS != ''
         run: |
           echo "::error::The following repos had scan/report failures: $FAILED_REPOS"
           exit 1
