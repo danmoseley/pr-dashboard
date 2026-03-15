@@ -23,9 +23,8 @@ jobs:
         continue-on-error: true
         run: |
           CI_OUTPUT="${{ runner.temp }}/ci-output"
-          # Install headless Chrome dependencies
-          sudo apt-get update -qq && sudo apt-get install -y -qq chromium-browser > /dev/null 2>&1 || true
-          CHROME=$(which chromium-browser || which chromium || which google-chrome || echo "")
+          # Use pre-installed browser (ubuntu-latest includes google-chrome)
+          CHROME=$(which google-chrome || which chromium-browser || which chromium || echo "")
           if [ -z "$CHROME" ]; then
             echo "::notice::No browser found, skipping screenshots"
             exit 0
@@ -34,12 +33,12 @@ jobs:
           if [ -f "$CI_OUTPUT/index.html" ]; then
             "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/index.png --window-size=1400,900 "file://$CI_OUTPUT/index.html" 2>/dev/null || true
           fi
-          for slug in extensions machinelearning runtime; do
-            if [ -f "$CI_OUTPUT/${slug}/actionable.html" ]; then
-              "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${slug}-actionable.png --window-size=1400,900 "file://$CI_OUTPUT/${slug}/actionable.html" 2>/dev/null || true
-              break
-            fi
-          done
+          # Find the first generated report dynamically
+          REPORT=$(find "$CI_OUTPUT" -name "actionable.html" -path "*/*/actionable.html" 2>/dev/null | head -1)
+          if [ -n "$REPORT" ]; then
+            SLUG=$(basename "$(dirname "$REPORT")")
+            "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${SLUG}-actionable.png --window-size=1400,900 "file://$REPORT" 2>/dev/null || true
+          fi
           ls -la screenshots/ 2>/dev/null || echo "No screenshots produced"
 
       - name: Upload screenshots

@@ -6,7 +6,7 @@
       1. PowerShell syntax validation (all .ps1 files)
       2. JavaScript syntax validation (pr-refresh.js)
       3. JSON config validation (maintainers.json, repos.json)
-      4. HTML generation smoke test (Regen-Html on 2 small repos)
+      4. HTML generation smoke test (Build-Reports + Build-Index on 2 small repos)
       5. HTML structure validation (required elements exist)
       6. Output file completeness (expected files with correct schema)
     Exits non-zero if any critical check fails.

@@ -16,6 +16,9 @@
     Which reports to generate: top15, community, quick-wins. Default: all three.
 .PARAMETER SkipAI
     If set, skip AI observation generation.
+.PARAMETER SkipHistory
+    If set, skip fetching merged PR stats via GraphQL and updating history.json.
+    Use for offline/CI validation where API access is unavailable.
 #>
 [CmdletBinding()]
 param(
