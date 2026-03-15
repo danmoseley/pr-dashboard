@@ -119,7 +119,7 @@ foreach ($pr in $allPrs) {
     # Author response latency (use field if available from full API refresh, else approximate from days_since_update)
     $dsac = if ($null -ne $pr.days_since_author_review_comment) { [int]$pr.days_since_author_review_comment }
            elseif ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment }
-           else { $dsu }
+           else { [int]$pr.age_days }
     $ut = [int]$pr.unresolved_threads
     if ($ut -gt 0 -and $dsac -gt 14) { $valueRaw += 1.5 }        # author silent
     elseif ($ut -gt 0 -and $dsac -gt 7) { $valueRaw += 0.5 }     # author slow

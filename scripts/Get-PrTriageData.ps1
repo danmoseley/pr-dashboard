@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments(last:20){totalCount nodes{author{login}}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -417,11 +417,17 @@ foreach ($pr in $candidates) {
             $lastReviewCommentDate = ($commentDates | Sort-Object -Descending | Select-Object -First 1)
         }
         # Find most recent comment by the PR author (for response latency)
+        # Include both review thread comments and PR conversation comments
         $authorCommentDates = @($gql.reviewThreads.nodes | ForEach-Object {
             $_.comments.nodes | Where-Object { $_.author.login -eq $authorLogin } | ForEach-Object {
                 if ($_.createdAt) { [DateTime]::Parse($_.createdAt) }
             }
         } | Where-Object { $_ })
+        if ($gql.comments.nodes) {
+            $authorCommentDates += @($gql.comments.nodes | Where-Object { $_.author.login -eq $authorLogin -and $_.createdAt } | ForEach-Object {
+                [DateTime]::Parse($_.createdAt)
+            })
+        }
         if ($authorCommentDates.Count -gt 0) {
             $lastAuthorCommentDate = ($authorCommentDates | Sort-Object -Descending | Select-Object -First 1)
         }
