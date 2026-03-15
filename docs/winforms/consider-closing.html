@@ -15,7 +15,8 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
+  .report-desc { font-size: 0.9em; margin: 0.3em 0 0.8em; line-height: 1.4; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: auto; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -23,7 +24,25 @@
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; }
+  .ready-high { background: rgba(35, 134, 54, 0.12); }
+  .action-score { font-weight: 800; text-align: right; white-space: nowrap; font-size: 1.25em; color: #f0c674;
+    background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3); border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; }
+  .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
+  .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
+  .why-btn { display: inline-block; font-size: 0.7em; font-family: inherit; color: #484f58; cursor: pointer; margin-left: 3px;
+    vertical-align: middle; font-weight: normal; text-decoration: none; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); line-height: 1.4; }
+  .why-btn:hover { opacity: 1; color: var(--link); border-color: var(--link); filter: none; }
+  .action-why-btn { color: #8b7640; }
+  .action-why-btn:hover { color: #f0c674; border-color: #f0c674; }
+  .why-popup { position: fixed; background: #1c2128; border: 1px solid #444c56; border-radius: 6px; padding: 10px 14px;
+    font-size: 0.85em; color: #e6edf3; z-index: 100; max-width: 350px; white-space: pre-line; line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: auto; }
+  th.action-col { background: rgba(240, 198, 116, 0.15) !important; color: #f0c674; font-weight: 700; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--link); }
+  th.sorted { color: var(--link); }
   .pr-num { white-space: nowrap; }
   .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -45,7 +64,7 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: var(--fg); font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -68,44 +87,74 @@
     .heat-1 { background: rgba(187, 128, 9, 0.1); }
     .heat-2 { background: rgba(210, 105, 30, 0.15); }
     .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+    .action-score { color: #9a6700; background: rgba(154, 103, 0, 0.06); border-color: rgba(154, 103, 0, 0.2); }
+    th.action-col { background: rgba(154, 103, 0, 0.1) !important; color: #9a6700; }
   }
   a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
               border-radius: 10px; text-decoration: none; margin-left: 4px; }
   a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
-<body data-server-updated="2026-03-15T02:08:33.4439882Z">
-<nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/winforms/consider-closing.html" target="_blank">&#x1F4AC; Feedback</a></nav>
+<body data-server-updated="2026-03-15T06:39:01.5222049Z">
+<nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/winforms/consider-closing.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Consider Closing — dotnet/winforms</h1>
-<p class="meta">Updated every 12h, last at 2026-03-15 02:08 UTC &middot; 31 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-15 06:39 UTC &middot; 31 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="report-desc">PRs that are old and have not been updated recently&mdash;likely abandoned or superseded. Consider closing with a polite note; authors can always reopen.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last activity (update or review comment)</td></tr>
-    <tr><td>1.5</td><td>Discussion</td><td>Recent review engagement boosts score; stale heavy discussion penalized</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity (update or review comment)</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum (recent review activity)</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+  <summary>How are the scores calculated?</summary>
+  <p>Each PR has three scores on a 0&ndash;10 scale:</p>
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>3.0</td><td>No merge conflicts</td></tr>
+        <tr><td>2.5</td><td>CI passing</td></tr>
+        <tr><td>2.5</td><td>Has approval</td></tr>
+        <tr><td>2.5</td><td>Feedback addressed</td></tr>
+        <tr><td>2.5</td><td>Discussion healthy</td></tr>
+        <tr><td>2.0</td><td>Small, easy to review</td></tr>
+        <tr><td>1.5</td><td>Has maintainer review</td></tr>
+        <tr><td>1.0</td><td>Recently active</td></tr>
+        <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>
+        <tr><td>0.7</td><td>Recently updated</td></tr>
+        <tr><td>0.5</td><td>Well labeled</td></tr>
+        <tr><td>0.3</td><td>Good review momentum</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from attention?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>1.5</td><td>No approval yet</td></tr>
+        <tr><td>1.5</td><td>Pending feedback, author silent &gt;14d</td></tr>
+        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
+        <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
+        <tr><td>1.0</td><td>High interest</td></tr>
+        <tr><td>0.5</td><td>Pending feedback, author slow (7&ndash;14d)</td></tr>
+        <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
+      <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
+      <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
+      <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+  </div>
+  <p style="font-size:0.85em; margin-top:0.8em;">Click any column header to re-sort. See <a href="https://github.com/danmoseley/pr-dashboard/pull/4">weight calibration analysis</a> for methodology.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table id="pr-table">
 <colgroup>
-  <col style="width:3%">
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
   <col style="width:4%">
   <col>
-  <col style="width:28%">
+  <col style="width:24%">
   <col style="width:7%">
   <col style="width:3%">
   <col style="width:2.5%">
@@ -116,44 +165,50 @@
 </colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th><th>Area</th>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable sorted desc" data-sort="num" title="Days since last update (push, comment, or review)">Upd<span class="sort-arrow"> &#x25BC;</span></th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
 </tr>
 </thead>
 <tbody>
-<tr data-people="KlausLoeffelmann,merriemcgaw,Olina-Zhang" data-labels="area-test coverage">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (304d) &#183; &#x1F570;&#xFE0F; old (305d)">5.8</td>
+<tr data-people="KlausLoeffelmann,JeremyKuhne,Olina-Zhang" data-labels="area-test coverage">
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;large change: 390 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;small, easy to review (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13456" title="Add unit test for RadioButtonStandardAdapter.cs, RadioButtonPopupAdapter.cs and RadioButtonFlatAdapter.cs files">#13456</a></td>
   <td class="title">Add unit test for RadioButtonStandardAdapter.cs, RadioButtonPopupAdapter.cs and RadioButtonFlatAdapter.cs files</td>
-  <td class="action" title="No review, Stale 304d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="No review, Stale 305d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">305d</td>
-  <td class="num heat-3">304d</td>
+  <td class="num heat-3">305d</td>
   <td class="num heat-1" title="390 lines changed">3</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-test coverage');return false" title="Show only area-test coverage">test coverage</a></td>
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,DJm00n" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (282d) &#183; &#x1F570;&#xFE0F; old (306d)">5.8</td>
+<tr data-people="JeremyKuhne,KlausLoeffelmann,DJm00n" data-labels="area-Infrastructure">
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;large change: 237 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;small, easy to review (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13448" title="Refactor icon initialization and make use of CreateIconResourceDirectory() for improved accuracy">#13448</a></td>
   <td class="title">Refactor icon initialization and make use of CreateIconResourceDirectory() for improved accuracy</td>
-  <td class="action" title="No review, Stale 282d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="No review, Stale 283d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">306d</td>
-  <td class="num heat-3">282d</td>
+  <td class="num heat-3">283d</td>
   <td class="num heat-1" title="237 lines changed">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="KlausLoeffelmann,ricardobossan,LeafShi1" data-labels="area-controls-DataGridView">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (213d) &#183; &#x1F570;&#xFE0F; old (233d)">6</td>
+  <td class="score">5.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13739" title="Use programatically check instead of assertion in method ComputeVisibleColumns of DataGridView.Methods to avoid null reference exception">#13739</a></td>
   <td class="title">Use programatically check instead of assertion in method ComputeVisibleColumns of DataGridView.Methods to avoid null reference exception</td>
   <td class="action" title="No review, Stale 213d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/1t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">233d</td>
   <td class="num heat-3">213d</td>
   <td class="num" title="23 lines changed">1</td>
@@ -161,12 +216,14 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
 <tr data-people="Epica3055" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (212d) &#183; &#x1F570;&#xFE0F; old (299d)">6.8</td>
+  <td class="score ready-high">6.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.8<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13486" title="add workflow Block PRs with &quot;NO-MERGE&quot; label">#13486</a></td>
   <td class="title">add workflow Block PRs with &quot;NO-MERGE&quot; label</td>
   <td class="action" title="No owner approval, Stale 212d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>: merge main (stale 212d)</td>
-  <td class="ci">&#x2705; 3/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="ci" title="3 passed, 0 failed, 0 running">&#x2705; 3/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">299d</td>
   <td class="num heat-3">212d</td>
   <td class="num" title="19 lines changed">1</td>
@@ -174,12 +231,14 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="KlausLoeffelmann,LeafShi1" data-labels="area-controls-DataGridView">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (191d) &#183; &#x1F570;&#xFE0F; old (219d)">6</td>
+  <td class="score ready-high">6.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13792" title="Add check &quot;IsDarkModeEnabled&quot; for SelectionForeColor of DataGridView">#13792</a></td>
   <td class="title">Add check &quot;IsDarkModeEnabled&quot; for SelectionForeColor of DataGridView</td>
   <td class="action" title="No review, Stale 191d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/1t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">219d</td>
   <td class="num heat-3">191d</td>
   <td class="num" title="4 lines changed">1</td>
@@ -187,12 +246,14 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-DataGridView');return false" title="Show only area-controls-DataGridView">controls-DataGridView</a></td>
 </tr>
 <tr data-people="LeafShi1" data-labels="area-Clipboard">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (177d) &#183; &#x1F570;&#xFE0F; old (264d)">7.2</td>
+  <td class="score ready-high">6.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13645" title="Adding Data, DataObject, FileDrop and Text tests to ClipboardCoreTests">#13645</a></td>
   <td class="title">Adding Data, DataObject, FileDrop and Text tests to ClipboardCoreTests</td>
   <td class="action" title="No owner approval, Stale 177d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 177d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/1t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">264d</td>
   <td class="num heat-3">177d</td>
   <td class="num" title="137 lines changed">4</td>
@@ -200,12 +261,14 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Clipboard');return false" title="Show only area-Clipboard">Clipboard</a></td>
 </tr>
 <tr data-people="Epica3055" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (173d) &#183; &#x1F570;&#xFE0F; old (179d)">6.9</td>
+  <td class="score ready-high">7.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 2t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13878" title="fix #13873 [DarkMode]: TabControl doesn&#39;t render tab titles correctly when SizeMode = Fixed">#13878</a></td>
   <td class="title">fix #13873 [DarkMode]: TabControl doesn&#39;t render tab titles correctly when SizeMode = Fixed</td>
-  <td class="action" title="No owner approval, Stale 173d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>: merge main (stale 173d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 3p</td>
+  <td class="action" title="Stale 173d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>: merge main (stale 173d)</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/2t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">179d</td>
   <td class="num heat-3">173d</td>
   <td class="num" title="6 lines changed">1</td>
@@ -213,12 +276,14 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 <tr data-people="LeafShi1" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (172d) &#183; &#x1F570;&#xFE0F; old (173d)">6.8</td>
+  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13891" title="Add hover visual effect for Popup button">#13891</a></td>
   <td class="title">Add hover visual effect for Popup button</td>
   <td class="action" title="No owner approval, Stale 172d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 172d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/1t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">173d</td>
   <td class="num heat-3">172d</td>
   <td class="num" title="18 lines changed">1</td>
@@ -226,25 +291,29 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 <tr data-people="KlausLoeffelmann,ricardobossan,LeafShi1" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (157d) &#183; &#x1F570;&#xFE0F; old (172d)">5.8</td>
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13898" title="Fix the Button border and color with FlatStyle = Flat: FlatAppearance properties">#13898</a></td>
   <td class="title">Fix the Button border and color with FlatStyle = Flat: FlatAppearance properties</td>
   <td class="action" title="No review, Stale 157d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">172d</td>
   <td class="num heat-3">157d</td>
   <td class="num heat-1" title="90 lines changed">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
-<tr data-people="KlausLoeffelmann,merriemcgaw,memoarfaa" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (151d) &#183; &#x1F570;&#xFE0F; old (299d)">6</td>
+<tr data-people="JeremyKuhne,KlausLoeffelmann,memoarfaa" data-labels="area-DarkMode">
+  <td class="score ready-high">6.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13480" title="[DarkMode] Fix MDIParent MainMenuStrip System Bitmaps">#13480</a></td>
   <td class="title">[DarkMode] Fix MDIParent MainMenuStrip System Bitmaps</td>
-  <td class="action" title="No review, Stale 151d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="No review, Stale 151d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">299d</td>
   <td class="num heat-3">151d</td>
   <td class="num" title="31 lines changed">1</td>
@@ -252,25 +321,29 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 <tr data-people="LeafShi1" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (139d) &#183; &#x1F570;&#xFE0F; old (144d)">6.8</td>
+  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13981" title="Fix 13976: Enhance TreeNode.UpdateImage() to support inherited image keys and selected image rendering">#13981</a></td>
   <td class="title">Fix 13976: Enhance TreeNode.UpdateImage() to support inherited image keys and selected image rendering</td>
   <td class="action" title="No owner approval, Stale 139d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 139d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/2t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">144d</td>
   <td class="num heat-3">139d</td>
   <td class="num" title="78 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
-<tr data-people="paul1956" data-labels="area-VisualBasic">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 6 unresolved &#183; &#x1F5E8;&#xFE0F; active (14 threads) &#183; &#x1F4E6; large (29 files, 4239 lines) &#183; &#x23F3; stale (135d) &#183; &#x1F570;&#xFE0F; old (485d)">3.9</td>
+<tr data-people="paul1956,Tanya-Solyanik,copilot-pull-request-reviewer" data-labels="area-VisualBasic">
+  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">7.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 141d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 14t 5ppl (+1.0)&#10;large change: 4239 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.8<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;pending feedback, author silent 141d (+1.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/12486" title="Code Coverage for DownloadFile Review 1St">#12486</a></td>
   <td class="title">Code Coverage for DownloadFile Review 1St</td>
-  <td class="action" title="Conflicts, 6 threads, No owner approval, Stale 135d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D;</a></span>: resolve conflicts; respond to 6 thread(s)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc heat-2">6/14t 3p</td>
+  <td class="action" title="6 threads, No owner approval, Stale 135d"><span class="user-ref"><img class="avatar" src="https://github.com/paul1956.png?size=32" alt="paul1956"><a href="https://github.com/paul1956">@paul1956</a><a class="filter-btn" href="#" onclick="filterByUser('paul1956');return false" title="Show only @paul1956">&#x1F50D;</a></span>: respond to 6 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Tanya-Solyanik.png?size=32" alt="Tanya-Solyanik"><a href="https://github.com/Tanya-Solyanik">@Tanya-Solyanik</a><a class="filter-btn" href="#" onclick="filterByUser('Tanya-Solyanik');return false" title="Show only @Tanya-Solyanik">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/copilot-pull-request-reviewer.png?size=32" alt="copilot-pull-request-reviewer"><a href="https://github.com/copilot-pull-request-reviewer">@copilot-pull-request-reviewer</a><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">6/14t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="6 unresolved of 14 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">485d</td>
   <td class="num heat-3">135d</td>
   <td class="num heat-2" title="4239 lines changed">29</td>
@@ -278,77 +351,89 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
 </tr>
 <tr data-people="DJm00n" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (116d) &#183; &#x1F570;&#xFE0F; old (306d)">6.2</td>
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 2t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13449" title="Optimize icon rendering: simplify logic and eliminate redundant calculations">#13449</a></td>
   <td class="title">Optimize icon rendering: simplify logic and eliminate redundant calculations</td>
-  <td class="action" title="No owner approval, Stale 116d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span>: merge main (stale 116d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="action" title="No owner approval, Stale 117d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span>: merge main (stale 117d)</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/2t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">306d</td>
-  <td class="num heat-3">116d</td>
+  <td class="num heat-3">117d</td>
   <td class="num" title="113 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DJm00n.png?size=32" alt="DJm00n"><a href="https://github.com/DJm00n">@DJm00n</a><a class="filter-btn" href="#" onclick="filterByUser('DJm00n');return false" title="Show only @DJm00n">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
+<tr data-people="KlausLoeffelmann,Shyam-Gupta,adegeo" data-labels="area-VisualBasic">
+  <td class="score ready-high">7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="pending feedback, author silent 112d (+1.5)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;pending feedback, author silent 112d (+1.5)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14074" title="Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMode.">#14074</a></td>
+  <td class="title">Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMode.</td>
+  <td class="action" title="2 threads, Stale 109d"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">&#x1F50D;</a></span></td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">2/2t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="2 unresolved of 2 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">112d</td>
+  <td class="num heat-3">109d</td>
+  <td class="num" title="21 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
+</tr>
 <tr data-people="SimonZhao888" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (109d) &#183; &#x1F570;&#xFE0F; old (111d)">6.8</td>
+  <td class="score ready-high">7.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14075" title="Fix issue 14071: ComboBox.ObjectCollection.CopyTo(Array destination, int index) copies Entry object, not inner item">#14075</a></td>
   <td class="title">Fix issue 14071: ComboBox.ObjectCollection.CopyTo(Array destination, int index) copies Entry object, not inner item</td>
-  <td class="action" title="No owner approval, Stale 109d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 109d)</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="Stale 109d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 109d)</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">111d</td>
   <td class="num heat-3">109d</td>
   <td class="num" title="2 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="KlausLoeffelmann,Shyam-Gupta,adegeo" data-labels="area-VisualBasic">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; owner approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (109d) &#183; &#x1F570;&#xFE0F; old (111d)">8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14074" title="Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMode.">#14074</a></td>
-  <td class="title">Fixing/clarifying XML comments for ScreenCaptureMode and VB&#39;s ColorMode.</td>
-  <td class="action" title="2 threads, Stale 109d"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/adegeo.png?size=32" alt="adegeo"><a href="https://github.com/adegeo">@adegeo</a><a class="filter-btn" href="#" onclick="filterByUser('adegeo');return false" title="Show only @adegeo">&#x1F50D;</a></span></td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">2/2t 2p</td>
-  <td class="num heat-3">111d</td>
-  <td class="num heat-3">109d</td>
-  <td class="num" title="21 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
+<tr data-people="memoarfaa,AraHaan" data-labels="area-DarkMode">
+  <td class="score">4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">7.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 307d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 20t 4ppl (+1.0)&#10;large change: 240 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;pending feedback, author silent 307d (+1.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13440" title="Improve Message Box in WinForms">#13440</a></td>
+  <td class="title">Improve Message Box in WinForms</td>
+  <td class="action" title="5 threads, No owner approval, Stale 97d"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/AraHaan.png?size=32" alt="AraHaan"><a href="https://github.com/AraHaan">@AraHaan</a><a class="filter-btn" href="#" onclick="filterByUser('AraHaan');return false" title="Show only @AraHaan">&#x1F50D;</a></span></td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-3">&#x1F525; 5/20t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="5 unresolved of 20 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">308d</td>
+  <td class="num heat-3">97d</td>
+  <td class="num heat-1" title="240 lines changed">3</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 <tr data-people="KlausLoeffelmann,merriemcgaw,LeafShi1" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (96d) &#183; &#x1F570;&#xFE0F; old (96d)">6</td>
+  <td class="score ready-high">7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14121" title="[release/10.0] Refactor StatusStrip DefaultPadding calculation and adjust GripWidth for improved layout consistency">#14121</a></td>
   <td class="title">[release/10.0] Refactor StatusStrip DefaultPadding calculation and adjust GripWidth for improved layout consistency</td>
   <td class="action" title="No review, Stale 96d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/1t 1p</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/1t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">96d</td>
   <td class="num heat-3">96d</td>
   <td class="num" title="104 lines changed">4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
-<tr data-people="memoarfaa,AraHaan" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 5 unresolved &#183; &#x1F5E8;&#xFE0F; busy (20 threads, 2 people) &#183; &#x23F3; stale (96d) &#183; &#x1F570;&#xFE0F; old (307d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13440" title="Improve Message Box in WinForms">#13440</a></td>
-  <td class="title">Improve Message Box in WinForms</td>
-  <td class="action" title="5 threads, No owner approval, Stale 96d"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/AraHaan.png?size=32" alt="AraHaan"><a href="https://github.com/AraHaan">@AraHaan</a><a class="filter-btn" href="#" onclick="filterByUser('AraHaan');return false" title="Show only @AraHaan">&#x1F50D;</a></span></td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc heat-3">&#x1F525; 5/20t 2p</td>
-  <td class="num heat-3">307d</td>
-  <td class="num heat-3">96d</td>
-  <td class="num heat-1" title="240 lines changed">3</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/memoarfaa.png?size=32" alt="memoarfaa"><a href="https://github.com/memoarfaa">@memoarfaa</a><a class="filter-btn" href="#" onclick="filterByUser('memoarfaa');return false" title="Show only @memoarfaa">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
-</tr>
 <tr data-people="SimonZhao888" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (95d) &#183; &#x1F570;&#xFE0F; old (101d)">6.8</td>
+  <td class="score ready-high">7.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14110" title="Fix ToolStripStatusLabel text visibility in High Contrast mode with System RenderMode">#14110</a></td>
   <td class="title">Fix ToolStripStatusLabel text visibility in High Contrast mode with System RenderMode</td>
-  <td class="action" title="No owner approval, Stale 95d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 95d)</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="action" title="Stale 95d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 95d)</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">101d</td>
   <td class="num heat-3">95d</td>
   <td class="num" title="10 lines changed">1</td>
@@ -356,12 +441,14 @@
   <td class="area-col"></td>
 </tr>
 <tr data-people="LeafShi1" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (92d) &#183; &#x1F570;&#xFE0F; old (94d)">6.8</td>
+  <td class="score ready-high">7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14133" title="Fix visibility logic for addNewPanel in DesignBindingPicker to use _dataSourceProviderService">#14133</a></td>
   <td class="title">Fix visibility logic for addNewPanel in DesignBindingPicker to use _dataSourceProviderService</td>
   <td class="action" title="No owner approval, Stale 92d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 92d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/3t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/3t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 3 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">94d</td>
   <td class="num heat-3">92d</td>
   <td class="num" title="6 lines changed">1</td>
@@ -369,12 +456,14 @@
   <td class="area-col"></td>
 </tr>
 <tr data-people="Shyam-Gupta,LeafShi1" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (90d) &#183; &#x1F570;&#xFE0F; old (93d)">5.5</td>
+  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14138" title="Add AppContext switch to mirror Owner.TopMost for modal dialogs (restore .NET Framework‑like behavior)">#14138</a></td>
   <td class="title">Add AppContext switch to mirror Owner.TopMost for modal dialogs (restore .NET Framework‑like behavior)</td>
   <td class="action" title="No review, Stale 90d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/Shyam-Gupta.png?size=32" alt="Shyam-Gupta"><a href="https://github.com/Shyam-Gupta">@Shyam-Gupta</a><a class="filter-btn" href="#" onclick="filterByUser('Shyam-Gupta');return false" title="Show only @Shyam-Gupta">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">93d</td>
   <td class="num heat-3">90d</td>
   <td class="num" title="28 lines changed">2</td>
@@ -382,64 +471,89 @@
   <td class="area-col"></td>
 </tr>
 <tr data-people="Olina-Zhang" data-labels="area-test coverage">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (39d) &#183; &#x1F570;&#xFE0F; old (172d)">7.2</td>
+  <td class="score ready-high">7.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13896" title="Add unit tests for ToolStripKeyboardHandlingService.cs file">#13896</a></td>
   <td class="title">Add unit tests for ToolStripKeyboardHandlingService.cs file</td>
   <td class="action" title="No owner approval, Stale 39d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span>: merge main (stale 39d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/2t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">172d</td>
   <td class="num heat-3">39d</td>
   <td class="num" title="124 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Olina-Zhang.png?size=32" alt="Olina-Zhang"><a href="https://github.com/Olina-Zhang">@Olina-Zhang</a><a class="filter-btn" href="#" onclick="filterByUser('Olina-Zhang');return false" title="Show only @Olina-Zhang">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-test coverage');return false" title="Show only area-test coverage">test coverage</a></td>
 </tr>
-<tr data-people="elachlan" data-labels="area-VisualBasic">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (690d)">4.4</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11258" title="Fix WindowsFormsApplicationBase.IsSingleInstance">#11258</a></td>
-  <td class="title">Fix WindowsFormsApplicationBase.IsSingleInstance</td>
-  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 33d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span>: resolve conflicts; respond to 1 thread(s)</td>
-  <td class="ci">&#x2705; 1/0/0</td>
-  <td class="disc">1/1t 3p</td>
-  <td class="num heat-3">690d</td>
-  <td class="num heat-3">33d</td>
-  <td class="num" title="68 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
-</tr>
-<tr data-people="SimonZhao888,app,LeafShi1" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (94d)">6.2</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14131" title="Fix TabControl dark mode rendering for Left/Right alignment with vertical text rotation, dark tab strip, and dark border">#14131</a></td>
-  <td class="title">Fix TabControl dark mode rendering for Left/Right alignment with vertical text rotation, dark tab strip, and dark border</td>
-  <td class="action" title="1 threads, No owner approval, Stale 33d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">1/1t 2p</td>
-  <td class="num heat-3">94d</td>
-  <td class="num heat-3">33d</td>
-  <td class="num" title="188 lines changed">1</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
-</tr>
 <tr data-people="SimonZhao888,app" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (95d)">7.2</td>
+  <td class="score ready-high">8.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.8<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14128" title="Fix ComboBox dark mode theme on first TabPage">#14128</a></td>
   <td class="title">Fix ComboBox dark mode theme on first TabPage</td>
-  <td class="action" title="No owner approval, Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 33d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 33d)</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">95d</td>
   <td class="num heat-3">33d</td>
   <td class="num" title="16 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
+<tr data-people="elachlan" data-labels="area-VisualBasic">
+  <td class="score">4.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 316d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 1t 6ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;pending feedback, author silent 316d (+1.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11258" title="Fix WindowsFormsApplicationBase.IsSingleInstance">#11258</a></td>
+  <td class="title">Fix WindowsFormsApplicationBase.IsSingleInstance</td>
+  <td class="action" title="1 threads, No owner approval, Stale 33d"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span>: respond to 1 thread(s)</td>
+  <td class="ci" title="1 passed, 0 failed, 0 running">&#x2705; 1/0/0</td>
+  <td class="disc heat-3">&#x1F525; 1/1t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">690d</td>
+  <td class="num heat-3">33d</td>
+  <td class="num" title="68 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elachlan.png?size=32" alt="elachlan"><a href="https://github.com/elachlan">@elachlan</a><a class="filter-btn" href="#" onclick="filterByUser('elachlan');return false" title="Show only @elachlan">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VisualBasic');return false" title="Show only area-VisualBasic">VisualBasic</a></td>
+</tr>
+<tr data-people="toehead2001,Tanya-Solyanik" data-labels="area-Infrastructure">
+  <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">5.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 237d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;pending feedback, author silent 237d (+1.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13303" title="Use MouseWheel scrolling in ToolStripDropDownMenu">#13303</a></td>
+  <td class="title">Use MouseWheel scrolling in ToolStripDropDownMenu</td>
+  <td class="action" title="1 threads, No owner approval, Stale 33d"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/Tanya-Solyanik.png?size=32" alt="Tanya-Solyanik"><a href="https://github.com/Tanya-Solyanik">@Tanya-Solyanik</a><a class="filter-btn" href="#" onclick="filterByUser('Tanya-Solyanik');return false" title="Show only @Tanya-Solyanik">&#x1F50D;</a></span></td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">335d</td>
+  <td class="num heat-3">33d</td>
+  <td class="num" title="33 lines changed">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
+</tr>
+<tr data-people="JeremyKuhne" data-labels="">
+  <td class="score">5.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 1t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/10944" title="Add convenience / perf methods to ListViewItem/ControlCollection">#10944</a></td>
+  <td class="title">Add convenience / perf methods to ListViewItem/ControlCollection</td>
+  <td class="action" title="No owner approval, Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>: merge main (stale 33d)</td>
+  <td class="ci" title="1 passed, 0 failed, 0 running">&#x2705; 1/0/0</td>
+  <td class="disc heat-2">0/1t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 1 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">750d</td>
+  <td class="num heat-3">33d</td>
+  <td class="num heat-1" title="159 lines changed">7</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
+  <td class="area-col"></td>
+</tr>
 <tr data-people="SimonZhao888,app" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (95d)">6.4</td>
+  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 5t 5ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14129" title="Fix dark mode text visibility in Collection Editor dialogs">#14129</a></td>
   <td class="title">Fix dark mode text visibility in Collection Editor dialogs</td>
   <td class="action" title="No owner approval, Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: merge main (stale 33d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc heat-2">0/5t 4p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/5t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">95d</td>
   <td class="num heat-3">33d</td>
   <td class="num" title="6 lines changed">1</td>
@@ -447,81 +561,78 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 <tr data-people="KlausLoeffelmann,LeafShi1" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (614d)">5.5</td>
+  <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;high interest: 0t 5ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/11641" title="Fix 11214 by removing IsHandleCreated in OnFontChanged">#11641</a></td>
   <td class="title">Fix 11214 by removing IsHandleCreated in OnFontChanged</td>
   <td class="action" title="No review, Stale 33d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/0t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">614d</td>
   <td class="num heat-3">33d</td>
   <td class="num" title="2 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="ricardobossan,Epica3055,KlausLoeffelmann" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (156d)">5.2</td>
+<tr data-people="ricardobossan" data-labels="">
+  <td class="score ready-high">7.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13950" title="Fixes #13901. Properly displays PropertyGrid` color and cursor dropdowns when using Dark Mode">#13950</a></td>
   <td class="title">Fixes #13901. Properly displays PropertyGrid` color and cursor dropdowns when using Dark Mode</td>
-  <td class="action" title="Conflicts, No owner approval, Stale 33d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/Epica3055.png?size=32" alt="Epica3055"><a href="https://github.com/Epica3055">@Epica3055</a><a class="filter-btn" href="#" onclick="filterByUser('Epica3055');return false" title="Show only @Epica3055">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span>: merge main (stale 33d)</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">156d</td>
   <td class="num heat-3">33d</td>
   <td class="num" title="18 lines changed">2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ricardobossan.png?size=32" alt="ricardobossan"><a href="https://github.com/ricardobossan">@ricardobossan</a><a class="filter-btn" href="#" onclick="filterByUser('ricardobossan');return false" title="Show only @ricardobossan">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="toehead2001" data-labels="area-Infrastructure">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (335d)">4.8</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13303" title="Use MouseWheel scrolling in ToolStripDropDownMenu">#13303</a></td>
-  <td class="title">Use MouseWheel scrolling in ToolStripDropDownMenu</td>
-  <td class="action" title="Conflicts, 1 threads, No owner approval, Stale 33d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span>: resolve conflicts; respond to 1 thread(s)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">1/1t 2p</td>
-  <td class="num heat-3">335d</td>
+<tr data-people="LeafShi1" data-labels="area-DarkMode">
+  <td class="score">5.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 4t 5ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13824" title="Update the OwnerDraw flag when BackgroundImage changes">#13824</a></td>
+  <td class="title">Update the OwnerDraw flag when BackgroundImage changes</td>
+  <td class="action" title="No owner approval, Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 33d)</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/4t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">207d</td>
   <td class="num heat-3">33d</td>
-  <td class="num" title="33 lines changed">2</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/toehead2001.png?size=32" alt="toehead2001"><a href="https://github.com/toehead2001">@toehead2001</a><a class="filter-btn" href="#" onclick="filterByUser('toehead2001');return false" title="Show only @toehead2001">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
+  <td class="num heat-1" title="74 lines changed">6</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
-<tr data-people="LeafShi1,merriemcgaw,KlausLoeffelmann" data-labels="area-NRT">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4E6; small change &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (110d)">4.5</td>
+<tr data-people="merriemcgaw,KlausLoeffelmann,LeafShi1" data-labels="area-NRT">
+  <td class="score ready-high">6.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14079" title="Fix incorrect logic in CharIsPrintable for UnicodeCategory exclusions">#14079</a></td>
   <td class="title">Fix incorrect logic in CharIsPrintable for UnicodeCategory exclusions</td>
-  <td class="action" title="Conflicts, No review, Stale 33d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 9/0/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="No review, Stale 33d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">110d</td>
   <td class="num heat-3">33d</td>
   <td class="num" title="4 lines changed">1</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-NRT');return false" title="Show only area-NRT">NRT</a></td>
 </tr>
-<tr data-people="JeremyKuhne,KlausLoeffelmann,merriemcgaw" data-labels="">
-  <td class="score" title="&#x2705; CI passed &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F440; reviewed, not approved &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (750d)">4.5</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/10944" title="Add convenience / perf methods to ListViewItem/ControlCollection">#10944</a></td>
-  <td class="title">Add convenience / perf methods to ListViewItem/ControlCollection</td>
-  <td class="action" title="Conflicts, No owner approval, Stale 33d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/merriemcgaw.png?size=32" alt="merriemcgaw"><a href="https://github.com/merriemcgaw">@merriemcgaw</a><a class="filter-btn" href="#" onclick="filterByUser('merriemcgaw');return false" title="Show only @merriemcgaw">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci">&#x2705; 1/0/0</td>
-  <td class="disc">0/1t 1p</td>
-  <td class="num heat-3">750d</td>
+<tr data-people="SimonZhao888,app,LeafShi1" data-labels="area-DarkMode">
+  <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 41d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 1t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score action-warm"><span style="opacity:0.48">&#x26A1;</span> 4.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;pending feedback, author silent 41d (+1.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14131" title="Fix TabControl dark mode rendering for Left/Right alignment with vertical text rotation, dark tab strip, and dark border">#14131</a></td>
+  <td class="title">Fix TabControl dark mode rendering for Left/Right alignment with vertical text rotation, dark tab strip, and dark border</td>
+  <td class="action" title="1 threads, No owner approval, Stale 33d"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">1/1t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">94d</td>
   <td class="num heat-3">33d</td>
-  <td class="num heat-1" title="159 lines changed">7</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JeremyKuhne.png?size=32" alt="JeremyKuhne"><a href="https://github.com/JeremyKuhne">@JeremyKuhne</a><a class="filter-btn" href="#" onclick="filterByUser('JeremyKuhne');return false" title="Show only @JeremyKuhne">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
-</tr>
-<tr data-people="LeafShi1" data-labels="area-DarkMode">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x23F3; stale (33d) &#183; &#x1F570;&#xFE0F; old (207d)">6.1</td>
-  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/13824" title="Update the OwnerDraw flag when BackgroundImage changes">#13824</a></td>
-  <td class="title">Update the OwnerDraw flag when BackgroundImage changes</td>
-  <td class="action" title="No owner approval, Stale 33d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span>: merge main (stale 33d)</td>
-  <td class="ci">&#x2705; 8/0/0</td>
-  <td class="disc">0/4t 3p</td>
-  <td class="num heat-3">207d</td>
-  <td class="num heat-3">33d</td>
-  <td class="num heat-1" title="74 lines changed">6</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  <td class="num" title="188 lines changed">1</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
 </tr>
 </tbody>
@@ -529,6 +640,7 @@
 
 
 <script>
+var _filterKey = 'prFilter:' + location.pathname;
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
@@ -547,6 +659,7 @@ function filterByLabel(label) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
 }
 function filterByUser(name) {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -566,6 +679,7 @@ function filterByUser(name) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -576,14 +690,22 @@ function clearFilter() {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
+  try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
-// Apply ?user=X or ?label=X filter on page load
+// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
   var label = params.get('label');
   if (user) filterByUser(user);
   else if (label) filterByLabel(label);
+  else {
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') filterByUser(saved.value);
+      else if (saved && saved.type === 'label') filterByLabel(saved.value);
+    } catch(e) {}
+  }
 })();
 // Resizable columns: drag right edge of any <th> to resize
 (function() {
@@ -608,6 +730,89 @@ function clearFilter() {
   function lockLayout() {
     if (locked) return; locked = true;
   }
+})();
+// Show tooltip popup on [?] click
+var activePopup = null;
+var activePopupBtn = null;
+function showWhy(el) {
+  if (activePopup) {
+    activePopup.remove();
+    var wasSame = (activePopupBtn === el);
+    activePopup = null; activePopupBtn = null;
+    if (wasSame) return; // 2nd click on same [?] dismisses
+  }
+  var why = (el.getAttribute('data-why') || '').replace(/&#10;/g, '\n');
+  if (!why) return;
+  var popup = document.createElement('div');
+  popup.className = 'why-popup';
+  popup.textContent = why;
+  document.body.appendChild(popup);
+  var rect = el.getBoundingClientRect();
+  popup.style.left = Math.max(0, Math.min(rect.right + 5, window.innerWidth - 360)) + 'px';
+  popup.style.top = Math.max(0, rect.top) + 'px';
+  activePopup = popup;
+  activePopupBtn = el;
+  // Dismiss on click outside
+  var dismissClick = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); return; }
+    if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); }
+  };
+  var dismissMouse = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick); return; }
+    var r = popup.getBoundingClientRect();
+    var pad = 50;
+    if (e.clientX < r.left - pad || e.clientX > r.right + pad || e.clientY < r.top - pad || e.clientY > r.bottom + pad) {
+      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick);
+    }
+  };
+  setTimeout(function() { document.addEventListener('click', dismissClick); }, 0);
+  document.addEventListener('mousemove', dismissMouse);
+}
+// Sortable columns: click any th.sortable to sort the table
+(function() {
+  var table = document.getElementById('pr-table');
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+  var headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, colIdx) {
+    if (!th.classList.contains('sortable')) return;
+    th.addEventListener('click', function(e) {
+      if (e.target.style && e.target.style.cursor === 'col-resize') return;
+      var isDesc = th.classList.contains('desc');
+      var newDir = isDesc ? 'asc' : 'desc';
+      headers.forEach(function(h) {
+        h.classList.remove('sorted','asc','desc');
+        var old = h.querySelector('.sort-arrow');
+        if (old) old.remove();
+      });
+      th.classList.add('sorted', newDir);
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = newDir === 'desc' ? ' \u25BC' : ' \u25B2';
+      th.insertBefore(arrow, th.querySelector('div'));
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      var sortType = th.getAttribute('data-sort') || 'num';
+      rows.sort(function(a, b) {
+        var aCell = a.cells[colIdx], bCell = b.cells[colIdx];
+        if (!aCell || !bCell) return 0;
+        if (sortType === 'alpha') {
+          var aText = aCell.textContent.trim().toLowerCase();
+          var bText = bCell.textContent.trim().toLowerCase();
+          var cmp = aText < bText ? -1 : aText > bText ? 1 : 0;
+          return newDir === 'desc' ? -cmp : cmp;
+        }
+        // Numeric: sum all numbers found in cell (handles "2/5t 3ppl" → 10)
+        var aText = aCell.textContent.replace(/[#?]/g, '');
+        var bText = bCell.textContent.replace(/[#?]/g, '');
+        var aNums = aText.match(/[\d.]+/g) || [0];
+        var bNums = bText.match(/[\d.]+/g) || [0];
+        var aVal = aNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        var bVal = bNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        return newDir === 'desc' ? bVal - aVal : aVal - bVal;
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
 })();
 </script>
 <script src="../pr-refresh.js"></script>

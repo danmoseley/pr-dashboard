@@ -15,7 +15,8 @@
   nav a:hover { text-decoration: underline; }
   h1 { font-size: 1.4em; margin-bottom: 0.2em; }
   .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: fixed; }
+  .report-desc { font-size: 0.9em; margin: 0.3em 0 0.8em; line-height: 1.4; }
+  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: auto; }
   thead { position: sticky; top: 0; z-index: 1; }
   th { background: var(--header-bg); padding: 6px 10px; text-align: left;
        border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
@@ -23,7 +24,25 @@
   tr:hover { background: var(--hover); }
   a { color: var(--link); text-decoration: none; }
   a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; }
+  .ready-high { background: rgba(35, 134, 54, 0.12); }
+  .action-score { font-weight: 800; text-align: right; white-space: nowrap; font-size: 1.25em; color: #f0c674;
+    background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3); border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; }
+  .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
+  .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
+  .why-btn { display: inline-block; font-size: 0.7em; font-family: inherit; color: #484f58; cursor: pointer; margin-left: 3px;
+    vertical-align: middle; font-weight: normal; text-decoration: none; padding: 0 3px; border-radius: 3px;
+    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); line-height: 1.4; }
+  .why-btn:hover { opacity: 1; color: var(--link); border-color: var(--link); filter: none; }
+  .action-why-btn { color: #8b7640; }
+  .action-why-btn:hover { color: #f0c674; border-color: #f0c674; }
+  .why-popup { position: fixed; background: #1c2128; border: 1px solid #444c56; border-radius: 6px; padding: 10px 14px;
+    font-size: 0.85em; color: #e6edf3; z-index: 100; max-width: 350px; white-space: pre-line; line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: auto; }
+  th.action-col { background: rgba(240, 198, 116, 0.15) !important; color: #f0c674; font-weight: 700; }
+  th.sortable { cursor: pointer; user-select: none; }
+  th.sortable:hover { color: var(--link); }
+  th.sorted { color: var(--link); }
   .pr-num { white-space: nowrap; }
   .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -45,7 +64,7 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: #8b949e; font-size: 0.85em; }
+  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: var(--fg); font-size: 0.85em; }
   .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
   .scoring p { margin: 0.5em 0; line-height: 1.4; }
   .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
@@ -68,44 +87,74 @@
     .heat-1 { background: rgba(187, 128, 9, 0.1); }
     .heat-2 { background: rgba(210, 105, 30, 0.15); }
     .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
+    .action-score { color: #9a6700; background: rgba(154, 103, 0, 0.06); border-color: rgba(154, 103, 0, 0.2); }
+    th.action-col { background: rgba(154, 103, 0, 0.1) !important; color: #9a6700; }
   }
   a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
               border-radius: 10px; text-decoration: none; margin-left: 4px; }
   a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
-<body data-server-updated="2026-03-15T02:07:17.1820900Z">
-<nav><a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="../index.html">Home</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/extensions/consider-closing.html" target="_blank">&#x1F4AC; Feedback</a></nav>
+<body data-server-updated="2026-03-15T06:37:44.3693763Z">
+<nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/extensions/consider-closing.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Consider Closing — dotnet/extensions</h1>
-<p class="meta">Updated every 12h, last at 2026-03-15 02:07 UTC &middot; 6 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
+<p class="meta">Updated every 12h, last at 2026-03-15 06:37 UTC &middot; 6 PRs &middot; <a href="https://github.com/dotnet/extensions">dotnet/extensions</a></p>
+<p class="report-desc">PRs that are old and have not been updated recently&mdash;likely abandoned or superseded. Consider closing with a polite note; authors can always reopen.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
-  <summary>How is the score calculated?</summary>
-  <p>Each PR is scored 0&ndash;10 on a weighted composite of 12 dimensions:</p>
-  <table class="scoring-table">
-    <tr><th>Weight</th><th>Dimension</th><th>What it measures</th></tr>
-    <tr><td>3.0</td><td>CI (Build Analysis)</td><td>Hard blocker &mdash; can&rsquo;t merge if CI is red</td></tr>
-    <tr><td>3.0</td><td>Merge conflicts</td><td>Hard blocker &mdash; unmergeable</td></tr>
-    <tr><td>3.0</td><td>Maintainer review</td><td>Hard blocker &mdash; requires owner/triager approval</td></tr>
-    <tr><td>2.0</td><td>Feedback</td><td>Unresolved review threads</td></tr>
-    <tr><td>2.0</td><td>Approval strength</td><td>Who approved: area owner &gt; triager &gt; contributor</td></tr>
-    <tr><td>1.5</td><td>Staleness</td><td>Days since last activity (update or review comment)</td></tr>
-    <tr><td>1.5</td><td>Discussion</td><td>Recent review engagement boosts score; stale heavy discussion penalized</td></tr>
-    <tr><td>1.0</td><td>Alignment</td><td>Has area label, not untriaged</td></tr>
-    <tr><td>1.0</td><td>Freshness</td><td>Recent activity (update or review comment)</td></tr>
-    <tr><td>1.0</td><td>Size</td><td>Smaller = easier to review</td></tr>
-    <tr><td>0.5</td><td>Community</td><td>Flags community PRs for visibility</td></tr>
-    <tr><td>0.5</td><td>Velocity</td><td>Review momentum (recent review activity)</td></tr>
-  </table>
-  <p>Higher score = fewer blockers remaining (green CI, approvals, no unresolved threads, etc.). The &ldquo;Next Action&rdquo; column identifies who needs to act and what they need to do.
-  See <a href="https://github.com/dotnet/runtime/pull/125005">pr-triage skill</a> for full details.</p>
+  <summary>How are the scores calculated?</summary>
+  <p>Each PR has three scores on a 0&ndash;10 scale:</p>
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>3.0</td><td>No merge conflicts</td></tr>
+        <tr><td>2.5</td><td>CI passing</td></tr>
+        <tr><td>2.5</td><td>Has approval</td></tr>
+        <tr><td>2.5</td><td>Feedback addressed</td></tr>
+        <tr><td>2.5</td><td>Discussion healthy</td></tr>
+        <tr><td>2.0</td><td>Small, easy to review</td></tr>
+        <tr><td>1.5</td><td>Has maintainer review</td></tr>
+        <tr><td>1.0</td><td>Recently active</td></tr>
+        <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>
+        <tr><td>0.7</td><td>Recently updated</td></tr>
+        <tr><td>0.5</td><td>Well labeled</td></tr>
+        <tr><td>0.3</td><td>Good review momentum</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from attention?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>1.5</td><td>No approval yet</td></tr>
+        <tr><td>1.5</td><td>Pending feedback, author silent &gt;14d</td></tr>
+        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
+        <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
+        <tr><td>1.0</td><td>High interest</td></tr>
+        <tr><td>0.5</td><td>Pending feedback, author slow (7&ndash;14d)</td></tr>
+        <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:250px;">
+      <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
+      <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
+      <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
+      <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+  </div>
+  <p style="font-size:0.85em; margin-top:0.8em;">Click any column header to re-sort. See <a href="https://github.com/danmoseley/pr-dashboard/pull/4">weight calibration analysis</a> for methodology.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table id="pr-table">
 <colgroup>
-  <col style="width:3%">
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
   <col style="width:4%">
   <col>
-  <col style="width:28%">
+  <col style="width:24%">
   <col style="width:7%">
   <col style="width:3%">
   <col style="width:2.5%">
@@ -116,31 +165,35 @@
 </colgroup>
 <thead>
 <tr>
-  <th>Score</th><th>PR</th><th>Title</th><th>Next Action</th>
-  <th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th><th>Area</th>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable sorted desc" data-sort="num" title="Days since last update (push, comment, or review)">Upd<span class="sort-arrow"> &#x25BC;</span></th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
 </tr>
 </thead>
 <tbody>
 <tr data-people="BowenYang666,dariusclay" data-labels="area-telemetry">
-  <td class="score" title="&#x274C; CI failing &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 1 unresolved &#183; &#x23F3; stale (206d) &#183; &#x1F570;&#xFE0F; old (345d)">4.5</td>
+  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">5.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 341d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;some unresolved feedback (+2.2)&#10;pending feedback, author silent 341d (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6244" title="add CommTagAttribute for metric code generator">#6244</a></td>
   <td class="title">add CommTagAttribute for metric code generator</td>
   <td class="action" title="CI fail (2 failed), 1 threads, No owner approval, Stale 206d"><span class="user-ref"><img class="avatar" src="https://github.com/BowenYang666.png?size=32" alt="BowenYang666"><a href="https://github.com/BowenYang666">@BowenYang666</a><a class="filter-btn" href="#" onclick="filterByUser('BowenYang666');return false" title="Show only @BowenYang666">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/dariusclay.png?size=32" alt="dariusclay"><a href="https://github.com/dariusclay">@dariusclay</a><a class="filter-btn" href="#" onclick="filterByUser('dariusclay');return false" title="Show only @dariusclay">&#x1F50D;</a></span></td>
-  <td class="ci">&#x274C; 4/2/0</td>
-  <td class="disc">1/1t 1p</td>
+  <td class="ci" title="4 passed, 2 failed, 0 running">&#x274C; 4/2/0</td>
+  <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">345d</td>
   <td class="num heat-3">206d</td>
   <td class="num heat-1" title="135 lines changed">6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/BowenYang666.png?size=32" alt="BowenYang666"><a href="https://github.com/BowenYang666">@BowenYang666</a><a class="filter-btn" href="#" onclick="filterByUser('BowenYang666');return false" title="Show only @BowenYang666">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
-<tr data-people="area,Youssef1313" data-labels="area-telemetry">
-  <td class="score" title="&#x274C; CI failing &#183; &#x1F50D; no review yet &#183; &#x23F3; stale (146d) &#183; &#x1F570;&#xFE0F; old (146d)">4.2</td>
+<tr data-people="adamsitnik,DeagleGross,Youssef1313" data-labels="area-telemetry">
+  <td class="score">5.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">3.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;large change: 262 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6932" title="Improve contextual options gen incrementality">#6932</a></td>
   <td class="title">Improve contextual options gen incrementality</td>
-  <td class="action" title="CI fail (4 failed), No review, Stale 146d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/area.png?size=32" alt="area"><a href="https://github.com/area">@area</a><a class="filter-btn" href="#" onclick="filterByUser('area');return false" title="Show only @area">&#x1F50D;</a></span> owner: review needed</td>
-  <td class="ci">&#x274C; 1/4/0</td>
-  <td class="disc">0/2t 1p</td>
+  <td class="action" title="CI fail (4 failed), No review, Stale 146d">&#x1F441; <span class="user-ref"><img class="avatar" src="https://github.com/adamsitnik.png?size=32" alt="adamsitnik"><a href="https://github.com/adamsitnik">@adamsitnik</a><a class="filter-btn" href="#" onclick="filterByUser('adamsitnik');return false" title="Show only @adamsitnik">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/DeagleGross.png?size=32" alt="DeagleGross"><a href="https://github.com/DeagleGross">@DeagleGross</a><a class="filter-btn" href="#" onclick="filterByUser('DeagleGross');return false" title="Show only @DeagleGross">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="1 passed, 4 failed, 0 running">&#x274C; 1/4/0</td>
+  <td class="disc">0/2t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 2 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">146d</td>
   <td class="num heat-3">146d</td>
   <td class="num heat-1" title="262 lines changed">6</td>
@@ -148,51 +201,59 @@
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
 <tr data-people="IbrahimMNada" data-labels="area-telemetry">
-  <td class="score" title="&#x274C; CI failing &#183; &#x26A0;&#xFE0F; has conflicts &#183; &#x1F50D; no review yet &#183; &#x1F4AC; 2 unresolved &#183; &#x1F4E6; large (27 files, 2236 lines) &#183; &#x23F3; stale (131d) &#183; &#x1F570;&#xFE0F; old (267d)">2</td>
+  <td class="score">2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">6.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 251d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 2236 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="some unresolved feedback (+2.2)&#10;pending feedback, author silent 251d (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6530" title="introduce JsonEmitterBase completion of  ( Tweak MetaData Report format for better readability #5929)">#6530</a></td>
   <td class="title">introduce JsonEmitterBase completion of  ( Tweak MetaData Report format for better readability #5929)</td>
-  <td class="action" title="Conflicts, CI fail (2 failed), 2 threads, No review, Stale 131d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span>: resolve conflicts; respond to 2 thread(s)</td>
-  <td class="ci">&#x274C; 4/2/0</td>
-  <td class="disc">2/3t 1p</td>
+  <td class="action" title="Conflicts, CI fail (2 failed), 2 threads, No review, Stale 132d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span>: resolve conflicts; respond to 2 thread(s)</td>
+  <td class="ci" title="4 passed, 2 failed, 0 running">&#x274C; 4/2/0</td>
+  <td class="disc">2/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="2 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">267d</td>
-  <td class="num heat-3">131d</td>
+  <td class="num heat-3">132d</td>
   <td class="num heat-2" title="2236 lines changed">27</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/IbrahimMNada.png?size=32" alt="IbrahimMNada"><a href="https://github.com/IbrahimMNada">@IbrahimMNada</a><a class="filter-btn" href="#" onclick="filterByUser('IbrahimMNada');return false" title="Show only @IbrahimMNada">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
 <tr data-people="mokarchi" data-labels="area-caching-hybrid">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4E6; large (10 files, 855 lines) &#183; &#x23F3; stale (106d) &#183; &#x1F570;&#xFE0F; old (167d)">6.2</td>
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">3.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;large change: 855 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6862" title="Implementation Plan for HybridCache ReportTagMetrics">#6862</a></td>
   <td class="title">Implementation Plan for HybridCache ReportTagMetrics</td>
-  <td class="action" title="No owner approval, Stale 106d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span>: merge main (stale 106d)</td>
-  <td class="ci">&#x2705; 6/0/0</td>
-  <td class="disc">0/3t 2p</td>
-  <td class="num heat-3">167d</td>
-  <td class="num heat-3">106d</td>
+  <td class="action" title="No owner approval, Stale 107d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span>: merge main (stale 107d)</td>
+  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
+  <td class="disc">0/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">168d</td>
+  <td class="num heat-3">107d</td>
   <td class="num heat-2" title="855 lines changed">10</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mokarchi.png?size=32" alt="mokarchi"><a href="https://github.com/mokarchi">@mokarchi</a><a class="filter-btn" href="#" onclick="filterByUser('mokarchi');return false" title="Show only @mokarchi">&#x1F50D;</a></span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-caching-hybrid');return false" title="Show only area-caching-hybrid">caching-hybrid</a></td>
 </tr>
 <tr data-people="evgenyfedorov2,app,joperezr" data-labels="area-telemetry">
-  <td class="score" title="&#x2705; CI passed &#183; &#x1F440; reviewed, not approved &#183; &#x1F4AC; 2 unresolved &#183; &#x1F5E8;&#xFE0F; active (8 threads) &#183; &#x1F4E6; small change &#183; &#x23F3; stale (57d) &#183; &#x1F570;&#xFE0F; old (114d)">5.9</td>
+  <td class="score ready-high">6.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;small, easy to review (+2)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;pending feedback, author silent 87d (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 8t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score action-warm"><span style="opacity:0.78">&#x26A1;</span> 4.8<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;pending feedback, author silent 87d (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/7062" title="Fix CS0757 error when multi-targeting with Microsoft.Extensions.Telemetry.Abstractions">#7062</a></td>
   <td class="title">Fix CS0757 error when multi-targeting with Microsoft.Extensions.Telemetry.Abstractions</td>
   <td class="action" title="2 threads, No owner approval, Stale 57d"><span class="user-ref"><img class="avatar" src="https://github.com/evgenyfedorov2.png?size=32" alt="evgenyfedorov2"><a href="https://github.com/evgenyfedorov2">@evgenyfedorov2</a><a class="filter-btn" href="#" onclick="filterByUser('evgenyfedorov2');return false" title="Show only @evgenyfedorov2">&#x1F50D;</a></span>: respond to 2 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/joperezr.png?size=32" alt="joperezr"><a href="https://github.com/joperezr">@joperezr</a><a class="filter-btn" href="#" onclick="filterByUser('joperezr');return false" title="Show only @joperezr">&#x1F50D;</a></span></td>
-  <td class="ci">&#x2705; 6/0/0</td>
-  <td class="disc heat-2">2/8t 4p</td>
-  <td class="num heat-3">114d</td>
+  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
+  <td class="disc heat-2">2/8t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="2 unresolved of 8 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">115d</td>
   <td class="num heat-3">57d</td>
   <td class="num" title="50 lines changed">4</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/evgenyfedorov2.png?size=32" alt="evgenyfedorov2"><a href="https://github.com/evgenyfedorov2">@evgenyfedorov2</a><a class="filter-btn" href="#" onclick="filterByUser('evgenyfedorov2');return false" title="Show only @evgenyfedorov2">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via &#x1F916;</span></td>
   <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-telemetry');return false" title="Show only area-telemetry">telemetry</a></td>
 </tr>
 <tr data-people="Meir017" data-labels="area-telemetry">
-  <td class="score" title="&#x274C; CI failing &#183; &#x1F44D; community reviewed &#183; &#x1F4E6; small change &#183; &#x23F3; stale (50d) &#183; &#x1F570;&#xFE0F; old (163d)">5.8</td>
+  <td class="score ready-high">7.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no attention signals" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;discussion healthy (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/extensions/pull/6883" title="Fix typo in AddExtendedLoggerFactory method name">#6883</a></td>
   <td class="title">Fix typo in AddExtendedLoggerFactory method name</td>
-  <td class="action" title="CI fail (3 failed), No owner approval, Stale 50d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Meir017.png?size=32" alt="Meir017"><a href="https://github.com/Meir017">@Meir017</a><a class="filter-btn" href="#" onclick="filterByUser('Meir017');return false" title="Show only @Meir017">&#x1F50D;</a></span>: fix CI failures</td>
-  <td class="ci">&#x274C; 2/3/0</td>
-  <td class="disc">0/0t 0p</td>
+  <td class="action" title="CI fail (3 failed), Stale 50d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/Meir017.png?size=32" alt="Meir017"><a href="https://github.com/Meir017">@Meir017</a><a class="filter-btn" href="#" onclick="filterByUser('Meir017');return false" title="Show only @Meir017">&#x1F50D;</a></span>: fix CI failures</td>
+  <td class="ci" title="2 passed, 3 failed, 0 running">&#x274C; 2/3/0</td>
+  <td class="disc">0/0t 0ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;0 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-3">163d</td>
   <td class="num heat-3">50d</td>
   <td class="num" title="16 lines changed">4</td>
@@ -204,6 +265,7 @@
 
 
 <script>
+var _filterKey = 'prFilter:' + location.pathname;
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
@@ -222,6 +284,7 @@ function filterByLabel(label) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
 }
 function filterByUser(name) {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -241,6 +304,7 @@ function filterByUser(name) {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = 'none';
   history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -251,14 +315,22 @@ function clearFilter() {
   var btn = document.getElementById('toggle-more');
   if (btn) btn.style.display = '';
   history.replaceState(null, '', location.pathname);
+  try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
-// Apply ?user=X or ?label=X filter on page load
+// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
   var user = params.get('user');
   var label = params.get('label');
   if (user) filterByUser(user);
   else if (label) filterByLabel(label);
+  else {
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') filterByUser(saved.value);
+      else if (saved && saved.type === 'label') filterByLabel(saved.value);
+    } catch(e) {}
+  }
 })();
 // Resizable columns: drag right edge of any <th> to resize
 (function() {
@@ -283,6 +355,89 @@ function clearFilter() {
   function lockLayout() {
     if (locked) return; locked = true;
   }
+})();
+// Show tooltip popup on [?] click
+var activePopup = null;
+var activePopupBtn = null;
+function showWhy(el) {
+  if (activePopup) {
+    activePopup.remove();
+    var wasSame = (activePopupBtn === el);
+    activePopup = null; activePopupBtn = null;
+    if (wasSame) return; // 2nd click on same [?] dismisses
+  }
+  var why = (el.getAttribute('data-why') || '').replace(/&#10;/g, '\n');
+  if (!why) return;
+  var popup = document.createElement('div');
+  popup.className = 'why-popup';
+  popup.textContent = why;
+  document.body.appendChild(popup);
+  var rect = el.getBoundingClientRect();
+  popup.style.left = Math.max(0, Math.min(rect.right + 5, window.innerWidth - 360)) + 'px';
+  popup.style.top = Math.max(0, rect.top) + 'px';
+  activePopup = popup;
+  activePopupBtn = el;
+  // Dismiss on click outside
+  var dismissClick = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); return; }
+    if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); }
+  };
+  var dismissMouse = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick); return; }
+    var r = popup.getBoundingClientRect();
+    var pad = 50;
+    if (e.clientX < r.left - pad || e.clientX > r.right + pad || e.clientY < r.top - pad || e.clientY > r.bottom + pad) {
+      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick);
+    }
+  };
+  setTimeout(function() { document.addEventListener('click', dismissClick); }, 0);
+  document.addEventListener('mousemove', dismissMouse);
+}
+// Sortable columns: click any th.sortable to sort the table
+(function() {
+  var table = document.getElementById('pr-table');
+  if (!table) return;
+  var tbody = table.querySelector('tbody');
+  var headers = table.querySelectorAll('thead th');
+  headers.forEach(function(th, colIdx) {
+    if (!th.classList.contains('sortable')) return;
+    th.addEventListener('click', function(e) {
+      if (e.target.style && e.target.style.cursor === 'col-resize') return;
+      var isDesc = th.classList.contains('desc');
+      var newDir = isDesc ? 'asc' : 'desc';
+      headers.forEach(function(h) {
+        h.classList.remove('sorted','asc','desc');
+        var old = h.querySelector('.sort-arrow');
+        if (old) old.remove();
+      });
+      th.classList.add('sorted', newDir);
+      var arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = newDir === 'desc' ? ' \u25BC' : ' \u25B2';
+      th.insertBefore(arrow, th.querySelector('div'));
+      var rows = Array.from(tbody.querySelectorAll('tr'));
+      var sortType = th.getAttribute('data-sort') || 'num';
+      rows.sort(function(a, b) {
+        var aCell = a.cells[colIdx], bCell = b.cells[colIdx];
+        if (!aCell || !bCell) return 0;
+        if (sortType === 'alpha') {
+          var aText = aCell.textContent.trim().toLowerCase();
+          var bText = bCell.textContent.trim().toLowerCase();
+          var cmp = aText < bText ? -1 : aText > bText ? 1 : 0;
+          return newDir === 'desc' ? -cmp : cmp;
+        }
+        // Numeric: sum all numbers found in cell (handles "2/5t 3ppl" → 10)
+        var aText = aCell.textContent.replace(/[#?]/g, '');
+        var bText = bCell.textContent.replace(/[#?]/g, '');
+        var aNums = aText.match(/[\d.]+/g) || [0];
+        var bNums = bText.match(/[\d.]+/g) || [0];
+        var aVal = aNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        var bVal = bNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
+        return newDir === 'desc' ? bVal - aVal : aVal - bVal;
+      });
+      rows.forEach(function(r) { tbody.appendChild(r); });
+    });
+  });
 })();
 </script>
 <script src="../pr-refresh.js"></script>
