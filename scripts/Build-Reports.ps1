@@ -71,9 +71,10 @@ foreach ($pr in $allPrs) {
     $approvalS = if ([int]$pr.approval_count -ge 2) { 1.0 } elseif ([int]$pr.approval_count -ge 1) { 0.5 } else { 0.0 }
     if ($staleApproval -and $approvalS -gt 0) { $approvalS = [Math]::Max(0, $approvalS - 0.25) }
     $dsu = [int]$pr.days_since_update
+    $dsr = if ($null -ne $pr.days_since_review) { [int]$pr.days_since_review } else { $dsu }
     $stalenessS = if ($dsu -le 3) { 1.0 } elseif ($dsu -le 14) { 0.5 } else { 0.0 }
     $tt = [int]$pr.total_threads; $dc = [int]$pr.distinct_commenters
-    $discussionS = if ($tt -le 5 -and $dc -le 2) { 1.0 } elseif ($dsu -le 14) { 0.75 } elseif ($tt -le 15 -and $dc -le 5) { 0.5 } else { 0.0 }
+    $discussionS = if ($tt -le 5 -and $dc -le 2) { 1.0 } elseif ($dsr -le 14) { 0.75 } elseif ($tt -le 15 -and $dc -le 5) { 0.5 } else { 0.0 }
     $freshS = if ($dsu -le 14) { 1.0 } elseif ($dsu -le 30) { 0.5 } else { 0.0 }
     $sizeS = if ([int]$pr.changed_files -le 5 -and [int]$pr.lines_changed -le 200) { 1.0 } elseif ([int]$pr.changed_files -le 20 -and [int]$pr.lines_changed -le 500) { 0.5 } else { 0.0 }
     $communityS = if ($pr.is_community) { 0.5 } else { 1.0 }

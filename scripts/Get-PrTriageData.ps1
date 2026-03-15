@@ -597,6 +597,22 @@ foreach ($pr in $candidates) {
     if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
     $valueWhyStr = $valueWhy -join "&#10;"
 
+    # Merge readiness tooltip components (used for both merge tooltip and action tooltip)
+    $mergeComponents = @(
+        [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -ge 0.5) { "no merge conflicts" } else { "has merge conflicts" }; val = $conflictScore; w = 3.0 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciScore -ge 0.5) { "CI passing" } else { "CI failing" }; val = $ciScore; w = 2.5 }
+        [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
+        [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -ge 0.5) { "feedback addressed" } else { "has unresolved feedback" }; val = $feedbackScore; w = 2.5 }
+        [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
+        [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
+        [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }
+        [PSCustomObject]@{ key = "staleness"; text = if ($stalenessScore -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessScore; w = 1.0 }
+        [PSCustomObject]@{ key = "community author"; text = if ($communityScore -ge 0.5) { "team author" } else { "community author" }; val = $communityScore; w = 1.0 }
+        [PSCustomObject]@{ key = "freshness"; text = if ($freshScore -ge 0.5) { "recently updated" } else { "no recent updates" }; val = $freshScore; w = 0.7 }
+        [PSCustomObject]@{ key = "triage"; text = if ($alignScore -ge 0.5) { "well labeled" } else { "missing area labels" }; val = $alignScore; w = 0.5 }
+        [PSCustomObject]@{ key = "momentum"; text = if ($velocityScore -ge 0.5) { "good review momentum" } else { "slow review momentum" }; val = $velocityScore; w = 0.3 }
+    )
+
     # Combined Action score: multiplicative (merge+1)*(value+1) normalized to 0-10
     $actionRaw = ($mergeReadiness + 1) * ($valueScore + 1)
     $actionScore = [Math]::Round(($actionRaw / 121.0) * 10, 1)
@@ -810,19 +826,6 @@ foreach ($pr in $candidates) {
     $blockersStr = if ($blockers.Count -gt 0) { $blockers -join ", " } else { "—" }
 
     # Why — merge readiness tooltip with point contributions (descending by weighted value)
-    $mergeComponents = @()
-    $mergeComponents += [PSCustomObject]@{ key = "conflicts"; text = if ($conflictScore -ge 0.5) { "no merge conflicts" } else { "has merge conflicts" }; val = $conflictScore; w = 3.0 }
-    $mergeComponents += [PSCustomObject]@{ key = "ci"; text = if ($ciScore -ge 0.5) { "CI passing" } else { "CI failing" }; val = $ciScore; w = 2.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "needs approval"; text = if ($approvalScore -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalScore; w = 2.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackScore -ge 0.5) { "feedback addressed" } else { "has unresolved feedback" }; val = $feedbackScore; w = 2.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "discussion"; text = if ($discussionScore -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionScore; w = 2.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
-    $mergeComponents += [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "staleness"; text = if ($stalenessScore -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessScore; w = 1.0 }
-    $mergeComponents += [PSCustomObject]@{ key = "community author"; text = if ($communityScore -ge 0.5) { "team author" } else { "community author" }; val = $communityScore; w = 1.0 }
-    $mergeComponents += [PSCustomObject]@{ key = "freshness"; text = if ($freshScore -ge 0.5) { "recently updated" } else { "no recent updates" }; val = $freshScore; w = 0.7 }
-    $mergeComponents += [PSCustomObject]@{ key = "triage"; text = if ($alignScore -ge 0.5) { "well labeled" } else { "missing area labels" }; val = $alignScore; w = 0.5 }
-    $mergeComponents += [PSCustomObject]@{ key = "momentum"; text = if ($velocityScore -ge 0.5) { "good review momentum" } else { "slow review momentum" }; val = $velocityScore; w = 0.3 }
     $mergeWhy = @($mergeComponents | Sort-Object { $_.val * $_.w } -Descending | Where-Object { ($_.val * $_.w) -gt 0 } | ForEach-Object {
         $c = [Math]::Round($_.val * $_.w, 1); "$($_.text) (+$c)"
     })
@@ -852,6 +855,7 @@ foreach ($pr in $candidates) {
         age_days = [int]$ageInDays
         days_since_update = [int]$daysSinceUpdate
         days_since_author_comment = [int]$daysSinceAuthorComment
+        days_since_review = [int]$daysSinceReview
         changed_files = $pr.changedFiles
         lines_changed = $totalLines
         next_action = $prNextAction
