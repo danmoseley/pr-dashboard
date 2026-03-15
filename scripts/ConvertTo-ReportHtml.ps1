@@ -244,7 +244,7 @@ $scoringHtml = @"
         <tr><td>2.5</td><td>Has approval</td></tr>
         <tr><td>2.5</td><td>Feedback addressed</td></tr>
         <tr><td>2.5</td><td>Discussion healthy</td></tr>
-        <tr><td>2.0</td><td>Small, easy to review (bonus for trivial: &le;2 files, &le;20 lines)</td></tr>
+        <tr><td>2.0&ndash;3.0</td><td>Small, easy to review (2.0) / trivial &le;2 files, &le;20 lines (3.0)</td></tr>
         <tr><td>1.5</td><td>Has maintainer review</td></tr>
         <tr><td>1.0</td><td>Recently active</td></tr>
         <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>

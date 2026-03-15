@@ -119,7 +119,7 @@ foreach ($pr in $allPrs) {
     elseif ($tt -gt 5) { $valueRaw += 0.5 }
     if ([int]$pr.age_days -gt 30 -and $dsu -le 14) { $valueRaw += 0.5 }             # old but active
     if ($isTrivial -and [int]$pr.unresolved_threads -eq 0) { $valueRaw += 0.5 }  # quick win — trivial review
-    # Author response latency(use field if available from full API refresh, else approximate from days_since_update)
+    # Author response latency (use field if available from full API refresh, else approximate from days_since_update)
     $dsac = if ($null -ne $pr.days_since_author_review_comment) { [int]$pr.days_since_author_review_comment }
            elseif ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment }
            else { [int]$pr.age_days }
