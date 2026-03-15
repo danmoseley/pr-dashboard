@@ -113,6 +113,9 @@
       if (locked) return; locked = true;
       // Freeze current column widths then switch to fixed layout
       var widths = Array.prototype.map.call(ths, function(h) { return h.offsetWidth + 'px'; });
+      // Clear <col> widths so th widths drive fixed-layout sizing
+      var cols = table.querySelectorAll('colgroup col');
+      cols.forEach(function(c) { c.style.width = ''; });
       ths.forEach(function(h, i) {
         h.style.width = widths[i]; h.style.minWidth = widths[i]; h.style.maxWidth = widths[i];
       });
