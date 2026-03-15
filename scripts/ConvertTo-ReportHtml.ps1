@@ -279,7 +279,7 @@ $scoringHtml = @"
 </details>
 "@
 
-$scheduleNote= if ($ScheduleDesc) { "Updated $ScheduleDesc, last at $Timestamp" } else { "Updated: $Timestamp" }
+$scheduleNote= if ($ScheduleDesc) { "Updated $ScheduleDesc, last <span id=`"last-updated`" data-updated=`"$TimestampIso`">at $Timestamp</span>" } else { "Updated: <span id=`"last-updated`" data-updated=`"$TimestampIso`">$Timestamp</span>" }
 $defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 $html = @"
@@ -411,6 +411,24 @@ function clearFilter() {
   }
 })();
 $(if ($prCount -gt 0) { "initTableSort('pr-table', $defaultColIndex);`ninitResizableColumns('pr-table');" })
+// Live relative timestamp for "last Xh ago"
+(function() {
+  function timeAgo(iso) {
+    var ms = Date.now() - new Date(iso).getTime();
+    var mins = Math.floor(ms / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    var hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    return Math.floor(hrs / 24) + 'd ago';
+  }
+  var el = document.getElementById('last-updated');
+  if (el) {
+    var iso = el.getAttribute('data-updated');
+    el.textContent = timeAgo(iso);
+    setInterval(function() { el.textContent = timeAgo(iso); }, 60000);
+  }
+})();
 </script>
 <script src="../pr-refresh.js"></script>
 </body>
