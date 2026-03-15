@@ -3,7 +3,7 @@
 
   // HTML escaping
   window.escHtml = function(s) {
-    if (!s) return '';
+    if (s == null) return '';
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   };
 
