@@ -3,6 +3,13 @@
 // current PR state from the GitHub REST API and updates the row in-place.
 // Persists refreshes to localStorage so they survive page reloads.
 // Auto-expires cached entries when the server-side pipeline has run.
+//
+// Security notes (this site is public on GitHub Pages):
+// - All API calls are unauthenticated — no tokens are embedded in client code.
+//   Each visitor's requests count against their own IP's rate limit (60/hour).
+// - Responses update only the visitor's local DOM and localStorage, never the
+//   repo or any server-side state. A page reload restores the static HTML.
+// - The 2-second cooldown limits casual rapid-fire clicks.
 
 (function() {
   'use strict';
@@ -97,6 +104,7 @@
 
     btn.classList.add('loading');
 
+    // Public (unauthenticated) GitHub REST API — no token needed or sent.
     var apiBase = 'https://api.github.com/repos/' + info.owner + '/' + info.repo;
     fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github.v3+json' } })
       .then(function(r) {
