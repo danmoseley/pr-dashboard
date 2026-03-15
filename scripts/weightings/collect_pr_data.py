@@ -26,8 +26,8 @@ REPOS = [
 ]
 
 # Maintainers list (from config/maintainers.json in the dashboard repo)
-# We'll use this to distinguish owner/triager approvals
-MAINTAINERS = set()
+# Per-repo dict to avoid cross-repo misclassification
+MAINTAINERS_BY_REPO = {}  # {"dotnet/runtime": {"user1", "user2"}, ...}
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
@@ -55,35 +55,37 @@ def gh_graphql(query, variables=None, retries=2):
     return None
 
 def fetch_maintainers():
-    """Fetch maintainers list from the dashboard repo."""
-    global MAINTAINERS
+    """Fetch maintainers list from the dashboard repo (per-repo)."""
+    global MAINTAINERS_BY_REPO
     # Try local config first, fall back to GitHub API
     local_config = SCRIPT_DIR.parent.parent / "config" / "maintainers.json"
+    data = None
     try:
         if local_config.exists():
             data = json.loads(local_config.read_text(encoding="utf-8"))
-            for repo, users in data.items():
-                if isinstance(users, list):
-                    MAINTAINERS.update(u.lower() for u in users)
-            print(f"Loaded {len(MAINTAINERS)} maintainers from {local_config}")
-            return
+            print(f"Loaded maintainers from {local_config}")
     except Exception as e:
         print(f"Warning: couldn't read local maintainers: {e}")
 
-    try:
-        result = subprocess.run(
-            ["gh", "api", "repos/danmoseley/pr-dashboard/contents/config/maintainers.json",
-             "-H", "Accept: application/vnd.github.v3.raw"],
-            capture_output=True, text=True, timeout=30
-        )
-        if result.returncode == 0:
-            data = json.loads(result.stdout)
-            for repo, users in data.items():
-                if isinstance(users, list):
-                    MAINTAINERS.update(u.lower() for u in users)
-            print(f"Loaded {len(MAINTAINERS)} maintainers from GitHub API")
-    except Exception as e:
-        print(f"Warning: couldn't fetch maintainers: {e}")
+    if data is None:
+        try:
+            result = subprocess.run(
+                ["gh", "api", "repos/danmoseley/pr-dashboard/contents/config/maintainers.json",
+                 "-H", "Accept: application/vnd.github.v3.raw"],
+                capture_output=True, text=True, timeout=30
+            )
+            if result.returncode == 0:
+                data = json.loads(result.stdout)
+                print(f"Loaded maintainers from GitHub API")
+        except Exception as e:
+            print(f"Warning: couldn't fetch maintainers: {e}")
+
+    if data:
+        for repo, users in data.items():
+            if isinstance(users, list):
+                MAINTAINERS_BY_REPO[repo] = {u.lower() for u in users}
+        total = sum(len(v) for v in MAINTAINERS_BY_REPO.values())
+        print(f"  {total} maintainers across {len(MAINTAINERS_BY_REPO)} repos")
 
 def fetch_merged_prs(owner, repo, count=80):
     """Fetch recently merged PRs with detail via GraphQL pagination.
@@ -207,8 +209,9 @@ def extract_pr_features(pr, repo_slug):
     has_area_label = any(l.startswith("area-") for l in label_names)
     is_untriaged = "untriaged" in label_names
 
-    # Is community?
-    is_community = author.lower() not in MAINTAINERS
+    # Is community? (scoped to this repo's maintainer list)
+    repo_maintainers = MAINTAINERS_BY_REPO.get(repo_slug, set())
+    is_community = author.lower() not in repo_maintainers
 
     # Reviews
     reviews = pr.get("reviews", {}).get("nodes", [])
@@ -217,7 +220,7 @@ def extract_pr_features(pr, repo_slug):
     approval_count = len(set((r.get("author") or {}).get("login", "") for r in approvals))
 
     has_owner_approval = any(
-        (r.get("author") or {}).get("login", "").lower() in MAINTAINERS
+        (r.get("author") or {}).get("login", "").lower() in repo_maintainers
         for r in approvals
     )
     has_any_review = len(reviews) > 0
