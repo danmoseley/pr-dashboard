@@ -29,7 +29,7 @@ param(
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
     [string]$TimestampIso = (Get-Date).ToUniversalTime().ToString("o"),
-    [int]$ScheduleHours = 0,
+    [string]$ScheduleDesc = "",
     [hashtable]$NavLinks = @{},
     [string]$DefaultSort = "action"
 )
@@ -279,7 +279,7 @@ $scoringHtml = @"
 </details>
 "@
 
-$scheduleNote= if ($ScheduleHours -gt 0) { "Updated every ${ScheduleHours}h, last at $Timestamp" } else { "Updated: $Timestamp" }
+$scheduleNote= if ($ScheduleDesc) { "Updated $ScheduleDesc, last at $Timestamp" } else { "Updated: $Timestamp" }
 $defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 $html = @"

@@ -17,13 +17,14 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $docsDir = Join-Path $root "docs"
 
-# Read schedule hours from the workflow YAML (single source of truth)
+# Read schedule description from the workflow YAML (single source of truth)
+# Looks for a comment like: # schedule-desc: ~twice daily
 $workflowFile = Join-Path $root ".github/workflows/generate-reports.yml"
-$scheduleHours = 12  # fallback
+$scheduleDesc = "~twice daily"  # fallback
 if (Test-Path $workflowFile) {
-    $cronLine = Get-Content $workflowFile | Where-Object { $_ -match 'cron:.*\*/(\d+)' }
-    if ($cronLine -and $cronLine -match '\*/(\d+)') {
-        $scheduleHours = [int]$Matches[1]
+    $descLine = Get-Content $workflowFile | Where-Object { $_ -match '#\s*schedule-desc:\s*(.+)' }
+    if ($descLine -and $descLine -match '#\s*schedule-desc:\s*(.+)') {
+        $scheduleDesc = $Matches[1].Trim()
     }
 }
 
@@ -55,7 +56,7 @@ foreach ($slug in $repos.Keys | Sort-Object) {
         Repo          = $cfg.Repo
         Slug          = $slug
         ReportTypes   = $cfg.Types
-        ScheduleHours = $scheduleHours
+        ScheduleDesc  = $scheduleDesc
     }
     if ($SkipAI) { $params["SkipAI"] = $true }
     & "$PSScriptRoot\Build-Reports.ps1" @params
@@ -68,6 +69,6 @@ if ($found -eq 0) {
 }
 
 Write-Host "`n=== Rebuilding index ===" -ForegroundColor Cyan
-& "$PSScriptRoot\Build-Index.ps1" -ScheduleHours $scheduleHours
+& "$PSScriptRoot\Build-Index.ps1" -ScheduleDesc $scheduleDesc
 
 Write-Host "`nDone — regenerated $found repos from cached scan data." -ForegroundColor Green

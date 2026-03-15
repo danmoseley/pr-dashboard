@@ -1,9 +1,10 @@
 name: Generate All Reports
 
 on:
+  # schedule-desc: ~twice daily
   schedule:
-    - cron: '0 6,18 * * 1-5'  # weekdays: 6am + 6pm UTC (~10pm/10am Pacific)
-    - cron: '0 16 * * 0,6'    # weekends: 4pm UTC (~8am Pacific) — 1x/day
+    - cron: '0 6,18 * * 1-5'  # weekdays 2x: 6am + 6pm UTC (Pacific evening/morning, varies with DST)
+    - cron: '0 16 * * 0,6'    # weekends 1x: 4pm UTC (Pacific morning, varies with DST)
   workflow_dispatch: {}
 
 permissions:
@@ -24,7 +25,7 @@ jobs:
           # Non-fatal: if the API call fails, proceed with the run anyway
           cutoff=$(date -u -d '10 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
           recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&branch=main&per_page=1" \
-            --jq ".workflow_runs[0].created_at // empty" 2>/dev/null || true)
+            --jq ".workflow_runs[0].updated_at // empty" 2>/dev/null || true)
           if [ -n "$recent" ] && [[ "$recent" > "$cutoff" ]]; then
             echo "Skipping: recent successful run at $recent (cutoff: $cutoff)"
             echo "SKIP_RUN=true" >> "$GITHUB_ENV"
@@ -89,7 +90,7 @@ jobs:
                 continue
               fi
             fi
-            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleHours 12 -SkipAI; then
+            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "~twice daily" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
               continue
@@ -104,7 +105,7 @@ jobs:
         if: env.SKIP_RUN != 'true'
         run: |
           mkdir -p docs/all
-          pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
+          pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "~twice daily"
 
       - name: Commit and push
         if: env.SKIP_RUN != 'true'
@@ -117,7 +118,7 @@ jobs:
             git stash --include-untracked || true
             git pull origin main || true
             git stash pop || true
-            pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
+            pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "~twice daily"
             pwsh ./scripts/Build-Changelog.ps1 || echo "::warning::Changelog generation failed, continuing without update"
             git add docs/
             if git diff --cached --quiet; then

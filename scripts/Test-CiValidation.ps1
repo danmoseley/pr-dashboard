@@ -169,7 +169,7 @@ if ($scanFiles.Count -eq 0) {
                 -Repo $repoName `
                 -Slug $slug `
                 -DocsDir $tempDocs `
-                -ScheduleHours 12 `
+                -ScheduleDesc "~twice daily" `
                 -SkipAI `
                 -SkipHistory
         } catch {
@@ -181,7 +181,7 @@ if ($scanFiles.Count -eq 0) {
     # Generate index page
     if ($smokeOk) {
         try {
-            & "$root/scripts/Build-Index.ps1" -DocsDir $tempDocs -ScheduleHours 12
+            & "$root/scripts/Build-Index.ps1" -DocsDir $tempDocs -ScheduleDesc "~twice daily"
         } catch {
             $smokeOk = $false
             $smokeDetail += "Build-Index failed: $_  "

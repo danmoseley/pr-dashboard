@@ -27,7 +27,7 @@ param(
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][string]$Slug,
     [string[]]$ReportTypes = @("top15", "community", "quick-wins", "stale-close"),
-    [int]$ScheduleHours = 0,
+    [string]$ScheduleDesc = "",
     [switch]$SkipAI,
     [switch]$SkipHistory
 )
@@ -303,7 +303,7 @@ Do NOT repeat what's in the table. Output ONLY the bullet points, each starting 
         OutputFile    = Join-Path $outDir $report.File
         Timestamp     = $timestamp
         TimestampIso  = $timestampIso
-        ScheduleHours = $ScheduleHours
+        ScheduleDesc  = $ScheduleDesc
         NavLinks      = $navLinks
     }
     if ($report.DefaultSort) { $htmlParams["DefaultSort"] = $report.DefaultSort }

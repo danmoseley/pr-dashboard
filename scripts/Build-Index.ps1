@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [string]$DocsDir = "docs",
-    [int]$ScheduleHours = 12
+    [string]$ScheduleDesc = "~twice daily"
 )
 
 $ErrorActionPreference = "Stop"
@@ -160,7 +160,7 @@ $dataRows = foreach ($rt in $reportTypes) {
 
 # Build updated row
 $updatedCells = $repos | ForEach-Object {
-    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-interval=`"$ScheduleHours`">...</td>"
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-schedule=`"$ScheduleDesc`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
@@ -315,8 +315,8 @@ function timeAgo(iso) {
 function updateTimestamps() {
   document.querySelectorAll('[data-updated]').forEach(function(el) {
     var ago = timeAgo(el.getAttribute('data-updated'));
-    var intervalH = el.getAttribute('data-interval');
-    el.textContent = ago + ', every ' + intervalH + 'h';
+    var schedule = el.getAttribute('data-schedule');
+    el.textContent = ago + (schedule ? ', ' + schedule : '');
   });
 }
 updateTimestamps();
