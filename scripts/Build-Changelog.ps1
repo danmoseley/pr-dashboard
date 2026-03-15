@@ -143,10 +143,10 @@ if (Test-Path $changelogJson) {
 if ($entries.Count -gt 0) {
     $sinceCommit = $entries[0].commit_range -split '\.\.' | Select-Object -Last 1
     # Try range-based log first (most accurate)
-    $gitArgs = @("log", "$sinceCommit..origin/main", "--format=%H||%s||%aI")
+    $gitArgs = @("log", "$sinceCommit..origin/main", "--format=%H||%s||%cI")
 } else {
     $cutoff = (Get-Date).AddDays(-$MaxDays).ToString("yyyy-MM-dd")
-    $gitArgs = @("log", "origin/main", "--format=%H||%s||%aI", "--since=$cutoff")
+    $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$cutoff")
 }
 
 Write-Host "Fetching commits..."
@@ -155,7 +155,7 @@ if ($LASTEXITCODE -ne 0) {
     # If range-based log fails (e.g., force-pushed history), fall back to date-based
     if ($entries.Count -gt 0) {
         Write-Warning "Range-based log failed, falling back to date-based"
-        $gitArgs = @("log", "origin/main", "--format=%H||%s||%aI", "--since=$($entries[0].date_utc)")
+        $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$($entries[0].date_utc)")
         $logOutput = & git @gitArgs 2>&1
     }
     if ($LASTEXITCODE -ne 0) {
@@ -280,7 +280,7 @@ $commitMessages
         date_utc     = $dayCommits[0].date_utc  # newest commit (git log is newest-first)
         display      = $displayDate
         bullets      = $bullets
-        commit_range = "$($commitShas[-1].Substring(0,7))..$($commitShas[0].Substring(0,7))"
+        commit_range = "$($commitShas[-1])..$($commitShas[0])"
     }
     $newEntries += $entry
     Write-Host "  Added changelog entry for $dayKey ($($bullets.Count) bullets)"
