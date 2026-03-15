@@ -86,6 +86,45 @@ score primarily surfaces community contributions that need maintainer action.
 7. **Infer maintainers from mergedBy data** rather than a static list (community
    rate drops from 78% to 34%, signal becomes significant at p=0.002).
 
+### Per-Repo Dynamics
+
+Repos have significantly different dynamics. Per-repo weights could improve
+accuracy but are impractical with current sample sizes (~80 per repo).
+
+| Repo | R² | Top Predictors | Median Age |
+|------|-----|---------------|------------|
+| sdk | 0.61 | discussion | 1.0d |
+| maui | 0.58 | discussion, size, community, align | 5.5d |
+| winforms | 0.44 | discussion, approval, size | 0.2d |
+| extensions | 0.41 | discussion | 1.5d |
+| aspnetcore | 0.41 | discussion | 0.7d |
+| aspire | 0.36 | discussion, size | 0.2d |
+| runtime | 0.33 | discussion, community | 2.2d |
+| roslyn | 0.33 | approval, size | 0.8d |
+| msbuild | 0.26 | approval | 1.9d |
+| machinelearning | 0.20 | size | 1.7d |
+| wpf | 0.05 | (none significant) | 1.0d |
+
+Notable differences:
+- **roslyn & msbuild**: Approval is the key gate (specific reviewers required).
+- **runtime**: Community PRs take 3.3x longer; discussion dominates.
+- **machinelearning**: Size is the main signal; community 4.9x slower.
+- **wpf**: Essentially unpredictable from these features (R²=0.05).
+
+A pragmatic middle ground: rather than full per-repo weight sets, apply one or
+two repo-specific adjustments (e.g., suppress CI score where Build Analysis is
+absent; boost approval weight for roslyn/msbuild).
+
+### Score Combination
+
+For "what PR should I look at next?" the two scores can be combined:
+- **Multiplicative with floor** `(merge + 1) × (attention + 1)` — best default;
+  answers "where does my time produce the most value?"
+- **Sort by merge readiness** — "I have 5 minutes, clear the easy wins"
+- **Sort by attention** — "weekly triage, what's stuck/important?"
+
+Could default to multiplicative and let users toggle mode.
+
 ## Scripts
 
 ### Data Collection
@@ -107,10 +146,15 @@ score primarily surfaces community contributions that need maintainer action.
 - `analyze_dual_score.py` — Dual-score analysis (merge readiness vs. deserves attention)
   with linked issue data.
 
-### Data (`data/`)
+### Data
+
+Collected data files (~1.9MB total, ~30 min to regenerate) are stored locally
+at `C:\git\pr_data\` rather than checked in:
 - `merged_pr_features.json` — 980 PR feature vectors (the core dataset).
 - `inferred_maintainers.json` — Per-repo maintainer sets from mergedBy history.
 - `linked_issues.json` — Linked issue metadata for all 980 PRs.
+
+To regenerate, run the collection scripts below.
 
 ## Reproducing
 
