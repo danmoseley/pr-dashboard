@@ -39,8 +39,10 @@ def load_data():
     
     df['is_community_inferred'] = df.apply(is_community, axis=1)
     
-    # Use Build Analysis as CI signal
-    # build_analysis_conclusion is what the dashboard uses
+    # Use Build Analysis as a separate CI signal (BA-only, no fallback).
+    # Note: the dashboard falls back to overall check results when BA is absent.
+    # The dataset's ci_status field has that fallback; build_analysis_conclusion does not.
+    # Here we isolate BA to test its specific predictive power.
     df['ba_passed'] = (df['build_analysis_conclusion'] == 'SUCCESS').astype(float)
     df['ba_failed'] = (df['build_analysis_conclusion'] == 'FAILURE').astype(float)
     df['ba_absent'] = (df['build_analysis_conclusion'] == 'ABSENT').astype(float)

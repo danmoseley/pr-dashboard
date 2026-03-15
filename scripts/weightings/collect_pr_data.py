@@ -218,9 +218,12 @@ def extract_pr_features(pr, repo_slug):
     has_area_label = any(l.startswith("area-") for l in label_names)
     is_untriaged = "untriaged" in label_names
 
-    # Is community? (scoped to this repo's maintainer list)
+    # Is external author? (author not in this repo's inferred maintainer list)
+    # Note: the dashboard's communityScore uses a "community*" label, not author identity.
+    # This field captures author-based community status for regression analysis.
     repo_maintainers = MAINTAINERS_BY_REPO.get(repo_slug, set())
     is_community = author.lower() not in repo_maintainers
+    has_community_label = any(l.startswith("community") for l in label_names)
 
     # Reviews
     reviews = pr.get("reviews", {}).get("nodes", [])
@@ -317,6 +320,8 @@ def extract_pr_features(pr, repo_slug):
             else:
                 check_fail_count += 1
 
+    # ci_status: mirrors dashboard logic — uses BA when present, falls back to overall checks.
+    # build_analysis_conclusion: BA-only (no fallback), for isolating BA's predictive power.
     ci_status = "UNKNOWN"
     if build_analysis_conclusion == "SUCCESS":
         ci_status = "SUCCESS"
@@ -392,6 +397,7 @@ def extract_pr_features(pr, repo_slug):
         "number": pr["number"],
         "author": author,
         "is_community": is_community,
+        "has_community_label": has_community_label,
         "created_at": created,
         "merged_at": merged,
         "age_days": round(age_days, 2),

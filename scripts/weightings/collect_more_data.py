@@ -29,7 +29,7 @@ DATA_FILE = os.path.join(OUTPUT_DIR, "merged_pr_features.json")
 # Import from the main collection script (same directory)
 sys.path.insert(0, str(SCRIPT_DIR))
 from collect_pr_data import (
-    fetch_maintainers, fetch_merged_prs, extract_pr_features, MAINTAINERS_BY_REPO
+    fetch_maintainers, fetch_merged_prs, extract_pr_features
 )
 
 def main():

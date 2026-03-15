@@ -9,7 +9,6 @@ import time
 import os
 import sys
 from pathlib import Path
-from datetime import datetime, timezone
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 _DATA_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))

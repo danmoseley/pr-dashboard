@@ -53,14 +53,13 @@ def compute_features(df):
         'FAILURE': 0.0, 'UNKNOWN': 0.5
     }).fillna(0.5)
     
-    # Approval score (mirrors dashboard logic)
+    # Approval score (simplified — triager approval not available in collected data,
+    # so we only model owner vs. non-owner approval)
     def approval_score(row):
         if row['approval_count'] >= 2 and row['has_owner_approval']:
             return 1.0
-        elif row['has_owner_approval'] or (row.get('has_triager_approval', False) and row['approval_count'] >= 2):
+        elif row['has_owner_approval']:
             return 0.75
-        elif row['approval_count'] >= 2:
-            return 0.5
         elif row['approval_count'] >= 1:
             return 0.5
         return 0.0
@@ -105,9 +104,21 @@ def compute_features(df):
     df['f_align'] = df.apply(align_score, axis=1)
     
     # Discussion score  
+    # Discussion score (includes recency like the dashboard's daysSinceReview <= 14 case)
     def discussion_score(row):
+        # Approximate dashboard's recency condition: days between last review and merge
+        days_since_review = None
+        if pd.notna(row.get('last_review_date')) and pd.notna(row.get('merged_at')):
+            try:
+                merged = pd.Timestamp(row['merged_at'])
+                last_review = pd.Timestamp(row['last_review_date'])
+                days_since_review = (merged - last_review).total_seconds() / 86400
+            except Exception:
+                pass
         if row['total_threads'] <= 5 and row['distinct_commenters'] <= 2:
             return 1.0
+        elif days_since_review is not None and days_since_review <= 14:
+            return 0.75
         elif row['total_threads'] <= 15 and row['distinct_commenters'] <= 5:
             return 0.5
         return 0.0
