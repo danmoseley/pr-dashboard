@@ -126,7 +126,8 @@ def fetch_merged_prs(owner, repo, count=80):
                   nodes {{
                     isResolved
                     isOutdated
-                    comments(first: 1) {{
+                    comments(first: 5) {{
+                      totalCount
                       nodes {{ createdAt author {{ login }} }}
                     }}
                   }}
@@ -263,10 +264,15 @@ def extract_pr_features(pr, repo_slug):
                 commenters.add(login.lower())
     distinct_commenters = len(commenters)
 
-    # Total comments (review threads + timeline comments)
-    total_comments = total_threads + sum(
+    # Total comments (actual review comment count + timeline comments)
+    review_comment_count = sum(
+        (t.get("comments") or {}).get("totalCount", len((t.get("comments") or {}).get("nodes", [])))
+        for t in threads
+    )
+    timeline_comment_count = sum(
         1 for item in timeline_items if item.get("__typename") == "IssueComment"
     )
+    total_comments = review_comment_count + timeline_comment_count
 
     # Check runs (CI)
     ci_passed = False

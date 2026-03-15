@@ -162,6 +162,7 @@ def main():
             time.sleep(0.5)
         
         # Save incrementally
+        os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
         with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
             json.dump(existing, f, indent=2)
     

@@ -114,6 +114,7 @@ def main():
     }
     
     out_file = os.path.join(OUTPUT_DIR, "inferred_maintainers.json")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     with open(out_file, "w", encoding="utf-8") as f:
         json.dump(output, f, indent=2)
     print(f"\nSaved to {out_file}")

@@ -23,6 +23,7 @@ REPOS_EXTRA = [
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 DATA_FILE = os.path.join(OUTPUT_DIR, "merged_pr_features.json")
 
 # Import from the main collection script (same directory)

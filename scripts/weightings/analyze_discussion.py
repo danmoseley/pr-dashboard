@@ -5,6 +5,7 @@ Decompose the 'discussion' signal: what exactly predicts slow merge?
 """
 
 import json
+import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm

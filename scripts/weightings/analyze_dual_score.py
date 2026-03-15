@@ -5,6 +5,7 @@ Score 2: Deserves Attention (impact + urgency + effort-at-risk)
 """
 
 import json
+import os
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
