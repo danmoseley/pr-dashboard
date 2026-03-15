@@ -257,11 +257,10 @@ def map_to_dashboard_weights(std_coefs, df):
         if cat == 'approval/maint':
             # Split into maintScore and approvalScore
             # Original ratio: maintScore=3.0, approvalScore=2.0 (60/40)
-            # Keep similar ratio but adjust total
-            recommendations.append({'feature': 'maintScore', 'new_weight': new_wt * 0.5,
-                                    'current_weight': 3.0, 'change': f"{new_wt*0.5 - 3.0:+.1f}"})
-            recommendations.append({'feature': 'approvalScore', 'new_weight': new_wt * 0.5,
-                                    'current_weight': 2.0, 'change': f"{new_wt*0.5 - 2.0:+.1f}"})
+            recommendations.append({'feature': 'maintScore', 'new_weight': new_wt * 0.6,
+                                    'current_weight': 3.0, 'change': f"{new_wt*0.6 - 3.0:+.1f}"})
+            recommendations.append({'feature': 'approvalScore', 'new_weight': new_wt * 0.4,
+                                    'current_weight': 2.0, 'change': f"{new_wt*0.4 - 2.0:+.1f}"})
         else:
             # Map back to original dashboard feature names
             name_map = {'ci': 'ciScore', 'discussion': 'discussionScore',

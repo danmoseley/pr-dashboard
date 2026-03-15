@@ -68,15 +68,18 @@ def fetch_maintainers():
         print(f"Warning: couldn't read local maintainers: {e}")
 
     if data is None:
+        # Fallback: fetch from the repo that hosts these scripts
+        remote_repo = os.environ.get("WEIGHTINGS_MAINTAINERS_REPO",
+                                     "danmoseley/pr-dashboard")
         try:
             result = subprocess.run(
-                ["gh", "api", "repos/danmoseley/pr-dashboard/contents/config/maintainers.json",
+                ["gh", "api", f"repos/{remote_repo}/contents/config/maintainers.json",
                  "-H", "Accept: application/vnd.github.v3.raw"],
                 capture_output=True, text=True, timeout=30
             )
             if result.returncode == 0:
                 data = json.loads(result.stdout)
-                print(f"Loaded maintainers from GitHub API")
+                print(f"Loaded maintainers from GitHub API ({remote_repo})")
         except Exception as e:
             print(f"Warning: couldn't fetch maintainers: {e}")
 
@@ -89,7 +92,10 @@ def fetch_maintainers():
 
 def fetch_merged_prs(owner, repo, count=80):
     """Fetch recently merged PRs with detail via GraphQL pagination.
-    Uses smaller batch size (20) and lighter query to avoid 504s on large repos."""
+    Uses smaller batch size (20) and lighter query to avoid 504s on large repos.
+    Note: orders by UPDATED_AT because GitHub GraphQL doesn't support ordering
+    merged PRs by mergedAt. This may include PRs updated post-merge (labels, comments)
+    but the sample is still representative of recent merge activity."""
     all_prs = []
     cursor = None
     per_page = 20  # Smaller batches to avoid timeouts
@@ -124,6 +130,9 @@ def fetch_merged_prs(owner, repo, count=80):
                     submittedAt
                   }}
                 }}
+                # Note: pagination limits (30 threads, 5 comments/thread, 30 timeline items)
+                # may undercount on high-activity PRs. totalCount is used where available
+                # to mitigate; see also the analysis scripts which note this limitation.
                 reviewThreads(first: 30) {{
                   nodes {{
                     isResolved

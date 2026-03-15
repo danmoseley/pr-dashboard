@@ -2,7 +2,6 @@
 Round 3: Refined analysis with:
 1. Inferred per-repo maintainers (from mergedBy data)
 2. Build Analysis as the CI signal (not overall check status)
-3. Distinguishing maintainer vs non-maintainer approval
 """
 
 import json
@@ -32,14 +31,6 @@ def load_data():
     
     df = pd.DataFrame(features)
     print(f"Loaded {len(df)} PRs from {df['repo'].nunique()} repos")
-    
-    # Re-derive maintainer-related features using inferred maintainers
-    def get_maintainer_approval(row):
-        maintainers = repo_maintainers.get(row['repo'], set())
-        # We don't have individual reviewer logins in the feature data,
-        # but we have has_owner_approval which used the old maintainer list.
-        # For now, use the existing flag but note the caveat.
-        return row['has_owner_approval']
     
     # Re-derive is_community using inferred maintainers
     def is_community(row):

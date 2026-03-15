@@ -92,7 +92,7 @@ def main():
         
         all_merger_data[repo_full] = mergers
         
-        # Infer maintainers: users who have merged PRs (excluding self-merges of bots)
+        # Infer maintainers: users who have merged PRs (excluding known bots)
         merger_counts = defaultdict(int)
         for m in mergers:
             if m["merger"] not in ("github-actions[bot]", "dotnet-maestro[bot]",
