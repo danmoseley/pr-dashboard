@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   models: read
+  actions: read
 
 jobs:
   generate:
@@ -20,9 +21,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           # Skip this scheduled run if there was a successful run in the last 10 hours
+          # Non-fatal: if the API call fails, proceed with the run anyway
           cutoff=$(date -u -d '10 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
-          recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&per_page=1" \
-            --jq ".workflow_runs[0].created_at // empty")
+          recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&branch=main&per_page=1" \
+            --jq ".workflow_runs[0].created_at // empty" 2>/dev/null || true)
           if [ -n "$recent" ] && [[ "$recent" > "$cutoff" ]]; then
             echo "Skipping: recent successful run at $recent (cutoff: $cutoff)"
             echo "SKIP_RUN=true" >> "$GITHUB_ENV"
