@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Changelog — PR Dashboard</title>
+<style>
+  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
+           --header-bg: #161b22; --muted: #8b949e; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+         background: var(--bg); color: var(--fg); padding: 2em; max-width: 800px; margin: 0 auto; }
+  nav { margin-bottom: 1.5em; font-size: 0.9em; }
+  nav a { color: var(--link); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  h1 { font-size: 1.6em; margin-bottom: 0.3em; }
+  .subtitle { color: var(--muted); font-size: 0.85em; margin-bottom: 2em; }
+  .entry { margin-bottom: 2em; }
+  .entry h2 { font-size: 1.15em; color: var(--link); border-bottom: 1px solid var(--border);
+              padding-bottom: 0.3em; margin-bottom: 0.6em; }
+  .entry ul { list-style: disc; padding-left: 1.5em; }
+  .entry li { margin-bottom: 0.4em; line-height: 1.5; }
+  .entry li.feature { font-size: 1.05em; }
+  .entry li.trivial { font-size: 0.75em; line-height: 1.3; color: var(--muted); }
+  .footer { margin-top: 3em; color: var(--muted); font-size: 0.8em; text-align: center; }
+  .footer a { color: var(--link); text-decoration: none; }
+  .footer a:hover { text-decoration: underline; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
+             --header-bg: #f6f8fa; --muted: #656d76; }
+  }
+</style>
+</head>
+<body>
+<nav><a href="index.html">&larr; Dashboard</a></nav>
+<h1>&#x1F4DD; Changelog</h1>
+<p class="subtitle">Notable changes to the PR Dashboard, updated daily.</p>
+
+<section class="entry">
+  <h2>March 13, 2026</h2>
+  <ul>
+  <li class="feature"><strong>Add per-PR refresh button to all report pages</strong></li>
+  <li>Fix emoji ordering for compound actions</li>
+  <li>Harden MutationObserver, polish styling, hide merged/closed PRs</li>
+  <li>Ignore self-approvals: author signing off on own PR is not meaningful</li>
+  <li>Improve next_action for conflicts/CI: check feedback before review-needed</li>
+  <li>Show review-needed instead of fix-CI when no approvals; fetch requested reviewers</li>
+  <li>Use review comment dates for staleness/freshness; reward recent engagement</li>
+  <li class="trivial">Document TimestampIso parameter in ConvertTo-ReportHtml.ps1</li>
+  </ul>
+</section>
+
+<section class="entry">
+  <h2>March 12, 2026</h2>
+  <ul>
+  <li class="feature"><strong>Add cross-repo actionable PRs view</strong></li>
+  <li>Make pipeline resilient to individual repo failures</li>
+  <li class="trivial">Add test screenshots to gitignore</li>
+  <li class="trivial">Update dashboard link formatting in README</li>
+  </ul>
+</section>
+
+<section class="entry">
+  <h2>March 10, 2026</h2>
+  <ul>
+  <li class="feature"><strong>Add area-label badges to PR dashboard reports</strong></li>
+  <li class="feature"><strong>Add dotnet/maui to PR dashboard</strong></li>
+  <li class="feature"><strong>Add feedback badge to reports and index</strong></li>
+  <li>Conditionally hide Area column for repos without area labels</li>
+  <li>Improve column layout: full titles, wider Next Action, remove Who column</li>
+  <li>Read schedule hours from workflow YAML in Regen-Html</li>
+  <li>Remove Who column; fold maintainer names into Next Action</li>
+  <li>Scope filter JS to main PR table only</li>
+  <li class="trivial">Fetch full titles for all repos and regenerate reports</li>
+  <li class="trivial">Regenerate all reports with new column layout</li>
+  <li class="trivial">Regenerate skills reports with new column layout</li>
+  </ul>
+</section>
+
+<p class="footer">
+  <a href="https://github.com/danmoseley/pr-dashboard">pr-dashboard</a> &middot;
+  <a href="index.html">Back to dashboard</a>
+</p>
+</body>
+</html>
