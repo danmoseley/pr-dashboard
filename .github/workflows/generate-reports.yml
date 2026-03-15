@@ -86,12 +86,6 @@ jobs:
           mkdir -p docs/all
           pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
 
-      - name: Generate changelog
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: pwsh ./scripts/Build-Changelog.ps1
-
       - name: Commit and push
         env:
           GH_TOKEN: ${{ github.token }}

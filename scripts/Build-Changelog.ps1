@@ -139,15 +139,17 @@ if (Test-Path $changelogJson) {
     $entries = @(Get-Content $changelogJson -Raw | ConvertFrom-Json)
 }
 
-# Determine the cutoff: last entry's newest commit, or MaxDays ago
+# Determine the cutoff: latest existing day (computed robustly), or MaxDays ago
 if ($entries.Count -gt 0) {
-    $latestEntryDay = $entries[0].day
-    # When we plan to re-generate the latest day, fetch from start of that day
-    # so we get ALL commits for the day, not just ones after the last-seen SHA
+    $latestEntryDay = ($entries | ForEach-Object { $_.day } | Sort-Object -Descending | Select-Object -First 1)
+    $latestEntry = $entries | Where-Object { $_.day -eq $latestEntryDay } | Select-Object -First 1
+    # Fetch from start of latest day so re-generation gets ALL commits for that day
     $latestDayStart = [datetime]::ParseExact($latestEntryDay, "yyyy-MM-dd", $null)
     $latestDayStartUtc = [System.TimeZoneInfo]::ConvertTimeToUtc($latestDayStart, $pacific)
     $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$($latestDayStartUtc.ToString('o'))")
 } else {
+    $latestEntryDay = $null
+    $latestEntry = $null
     $cutoff = (Get-Date).AddDays(-$MaxDays).ToString("yyyy-MM-dd")
     $gitArgs = @("log", "origin/main", "--format=%H||%s||%cI", "--since=$cutoff")
 }
@@ -192,22 +194,31 @@ foreach ($line in $meaningful) {
     if (-not $grouped.Contains($dayKey)) {
         $grouped[$dayKey] = @()
     }
-    $grouped[$dayKey] += @{ sha = $sha; message = $msg; date_utc = $dateUtc.ToString("o") }
+    $grouped[$dayKey] += [ordered]@{ sha = $sha; message = $msg; date_utc = $dateUtc.ToString("o") }
 }
 
-# Allow re-generating the most recent day (may have new commits since last run)
+# Build lookup of existing days; only re-generate latest day if it has new commits
 $existingDays = @{}
-$latestDay = $null
 foreach ($e in $entries) {
-    if (-not $latestDay -or $e.day -gt $latestDay) { $latestDay = $e.day }
-    $existingDays[$e.day] = $true
+    $existingDays[$e.day] = $e
 }
 
 $newEntries = @()
 foreach ($dayKey in $grouped.Keys) {
-    if ($existingDays.ContainsKey($dayKey) -and $dayKey -ne $latestDay) {
-        Write-Host "  Skipping $dayKey (already in changelog)"
-        continue
+    if ($existingDays.ContainsKey($dayKey)) {
+        if ($dayKey -eq $latestEntryDay) {
+            # Check if the newest commit SHA differs — skip if unchanged
+            $newestSha = ($grouped[$dayKey] | Select-Object -First 1).sha
+            $existingRange = $existingDays[$dayKey].commit_range
+            if ($existingRange -and $existingRange.EndsWith($newestSha)) {
+                Write-Host "  Skipping $dayKey (no new commits since last run)"
+                continue
+            }
+            Write-Host "  Re-generating $dayKey (new commits found)"
+        } else {
+            Write-Host "  Skipping $dayKey (already in changelog)"
+            continue
+        }
     }
 
     $dayCommits = $grouped[$dayKey]
@@ -246,7 +257,7 @@ $commitMessages
                         $tier = $Matches[1]
                         $line = ($line -replace '^\[(feature|normal|trivial)\]\s*', '').Trim()
                     }
-                    @{ text = $line; tier = $tier }
+                    [ordered]@{ text = $line; tier = $tier }
                 } | Where-Object { $_.text })
             } else {
                 Write-Warning "AI summarization failed for $dayKey, falling back to raw commits"
@@ -263,14 +274,14 @@ $commitMessages
         $bullets = @($dayCommits | ForEach-Object {
             ($_.message -replace $trivialSuffixes, '').Trim()
         } | Sort-Object -Unique | ForEach-Object {
-            @{ text = $_; tier = (Get-BulletTier $_) }
+            [ordered]@{ text = $_; tier = (Get-BulletTier $_) }
         })
     }
 
     $pacificDate = [datetime]::ParseExact($dayKey, "yyyy-MM-dd", $null)
     $displayDate = $pacificDate.ToString("MMMM d, yyyy")
 
-    $entry = @{
+    $entry = [ordered]@{
         day          = $dayKey
         date_utc     = $dayCommits[0].date_utc  # newest commit (git log is newest-first)
         display      = $displayDate
