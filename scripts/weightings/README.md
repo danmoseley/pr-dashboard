@@ -183,3 +183,55 @@ python analyze_critical.py      # Methodology critique
 python analyze_discussion.py    # Discussion decomposition
 python analyze_dual_score.py    # Dual-score with issue data
 ```
+
+## Next Steps
+
+### Near-term (apply findings to dashboard)
+
+1. **Update weights in `Get-PrTriageData.ps1`** — apply the recommended single-score
+   weight changes (the table above). Lowest-risk, highest-impact change.
+
+2. **Split discussionScore into feedback + engagement** — separate unresolved threads
+   (actionable, author can fix) from distinct commenters (complexity signal, cap at
+   0.5 minimum to avoid death spiral).
+
+3. **Show sub-scores in reports** — expose individual component scores (CI, approval,
+   discussion, size, etc.) as columns or tooltips so maintainers can see *why* a PR
+   ranks where it does and what's blocking it.
+
+4. **Use Build Analysis specifically for CI** — already partially done; ensure repos
+   without BA (extensions, msbuild, winforms, wpf) get a neutral CI score rather than
+   misleading pass/fail from unrelated checks.
+
+5. **Compute and display the attention score** — implement Score 2 alongside merge
+   readiness. Show both in reports; default sort by multiplicative combination
+   `(merge + 1) × (attention + 1)` with option to sort by either individually.
+
+6. **Fetch linked issue metadata** — the dashboard's GraphQL query could include
+   `closingIssuesReferences` to pull reactions, labels, and cross-references for
+   the attention score. Adds minimal API cost.
+
+### Longer-term (potential improvements to consider)
+
+7. **Per-repo weight adjustments** — not full per-repo weight sets (overfitting risk
+   with ~80 PRs each), but targeted overrides for the biggest differences:
+   - Suppress CI score where Build Analysis is absent
+   - Boost approval weight for roslyn/msbuild (approval-gated teams)
+   - Boost community weight for runtime/machinelearning (3-5× speed gap)
+
+8. **Periodic recalibration** — re-run analysis quarterly or after major team changes.
+   The collection scripts are reusable; 30 minutes to regenerate data, instant analysis.
+
+9. **Include abandoned/closed PRs** — current analysis only covers merged PRs (survivor
+   bias). Analyzing closed-without-merge PRs would better capture how CI failures and
+   conflicts actually block PRs, improving CI and conflict weight estimates.
+
+10. **Time-series snapshots** — instead of one snapshot per PR at merge time, take
+    periodic snapshots of open PRs to validate staleness/freshness/velocity weights
+    (currently untestable, 3.0 of the 20.0 total weight budget).
+
+11. **Sort mode toggle in UI** — let users switch between "ready to merge" (clear the
+    queue), "needs attention" (triage), and "best ROI" (multiplicative) views.
+
+12. **Weekend/day-of-week signal** — analysis shows Friday PRs take 2-3× longer.
+    Could display expected merge timeline or adjust freshness scoring accordingly.
