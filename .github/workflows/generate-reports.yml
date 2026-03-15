@@ -7,7 +7,7 @@ on:
 
 permissions:
   contents: write
-  # models: read  # uncomment when re-enabling AI observations
+  models: read
 
 jobs:
   generate:
@@ -15,11 +15,13 @@ jobs:
     steps:
       - name: Checkout dashboard repo
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # full history needed for changelog generation
 
-      # - name: Install gh-models extension
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
-      #   run: gh extension install github/gh-models
+      - name: Install gh-models extension
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh extension install github/gh-models
 
       - name: Scan and generate reports
         env:
@@ -83,6 +85,11 @@ jobs:
         run: |
           mkdir -p docs/all
           pwsh ./scripts/Build-Index.ps1 -ScheduleHours 12
+
+      - name: Generate changelog
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: pwsh ./scripts/Build-Changelog.ps1
 
       - name: Commit and push
         run: |
