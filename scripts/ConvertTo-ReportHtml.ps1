@@ -254,18 +254,18 @@ $scoringHtml = @"
       </table>
     </div>
     <div style="flex:1; min-width:250px;">
-      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from attention?</h4>
+      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
         <tr><td>1.5</td><td>No approval yet</td></tr>
-        <tr><td>1.5</td><td>Pending feedback, author silent &gt;14d</td></tr>
         <tr><td>1.0</td><td>Community author</td></tr>
         <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
         <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
         <tr><td>1.0</td><td>High interest</td></tr>
-        <tr><td>0.5</td><td>Pending feedback, author slow (7&ndash;14d)</td></tr>
         <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
         <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
+        <tr><td>&minus;1.5</td><td>Author silent &gt;14d (ball in their court)</td></tr>
+        <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
       </table>
     </div>
     <div style="flex:1; min-width:250px;">

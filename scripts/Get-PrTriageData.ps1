@@ -579,17 +579,18 @@ foreach ($pr in $candidates) {
     if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $valueRaw += 1.0 }   # high interest
     elseif ($totalThreads -gt 5) { $valueRaw += 0.5 }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueRaw += 0.5 }     # old but active
-    # Author response latency: unresponsive author with pending feedback = needs nudge
+    # Author response latency: if ball is in author's court, reduce attention (maintainer can't help)
     $daysSinceAuthorComment = if ($lastAuthorCommentDate) { ($now - $lastAuthorCommentDate).TotalDays } else { $ageInDays }
-    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw += 1.5 }   # stale author response
-    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $valueRaw += 0.5 } # slow author response
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw -= 1.5 }   # author silent — not actionable
+    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $valueRaw -= 0.5 } # author slow — less actionable
+    $valueRaw = [Math]::Max($valueRaw, 0.0)
     $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
 
     # Value "why" tooltip
     $valueWhy = @()
     if ($isCommunity) { $valueWhy += "community author (+1.0)" }
     if ($approvalCount -eq 0) { $valueWhy += "no approval yet (+1.5)" }
-    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueWhy += "pending feedback, author silent $([int]$daysSinceAuthorComment)d (+1.5)" }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueWhy += "author silent $([int]$daysSinceAuthorComment)d, ball in their court (-1.5)" }
     if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $valueWhy += "reviewed, not approved (+1.0)" }
     if ($unresolvedThreads -gt 0) { $valueWhy += "unresolved feedback (+1.0)" }
     if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $valueWhy += "high interest: ${totalThreads}t ${distinctCommenters}ppl (+1.0)" }
@@ -597,7 +598,7 @@ foreach ($pr in $candidates) {
         if ($unresolvedThreads -gt 0) { $valueWhy += "active discussion: ${totalThreads}t, $unresolvedThreads unresolved (+0.5)" }
         else { $valueWhy += "thorough review: $totalThreads resolved threads (+0.5)" }
     }
-    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7 -and $daysSinceAuthorComment -le 14) { $valueWhy += "pending feedback, author slow $([int]$daysSinceAuthorComment)d (+0.5)" }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7 -and $daysSinceAuthorComment -le 14) { $valueWhy += "author slow $([int]$daysSinceAuthorComment)d, ball in their court (-0.5)" }
     if ($totalLines -gt 200) { $valueWhy += "large change: $totalLines lines (+0.5)" }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueWhy += "old but active: $([int]$ageInDays)d age (+0.5)" }
     if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
@@ -634,8 +635,8 @@ foreach ($pr in $candidates) {
     if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $allContribs += [PSCustomObject]@{ key = "reviewed, not approved"; text = "reviewed, not approved"; pts = 1.0 } }
     if ($unresolvedThreads -gt 0) { $allContribs += [PSCustomObject]@{ key = "unresolved feedback"; text = "has unresolved feedback"; pts = 1.0 } }
     if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $allContribs += [PSCustomObject]@{ key = "high interest"; text = "high interest"; pts = 1.0 } }
-    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author silent $([int]$daysSinceAuthorComment)d"; pts = 1.5 } }
-    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author slow $([int]$daysSinceAuthorComment)d"; pts = 0.5 } }
+    if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "author silent $([int]$daysSinceAuthorComment)d, ball in their court"; pts = -1.5 } }
+    elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "author slow $([int]$daysSinceAuthorComment)d, ball in their court"; pts = -0.5 } }
     # Group by key, sum points, keep best text
     $grouped = $allContribs | Group-Object key | ForEach-Object {
         $total = ($_.Group | Measure-Object pts -Sum).Sum
@@ -643,7 +644,8 @@ foreach ($pr in $candidates) {
         [PSCustomObject]@{ text = $bestText; pts = [Math]::Round($total, 1) }
     }
     $topContribs = @($grouped | Sort-Object pts -Descending | ForEach-Object {
-        "$($_.text) (+$($_.pts))"
+        $sign = if ($_.pts -ge 0) { "+" } else { "" }
+        "$($_.text) (${sign}$($_.pts))"
     })
     $actionWhyStr = ($topContribs -join "&#10;")
 
