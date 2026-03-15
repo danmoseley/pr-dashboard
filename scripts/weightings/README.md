@@ -106,10 +106,31 @@ accuracy but are impractical with current sample sizes (~80 per repo).
 | wpf | 0.05 | (none significant) | 1.0d |
 
 Notable differences:
-- **roslyn & msbuild**: Approval is the key gate (specific reviewers required).
-- **runtime**: Community PRs take 3.3x longer; discussion dominates.
-- **machinelearning**: Size is the main signal; community 4.9x slower.
-- **wpf**: Essentially unpredictable from these features (R²=0.05).
+- **sdk** (R²=0.61): Most predictable repo. Discussion is the dominant signal.
+  PRs with low thread counts merge very quickly.
+- **maui** (R²=0.58): Most complex dynamics — discussion, size, community, and
+  alignment all matter. Slowest repo (5.5d median, 76.5d mean — long tail of old
+  PRs). Build Analysis is present but red 78% of the time.
+- **winforms** (R²=0.44): Very fast (0.2d median). Discussion, approval, and size
+  all significant. No Build Analysis check.
+- **extensions** (R²=0.41): Discussion-dominated. No Build Analysis check.
+- **aspnetcore** (R²=0.41): Fast (0.7d median). Discussion-dominated. Has Build
+  Analysis; 92% have milestones.
+- **aspire** (R²=0.36): Fastest repo (0.2d median). Discussion + size matter.
+  99% have milestones. Only 4% have linked issues.
+- **runtime** (R²=0.33): Community PRs take 3.3× longer (3.9d vs 1.2d). Discussion
+  and community are the top predictors. Highest linked issue rate (21%). Build
+  Analysis present but frequently red on unrelated legs.
+- **roslyn** (R²=0.33): Approval is the key gate — compiler team requires specific
+  reviewers. Size also matters. Community PRs are actually *faster* (they tend to
+  be small). 59% have milestones.
+- **msbuild** (R²=0.26): Approval-gated like roslyn. No Build Analysis check.
+  No milestones used.
+- **machinelearning** (R²=0.20): Size is the main signal. Largest community speed
+  gap (4.9× slower). Low linked issue rate.
+- **wpf** (R²=0.05): Essentially unpredictable from these features. Very few
+  linked issues (0%), few milestones (4%). Small team, likely driven by factors
+  not visible in API data (internal priorities, release schedule).
 
 A pragmatic middle ground: rather than full per-repo weight sets, apply one or
 two repo-specific adjustments (e.g., suppress CI score where Build Analysis is
