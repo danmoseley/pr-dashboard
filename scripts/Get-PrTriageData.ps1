@@ -168,7 +168,7 @@ if ($candidates.Count -eq 0) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments(first:20){totalCount nodes{author{login}}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+$fragment = 'number comments(last:20){totalCount nodes{author{login}}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -337,6 +337,10 @@ foreach ($pr in $candidates) {
                 Select-Object -First 1 -ExpandProperty login -ErrorAction SilentlyContinue
         }
     }
+
+    # Resolve effective author early (needed for $prioritizedOwners exclusion and scoring)
+    $authorLogin = $pr.author.login
+    if ($botTrigger) { $authorLogin = $botTrigger }
 
     # Extract Build Analysis
     $checks = @()
@@ -553,9 +557,6 @@ foreach ($pr in $candidates) {
     # Identify 1-2 specific people responsible for the next step
     $prNextAction = ""
     $who = @()
-
-    $authorLogin = $pr.author.login
-    if ($botTrigger) { $authorLogin = $botTrigger }
 
     if ($pr.mergeable -eq "CONFLICTING") {
         $prNextAction = "@$($authorLogin): resolve conflicts"

@@ -7,7 +7,11 @@
     in the last N days. Users who merged at least -MinMerges PRs (excluding bots) are considered
     maintainers. The results are unioned with the existing config/maintainers.json and written back.
 
-    Requires: gh CLI authenticated with appropriate permissions.
+    Requires: PowerShell 7+ (pwsh) and gh CLI authenticated with appropriate permissions.
+
+    Note: Uses GitHub's search API which caps at ~1000 results. For very active repos this may
+    undercount merges, but since we union with the existing list and use a low threshold, the
+    practical impact is minimal.
 
 .PARAMETER Days
     How many days back to look for merged PRs. Default: 90 (roughly 3 months).
@@ -25,6 +29,7 @@
     # Look back 60 days, require 5+ merges, preview only
     ./scripts/Update-Maintainers.ps1 -Days 60 -MinMerges 5 -DryRun
 #>
+#Requires -Version 7.0
 [CmdletBinding()]
 param(
     [int]$Days = 90,
