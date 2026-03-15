@@ -583,6 +583,7 @@ foreach ($pr in $candidates) {
     $daysSinceAuthorComment = if ($lastAuthorCommentDate) { ($now - $lastAuthorCommentDate).TotalDays } else { $ageInDays }
     if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw -= 1.5 }   # author silent — not actionable
     elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $valueRaw -= 0.5 } # author slow — less actionable
+    $valueClamped = $valueRaw -lt 0
     $valueRaw = [Math]::Max($valueRaw, 0.0)
     $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
 
@@ -602,6 +603,7 @@ foreach ($pr in $candidates) {
     if ($totalLines -gt 200) { $valueWhy += "large change: $totalLines lines (+0.5)" }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueWhy += "old but active: $([int]$ageInDays)d age (+0.5)" }
     if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
+    if ($valueClamped) { $valueWhy += "(net negative, floored to 0)" }
     $valueWhyStr = $valueWhy -join "&#10;"
 
     # Merge readiness tooltip components (used for both merge tooltip and action tooltip)
