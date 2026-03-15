@@ -296,10 +296,6 @@ $html = @"
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .show-more-btn { display: block; margin: 1em auto; padding: 6px 20px; font-size: 0.9em; cursor: pointer;
-    background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
-    border-radius: 6px; font-weight: 500; }
-  .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
 </style>
 </head>
 <body data-server-updated="$TimestampIso">

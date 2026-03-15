@@ -201,6 +201,8 @@
     renderFiltered(name);
   };
 
+  var FILTER_KEY = 'pr-dashboard-all-filter';
+
   window.filterByLabel = function(label) {
     // Secondary filter within current view
     var rows = document.querySelectorAll('#pr-table tbody tr');
@@ -210,12 +212,20 @@
     });
     document.getElementById('filter-name').textContent = label;
     document.getElementById('filter-banner').style.display = 'block';
+    var btn = document.getElementById('toggle-more');
+    if (btn) btn.style.display = 'none';
+    try { localStorage.setItem(FILTER_KEY, JSON.stringify({type:'label',value:label})); } catch(e) {}
   };
 
   window.clearSecondaryFilter = function() {
     var rows = document.querySelectorAll('#pr-table tbody tr');
-    rows.forEach(function(r) { r.style.display = ''; });
+    rows.forEach(function(r) {
+      r.style.display = r.classList.contains('more-row') ? 'none' : '';
+    });
     document.getElementById('filter-banner').style.display = 'none';
+    var btn = document.getElementById('toggle-more');
+    if (btn) btn.style.display = '';
+    try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
   };
 
   window.clearUser = function() {
@@ -294,26 +304,61 @@
       '<col style="width:8%">' +      // Author
       (hasArea ? '<col style="width:7%">' : '') +
       '</colgroup><thead><tr>' +
-      '<th class="sortable" data-sort="num">Ready</th><th class="sortable" data-sort="num">Need</th><th class="sortable action-col" data-sort="num">Action</th><th class="sortable" data-sort="num">PR</th><th class="sortable" data-sort="alpha">Repo</th><th class="sortable" data-sort="alpha">Title</th><th class="sortable" data-sort="alpha">Next Action</th>' +
-      '<th>CI</th><th class="sortable" data-sort="num">Disc</th><th class="sortable" data-sort="num">Age</th><th class="sortable" data-sort="num">Upd</th><th class="sortable" data-sort="num">Files</th><th class="sortable" data-sort="alpha">Author</th>' +
-      (hasArea ? '<th class="sortable" data-sort="alpha">Area</th>' : '') +
+      '<th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th>' +
+      '<th class="sortable" data-sort="num" title="Need: how much does this PR benefit from maintainer attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th>' +
+      '<th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th>' +
+      '<th class="sortable" data-sort="num" title="Pull request number">PR</th>' +
+      '<th class="sortable" data-sort="alpha" title="Repository">Repo</th>' +
+      '<th class="sortable" data-sort="alpha" title="PR title and labels">Title</th>' +
+      '<th class="sortable" data-sort="alpha" title="Who needs to act next and what they should do">Next Action</th>' +
+      '<th title="CI status from Build Analysis (or latest check run)">CI</th>' +
+      '<th class="sortable" data-sort="num" title="Discussion: unresolved/total review threads and distinct commenters">Disc</th>' +
+      '<th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th>' +
+      '<th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th>' +
+      '<th class="sortable" data-sort="num" title="Number of files changed">Files</th>' +
+      '<th class="sortable" data-sort="alpha" title="PR author">Author</th>' +
+      (hasArea ? '<th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>' : '') +
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
-      html += renderRow(prs[i], hasArea);
+      html += renderRow(prs[i], hasArea, i);
     }
     html += '</tbody></table>';
 
+    // Show more/fewer toggle for >100 rows
+    if (prs.length > 100) {
+      var extra = prs.length - 100;
+      html += '<button class="show-more-btn" id="toggle-more">Show ' + extra + ' more \u25BC</button>';
+    }
+
     document.getElementById('content').innerHTML = html;
+
+    // Wire up show-more toggle
+    var toggleBtn = document.getElementById('toggle-more');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        var rows = document.querySelectorAll('.more-row');
+        var showing = rows[0] && rows[0].style.display !== 'none';
+        rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
+        toggleBtn.textContent = showing ? 'Show ' + extra + ' more \u25BC' : 'Show fewer \u25B2';
+      });
+    }
 
     // Wire up sortable column headers (Action = column 2)
     initTableSort('pr-table', 2);
     initResizableColumns('pr-table');
+
+    // Restore secondary filter from localStorage
+    try {
+      var saved = JSON.parse(localStorage.getItem(FILTER_KEY));
+      if (saved && saved.type === 'label') filterByLabel(saved.value);
+    } catch(e) {}
   }
 
-  function renderRow(pr, hasArea) {
+  function renderRow(pr, hasArea, idx) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
+    var moreClass = idx >= 100 ? ' class="more-row" style="display:none"' : '';
 
     // CI emoji
     var ciEmoji = pr.ci === 'SUCCESS' ? '&#x2705;' :
@@ -389,7 +434,7 @@
     if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
     else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
 
-    return '<tr data-people="' + people + '" data-labels="' + escAttr(labels) + '">' +
+    return '<tr' + moreClass + ' data-people="' + people + '" data-labels="' + escAttr(labels) + '">' +
       '<td class="score' + readyClass + '">' + readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button></td>' +
       '<td class="score">' + needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button></td>' +
       '<td class="action-score' + actionClass + '">' + actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button></td>' +
