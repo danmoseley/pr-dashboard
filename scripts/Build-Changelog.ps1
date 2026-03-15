@@ -25,7 +25,11 @@ $ErrorActionPreference = "Stop"
 $changelogJson = Join-Path $DocsDir "changelog.json"
 $changelogHtml = Join-Path $DocsDir "changelog.html"
 
-$pacific = [System.TimeZoneInfo]::FindSystemTimeZoneById("America/Los_Angeles")
+$pacific = try {
+    [System.TimeZoneInfo]::FindSystemTimeZoneById("America/Los_Angeles")
+} catch {
+    [System.TimeZoneInfo]::FindSystemTimeZoneById("Pacific Standard Time")
+}
 
 function Write-ChangelogHtml {
     param(
@@ -127,6 +131,8 @@ function Get-BulletTier([string]$text) {
 
 # --- Main logic ---
 
+try {
+
 # Load existing changelog entries
 $entries = @()
 if (Test-Path $changelogJson) {
@@ -194,15 +200,17 @@ foreach ($line in $meaningful) {
     $grouped[$dayKey] += @{ sha = $sha; message = $msg; date_utc = $dateUtc.ToString("o") }
 }
 
-# Skip days that already have entries
+# Allow re-generating the most recent day (may have new commits since last run)
 $existingDays = @{}
+$latestDay = $null
 foreach ($e in $entries) {
+    if (-not $latestDay -or $e.day -gt $latestDay) { $latestDay = $e.day }
     $existingDays[$e.day] = $true
 }
 
 $newEntries = @()
 foreach ($dayKey in $grouped.Keys) {
-    if ($existingDays.ContainsKey($dayKey)) {
+    if ($existingDays.ContainsKey($dayKey) -and $dayKey -ne $latestDay) {
         Write-Host "  Skipping $dayKey (already in changelog)"
         continue
     }
@@ -269,7 +277,7 @@ $commitMessages
 
     $entry = @{
         day          = $dayKey
-        date_utc     = $dayCommits[-1].date_utc
+        date_utc     = $dayCommits[0].date_utc  # newest commit (git log is newest-first)
         display      = $displayDate
         bullets      = $bullets
         commit_range = "$($commitShas[-1].Substring(0,7))..$($commitShas[0].Substring(0,7))"
@@ -286,8 +294,11 @@ if ($newEntries.Count -eq 0) {
     exit 0
 }
 
-# Merge new entries with existing, sort newest first
-$allEntries = @($newEntries) + @($entries) | Sort-Object -Property { $_.day } -Descending
+# Merge new entries with existing (replace any re-generated days), sort newest first
+$replacedDays = @{}
+$newEntries | ForEach-Object { $replacedDays[$_.day] = $true }
+$kept = @($entries | Where-Object { -not $replacedDays.ContainsKey($_.day) })
+$allEntries = @($newEntries) + $kept | Sort-Object -Property { $_.day } -Descending
 
 # Save JSON
 $allEntries | ConvertTo-Json -Depth 5 | Out-File -FilePath $changelogJson -Encoding utf8
@@ -295,3 +306,9 @@ Write-Host "Saved $($allEntries.Count) entries to $changelogJson"
 
 # Render HTML
 Write-ChangelogHtml -Entries $allEntries -OutputFile $changelogHtml
+
+} catch {
+    Write-Warning "Changelog generation failed: $_"
+    Write-Warning "Continuing without changelog update"
+    exit 0
+}
