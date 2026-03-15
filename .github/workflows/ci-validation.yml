@@ -1,0 +1,48 @@
+name: CI Validation
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Run validation checks
+        run: pwsh ./scripts/Test-CiValidation.ps1
+
+      - name: Screenshot dashboard (optional)
+        if: success() || failure()
+        continue-on-error: true
+        run: |
+          # Install headless Chrome dependencies
+          sudo apt-get update -qq && sudo apt-get install -y -qq chromium-browser > /dev/null 2>&1 || true
+          CHROME=$(which chromium-browser || which chromium || which google-chrome || echo "")
+          if [ -z "$CHROME" ]; then
+            echo "::notice::No browser found, skipping screenshots"
+            exit 0
+          fi
+          mkdir -p screenshots
+          "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/index.png --window-size=1400,900 "file://$(pwd)/docs/index.html" 2>/dev/null || true
+          # Pick a small repo report for the second screenshot
+          for slug in extensions machinelearning runtime; do
+            if [ -f "docs/${slug}/actionable.html" ]; then
+              "$CHROME" --headless --disable-gpu --no-sandbox --screenshot=screenshots/${slug}-actionable.png --window-size=1400,900 "file://$(pwd)/docs/${slug}/actionable.html" 2>/dev/null || true
+              break
+            fi
+          done
+          ls -la screenshots/ 2>/dev/null || echo "No screenshots produced"
+
+      - name: Upload screenshots
+        if: success() || failure()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-screenshots
+          path: screenshots/
+          if-no-files-found: ignore
+          retention-days: 7
