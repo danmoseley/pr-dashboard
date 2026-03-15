@@ -112,9 +112,9 @@
     function lockLayout() {
       if (locked) return; locked = true;
       // Freeze current column widths then switch to fixed layout
-      ths.forEach(function(h) {
-        var w = h.offsetWidth + 'px';
-        h.style.width = w; h.style.minWidth = w; h.style.maxWidth = w;
+      var widths = Array.prototype.map.call(ths, function(h) { return h.offsetWidth + 'px'; });
+      ths.forEach(function(h, i) {
+        h.style.width = widths[i]; h.style.minWidth = widths[i]; h.style.maxWidth = widths[i];
       });
       table.style.tableLayout = 'fixed';
     }
