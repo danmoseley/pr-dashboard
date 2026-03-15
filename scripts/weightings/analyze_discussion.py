@@ -132,7 +132,7 @@ def analyze_death_spiral(df):
     
     # Split PRs into thread-count buckets
     df['thread_bucket'] = pd.cut(df['total_threads'], 
-                                  bins=[0, 2, 5, 15, 100, float('inf')],
+                                  bins=[-0.1, 2, 5, 15, 100, float('inf')],
                                   labels=['0-2', '3-5', '6-15', '16-100', '100+'],
                                   right=True)
     

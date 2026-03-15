@@ -176,8 +176,11 @@ def main():
     )
     
     print(f"\nQuick stats:")
-    print(f"  PRs with linked issues: {has_issues} ({has_issues/len(existing)*100:.0f}%)")
-    print(f"  PRs with milestones: {has_milestone} ({has_milestone/len(existing)*100:.0f}%)")
+    if len(existing) > 0:
+        print(f"  PRs with linked issues: {has_issues} ({has_issues/len(existing)*100:.0f}%)")
+        print(f"  PRs with milestones: {has_milestone} ({has_milestone/len(existing)*100:.0f}%)")
+    else:
+        print(f"  No PRs in dataset")
     print(f"  Total issue reactions: {total_reactions}")
     
     # Regression/security label check

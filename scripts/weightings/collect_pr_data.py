@@ -304,6 +304,10 @@ def extract_pr_features(pr, repo_slug):
         contexts = rollup.get("contexts", {}).get("nodes", [])
         for ctx in contexts:
             name = ctx.get("name", "")
+            # Skip non-CheckRun union members (e.g. StatusContext) that
+            # deserialize as empty dicts from the `... on CheckRun` fragment
+            if not name:
+                continue
             status = ctx.get("status", "")
             conclusion = ctx.get("conclusion")
 
