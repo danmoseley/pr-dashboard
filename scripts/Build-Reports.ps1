@@ -64,7 +64,7 @@ foreach ($pr in $allPrs) {
         $null -ne $pr.value_score -and $null -ne $pr.value_why -and $null -ne $pr.action_why) { continue }
 
     # --- Merge Readiness: calibrated weights from analysis (total 20.0) ---
-    $ciS = switch ($pr.ci) { "SUCCESS" { 1.0 } "ABSENT" { 0.5 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
+    $ciS = switch ($pr.ci) { "SUCCESS" { 1.0 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
     $conflictS = switch ($pr.mergeable) { "MERGEABLE" { 1.0 } "UNKNOWN" { 0.5 } "CONFLICTING" { 0.0 } default { 0.5 } }
     $hasNAA = $pr.blockers -match 'needs-author-action'
     $noReview = $pr.blockers -match 'No review'
@@ -94,7 +94,7 @@ foreach ($pr in $allPrs) {
     # Merge tooltip with point contributions
     $mComps = @(
         [PSCustomObject]@{ key = "conflicts"; text = if ($conflictS -eq 1.0) { "no merge conflicts" } elseif ($conflictS -eq 0) { "has merge conflicts" } else { "mergeability unknown" }; val = $conflictS; w = 3.0 }
-        [PSCustomObject]@{ key = "ci"; text = if ($ciS -eq 1.0) { "CI passing" } elseif ($ciS -eq 0) { "CI failing" } else { "CI pending/absent" }; val = $ciS; w = 2.5 }
+        [PSCustomObject]@{ key = "ci"; text = if ($ciS -eq 1.0) { "CI passing" } elseif ($ciS -eq 0.5) { "CI pending" } else { "CI failing/absent" }; val = $ciS; w = 2.5 }
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalS -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalS; w = 2.5 }
         [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackS -eq 1.0) { "feedback addressed" } elseif ($feedbackS -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackS; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionS -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionS; w = 2.5 }
