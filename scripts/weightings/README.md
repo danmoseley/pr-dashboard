@@ -248,27 +248,33 @@ python analyze_dual_score.py    # Dual-score with issue data
    `closingIssuesReferences` to pull reactions, labels, and cross-references for
    the attention score. Adds minimal API cost.
 
+7. **Track author response latency** — add `days_since_last_author_comment` as a
+   signal, especially for community PRs with pending feedback. A community PR with
+   8 unresolved comments and a response yesterday is healthy; the same PR with no
+   response in 2 weeks is stalling. More actionable than `community × comments`
+   as an interaction term, and avoids penalizing actively-worked community PRs.
+
 ### Longer-term (potential improvements to consider)
 
-7. **Per-repo weight adjustments** — not full per-repo weight sets (overfitting risk
+8. **Per-repo weight adjustments** — not full per-repo weight sets (overfitting risk
    with ~80 PRs each), but targeted overrides for the biggest differences:
    - Suppress CI score where Build Analysis is absent
    - Boost approval weight for roslyn/msbuild (approval-gated teams)
    - Boost community weight for runtime/machinelearning (3-5× speed gap)
 
-8. **Periodic recalibration** — re-run analysis quarterly or after major team changes.
+9. **Periodic recalibration** — re-run analysis quarterly or after major team changes.
    The collection scripts are reusable; 30 minutes to regenerate data, instant analysis.
 
-9. **Include abandoned/closed PRs** — current analysis only covers merged PRs (survivor
+10. **Include abandoned/closed PRs** — current analysis only covers merged PRs (survivor
    bias). Analyzing closed-without-merge PRs would better capture how CI failures and
    conflicts actually block PRs, improving CI and conflict weight estimates.
 
-10. **Time-series snapshots** — instead of one snapshot per PR at merge time, take
+11. **Time-series snapshots** — instead of one snapshot per PR at merge time, take
     periodic snapshots of open PRs to validate staleness/freshness/velocity weights
     (currently untestable, 3.0 of the 20.0 total weight budget).
 
-11. **Sort mode toggle in UI** — let users switch between "ready to merge" (clear the
+12. **Sort mode toggle in UI** — let users switch between "ready to merge" (clear the
     queue), "needs attention" (triage), and "best ROI" (multiplicative) views.
 
-12. **Weekend/day-of-week signal** — analysis shows Friday PRs take 2-3× longer.
+13. **Weekend/day-of-week signal** — analysis shows Friday PRs take 2-3× longer.
     Could display expected merge timeline or adjust freshness scoring accordingly.
