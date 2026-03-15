@@ -1,4 +1,4 @@
-"""
+﻿"""
 Round 3: Refined analysis with:
 1. Inferred per-repo maintainers (from mergedBy data)
 2. Build Analysis as the CI signal (not overall check status)
@@ -134,7 +134,7 @@ def run_full_analysis(df):
     """Run complete analysis with all three approaches."""
     
     # ============================================================
-    # APPROACH 1: Dashboard sub-scores → log(age_days)
+    # APPROACH 1: Dashboard sub-scores -> log(age_days)
     # ============================================================
     print("\n" + "="*70)
     print("APPROACH 1: Dashboard Sub-Scores (with Build Analysis CI)")
@@ -224,18 +224,18 @@ def run_full_analysis(df):
     # EVENT-GAP ANALYSIS
     # ============================================================
     print("\n" + "="*70)
-    print("EVENT-GAP: Time from Build Analysis pass → merge")
+    print("EVENT-GAP: Time from Build Analysis pass -> merge")
     print("="*70)
     
     has_ci = df['ci_to_merge_days'].notna()
     ci_gaps = df.loc[has_ci, 'ci_to_merge_days']
-    print(f"CI(BA) pass → merge (n={has_ci.sum()}):")
+    print(f"CI(BA) pass -> merge (n={has_ci.sum()}):")
     print(f"  Median: {ci_gaps.median():.3f} days ({ci_gaps.median()*24:.1f}h)")
     print(f"  Within 1h: {(ci_gaps.abs() <= 1/24).sum()} ({(ci_gaps.abs() <= 1/24).mean()*100:.0f}%)")
     
     has_appr = df['approval_to_merge_days'].notna()
     appr_gaps = df.loc[has_appr, 'approval_to_merge_days']
-    print(f"\nFirst approval → merge (n={has_appr.sum()}):")
+    print(f"\nFirst approval -> merge (n={has_appr.sum()}):")
     print(f"  Median: {appr_gaps.median():.3f} days ({appr_gaps.median()*24:.1f}h)")
     print(f"  Within 1h: {(appr_gaps <= 1/24).sum()} ({(appr_gaps <= 1/24).mean()*100:.0f}%)")
     
@@ -299,8 +299,8 @@ def synthesize_weights(ols1, dash_feats, ols2_std, cont_feats, logit, df):
     ))
     
     # Event-gap evidence (qualitative)
-    # CI: last gate 69% of time, 53% merge within 1h → strong gate
-    # Approval: 41% merge within 1h → strong gate
+    # CI: last gate 69% of time, 53% merge within 1h -> strong gate
+    # Approval: 41% merge within 1h -> strong gate
     
     # Build final weights - combine multiple evidence sources
     categories = ['ci', 'approval', 'maint_review', 'feedback', 'discussion',

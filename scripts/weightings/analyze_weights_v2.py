@@ -1,4 +1,4 @@
-"""
+﻿"""
 Round 2: Event-gap analysis and refined regression.
 Instead of just correlating features at merge time with age_days,
 analyze the TIME GAPS between specific events and merge.
@@ -41,7 +41,7 @@ def event_gap_analysis(df):
     # Approval-to-merge gap
     has_approval_gap = df['approval_to_merge_days'].notna()
     approval_gaps = df.loc[has_approval_gap, 'approval_to_merge_days']
-    print(f"\nFirst Approval → Merge (n={has_approval_gap.sum()}):")
+    print(f"\nFirst Approval -> Merge (n={has_approval_gap.sum()}):")
     print(f"  Median: {approval_gaps.median():.2f} days")
     print(f"  Mean: {approval_gaps.mean():.2f} days")
     print(f"  P25/P75: {approval_gaps.quantile(0.25):.2f} / {approval_gaps.quantile(0.75):.2f}")
@@ -51,7 +51,7 @@ def event_gap_analysis(df):
     # CI-to-merge gap
     has_ci_gap = df['ci_to_merge_days'].notna()
     ci_gaps = df.loc[has_ci_gap, 'ci_to_merge_days']
-    print(f"\nCI Pass → Merge (n={has_ci_gap.sum()}):")
+    print(f"\nCI Pass -> Merge (n={has_ci_gap.sum()}):")
     print(f"  Median: {ci_gaps.median():.2f} days")
     print(f"  Mean: {ci_gaps.mean():.2f} days")
     print(f"  P25/P75: {ci_gaps.quantile(0.25):.2f} / {ci_gaps.quantile(0.75):.2f}")
@@ -60,19 +60,19 @@ def event_gap_analysis(df):
     
     # Last activity to merge gap
     activity_gaps = df['last_activity_to_merge_days']
-    print(f"\nLast Activity → Merge (n={len(activity_gaps)}):")
+    print(f"\nLast Activity -> Merge (n={len(activity_gaps)}):")
     print(f"  Median: {activity_gaps.median():.2f} days")
     print(f"  Mean: {activity_gaps.mean():.2f} days")
     print(f"  P25/P75: {activity_gaps.quantile(0.25):.2f} / {activity_gaps.quantile(0.75):.2f}")
     
     # Per-repo event gaps
-    print("\n--- Per-Repo: Median gap from First Approval → Merge ---")
+    print("\n--- Per-Repo: Median gap from First Approval -> Merge ---")
     for repo in sorted(df['repo'].unique()):
         rdf = df[(df['repo'] == repo) & df['approval_to_merge_days'].notna()]
         if len(rdf) > 5:
             print(f"  {repo}: {rdf['approval_to_merge_days'].median():.2f}d (n={len(rdf)})")
     
-    print("\n--- Per-Repo: Median gap from CI Pass → Merge ---")
+    print("\n--- Per-Repo: Median gap from CI Pass -> Merge ---")
     for repo in sorted(df['repo'].unique()):
         rdf = df[(df['repo'] == repo) & df['ci_to_merge_days'].notna()]
         if len(rdf) > 5:

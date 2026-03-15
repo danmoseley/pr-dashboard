@@ -1,4 +1,4 @@
-"""
+﻿"""
 Round 4: Critical analysis of methodology and conclusions.
 - Examine potential confounds and biases
 - Try alternative models (Random Forest, Ridge, Lasso) for robustness
@@ -508,14 +508,14 @@ def overall_summary():
     Most of merge timing is driven by human factors we can't measure.
   
   CONFIDENCE LEVELS IN RECOMMENDATIONS:
-  ★★★★★ Discussion underweighted (1.5 → 4-5):  Very high confidence
-  ★★★★☆ Size underweighted (1.0 → 2.0):        High confidence
-  ★★★★☆ Community underweighted (0.5 → 1.0):    High (with inferred maintainers)
-  ★★★☆☆ CI overweighted (3.0 → 2.0):            Moderate (gate effect hard to measure)
-  ★★★☆☆ Approval about right (2.0 → 2.5):       Moderate
-  ★★☆☆☆ Maint overweighted (3.0 → 1.5):         Lower (overlap with approval)
-  ★★☆☆☆ Align overweighted (1.0 → 0.3):         Lower (weak signal)
-  ★☆☆☆☆ Staleness/fresh/velocity:                Can't validate at all
+  ***** Discussion underweighted (1.5 -> 4-5):  Very high confidence
+  ****- Size underweighted (1.0 -> 2.0):        High confidence
+  ****- Community underweighted (0.5 -> 1.0):    High (with inferred maintainers)
+  ***-- CI overweighted (3.0 -> 2.0):            Moderate (gate effect hard to measure)
+  ***-- Approval about right (2.0 -> 2.5):       Moderate
+  **--- Maint overweighted (3.0 -> 1.5):         Lower (overlap with approval)
+  **--- Align overweighted (1.0 -> 0.3):         Lower (weak signal)
+  *---- Staleness/fresh/velocity:                Can't validate at all
   
   WOULD MORE DATA HELP?
   See learning curve and bootstrap analysis above for quantitative answer.

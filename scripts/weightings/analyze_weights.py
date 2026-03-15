@@ -1,4 +1,4 @@
-"""
+﻿"""
 Analyze merged PR data to derive empirical weights for readiness score.
 Runs OLS regression globally and per-repo, compares with current dashboard weights.
 """
@@ -146,7 +146,7 @@ def run_global_regression(df):
     print("="*70)
     
     # --- Approach 1: Dashboard sub-scores predicting merge speed ---
-    print("\n--- Approach 1: Dashboard sub-scores → age_days ---")
+    print("\n--- Approach 1: Dashboard sub-scores -> age_days ---")
     print("(Do the dashboard's categorical scores correlate with how quickly PRs merge?)")
     
     feature_cols_dash = ['f_ci', 'f_approval', 'f_maint', 'f_feedback', 
@@ -171,7 +171,7 @@ def run_global_regression(df):
         't_stat': model.tvalues
     }).drop('const', errors='ignore')
     
-    # A negative coefficient means higher feature value → lower age → faster merge → good
+    # A negative coefficient means higher feature value -> lower age -> faster merge -> good
     # So we negate to get "readiness contribution"
     coef_df['readiness_direction'] = -coef_df['coef']
     coef_df = coef_df.sort_values('readiness_direction', ascending=False)
@@ -179,7 +179,7 @@ def run_global_regression(df):
     print(coef_df.to_string(float_format=lambda x: f"{x:.4f}"))
     
     # --- Approach 2: Raw continuous features ---
-    print("\n\n--- Approach 2: Continuous features → age_days ---")
+    print("\n\n--- Approach 2: Continuous features -> age_days ---")
     
     feature_cols_raw = ['f_ci_passed', 'f_ci_failed', 'f_has_approval', 
                         'f_has_owner_approval', 'f_log_lines', 'f_log_files',

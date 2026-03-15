@@ -1,4 +1,4 @@
-"""
+﻿"""
 Decompose the 'discussion' signal: what exactly predicts slow merge?
 - Raw thread count vs unresolved threads vs commenters vs resolution rate
 - Is it "how much discussion" or "how stuck is the discussion"?
@@ -205,11 +205,11 @@ def analyze_valuable_prs(df):
   
   Options for the score design:
   
-  A) CURRENT: Raw thread count → lower score (death spiral risk)
+  A) CURRENT: Raw thread count -> lower score (death spiral risk)
      Pros: Simple, correlates with merge difficulty
-     Cons: Penalizes valuable PRs; more engagement → worse score
+     Cons: Penalizes valuable PRs; more engagement -> worse score
   
-  B) RESOLUTION PROGRESS: (resolved / total) threads → score
+  B) RESOLUTION PROGRESS: (resolved / total) threads -> score
      Pros: Rewards making progress; no death spiral
      Cons: A PR with 0/0 threads scores same as 50/50
   
@@ -217,13 +217,13 @@ def analyze_valuable_prs(df):
      Pros: New resolved comments don't hurt; matches feedbackScore
      Cons: Doesn't capture "this is a complex beast"
   
-  D) ENGAGEMENT RECENCY: Recent comments → higher score
+  D) ENGAGEMENT RECENCY: Recent comments -> higher score
      Pros: Active discussion is positive; stale discussion is negative
      Cons: More complex to compute; game-able
   
   E) SEPARATE CONCERNS: Split into two signals:
-     - "Complexity" (total threads) → informational, not in score
-     - "Progress" (resolution rate, recent activity) → in score
+     - "Complexity" (total threads) -> informational, not in score
+     - "Progress" (resolution rate, recent activity) -> in score
      Pros: Best of both worlds
      Cons: More weight parameters to tune
 """)
