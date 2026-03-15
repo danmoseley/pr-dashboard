@@ -607,7 +607,7 @@ foreach ($pr in $candidates) {
         [PSCustomObject]@{ key = "size"; text = if ($sizeScore -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeScore; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintScore -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintScore; w = 1.5 }
         [PSCustomObject]@{ key = "staleness"; text = if ($stalenessScore -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessScore; w = 1.0 }
-        [PSCustomObject]@{ key = "community author"; text = if ($communityScore -ge 0.5) { "team author" } else { "community author" }; val = $communityScore; w = 1.0 }
+        [PSCustomObject]@{ key = "community author"; text = if ($isCommunity) { "community author" } else { "team author" }; val = $communityScore; w = 1.0 }
         [PSCustomObject]@{ key = "freshness"; text = if ($freshScore -ge 0.5) { "recently updated" } else { "no recent updates" }; val = $freshScore; w = 0.7 }
         [PSCustomObject]@{ key = "triage"; text = if ($alignScore -ge 0.5) { "well labeled" } else { "missing area labels" }; val = $alignScore; w = 0.5 }
         [PSCustomObject]@{ key = "momentum"; text = if ($velocityScore -ge 0.5) { "good review momentum" } else { "slow review momentum" }; val = $velocityScore; w = 0.3 }
@@ -854,7 +854,7 @@ foreach ($pr in $candidates) {
         area_labels = @($labelNames | Where-Object { $_ -match "^area-" })
         age_days = [int]$ageInDays
         days_since_update = [int]$daysSinceUpdate
-        days_since_author_comment = [int]$daysSinceAuthorComment
+        days_since_author_review_comment = [int]$daysSinceAuthorComment
         days_since_review = [int]$daysSinceReview
         changed_files = $pr.changedFiles
         lines_changed = $totalLines

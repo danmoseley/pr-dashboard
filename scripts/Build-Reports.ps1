@@ -96,7 +96,7 @@ foreach ($pr in $allPrs) {
         [PSCustomObject]@{ key = "size"; text = if ($sizeS -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeS; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintS -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintS; w = 1.5 }
         [PSCustomObject]@{ key = "staleness"; text = if ($stalenessS -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessS; w = 1.0 }
-        [PSCustomObject]@{ key = "community author"; text = if ($communityS -ge 0.5) { "team author" } else { "community author" }; val = $communityS; w = 1.0 }
+        [PSCustomObject]@{ key = "community author"; text = if ($pr.is_community) { "community author" } else { "team author" }; val = $communityS; w = 1.0 }
         [PSCustomObject]@{ key = "freshness"; text = if ($freshS -ge 0.5) { "recently updated" } else { "no recent updates" }; val = $freshS; w = 0.7 }
         [PSCustomObject]@{ key = "triage"; text = if ($alignS -ge 0.5) { "well labeled" } else { "missing area labels" }; val = $alignS; w = 0.5 }
         [PSCustomObject]@{ key = "momentum"; text = if ($velocityS -ge 0.5) { "good review momentum" } else { "slow review momentum" }; val = $velocityS; w = 0.3 }
@@ -117,7 +117,9 @@ foreach ($pr in $allPrs) {
     elseif ($tt -gt 5) { $valueRaw += 0.5 }
     if ([int]$pr.age_days -gt 30 -and $dsu -le 14) { $valueRaw += 0.5 }             # old but active
     # Author response latency (use field if available from full API refresh, else approximate from days_since_update)
-    $dsac = if ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment } else { $dsu }
+    $dsac = if ($null -ne $pr.days_since_author_review_comment) { [int]$pr.days_since_author_review_comment }
+           elseif ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment }
+           else { $dsu }
     $ut = [int]$pr.unresolved_threads
     if ($ut -gt 0 -and $dsac -gt 14) { $valueRaw += 1.5 }        # author silent
     elseif ($ut -gt 0 -and $dsac -gt 7) { $valueRaw += 0.5 }     # author slow
@@ -195,7 +197,7 @@ $allReports = @{
         File     = "actionable.html"
         Desc     = "All open PRs sorted by Action score. Higher-scored PRs are closer to merge-ready <em>and</em> would benefit most from maintainer attention."
         Filter   = { param($prs) @($prs | Select-Object -First 500) }
-        AiPrompt = "These are the most actionable PRs in $Repo ranked by merge-readiness score."
+        AiPrompt = "These are the most actionable PRs in $Repo ranked by Action score (a combination of merge readiness and attention value)."
     }
     "community" = @{
         Id       = "community"
@@ -255,7 +257,7 @@ foreach ($report in $reports) {
     if (-not $SkipAI -and $filteredArray.Count -gt 0) {
         try {
             $summary = $filteredArray | ForEach-Object {
-                "#$($_.number) merge=$($_.merge_readiness) value=$($_.value_score) action=$($_.action_score) ci=$($_.ci) action=`"$($_.next_action)`" who=`"$($_.who)`" threads=$($_.unresolved_threads) age=$($_.age_days)d community=$($_.is_community) author=$($_.author)"
+                "#$($_.number) merge=$($_.merge_readiness) value=$($_.value_score) action=$($_.action_score) ci=$($_.ci) next_action=`"$($_.next_action)`" who=`"$($_.who)`" threads=$($_.unresolved_threads) age=$($_.age_days)d community=$($_.is_community) author=$($_.author)"
             }
             $summaryText = $summary -join "`n"
 
