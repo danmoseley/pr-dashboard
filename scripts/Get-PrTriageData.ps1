@@ -322,7 +322,8 @@ foreach ($pr in $candidates) {
     $labelNames = @($pr.labels | ForEach-Object { $_.name })
 
     # Per-PR owners (use label-specific or fallback to filter-level, then -Maintainers)
-    $prOwners = Get-OwnersForPr $labelNames
+    $labelOwners = Get-OwnersForPr $labelNames
+    $prOwners = $labelOwners
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
 
@@ -466,8 +467,8 @@ foreach ($pr in $candidates) {
             [void]$prioritizedOwners.Add($r)
         }
     }
-    # Tier 2: Area owners (from label match)
-    foreach ($o in (Get-OwnersForPr $labelNames)) {
+    # Tier 2: Area owners (cached from label match above)
+    foreach ($o in $labelOwners) {
         if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
             [void]$prioritizedOwners.Add($o)
         }
@@ -663,7 +664,7 @@ foreach ($pr in $candidates) {
         }
         elseif (-not $hasAnyReview) {
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
-                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         elseif ($prioritizedOwners.Count -gt 0) { @($prioritizedOwners | Select-Object -First 2) }
                          else { @() }
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): review needed"
@@ -676,7 +677,7 @@ foreach ($pr in $candidates) {
             $staleReviewers = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
-                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         elseif ($prioritizedOwners.Count -gt 0) { @($prioritizedOwners | Select-Object -First 2) }
                          else { @() }
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): re-review needed"
@@ -686,10 +687,10 @@ foreach ($pr in $candidates) {
             }
         }
         elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
-            $pendingOwners = @($prOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
+            $pendingOwners = @($prioritizedOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($pendingOwners.Count -gt 0) { $pendingOwners }
-                         elseif ($prOwners.Count -gt 0) { @($prOwners | Select-Object -First 2) }
+                         elseif ($prioritizedOwners.Count -gt 0) { @($prioritizedOwners | Select-Object -First 2) }
                          else { @() }
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): review needed"

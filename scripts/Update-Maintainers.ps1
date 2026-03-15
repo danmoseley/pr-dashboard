@@ -41,16 +41,16 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-if (-not (Test-Path "$repoRoot\docs\repos.json")) {
+if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
     $repoRoot = Split-Path -Parent $PSScriptRoot
 }
-if (-not (Test-Path "$repoRoot\docs\repos.json")) {
+if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
     Write-Error "Cannot find docs/repos.json. Run from the pr-dashboard repo root or scripts/ folder."
     exit 1
 }
 
-$reposJsonPath = Join-Path $repoRoot 'docs\repos.json'
-$maintainersJsonPath = Join-Path $repoRoot 'config\maintainers.json'
+$reposJsonPath = Join-Path $repoRoot 'docs' 'repos.json'
+$maintainersJsonPath = Join-Path $repoRoot 'config' 'maintainers.json'
 
 # Bot accounts to exclude
 $botLogins = @(
@@ -95,9 +95,12 @@ foreach ($entry in $repos) {
         $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
         $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
 
-        $result = gh api graphql -f query="$q" 2>&1
+        $result = $null
+        $stderr = $null
+        $result = gh api graphql -f query="$q" 2>$null
         if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: $result" -ForegroundColor Red
+            Write-Host "ERROR querying $repo (skipping)" -ForegroundColor Red
+            $mergerCounts = $null
             break
         }
 
@@ -117,6 +120,12 @@ foreach ($entry in $repos) {
         $hasNext = $searchData.pageInfo.hasNextPage
         $cursor = $searchData.pageInfo.endCursor
     } while ($hasNext)
+
+    # Skip repo if fetch failed — keep existing entry unchanged
+    if ($null -eq $mergerCounts) {
+        $updated[$repo] = @($existing[$repo] ?? @())
+        continue
+    }
 
     # Apply threshold
     $discovered = @($mergerCounts.GetEnumerator() |
