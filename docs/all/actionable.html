@@ -46,6 +46,10 @@
   #pr-table td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
   #pr-table tr:hover { background: var(--hover); }
   .score { font-weight: bold; text-align: right; white-space: nowrap; }
+  .action-score { font-weight: 900; text-align: right; white-space: nowrap; font-size: 1.1em; color: #d4a017; }
+  .ready-high { background: rgba(35, 134, 54, 0.12); }
+  .action-hot { background: rgba(35, 134, 54, 0.18); }
+  .action-warm { background: rgba(35, 134, 54, 0.08); }
   .pr-num { white-space: nowrap; }
   .repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9em; }
   .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -195,7 +199,7 @@
           allPrs = allPrs.concat(r.prs);
           if (r.updated) timestamps.push(new Date(r.updated));
         });
-        allPrs.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+        allPrs.sort(function(a, b) { return (b.action_score || b.score || 0) - (a.action_score || a.score || 0); });
         loaded = true;
         document.getElementById('status').style.display = 'none';
 
@@ -285,7 +289,7 @@
       var people = getPeople(pr);
       return people.indexOf(lc) >= 0;
     });
-    filtered.sort(function(a, b) { return (b.score || 0) - (a.score || 0); });
+    filtered.sort(function(a, b) { return (b.action_score || b.score || 0) - (a.action_score || a.score || 0); });
 
     // Summary bar
     var repoCounts = {};
@@ -317,7 +321,9 @@
     var hasArea = prs.some(function(pr) { return pr.area_labels && pr.area_labels.length > 0; });
 
     var html = '<table id="pr-table"><colgroup>' +
-      '<col style="width:3%">' +     // Score
+      '<col style="width:2.5%">' +     // Ready
+      '<col style="width:2.5%">' +     // Need
+      '<col style="width:2.5%">' +     // Action
       '<col style="width:3.5%">' +    // PR
       '<col style="width:6%">' +      // Repo
       '<col>' +                       // Title (flex)
@@ -330,7 +336,7 @@
       '<col style="width:8%">' +      // Author
       (hasArea ? '<col style="width:7%">' : '') +
       '</colgroup><thead><tr>' +
-      '<th>Score</th><th>PR</th><th>Repo</th><th>Title</th><th>Next Action</th>' +
+      '<th>Ready</th><th>Need</th><th style="font-weight:bold">Action</th><th>PR</th><th>Repo</th><th>Title</th><th>Next Action</th>' +
       '<th>CI</th><th>Disc</th><th>Age</th><th>Upd</th><th>Files</th><th>Author</th>' +
       (hasArea ? '<th>Area</th>' : '') +
       '</tr></thead><tbody>';
@@ -407,10 +413,24 @@
     var labels = (pr.area_labels || []).join(',');
     var safeTitle = escHtml(pr.title);
     var safeWhy = pr.why || '';
+    var safeValueWhy = pr.value_why || '';
+    var safeActionWhy = pr.action_why || '';
     var safeBlockers = escHtml(pr.blockers || '');
 
+    // Score indicators
+    var readyVal = pr.merge_readiness != null ? pr.merge_readiness : pr.score;
+    var needVal = pr.value_score != null ? pr.value_score : 0;
+    var actionVal = pr.action_score != null ? pr.action_score : readyVal;
+    var readyClass = readyVal >= 6 ? ' ready-high' : '';
+    var actionEmoji2 = '';
+    var actionClass = '';
+    if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
+    else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
+
     return '<tr data-people="' + people + '" data-labels="' + escAttr(labels) + '">' +
-      '<td class="score" title="' + escAttr(safeWhy) + '">' + pr.score + '</td>' +
+      '<td class="score' + readyClass + '" title="' + escAttr(safeWhy) + '">' + readyVal + '</td>' +
+      '<td class="score" title="' + escAttr(safeValueWhy) + '">' + needVal + '</td>' +
+      '<td class="action-score' + actionClass + '" title="' + escAttr(safeActionWhy) + '">' + actionEmoji2 + actionVal + '</td>' +
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(safeTitle) + '">#' + pr.number + '</a></td>' +
       '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
       '<td class="title">' + safeTitle + '</td>' +
