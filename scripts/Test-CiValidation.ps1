@@ -140,9 +140,9 @@ if ($scanFiles.Count -eq 0) {
     $smokeDetail = ""
     $testedSlugs = @()
 
-    # Read schedule description from workflow YAML (same logic as Regen-Html.ps1)
+    # Read schedule description from workflow YAML (same logic and fallback as Regen-Html.ps1)
     $wfFile = Join-Path $root ".github/workflows/generate-reports.yml"
-    $scheduleDesc = ""
+    $scheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"  # fallback
     if (Test-Path $wfFile) {
         $descLine = Get-Content $wfFile | Where-Object { $_ -match '#\s*schedule-desc:\s*(.+)' } | Select-Object -First 1
         if ($descLine -and $descLine -match '#\s*schedule-desc:\s*(.+)') {

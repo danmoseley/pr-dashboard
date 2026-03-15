@@ -21,13 +21,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Skip this scheduled run if there was a successful run in the last 10 hours
+          # Skip this scheduled run if a manual run completed successfully in the last 10 hours
           # Non-fatal: if the API call fails, proceed with the run anyway
           cutoff=$(date -u -d '10 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
-          recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&branch=main&per_page=1" \
+          recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?status=success&branch=main&event=workflow_dispatch&per_page=1" \
             --jq ".workflow_runs[0].updated_at // empty" 2>/dev/null || true)
           if [ -n "$recent" ] && [[ "$recent" > "$cutoff" ]]; then
-            echo "Skipping: recent successful run at $recent (cutoff: $cutoff)"
+            echo "Skipping: recent manual run completed at $recent (cutoff: $cutoff)"
             echo "SKIP_RUN=true" >> "$GITHUB_ENV"
           fi
       - name: Checkout dashboard repo
@@ -40,7 +40,7 @@ jobs:
         if: env.SKIP_RUN != 'true'
         run: |
           # Read schedule-desc from the workflow YAML comment (single source of truth)
-          desc=$(grep -oP '#\s*schedule-desc:\s*\K.+' .github/workflows/generate-reports.yml | head -1)
+          desc=$(grep -oP '#\s*schedule-desc:\s*\K.+' .github/workflows/generate-reports.yml | head -1 || true)
           echo "SCHEDULE_DESC=${desc:-~twice daily}" >> "$GITHUB_ENV"
 
       - name: Install gh-models extension
