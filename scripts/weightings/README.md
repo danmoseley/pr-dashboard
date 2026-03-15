@@ -50,7 +50,7 @@ but _raise_ the need for attention. Issue engagement is entirely new signal.
 | **Effort at risk** | community author | +2 | **Opposite** |
 | | has reviews but no approval | +1 | **Opposite** |
 | | large change (>200 lines) | +0.5 | **Opposite** |
-| | trivial change (≤2 files, ≤20 lines) | +0.5 | Aligned |
+| | trivial change (≤2 files, ≤20 lines, no unresolved threads) | +0.5 | Aligned |
 | **Blocked** | CI failing | +1 | **Opposite** |
 | | unresolved review feedback | +1 | Aligned |
 | | no approval | +1.5 | **Opposite** |
