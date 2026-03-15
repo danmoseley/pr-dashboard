@@ -1,7 +1,7 @@
 name: Generate All Reports
 
 on:
-  # schedule-desc: ~twice daily
+  # schedule-desc: ~twice daily (weekdays 2x, weekends 1x)
   schedule:
     - cron: '0 6,18 * * 1-5'  # weekdays 2x: 6am + 6pm UTC (Pacific evening/morning, varies with DST)
     - cron: '0 16 * * 0,6'    # weekends 1x: 4pm UTC (Pacific morning, varies with DST)
@@ -15,6 +15,8 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
+    env:
+      SCHEDULE_DESC: "~twice daily (weekdays 2x, weekends 1x)"
     steps:
       - name: Skip if recent run
         if: github.event_name == 'schedule'
@@ -90,7 +92,7 @@ jobs:
                 continue
               fi
             fi
-            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "~twice daily" -SkipAI; then
+            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$SCHEDULE_DESC" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
               continue
@@ -105,7 +107,7 @@ jobs:
         if: env.SKIP_RUN != 'true'
         run: |
           mkdir -p docs/all
-          pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "~twice daily"
+          pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "$SCHEDULE_DESC"
 
       - name: Commit and push
         if: env.SKIP_RUN != 'true'
@@ -118,7 +120,7 @@ jobs:
             git stash --include-untracked || true
             git pull origin main || true
             git stash pop || true
-            pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "~twice daily"
+            pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "$SCHEDULE_DESC"
             pwsh ./scripts/Build-Changelog.ps1 || echo "::warning::Changelog generation failed, continuing without update"
             git add docs/
             if git diff --cached --quiet; then

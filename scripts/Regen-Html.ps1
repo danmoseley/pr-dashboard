@@ -20,9 +20,9 @@ $docsDir = Join-Path $root "docs"
 # Read schedule description from the workflow YAML (single source of truth)
 # Looks for a comment like: # schedule-desc: ~twice daily
 $workflowFile = Join-Path $root ".github/workflows/generate-reports.yml"
-$scheduleDesc = "~twice daily"  # fallback
+$scheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"  # fallback
 if (Test-Path $workflowFile) {
-    $descLine = Get-Content $workflowFile | Where-Object { $_ -match '#\s*schedule-desc:\s*(.+)' }
+    $descLine = Get-Content $workflowFile | Where-Object { $_ -match '#\s*schedule-desc:\s*(.+)' } | Select-Object -First 1
     if ($descLine -and $descLine -match '#\s*schedule-desc:\s*(.+)') {
         $scheduleDesc = $Matches[1].Trim()
     }

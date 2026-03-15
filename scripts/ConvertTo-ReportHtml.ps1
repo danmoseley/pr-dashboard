@@ -279,7 +279,8 @@ $scoringHtml = @"
 </details>
 "@
 
-$scheduleNote= if ($ScheduleDesc) { "Updated $ScheduleDesc, last <span id=`"last-updated`" data-updated=`"$TimestampIso`">at $Timestamp</span>" } else { "Updated: <span id=`"last-updated`" data-updated=`"$TimestampIso`">$Timestamp</span>" }
+$safeScheduleDesc = [System.Net.WebUtility]::HtmlEncode($ScheduleDesc)
+$scheduleNote= if ($ScheduleDesc) { "Updated $safeScheduleDesc, last <span id=`"last-updated`" data-updated=`"$TimestampIso`">at $Timestamp</span>" } else { "Updated: <span id=`"last-updated`" data-updated=`"$TimestampIso`">$Timestamp</span>" }
 $defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 $html = @"

@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [string]$DocsDir = "docs",
-    [string]$ScheduleDesc = "~twice daily"
+    [string]$ScheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"
 )
 
 $ErrorActionPreference = "Stop"
@@ -160,7 +160,7 @@ $dataRows = foreach ($rt in $reportTypes) {
 
 # Build updated row
 $updatedCells = $repos | ForEach-Object {
-    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-schedule=`"$ScheduleDesc`">...</td>"
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-schedule=`"$([System.Net.WebUtility]::HtmlEncode($ScheduleDesc))`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
