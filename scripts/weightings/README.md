@@ -74,7 +74,9 @@ score primarily surfaces community contributions that need maintainer action.
 
 3. **maintScore is redundant** with approvalScore (Lasso drops it; bootstrap CV=127%).
 
-4. **Size matters more than expected** (significant in 6/11 repos).
+4. **Size matters more than expected** (significant in 6/11 repos). Changed files,
+   total lines, and additions-only all correlate similarly with merge time (r≈0.27–0.30
+   on log scale), so the combined threshold approach in the dashboard is reasonable.
 
 5. **Raw discussion count creates a death spiral**. Recommend splitting into
    actionable feedback (unresolved threads) + engagement (distinct commenters, capped).
