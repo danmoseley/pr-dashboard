@@ -333,6 +333,6 @@ $indexHtml | Out-File -FilePath (Join-Path $DocsDir "index.html") -Encoding utf8
 Write-Host "Generated index.html ($($repos.Count) repos)"
 
 # Write repos.json for the cross-repo page
-$reposJson = $repos | ForEach-Object { @{ slug = $_.slug; repo = $_.repo } } | ConvertTo-Json
+$reposJson = $repos | ForEach-Object { [ordered]@{ slug = $_.slug; repo = $_.repo } } | ConvertTo-Json
 $reposJson | Out-File -FilePath (Join-Path $DocsDir "repos.json") -Encoding utf8
 Write-Host "Generated repos.json ($($repos.Count) repos)"
