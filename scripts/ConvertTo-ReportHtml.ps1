@@ -288,95 +288,18 @@ $html = @"
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>$([System.Net.WebUtility]::HtmlEncode($Title)) - PR Dashboard</title>
+<link rel="stylesheet" href="../shared-styles.css">
 <style>
-  :root { --bg: #0d1117; --fg: #e6edf3; --border: #30363d; --link: #58a6ff;
-           --badge-community: #238636; --badge-area: #d4c5f9; --hover: #161b22; --header-bg: #161b22; }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-         background: var(--bg); color: var(--fg); padding: 1em 2em; }
-  nav { margin-bottom: 1em; font-size: 0.9em; }
-  nav a { color: var(--link); text-decoration: none; margin: 0 0.3em; }
-  nav a:hover { text-decoration: underline; }
-  h1 { font-size: 1.4em; margin-bottom: 0.2em; }
-  .meta { color: #8b949e; font-size: 0.85em; margin-bottom: 1em; }
+  /* Page-specific styles for per-repo reports */
   .report-desc { font-size: 0.9em; margin: 0.3em 0 0.8em; line-height: 1.4; }
-  table { border-collapse: collapse; width: 100%; font-size: 0.85em; table-layout: auto; }
-  thead { position: sticky; top: 0; z-index: 1; }
-  th { background: var(--header-bg); padding: 6px 10px; text-align: left;
-       border-bottom: 2px solid var(--border); white-space: nowrap; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
-  td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
-  tr:hover { background: var(--hover); }
-  a { color: var(--link); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-  .score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; }
-  .ready-high { background: rgba(35, 134, 54, 0.12); }
-  .action-score { font-weight: 800; text-align: right; white-space: nowrap; font-size: 1.25em; color: #f0c674;
-    background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3); border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; }
-  .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
-  .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
-  .why-btn { display: inline-block; font-size: 0.7em; font-family: inherit; color: #484f58; cursor: pointer; margin-left: 3px;
-    vertical-align: middle; font-weight: normal; text-decoration: none; padding: 0 3px; border-radius: 3px;
-    background: var(--header-bg); border: 1px solid var(--border); filter: grayscale(1) opacity(0.65); line-height: 1.4; }
-  .why-btn:hover { opacity: 1; color: var(--link); border-color: var(--link); filter: none; }
-  .action-why-btn { color: #8b7640; }
-  .action-why-btn:hover { color: #f0c674; border-color: #f0c674; }
-  .why-popup { position: fixed; background: #1c2128; border: 1px solid #444c56; border-radius: 6px; padding: 10px 14px;
-    font-size: 0.85em; color: #e6edf3; z-index: 100; max-width: 350px; white-space: pre-line; line-height: 1.5;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4); pointer-events: auto; }
-  th.action-col { background: rgba(240, 198, 116, 0.15) !important; color: #f0c674; font-weight: 700; }
-  th.sortable { cursor: pointer; user-select: none; }
-  th.sortable:hover { color: var(--link); }
-  th.sorted { color: var(--link); }
-  .pr-num { white-space: nowrap; }
-  .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ci { white-space: nowrap; padding: 5px 4px; }
-  .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
-  .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
-  .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
-  .heat-1 { background: rgba(187, 128, 9, 0.15); }
-  .heat-2 { background: rgba(210, 105, 30, 0.22); }
-  .heat-3 { background: rgba(218, 54, 51, 0.25); color: #f85149; }
-  .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .avatar { width: 16px; height: 16px; border-radius: 50%; vertical-align: text-bottom; margin-right: 2px; }
-  .badge { font-size: 0.75em; padding: 1px 6px; border-radius: 10px; margin-left: 4px; }
-  .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
-  .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
-  .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
   .observations { margin-top: 1.5em; max-width: 900px; }
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
-  .scoring { margin: 0.5em 0 1em; max-width: 900px; color: var(--fg); font-size: 0.85em; }
-  .scoring summary { cursor: pointer; color: var(--fg); font-weight: 500; }
-  .scoring p { margin: 0.5em 0; line-height: 1.4; }
-  .scoring-table { width: auto; font-size: 0.95em; margin: 0.5em 0; }
-  .scoring-table th, .scoring-table td { padding: 3px 10px; border: 1px solid var(--border); }
   .show-more-btn { display: block; margin: 1em auto; padding: 6px 20px; font-size: 0.9em; cursor: pointer;
     background: var(--header-bg); color: var(--link); border: 1px solid var(--border);
     border-radius: 6px; font-weight: 500; }
   .show-more-btn:hover { background: var(--hover); text-decoration: underline; }
-  .user-ref { position: relative; display: inline-block; }
-  .filter-btn { font-size: 0.7em; margin-left: 2px; padding: 0 3px; border-radius: 3px;
-    background: var(--header-bg); border: 1px solid var(--border); color: #484f58; vertical-align: middle;
-    text-decoration: none !important; cursor: pointer; filter: grayscale(1) opacity(0.5); }
-  .filter-btn:hover { color: var(--link); border-color: var(--link); filter: none; }
-  .filter-banner { position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none; }
-  .filter-banner a { margin-left: 8px; }
-  @media (prefers-color-scheme: light) {
-    :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
-             --hover: #f6f8fa; --header-bg: #f6f8fa; }
-    .heat-1 { background: rgba(187, 128, 9, 0.1); }
-    .heat-2 { background: rgba(210, 105, 30, 0.15); }
-    .heat-3 { background: rgba(218, 54, 51, 0.18); color: #cf222e; }
-    .action-score { color: #9a6700; background: rgba(154, 103, 0, 0.06); border-color: rgba(154, 103, 0, 0.2); }
-    th.action-col { background: rgba(154, 103, 0, 0.1) !important; color: #9a6700; }
-  }
-  a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
-              border-radius: 10px; text-decoration: none; margin-left: 4px; }
-  a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
 </style>
 </head>
 <body data-server-updated="$TimestampIso">
@@ -389,14 +312,7 @@ $scoringHtml
 $(if ($prCount -eq 0) {
 '<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
 } else {
-$sortedMerge = if ($DefaultSort -eq "merge") { ' sorted desc' } else { '' }
-$sortedValue = if ($DefaultSort -eq "value") { ' sorted desc' } else { '' }
-$sortedAction = if ($DefaultSort -eq "action") { ' sorted desc' } else { '' }
-$sortedUpd = if ($DefaultSort -eq "upd") { ' sorted desc' } else { '' }
-$arrowMerge = if ($DefaultSort -eq "merge") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
-$arrowValue = if ($DefaultSort -eq "value") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
-$arrowAction = if ($DefaultSort -eq "action") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
-$arrowUpd = if ($DefaultSort -eq "upd") { '<span class="sort-arrow"> &#x25BC;</span>' } else { '' }
+$defaultColIndex = switch ($DefaultSort) { "merge" { 0 } "value" { 1 } "action" { 2 } "upd" { 9 } default { 2 } }
 
 @"
 <table id="pr-table">
@@ -417,8 +333,8 @@ $arrowUpd = if ($DefaultSort -eq "upd") { '<span class="sort-arrow"> &#x25BC;</s
 </colgroup>
 <thead>
 <tr>
-  <th class="sortable$sortedMerge" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready$arrowMerge</th><th class="sortable$sortedValue" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need$arrowValue</th><th class="sortable$sortedAction action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action$arrowAction</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable$sortedUpd" data-sort="num" title="Days since last update (push, comment, or review)">Upd$arrowUpd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Number of files changed">Files</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>$(if ($hasAnyAreaLabels) { "<th class=`"sortable`" data-sort=`"alpha`" title=`"Area labels assigned to this PR`">Area</th>" })
 </tr>
 </thead>
 <tbody>
@@ -429,6 +345,7 @@ $($rows -join "`n")
 })
 $toggleHtml
 $obsHtml
+<script src="../shared-ui.js"></script>
 <script>
 var _filterKey = 'prFilter:' + location.pathname;
 function filterByLabel(label) {
@@ -497,113 +414,8 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-// Resizable columns: drag right edge of any <th> to resize
-(function() {
-  var ths = document.querySelectorAll('thead th');
-  ths.forEach(function(th) {
-    var grip = document.createElement('div');
-    grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
-    th.style.position = 'relative';
-    grip.addEventListener('mousedown', function(e) {
-      lockLayout();
-      var startX = e.pageX, startW = th.offsetWidth;
-      function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
-      function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-      e.preventDefault();
-    });
-    th.appendChild(grip);
-  });
-  // On first drag, snapshot auto widths so resizing works predictably
-  var tbl = document.querySelector('table'), locked = false;
-  function lockLayout() {
-    if (locked) return; locked = true;
-  }
-})();
-// Show tooltip popup on [?] click
-var activePopup = null;
-var activePopupBtn = null;
-function showWhy(el) {
-  if (activePopup) {
-    activePopup.remove();
-    var wasSame = (activePopupBtn === el);
-    activePopup = null; activePopupBtn = null;
-    if (wasSame) return; // 2nd click on same [?] dismisses
-  }
-  var why = (el.getAttribute('data-why') || '').replace(/&#10;/g, '\n');
-  if (!why) return;
-  var popup = document.createElement('div');
-  popup.className = 'why-popup';
-  popup.textContent = why;
-  document.body.appendChild(popup);
-  var rect = el.getBoundingClientRect();
-  popup.style.left = Math.max(0, Math.min(rect.right + 5, window.innerWidth - 360)) + 'px';
-  popup.style.top = Math.max(0, rect.top) + 'px';
-  activePopup = popup;
-  activePopupBtn = el;
-  // Dismiss on click outside
-  var dismissClick = function(e) {
-    if (!popup.parentNode) { document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); return; }
-    if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); }
-  };
-  var dismissMouse = function(e) {
-    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick); return; }
-    var r = popup.getBoundingClientRect();
-    var pad = 50;
-    if (e.clientX < r.left - pad || e.clientX > r.right + pad || e.clientY < r.top - pad || e.clientY > r.bottom + pad) {
-      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick);
-    }
-  };
-  setTimeout(function() { document.addEventListener('click', dismissClick); }, 0);
-  document.addEventListener('mousemove', dismissMouse);
-}
-// Sortable columns: click any th.sortable to sort the table
-(function() {
-  var table = document.getElementById('pr-table');
-  if (!table) return;
-  var tbody = table.querySelector('tbody');
-  var headers = table.querySelectorAll('thead th');
-  headers.forEach(function(th, colIdx) {
-    if (!th.classList.contains('sortable')) return;
-    th.addEventListener('click', function(e) {
-      if (e.target.style && e.target.style.cursor === 'col-resize') return;
-      var isDesc = th.classList.contains('desc');
-      var newDir = isDesc ? 'asc' : 'desc';
-      headers.forEach(function(h) {
-        h.classList.remove('sorted','asc','desc');
-        var old = h.querySelector('.sort-arrow');
-        if (old) old.remove();
-      });
-      th.classList.add('sorted', newDir);
-      var arrow = document.createElement('span');
-      arrow.className = 'sort-arrow';
-      arrow.textContent = newDir === 'desc' ? ' \u25BC' : ' \u25B2';
-      th.insertBefore(arrow, th.querySelector('div'));
-      var rows = Array.from(tbody.querySelectorAll('tr'));
-      var sortType = th.getAttribute('data-sort') || 'num';
-      rows.sort(function(a, b) {
-        var aCell = a.cells[colIdx], bCell = b.cells[colIdx];
-        if (!aCell || !bCell) return 0;
-        if (sortType === 'alpha') {
-          var aText = aCell.textContent.trim().toLowerCase();
-          var bText = bCell.textContent.trim().toLowerCase();
-          var cmp = aText < bText ? -1 : aText > bText ? 1 : 0;
-          return newDir === 'desc' ? -cmp : cmp;
-        }
-        // Numeric: sum all numbers found in cell (handles "2/5t 3ppl" → 10)
-        var aText = aCell.textContent.replace(/[#?]/g, '');
-        var bText = bCell.textContent.replace(/[#?]/g, '');
-        var aNums = aText.match(/[\d.]+/g) || [0];
-        var bNums = bText.match(/[\d.]+/g) || [0];
-        var aVal = aNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
-        var bVal = bNums.reduce(function(s,n){ return s + parseFloat(n); }, 0);
-        return newDir === 'desc' ? bVal - aVal : aVal - bVal;
-      });
-      rows.forEach(function(r) { tbody.appendChild(r); });
-    });
-  });
-})();
+initTableSort('pr-table', $defaultColIndex);
+initResizableColumns('pr-table');
 </script>
 <script src="../pr-refresh.js"></script>
 </body>
