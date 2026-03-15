@@ -247,7 +247,7 @@ $scoringHtml = @"
         <tr><td>2.5</td><td>Has approval</td></tr>
         <tr><td>2.5</td><td>Feedback addressed</td></tr>
         <tr><td>2.5</td><td>Discussion healthy</td></tr>
-        <tr><td>2.0</td><td>Small, easy to review</td></tr>
+        <tr><td>2.0&ndash;3.0</td><td>Small, easy to review (2.0) / trivial &le;2 files, &le;20 lines (3.0)</td></tr>
         <tr><td>1.5</td><td>Has maintainer review</td></tr>
         <tr><td>1.0</td><td>Recently active</td></tr>
         <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>
@@ -266,6 +266,7 @@ $scoringHtml = @"
         <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
         <tr><td>1.0</td><td>High interest</td></tr>
         <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Trivial change (&le;2 files, &le;20 lines, no unresolved threads)</td></tr>
         <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
         <tr><td>&minus;1.5</td><td>Author silent &gt;14d (ball in their court)</td></tr>
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>

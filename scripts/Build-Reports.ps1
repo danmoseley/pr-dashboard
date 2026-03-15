@@ -80,7 +80,8 @@ foreach ($pr in $allPrs) {
     $tt = [int]$pr.total_threads; $dc = [int]$pr.distinct_commenters
     $discussionS = if ($tt -le 5 -and $dc -le 2) { 1.0 } elseif ($dsr -le 14) { 0.75 } elseif ($tt -le 15 -and $dc -le 5) { 0.5 } else { 0.0 }
     $freshS = if ($dsu -le 14) { 1.0 } elseif ($dsu -le 30) { 0.5 } else { 0.0 }
-    $sizeS = if ([int]$pr.changed_files -le 5 -and [int]$pr.lines_changed -le 200) { 1.0 } elseif ([int]$pr.changed_files -le 20 -and [int]$pr.lines_changed -le 500) { 0.5 } else { 0.0 }
+    $isTrivial = [int]$pr.changed_files -le 2 -and [int]$pr.lines_changed -le 20
+    $sizeS = if ($isTrivial) { 1.5 } elseif ([int]$pr.changed_files -le 5 -and [int]$pr.lines_changed -le 200) { 1.0 } elseif ([int]$pr.changed_files -le 20 -and [int]$pr.lines_changed -le 500) { 0.5 } else { 0.0 }
     $communityS = if ($pr.is_community) { 0.5 } else { 1.0 }
     $alignS = if ($pr.area_labels -and @($pr.area_labels).Count -gt 0) { 1.0 } else { 0.0 }
     $velocityS = if ($dsu -le 7) { 1.0 } elseif ($dsu -le 14) { 0.5 } else { 0.0 }
@@ -88,7 +89,7 @@ foreach ($pr in $allPrs) {
     $mergeRaw = ($ciS * 2.5) + ($conflictS * 3.0) + ($approvalS * 2.5) + ($maintS * 1.5) +
         ($feedbackS * 2.5) + ($discussionS * 2.5) + ($sizeS * 2.0) + ($communityS * 1.0) +
         ($stalenessS * 1.0) + ($freshS * 0.7) + ($alignS * 0.5) + ($velocityS * 0.3)
-    $mergeReadiness = [Math]::Round(($mergeRaw / 20.0) * 10, 1)
+    $mergeReadiness = [Math]::Round([Math]::Min(($mergeRaw / 20.0) * 10, 10.0), 1)
 
     # Merge tooltip with point contributions
     $mComps = @(
@@ -97,7 +98,7 @@ foreach ($pr in $allPrs) {
         [PSCustomObject]@{ key = "needs approval"; text = if ($approvalS -ge 0.5) { "has approval" } else { "needs approval" }; val = $approvalS; w = 2.5 }
         [PSCustomObject]@{ key = "unresolved feedback"; text = if ($feedbackS -eq 1.0) { "feedback addressed" } elseif ($feedbackS -eq 0) { "has unresolved feedback" } else { "some unresolved feedback" }; val = $feedbackS; w = 2.5 }
         [PSCustomObject]@{ key = "discussion"; text = if ($discussionS -ge 0.5) { "discussion healthy" } else { "heavy unresolved discussion" }; val = $discussionS; w = 2.5 }
-        [PSCustomObject]@{ key = "size"; text = if ($sizeS -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeS; w = 2.0 }
+        [PSCustomObject]@{ key = "size"; text = if ($isTrivial) { "trivial change, 30-second review" } elseif ($sizeS -ge 0.5) { "small, easy to review" } else { "large change, harder to review" }; val = $sizeS; w = 2.0 }
         [PSCustomObject]@{ key = "maintainer review"; text = if ($maintS -ge 0.5) { "has maintainer review" } else { "needs maintainer review" }; val = $maintS; w = 1.5 }
         [PSCustomObject]@{ key = "staleness"; text = if ($stalenessS -ge 0.5) { "recently active" } else { "gone stale" }; val = $stalenessS; w = 1.0 }
         [PSCustomObject]@{ key = "community author"; text = if ($pr.is_community) { "community author" } else { "team author" }; val = $communityS; w = 1.0 }
@@ -120,6 +121,7 @@ foreach ($pr in $allPrs) {
     if ($tt -gt 10 -or $dc -gt 3) { $valueRaw += 1.0 }                              # high interest
     elseif ($tt -gt 5) { $valueRaw += 0.5 }
     if ([int]$pr.age_days -gt 30 -and $dsu -le 14) { $valueRaw += 0.5 }             # old but active
+    if ($isTrivial -and [int]$pr.unresolved_threads -eq 0) { $valueRaw += 0.5 }  # quick win — trivial review
     # Author response latency (use field if available from full API refresh, else approximate from days_since_update)
     $dsac = if ($null -ne $pr.days_since_author_review_comment) { [int]$pr.days_since_author_review_comment }
            elseif ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment }
@@ -130,7 +132,7 @@ foreach ($pr in $allPrs) {
     elseif ($ut -gt 0 -and $dsac -gt 7) { $valueRaw -= 0.5 }     # author slow — less actionable
     $valueClamped = $valueRaw -lt 0
     $valueRaw = [Math]::Max($valueRaw, 0.0)
-    $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
+    $valueScore = [Math]::Round([Math]::Min(($valueRaw / 9.0) * 10, 10.0), 1)
 
     # Value tooltip
     $vWhy = @()
@@ -147,6 +149,7 @@ foreach ($pr in $allPrs) {
     if ($ut -gt 0 -and $dsac -gt 7 -and $dsac -le 14) { $vWhy += "author slow ${dsac}d, ball in their court (-0.5)" }
     if ([int]$pr.lines_changed -gt 200) { $vWhy += "large change: $([int]$pr.lines_changed) lines (+0.5)" }
     if ([int]$pr.age_days -gt 30 -and $dsu -le 14) { $vWhy += "old but active: $([int]$pr.age_days)d age (+0.5)" }
+    if ($isTrivial -and [int]$pr.unresolved_threads -eq 0) { $vWhy += "trivial change, quick win (+0.5)" }
     if ($vWhy.Count -eq 0) { $vWhy += "no attention signals" }
     if ($valueClamped) { $vWhy += "(net negative, floored to 0)" }
     $valueWhyStr = $vWhy -join "&#10;"
