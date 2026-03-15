@@ -122,15 +122,18 @@ foreach ($pr in $allPrs) {
            elseif ($null -ne $pr.days_since_author_comment) { [int]$pr.days_since_author_comment }
            else { [int]$pr.age_days }
     $ut = [int]$pr.unresolved_threads
-    if ($ut -gt 0 -and $dsac -gt 14) { $valueRaw += 1.5 }        # author silent
-    elseif ($ut -gt 0 -and $dsac -gt 7) { $valueRaw += 0.5 }     # author slow
+    # Author response latency: if ball is in author's court, reduce attention (maintainer can't help)
+    if ($ut -gt 0 -and $dsac -gt 14) { $valueRaw -= 1.5 }        # author silent — not actionable
+    elseif ($ut -gt 0 -and $dsac -gt 7) { $valueRaw -= 0.5 }     # author slow — less actionable
+    $valueClamped = $valueRaw -lt 0
+    $valueRaw = [Math]::Max($valueRaw, 0.0)
     $valueScore = [Math]::Round([Math]::Min(($valueRaw / 8.5) * 10, 10.0), 1)
 
     # Value tooltip
     $vWhy = @()
     if ($pr.is_community) { $vWhy += "community author (+1.0)" }
     if ([int]$pr.approval_count -eq 0) { $vWhy += "no approval yet (+1.5)" }
-    if ($ut -gt 0 -and $dsac -gt 14) { $vWhy += "pending feedback, author silent ${dsac}d (+1.5)" }
+    if ($ut -gt 0 -and $dsac -gt 14) { $vWhy += "author silent ${dsac}d, ball in their court (-1.5)" }
     if ($tt -gt 0 -and [int]$pr.approval_count -eq 0) { $vWhy += "reviewed, not approved (+1.0)" }
     if ([int]$pr.unresolved_threads -gt 0) { $vWhy += "unresolved feedback (+1.0)" }
     if ($tt -gt 10 -or $dc -gt 3) { $vWhy += "high interest: ${tt}t ${dc}ppl (+1.0)" }
@@ -138,10 +141,11 @@ foreach ($pr in $allPrs) {
         if ([int]$pr.unresolved_threads -gt 0) { $vWhy += "active discussion: ${tt}t, $([int]$pr.unresolved_threads) unresolved (+0.5)" }
         else { $vWhy += "thorough review: ${tt} resolved threads (+0.5)" }
     }
-    if ($ut -gt 0 -and $dsac -gt 7 -and $dsac -le 14) { $vWhy += "pending feedback, author slow ${dsac}d (+0.5)" }
+    if ($ut -gt 0 -and $dsac -gt 7 -and $dsac -le 14) { $vWhy += "author slow ${dsac}d, ball in their court (-0.5)" }
     if ([int]$pr.lines_changed -gt 200) { $vWhy += "large change: $([int]$pr.lines_changed) lines (+0.5)" }
     if ([int]$pr.age_days -gt 30 -and $dsu -le 14) { $vWhy += "old but active: $([int]$pr.age_days)d age (+0.5)" }
     if ($vWhy.Count -eq 0) { $vWhy += "no attention signals" }
+    if ($valueClamped) { $vWhy += "(net negative, floored to 0)" }
     $valueWhyStr = $vWhy -join "&#10;"
 
     # --- Combined Action score: multiplicative (merge+1)*(value+1) normalized to 0-10 ---
@@ -159,15 +163,16 @@ foreach ($pr in $allPrs) {
     if ($tt -gt 0 -and [int]$pr.approval_count -eq 0) { $allC += [PSCustomObject]@{ key = "reviewed, not approved"; text = "reviewed, not approved"; pts = 1.0 } }
     if ([int]$pr.unresolved_threads -gt 0) { $allC += [PSCustomObject]@{ key = "unresolved feedback"; text = "has unresolved feedback"; pts = 1.0 } }
     if ($tt -gt 10 -or $dc -gt 3) { $allC += [PSCustomObject]@{ key = "high interest"; text = "high interest"; pts = 1.0 } }
-    if ($ut -gt 0 -and $dsac -gt 14) { $allC += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author silent ${dsac}d"; pts = 1.5 } }
-    elseif ($ut -gt 0 -and $dsac -gt 7) { $allC += [PSCustomObject]@{ key = "author latency"; text = "pending feedback, author slow ${dsac}d"; pts = 0.5 } }
+    if ($ut -gt 0 -and $dsac -gt 14) { $allC += [PSCustomObject]@{ key = "author latency"; text = "author silent ${dsac}d, ball in their court"; pts = -1.5 } }
+    elseif ($ut -gt 0 -and $dsac -gt 7) { $allC += [PSCustomObject]@{ key = "author latency"; text = "author slow ${dsac}d, ball in their court"; pts = -0.5 } }
     $grouped = $allC | Group-Object key | ForEach-Object {
         $total = ($_.Group | Measure-Object pts -Sum).Sum
         $bestText = ($_.Group | Sort-Object pts -Descending | Select-Object -First 1).text
         [PSCustomObject]@{ text = $bestText; pts = [Math]::Round($total, 1) }
     }
     $topC = @($grouped | Sort-Object pts -Descending | ForEach-Object {
-        "$($_.text) (+$($_.pts))"
+        $sign = if ($_.pts -ge 0) { "+" } else { "" }
+        "$($_.text) (${sign}$($_.pts))"
     })
     $actionWhyStr = ($topC -join "&#10;")
 
