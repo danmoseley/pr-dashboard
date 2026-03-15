@@ -11,7 +11,7 @@
 [CmdletBinding()]
 param(
     [string]$DocsDir = "docs",
-    [string]$ScheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"
+    [string]$ScheduleDesc = ""
 )
 
 $ErrorActionPreference = "Stop"

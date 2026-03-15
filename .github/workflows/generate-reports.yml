@@ -15,8 +15,6 @@ permissions:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    env:
-      SCHEDULE_DESC: "~twice daily (weekdays 2x, weekends 1x)"
     steps:
       - name: Skip if recent run
         if: github.event_name == 'schedule'
@@ -37,6 +35,13 @@ jobs:
         uses: actions/checkout@v6
         with:
           fetch-depth: 0  # full history needed for changelog generation
+
+      - name: Read schedule description
+        if: env.SKIP_RUN != 'true'
+        run: |
+          # Read schedule-desc from the workflow YAML comment (single source of truth)
+          desc=$(grep -oP '#\s*schedule-desc:\s*\K.+' .github/workflows/generate-reports.yml | head -1)
+          echo "SCHEDULE_DESC=${desc:-~twice daily}" >> "$GITHUB_ENV"
 
       - name: Install gh-models extension
         if: env.SKIP_RUN != 'true'
