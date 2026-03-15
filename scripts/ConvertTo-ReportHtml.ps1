@@ -174,7 +174,7 @@ $rows = foreach ($pr in $prs) {
   <td class="title">$safeTitle</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
-  <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<span class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters">?</span></td>
+  <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num$filesHeat" title="$($pr.lines_changed) lines changed">$($pr.changed_files)</td>
@@ -247,7 +247,7 @@ $scoringHtml = @"
         <tr><td>2.0</td><td>Small, easy to review</td></tr>
         <tr><td>1.5</td><td>Has maintainer review</td></tr>
         <tr><td>1.0</td><td>Recently active</td></tr>
-        <tr><td>1.0</td><td>Team or known author</td></tr>
+        <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5)</td></tr>
         <tr><td>0.7</td><td>Recently updated</td></tr>
         <tr><td>0.5</td><td>Well labeled</td></tr>
         <tr><td>0.3</td><td>Good review momentum</td></tr>
@@ -543,22 +543,19 @@ function showWhy(el) {
   activePopup = popup;
   activePopupBtn = el;
   // Dismiss on click outside
-  setTimeout(function() {
-    function dismissClick(e) {
-      if (!popup.parentNode) { document.removeEventListener('click', dismissClick); return; }
-      if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); }
-    }
-    document.addEventListener('click', dismissClick);
-  }, 0);
-  // Dismiss when mouse moves ~50px away from popup
-  function dismissMouse(e) {
-    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); return; }
+  var dismissClick = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); return; }
+    if (!popup.contains(e.target) && e.target !== el) { popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('click', dismissClick); document.removeEventListener('mousemove', dismissMouse); }
+  };
+  var dismissMouse = function(e) {
+    if (!popup.parentNode) { document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick); return; }
     var r = popup.getBoundingClientRect();
     var pad = 50;
     if (e.clientX < r.left - pad || e.clientX > r.right + pad || e.clientY < r.top - pad || e.clientY > r.bottom + pad) {
-      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse);
+      popup.remove(); activePopup = null; activePopupBtn = null; document.removeEventListener('mousemove', dismissMouse); document.removeEventListener('click', dismissClick);
     }
-  }
+  };
+  setTimeout(function() { document.addEventListener('click', dismissClick); }, 0);
   document.addEventListener('mousemove', dismissMouse);
 }
 // Sortable columns: click any th.sortable to sort the table
