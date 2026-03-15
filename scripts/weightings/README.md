@@ -138,15 +138,29 @@ A pragmatic middle ground: rather than full per-repo weight sets, apply one or
 two repo-specific adjustments (e.g., suppress CI score where Build Analysis is
 absent; boost approval weight for roslyn/msbuild).
 
-### Score Combination
+### Score Combination — Recommended Approach
 
-For "what PR should I look at next?" the two scores can be combined:
-- **Multiplicative with floor** `(merge + 1) × (attention + 1)` — best default;
-  answers "where does my time produce the most value?"
-- **Sort by merge readiness** — "I have 5 minutes, clear the easy wins"
-- **Sort by attention** — "weekly triage, what's stuck/important?"
+The two scores are anti-correlated (r=-0.63): PRs that are nearly ready to merge
+tend to need little attention, and vice versa. Three combination strategies were
+considered:
 
-Could default to multiplicative and let users toggle mode.
+| Strategy | Formula | Best for |
+|----------|---------|----------|
+| **Multiplicative (recommended)** | `(merge + 1) × (attention + 1)` | Default sort — "where does my time produce the most value?" |
+| Sort by merge readiness | Rank by Score 1 only | "I have 5 minutes, clear the easy wins" |
+| Sort by attention | Rank by Score 2 only | "Weekly triage — what's stuck or important?" |
+
+**Recommendation: multiplicative with floor, as the default sort order.** This
+naturally surfaces Q1 PRs ("help across the finish line" — high on both axes) at
+the top. The `+1` offset prevents zeroing out one dimension. In practice:
+
+- A PR with merge=8, attention=2 scores `9 × 3 = 27`
+- A PR with merge=2, attention=8 scores `3 × 9 = 27` (equal priority — correct)
+- A PR with merge=8, attention=0 scores `9 × 1 = 9` (lower — will merge on its own)
+- A PR with merge=0, attention=8 scores `1 × 9 = 9` (lower — blocked, attention alone won't help)
+
+The UI could also offer a toggle to sort by either dimension alone for focused
+workflows (quick-win clearing vs. triage sessions).
 
 ## Scripts
 
