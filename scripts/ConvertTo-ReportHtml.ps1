@@ -61,7 +61,8 @@ if ($NavLinks.Count -gt 0) {
 }
 
 # Helper: replace @username with avatar + linked username + filter button
-function ConvertTo-UserHtml([string]$text) {
+# $communitySet: hashtable of usernames known to be community contributors
+function ConvertTo-UserHtml([string]$text, [hashtable]$communitySet = @{}) {
     # Match @user or @app/bot-name as a single token
     [regex]::Replace($text, '@((?:app/)?[\w-]+)', {
         param($m)
@@ -72,9 +73,16 @@ function ConvertTo-UserHtml([string]$text) {
             "<a href=`"https://github.com/apps/$name`">@$name</a>"
         } else {
             $u = $full
-            "<span class=`"user-ref`"><img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D;</a></span>"
+            $cBadge = if ($communitySet.ContainsKey($u)) { '<span class="badge community" title="community">C</span>' } else { '' }
+            "<span class=`"user-ref`">$cBadge<img class=`"avatar`" src=`"https://github.com/$u.png?size=32`" alt=`"$u`"><a href=`"https://github.com/$u`">@$u</a><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D;</a></span>"
         }
     })
+}
+
+# Build set of community authors for badging wherever they appear
+$communityAuthors = @{}
+foreach ($p in $prs) {
+    if ($p.is_community -and $p.author) { $communityAuthors[$p.author] = $true }
 }
 
 # Compute 10th percentile of lines_changed for "small PR" icon
@@ -109,11 +117,10 @@ $rows = foreach ($pr in $prs) {
             $ciFailHint = "<sup class=`"ci-warn`">$ciFailCount</sup>"
         }
     }
-    $communityBadge = if ($pr.is_community) { ' <span class="badge community" title="community">C</span>' } else { "" }
-    $authorDisplay = ConvertTo-UserHtml "@$($pr.author)"
+    $authorDisplay = ConvertTo-UserHtml "@$($pr.author)" $communityAuthors
     if ($pr.author -match "copilot-swe-agent") {
         if ($pr.copilot_trigger) {
-            $authorDisplay = "$(ConvertTo-UserHtml "@$($pr.copilot_trigger)") <span class=`"badge`" title=`"authored by Copilot`">via &#x1F916;</span>"
+            $authorDisplay = "$(ConvertTo-UserHtml "@$($pr.copilot_trigger)" $communityAuthors) <span class=`"badge`" title=`"authored by Copilot`">via &#x1F916;</span>"
         } else {
             $authorDisplay = "&#x1F916; copilot"
         }
@@ -187,13 +194,13 @@ $rows = foreach ($pr in $prs) {
   <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="$prUrl" title="$safeTitle">#$($pr.number)</a></td>
   <td class="title">$safeTitle</td>
-  <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)))</td>
+  <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)) $communityAuthors)</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num$ageHeat">$($pr.age_days)d</td>
   <td class="num$updateHeat">$($pr.days_since_update)d</td>
   <td class="num$filesHeat" title="$($pr.changed_files) $filesWord, $($pr.lines_changed) $linesWord (additions + deletions)">$sizeIcon$($pr.lines_changed)</td>
-  <td class="author">$communityBadge$authorDisplay</td>
+  <td class="author">$authorDisplay</td>
   $(if ($hasAnyAreaLabels) { "<td class=`"area-col`">$areaLabelHtml</td>" })
 </tr>
 "@
