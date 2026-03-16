@@ -14,10 +14,10 @@
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
 </style>
 </head>
-<body data-server-updated="2026-03-16T07:29:17.1981390Z">
+<body data-server-updated="2026-03-16T19:14:14.2445829Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/winforms/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/winforms</h1>
-<p class="meta">Updated ~twice daily (weekdays 2x, weekends 1x), last <span id="last-updated" data-updated="2026-03-16T07:29:17.1981390Z">at 2026-03-16 07:29 UTC</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="meta">Updated ~twice daily (weekdays 2x, weekends 1x), last <span id="last-updated" data-updated="2026-03-16T19:14:14.2445829Z">at 2026-03-16 19:14 UTC</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -67,7 +67,61 @@
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
+  <col style="width:4%">
+  <col>
+  <col style="width:24%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
+<thead>
+<tr>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="LeafShi1,SimonZhao888" data-labels="area-DarkMode">
+  <td class="score ready-high">9.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 5t 4ppl (+1.0)&#10;old but active: 34d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14288" title="Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in dark mode after enabled SystemColorMode.Dark">#14288</a></td>
+  <td class="title">Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in dark mode after enabled SystemColorMode.Dark</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/5t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-2">34d</td>
+  <td class="num">4d</td>
+  <td class="num" title="2 files, 130 lines (additions + deletions)">130</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
+</tr>
+<tr data-people="LeafShi1,SimonZhao888" data-labels="area-DarkMode">
+  <td class="score ready-high">10<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, quick win (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14338" title="Fix issue 11939: [Dark Mode]HelpProvider text color is barely visible">#14338</a></td>
+  <td class="title">Fix issue 11939: [Dark Mode]HelpProvider text color is barely visible</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">15d</td>
+  <td class="num heat-2">14d</td>
+  <td class="num" title="1 file, 2 lines (additions + deletions)">2</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
+</tr>
+</tbody>
+</table>
 
 
 <script src="../shared-ui.js"></script>
@@ -139,7 +193,8 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
