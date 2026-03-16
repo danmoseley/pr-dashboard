@@ -71,6 +71,10 @@ function ConvertTo-UserHtml([string]$text, [hashtable]$communitySet = @{}) {
             # Bot app — link to GitHub Apps page, no avatar/filter
             $name = $Matches[1]
             "<a href=`"https://github.com/apps/$name`">@$name</a>"
+        } elseif ($full -match 'copilot-pull-request-reviewer') {
+            # Copilot reviewer — compact bot icon with filter
+            $u = $full
+            "<span class=`"user-ref`"><span class=`"bot-icon`" title=`"Copilot reviewer`">&#x1F916;</span><a class=`"filter-btn`" href=`"#`" onclick=`"filterByUser('$u');return false`" title=`"Show only @$u`">&#x1F50D;</a></span>"
         } else {
             $u = $full
             $cBadge = if ($communitySet.ContainsKey($u)) { '<span class="badge community" title="community">C</span>' } else { '' }
@@ -120,9 +124,9 @@ $rows = foreach ($pr in $prs) {
     $authorDisplay = ConvertTo-UserHtml "@$($pr.author)" $communityAuthors
     if ($pr.author -match "copilot-swe-agent") {
         if ($pr.copilot_trigger) {
-            $authorDisplay = "$(ConvertTo-UserHtml "@$($pr.copilot_trigger)" $communityAuthors) <span class=`"badge`" title=`"authored by Copilot`">via &#x1F916;</span>"
+            $authorDisplay = "$(ConvertTo-UserHtml "@$($pr.copilot_trigger)" $communityAuthors) <span class=`"badge`" title=`"authored by Copilot`">via <span class=`"bot-icon`">&#x1F916;</span></span>"
         } else {
-            $authorDisplay = "&#x1F916; copilot"
+            $authorDisplay = "<span class=`"bot-icon`">&#x1F916;</span> copilot"
         }
     }
 
