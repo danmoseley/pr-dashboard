@@ -89,7 +89,7 @@
       var btn = document.createElement('button');
       btn.className = 'pr-refresh-btn';
       btn.innerHTML = '&#x21bb;';
-      btn.title = 'Check current state; hides if merged/closed';
+      btn.title = 'Check current state; hides row if merged/closed';
       btn.setAttribute('aria-label', 'Check status of PR #' + info.number);
       btn.addEventListener('click', function(e) {
         e.preventDefault();
