@@ -13,14 +13,15 @@
 
   // Known bot usernames that should render as a bot icon instead of an avatar.
   // Keep in sync with ConvertTo-UserHtml in scripts/ConvertTo-ReportHtml.ps1.
-  var BOT_USERS = { 'copilot-pull-request-reviewer': 'Copilot reviewer' };
+  var BOT_USERS = Object.create(null);
+  BOT_USERS['copilot-pull-request-reviewer'] = 'Copilot reviewer';
 
-  function isBotUser(name) { return BOT_USERS.hasOwnProperty(name); }
+  function isBotUser(name) { return name in BOT_USERS; }
 
   function botHtml(name) {
     var label = BOT_USERS[name] || name;
     return '<span class="user-ref"><span class="bot-icon" role="img" aria-label="' + escAttr(label) + '" title="' + escAttr(label) + '">&#x1F916;</span>' +
-      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + escHtml(name) + '">&#x1F50D;</a></span>';
+      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + escAttr(name) + '">&#x1F50D;</a></span>';
   }
 
   // Render a single @username as HTML (avatar + link + filter, or bot icon)
@@ -32,9 +33,9 @@
       return '<a href="https://github.com/apps/' + name + '">@' + escHtml(name) + '</a>';
     }
     if (isBotUser(u)) return botHtml(u);
-    return '<span class="user-ref"><img class="avatar" src="https://github.com/' + u + '.png?size=32" alt="' + u + '">' +
-      '<a href="https://github.com/' + u + '">@' + escHtml(u) + '</a>' +
-      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(u) + '\');return false" title="Show only @' + u + '">&#x1F50D;</a></span>';
+    return '<span class="user-ref"><img class="avatar" src="https://github.com/' + encodeURIComponent(u) + '.png?size=32" alt="' + escAttr(u) + '">' +
+      '<a href="https://github.com/' + encodeURIComponent(u) + '">@' + escHtml(u) + '</a>' +
+      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(u) + '\');return false" title="Show only @' + escAttr(u) + '">&#x1F50D;</a></span>';
   };
 
   // Replace all @username references in text with rendered HTML
@@ -45,9 +46,9 @@
         return '<a href="https://github.com/apps/' + botName + '">@' + escHtml(botName) + '</a>';
       }
       if (isBotUser(name)) return botHtml(name);
-      return '<span class="user-ref"><img class="avatar" src="https://github.com/' + name + '.png?size=32" alt="' + name + '">' +
-        '<a href="https://github.com/' + name + '">@' + escHtml(name) + '</a>' +
-        '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + name + '">&#x1F50D;</a></span>';
+      return '<span class="user-ref"><img class="avatar" src="https://github.com/' + encodeURIComponent(name) + '.png?size=32" alt="' + escAttr(name) + '">' +
+        '<a href="https://github.com/' + encodeURIComponent(name) + '">@' + escHtml(name) + '</a>' +
+        '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + escAttr(name) + '">&#x1F50D;</a></span>';
     });
   };
 
