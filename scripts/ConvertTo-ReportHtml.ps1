@@ -62,6 +62,8 @@ if ($NavLinks.Count -gt 0) {
 
 # Helper: replace @username with avatar + linked username + filter button
 # $communitySet: hashtable of usernames known to be community contributors
+# NOTE: bot-detection logic (e.g. copilot-pull-request-reviewer) is duplicated
+#       in docs/shared-ui.js (BOT_USERS). Keep them in sync.
 function ConvertTo-UserHtml([string]$text, [hashtable]$communitySet = @{}) {
     # Match @user or @app/bot-name as a single token
     [regex]::Replace($text, '@((?:app/)?[\w-]+)', {

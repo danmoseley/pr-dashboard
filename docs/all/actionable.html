@@ -474,29 +474,7 @@
       .filter(function(u) { if (seen[u]) return false; seen[u] = true; return true; });
   }
 
-  function userHtml(username) {
-    if (!username) return '';
-    var u = username.replace(/^@/, '');
-    if (/^app\//.test(u)) {
-      var name = u.replace(/^app\//, '');
-      return '<a href="https://github.com/apps/' + name + '">@' + escHtml(name) + '</a>';
-    }
-    return '<span class="user-ref"><img class="avatar" src="https://github.com/' + u + '.png?size=32" alt="' + u + '">' +
-      '<a href="https://github.com/' + u + '">@' + escHtml(u) + '</a>' +
-      '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(u) + '\');return false" title="Show only @' + u + '">&#x1F50D;</a></span>';
-  }
-
-  function convertUserRefs(text) {
-    return text.replace(/@((?:app\/)?[\w-]+)/g, function(match, name) {
-      if (/^app\//.test(name)) {
-        var botName = name.replace(/^app\//, '');
-        return '<a href="https://github.com/apps/' + botName + '">@' + escHtml(botName) + '</a>';
-      }
-      return '<span class="user-ref"><img class="avatar" src="https://github.com/' + name + '.png?size=32" alt="' + name + '">' +
-        '<a href="https://github.com/' + name + '">@' + escHtml(name) + '</a>' +
-        '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + name + '">&#x1F50D;</a></span>';
-    });
-  }
+  // userHtml() and convertUserRefs() are now in shared-ui.js
 
 })();
 </script>
