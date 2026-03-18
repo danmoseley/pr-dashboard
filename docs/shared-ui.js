@@ -22,6 +22,7 @@
     var label = BOT_USERS[name] || name;
     return '<span class="user-ref"><span class="bot-icon" role="img" aria-label="' + escAttr(label) + '" title="' + escAttr(label) + '">&#x1F916;</span>' +
       '<a class="filter-btn" href="#" onclick="filterByUser(\'' + escAttr(name) + '\');return false" title="Show only @' + escAttr(name) + '" aria-label="Show only @' + escAttr(name) + '">&#x1F50D;</a></span>';
+  }
 
   // Render a single @username as HTML (avatar + link + filter, or bot icon)
   window.userHtml = function(username) {
