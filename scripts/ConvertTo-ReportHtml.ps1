@@ -62,6 +62,8 @@ if ($NavLinks.Count -gt 0) {
 
 # Helper: replace @username with avatar + linked username + filter button
 # $communitySet: hashtable of usernames known to be community contributors
+# NOTE: bot-detection logic (e.g. copilot-pull-request-reviewer) is duplicated
+#       in docs/shared-ui.js (BOT_USERS). Keep them in sync.
 function ConvertTo-UserHtml([string]$text, [hashtable]$communitySet = @{}) {
     # Match @user or @app/bot-name as a single token
     [regex]::Replace($text, '@((?:app/)?[\w-]+)', {
@@ -134,7 +136,7 @@ $rows = foreach ($pr in $prs) {
     $actionEmoji = if ($pr.next_action -match "Ready to merge") { "&#x1F7E2; " }       # 🟢
                    elseif ($pr.next_action -match "resolve conflicts") { "&#x1F6D1; " } # 🛑
                    elseif ($pr.next_action -match "fix CI") { "&#x1F6D1; " }            # 🛑
-                   elseif ($pr.next_action -match "review needed") { "&#x1F441; " }     # 👁
+                   elseif ($pr.next_action -match "review needed") { "<span class=`"action-icon-lg`">&#x1F441;</span> " }     # 👁
                    elseif ($pr.next_action -match "respond to") { "" }                    # no emoji, text is clear
                    elseif ($pr.next_action -match "Wait for CI") { "&#x23F3; " }        # ⏳
                    elseif ($pr.next_action -match "merge main") { "&#x1F504; " }        # 🔄
