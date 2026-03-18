@@ -110,7 +110,7 @@
 
     // Public (unauthenticated) GitHub REST API — no token needed or sent.
     var apiBase = 'https://api.github.com/repos/' + info.owner + '/' + info.repo;
-    fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github.v3+json' } })
+    fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github+json' } })
       .then(function(r) {
         updateRateLimit(r);
         if (!r.ok) throw new Error('PR fetch failed: ' + r.status);
@@ -200,7 +200,7 @@
           changed = true;
         }
         ciCell.setAttribute('data-ci-status', result.ci.status);
-        ciCell.innerHTML = emoji + ' ' + result.ci.detail;
+        ciCell.textContent = emoji + ' ' + result.ci.detail;
         ciCell.title = 'Approximate status from mergeable_state';
       }
     }
@@ -211,7 +211,6 @@
       if (actionCell && !/conflict/i.test(actionCell.textContent)) {
         var span = document.createElement('span');
         span.className = 'pr-conflict-indicator';
-        span.style.cssText = 'color:#da3633; font-weight:600; margin-right:4px;';
         span.textContent = '\uD83D\uDED1 conflict';
         actionCell.insertBefore(span, actionCell.firstChild);
         changed = true;
@@ -227,6 +226,8 @@
     // Only fade scores if something score-affecting actually changed
     if (changed) {
       tr.classList.add('scores-stale');
+    } else {
+      tr.classList.remove('scores-stale');
     }
   }
 
