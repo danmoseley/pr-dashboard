@@ -155,13 +155,15 @@
     // "clean" = all checks pass, no conflicts, reviews approved
     // "unstable" = some checks failing
     // "blocked" = required reviews missing or checks pending
-    // "dirty" = merge conflicts
+    // "dirty" = merge conflicts (CI status unknown, conflicts handled separately)
     // "behind" = base branch is ahead
     var status;
     switch (state) {
       case 'clean': status = 'SUCCESS'; break;
       case 'unstable': status = 'FAILURE'; break;
       case 'blocked': status = 'IN_PROGRESS'; break;
+      case 'dirty': status = 'UNKNOWN'; break;
+      case 'behind': status = 'UNKNOWN'; break;
       default: status = 'UNKNOWN'; break;
     }
     return { status: status, detail: state || '?', failCount: 0 };
@@ -184,14 +186,12 @@
         var emoji = result.ci.status === 'SUCCESS' ? '\u2705' :
                     result.ci.status === 'FAILURE' ? '\u274C' :
                     result.ci.status === 'IN_PROGRESS' ? '\u23F3' : '\u26A0\uFE0F';
-        // Detect if CI status actually changed from what's displayed
-        var oldText = ciCell.textContent;
-        var wasSuccess = oldText.indexOf('\u2705') >= 0;
-        var wasFailure = oldText.indexOf('\u274C') >= 0;
-        if ((result.ci.status === 'SUCCESS') !== wasSuccess ||
-            (result.ci.status === 'FAILURE') !== wasFailure) {
+        // Detect if CI status actually changed
+        var prevStatus = ciCell.getAttribute('data-ci-status') || '';
+        if (prevStatus && prevStatus !== result.ci.status) {
           changed = true;
         }
+        ciCell.setAttribute('data-ci-status', result.ci.status);
         ciCell.innerHTML = emoji + ' ' + result.ci.detail;
         ciCell.title = 'Approximate status from mergeable_state';
       }
@@ -252,6 +252,8 @@
     if (rateLimitEl) return;
     rateLimitEl = document.createElement('div');
     rateLimitEl.className = 'rate-limit-footer';
+    rateLimitEl.setAttribute('role', 'status');
+    rateLimitEl.setAttribute('aria-live', 'polite');
     document.body.appendChild(rateLimitEl);
   }
 
@@ -263,9 +265,11 @@
     ensureRateLimitFooter();
     var resetText = '';
     if (reset) {
-      var resetMs = parseInt(reset) * 1000 - Date.now();
-      var resetMin = Math.max(1, Math.ceil(resetMs / 60000));
-      resetText = ' \u00B7 resets in ' + resetMin + 'min';
+      var resetSec = parseInt(reset, 10);
+      if (isFinite(resetSec)) {
+        var resetMin = Math.max(1, Math.ceil((resetSec * 1000 - Date.now()) / 60000));
+        resetText = ' \u00B7 resets in ' + resetMin + 'min';
+      }
     }
     rateLimitEl.textContent = 'API: ' + remaining + '/' + limit + ' remaining' + resetText;
   }
