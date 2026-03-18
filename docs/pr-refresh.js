@@ -187,8 +187,16 @@
                     result.ci.status === 'FAILURE' ? '\u274C' :
                     result.ci.status === 'IN_PROGRESS' ? '\u23F3' : '\u26A0\uFE0F';
         // Detect if CI status actually changed
-        var prevStatus = ciCell.getAttribute('data-ci-status') || '';
-        if (prevStatus && prevStatus !== result.ci.status) {
+        var prevStatus = ciCell.getAttribute('data-ci-status');
+        if (!prevStatus) {
+          // Infer from existing emoji on first refresh
+          var t = ciCell.textContent;
+          if (t.indexOf('\u2705') >= 0) prevStatus = 'SUCCESS';
+          else if (t.indexOf('\u274C') >= 0) prevStatus = 'FAILURE';
+          else if (t.indexOf('\u23F3') >= 0) prevStatus = 'IN_PROGRESS';
+          else prevStatus = 'UNKNOWN';
+        }
+        if (prevStatus !== result.ci.status) {
           changed = true;
         }
         ciCell.setAttribute('data-ci-status', result.ci.status);
@@ -198,13 +206,20 @@
     }
 
     // Update mergeable indicator in the action cell
+    var actionCell = tr.querySelector('.action');
     if (result.mergeable_state === 'dirty') {
-      var actionCell = tr.querySelector('.action');
       if (actionCell && !/conflict/i.test(actionCell.textContent)) {
         var span = document.createElement('span');
+        span.className = 'pr-conflict-indicator';
         span.style.cssText = 'color:#da3633; font-weight:600; margin-right:4px;';
         span.textContent = '\uD83D\uDED1 conflict';
         actionCell.insertBefore(span, actionCell.firstChild);
+        changed = true;
+      }
+    } else if (actionCell) {
+      var existing = actionCell.querySelector('.pr-conflict-indicator');
+      if (existing) {
+        existing.remove();
         changed = true;
       }
     }
