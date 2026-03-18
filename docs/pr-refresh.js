@@ -110,7 +110,7 @@
 
     // Public (unauthenticated) GitHub REST API — no token needed or sent.
     var apiBase = 'https://api.github.com/repos/' + info.owner + '/' + info.repo;
-    fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github+json' } })
+    fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28' } })
       .then(function(r) {
         updateRateLimit(r);
         if (!r.ok) throw new Error('PR fetch failed: ' + r.status);
@@ -151,22 +151,16 @@
 
   // --- Derive approximate CI status from PR mergeable_state ---
   function ciFromMergeableState(state) {
-    // mergeable_state values: clean, dirty, unstable, blocked, behind, unknown
-    // "clean" = all checks pass, no conflicts, reviews approved
-    // "unstable" = some checks failing
-    // "blocked" = required reviews missing or checks pending
-    // "dirty" = merge conflicts (CI status unknown, conflicts handled separately)
-    // "behind" = base branch is ahead
-    var status;
+    var status, detail;
     switch (state) {
-      case 'clean': status = 'SUCCESS'; break;
-      case 'unstable': status = 'FAILURE'; break;
-      case 'blocked': status = 'IN_PROGRESS'; break;
-      case 'dirty': status = 'UNKNOWN'; break;
-      case 'behind': status = 'UNKNOWN'; break;
-      default: status = 'UNKNOWN'; break;
+      case 'clean':    status = 'SUCCESS';     detail = 'checks passing'; break;
+      case 'unstable': status = 'FAILURE';     detail = 'checks failing'; break;
+      case 'blocked':  status = 'IN_PROGRESS'; detail = 'waiting'; break;
+      case 'dirty':    status = 'UNKNOWN';     detail = 'conflicts'; break;
+      case 'behind':   status = 'UNKNOWN';     detail = 'base behind'; break;
+      default:         status = 'UNKNOWN';     detail = 'unknown'; break;
     }
-    return { status: status, detail: state || '?', failCount: 0 };
+    return { status: status, detail: detail, failCount: 0 };
   }
 
   // --- Apply refresh result to a DOM row ---
@@ -283,8 +277,10 @@
     if (reset) {
       var resetSec = parseInt(reset, 10);
       if (isFinite(resetSec)) {
-        var resetMin = Math.max(1, Math.ceil((resetSec * 1000 - Date.now()) / 60000));
-        resetText = ' \u00B7 resets in ' + resetMin + 'min';
+        var resetMin = Math.ceil((resetSec * 1000 - Date.now()) / 60000);
+        resetText = resetMin > 0
+          ? ' \u00B7 resets in ' + resetMin + 'min'
+          : ' \u00B7 resets soon';
       }
     }
     rateLimitEl.textContent = 'API: ' + remaining + '/' + limit + ' remaining' + resetText;
