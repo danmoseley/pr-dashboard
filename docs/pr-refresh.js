@@ -1,8 +1,12 @@
 // pr-refresh.js — Per-PR refresh button for PR Dashboard
 // Adds a hover-only 🔄 button next to each PR number. On click, fetches
 // current PR state from the GitHub REST API and updates the row in-place.
+// Uses a single API call per PR (GET /pulls/{n}) — derives CI status from
+// the mergeable_state field instead of fetching check-runs separately.
 // Persists refreshes to localStorage so they survive page reloads.
 // Auto-expires cached entries when the server-side pipeline has run.
+//
+// Also displays the GitHub API rate limit remaining in a footer element.
 //
 // Security notes (this site is public on GitHub Pages):
 // - All API calls are unauthenticated — no tokens are embedded in client code.
@@ -85,7 +89,7 @@
       var btn = document.createElement('button');
       btn.className = 'pr-refresh-btn';
       btn.innerHTML = '&#x21bb;';
-      btn.title = 'Check merge status and CI for this PR';
+      btn.title = 'Check current state; hides if merged/closed';
       btn.setAttribute('aria-label', 'Check status of PR #' + info.number);
       btn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -96,7 +100,7 @@
     });
   }
 
-  // --- Refresh a single PR ---
+  // --- Refresh a single PR (1 API call) ---
   function doRefresh(tr, btn, info) {
     var now = Date.now();
     if (now - lastRefreshTime < COOLDOWN_MS) return;
@@ -108,6 +112,7 @@
     var apiBase = 'https://api.github.com/repos/' + info.owner + '/' + info.repo;
     fetch(apiBase + '/pulls/' + info.number, { headers: { Accept: 'application/vnd.github.v3+json' } })
       .then(function(r) {
+        updateRateLimit(r);
         if (!r.ok) throw new Error('PR fetch failed: ' + r.status);
         return r.json();
       })
@@ -117,21 +122,15 @@
           merged: pr.merged || false,
           mergeable_state: pr.mergeable_state,
           title: pr.title,
-          head_sha: pr.head && pr.head.sha,
           ts: new Date().toISOString(),
           serverTs: getServerTimestamp()
         };
 
-        if (pr.state === 'open' && result.head_sha) {
-          // Fetch check runs for CI status
-          return fetch(apiBase + '/commits/' + result.head_sha + '/check-runs?per_page=100',
-            { headers: { Accept: 'application/vnd.github.v3+json' } })
-            .then(function(r2) { return r2.ok ? r2.json() : { check_runs: [] }; })
-            .then(function(checks) {
-              result.ci = parseCiStatus(checks.check_runs || []);
-              return result;
-            });
+        // Derive CI status from mergeable_state (avoids a second API call)
+        if (pr.state === 'open') {
+          result.ci = ciFromMergeableState(pr.mergeable_state);
         }
+
         return result;
       })
       .then(function(result) {
@@ -150,41 +149,22 @@
       });
   }
 
-  // --- Parse CI check runs (mirrors server-side logic) ---
-  function parseCiStatus(runs) {
-    // Find the "Build Analysis" check (primary CI signal)
-    var buildAnalysis = null;
-    for (var i = 0; i < runs.length; i++) {
-      if (/build.analysis/i.test(runs[i].name)) {
-        buildAnalysis = runs[i];
-        break;
-      }
-    }
-
-    var pass = 0, fail = 0, pending = 0;
-    runs.forEach(function(r) {
-      if (r.status !== 'completed') { pending++; }
-      else if (r.conclusion === 'success' || r.conclusion === 'skipped' || r.conclusion === 'neutral') { pass++; }
-      else { fail++; }
-    });
-    var detail = pass + '/' + fail + '/' + pending;
-
+  // --- Derive approximate CI status from PR mergeable_state ---
+  function ciFromMergeableState(state) {
+    // mergeable_state values: clean, dirty, unstable, blocked, behind, unknown
+    // "clean" = all checks pass, no conflicts, reviews approved
+    // "unstable" = some checks failing
+    // "blocked" = required reviews missing or checks pending
+    // "dirty" = merge conflicts
+    // "behind" = base branch is ahead
     var status;
-    if (buildAnalysis) {
-      if (buildAnalysis.status !== 'completed') status = 'IN_PROGRESS';
-      else if (buildAnalysis.conclusion === 'success') status = 'SUCCESS';
-      else status = 'FAILURE';
-    } else if (pending > 0) {
-      status = 'IN_PROGRESS';
-    } else if (fail === 0 && pass > 0) {
-      status = 'SUCCESS';
-    } else if (fail > 0) {
-      status = 'FAILURE';
-    } else {
-      status = 'UNKNOWN';
+    switch (state) {
+      case 'clean': status = 'SUCCESS'; break;
+      case 'unstable': status = 'FAILURE'; break;
+      case 'blocked': status = 'IN_PROGRESS'; break;
+      default: status = 'UNKNOWN'; break;
     }
-
-    return { status: status, detail: detail, failCount: fail };
+    return { status: status, detail: state || '?', failCount: 0 };
   }
 
   // --- Apply refresh result to a DOM row ---
@@ -195,21 +175,25 @@
       return;
     }
 
-    // Open — update CI cell
+    var changed = false;
+
+    // Open — update CI cell from mergeable_state-derived status
     if (result.ci) {
       var ciCell = tr.querySelector('.ci');
       if (ciCell) {
         var emoji = result.ci.status === 'SUCCESS' ? '\u2705' :
                     result.ci.status === 'FAILURE' ? '\u274C' :
                     result.ci.status === 'IN_PROGRESS' ? '\u23F3' : '\u26A0\uFE0F';
-        var failHint = '';
-        if (result.ci.status === 'SUCCESS' && result.ci.failCount > 0) {
-          failHint = '<sup class="ci-warn">' + result.ci.failCount + '</sup>';
-          ciCell.title = 'Build Analysis passed; ' + result.ci.failCount + ' non-blocking check(s) failed';
-        } else {
-          ciCell.title = '';
+        // Detect if CI status actually changed from what's displayed
+        var oldText = ciCell.textContent;
+        var wasSuccess = oldText.indexOf('\u2705') >= 0;
+        var wasFailure = oldText.indexOf('\u274C') >= 0;
+        if ((result.ci.status === 'SUCCESS') !== wasSuccess ||
+            (result.ci.status === 'FAILURE') !== wasFailure) {
+          changed = true;
         }
-        ciCell.innerHTML = emoji + failHint + ' ' + result.ci.detail;
+        ciCell.innerHTML = emoji + ' ' + result.ci.detail;
+        ciCell.title = 'Approximate status from mergeable_state';
       }
     }
 
@@ -221,7 +205,13 @@
         span.style.cssText = 'color:#da3633; font-weight:600; margin-right:4px;';
         span.textContent = '\uD83D\uDED1 conflict';
         actionCell.insertBefore(span, actionCell.firstChild);
+        changed = true;
       }
+    }
+
+    // Only fade scores if something score-affecting actually changed
+    if (changed) {
+      tr.classList.add('scores-stale');
     }
   }
 
@@ -253,6 +243,31 @@
         applyResultToRow(tr, cache[key]);
       }
     });
+  }
+
+  // --- Rate limit footer ---
+  var rateLimitEl = null;
+
+  function ensureRateLimitFooter() {
+    if (rateLimitEl) return;
+    rateLimitEl = document.createElement('div');
+    rateLimitEl.className = 'rate-limit-footer';
+    document.body.appendChild(rateLimitEl);
+  }
+
+  function updateRateLimit(response) {
+    var remaining = response.headers.get('X-RateLimit-Remaining');
+    var limit = response.headers.get('X-RateLimit-Limit');
+    var reset = response.headers.get('X-RateLimit-Reset');
+    if (remaining == null || limit == null) return;
+    ensureRateLimitFooter();
+    var resetText = '';
+    if (reset) {
+      var resetMs = parseInt(reset) * 1000 - Date.now();
+      var resetMin = Math.max(1, Math.ceil(resetMs / 60000));
+      resetText = ' \u00B7 resets in ' + resetMin + 'min';
+    }
+    rateLimitEl.textContent = 'API: ' + remaining + '/' + limit + ' remaining' + resetText;
   }
 
   // --- Initialize ---
