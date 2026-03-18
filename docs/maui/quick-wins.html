@@ -14,10 +14,10 @@
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
 </style>
 </head>
-<body data-server-updated="2026-03-17T19:26:54.6183018Z">
+<body data-server-updated="2026-03-18T07:19:23.7845752Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/maui/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/maui</h1>
-<p class="meta">Updated ~twice daily (weekdays 2x, weekends 1x), last <span id="last-updated" data-updated="2026-03-17T19:26:54.6183018Z">at 2026-03-17 19:26 UTC</span> &middot; 1 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
+<p class="meta">Updated ~twice daily (weekdays 2x, weekends 1x), last <span id="last-updated" data-updated="2026-03-18T07:19:23.7845752Z">at 2026-03-18 07:19 UTC</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -81,29 +81,44 @@
   <col style="width:2.5%">
   <col style="width:2.5%">
   <col style="width:8%">
-  
+  <col style="width:7%">
 </colgroup>
 <thead>
 <tr>
   <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
 </tr>
 </thead>
 <tbody>
+<tr data-people="kubaflo,KarthikRajaKalaimani" data-labels="area-controls-scrollview">
+  <td class="score ready-high">9.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;high interest: 0t 7ppl (+1.0)&#10;old but active: 419d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;high interest (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/maui/pull/27300" title="[iOS][Windows] ScrollView: Fix ScrollToAsync hanging when already at target position">#27300</a></td>
+  <td class="title">[iOS][Windows] ScrollView: Fix ScrollToAsync hanging when already at target position</td>
+  <td class="action" title="Copilot review errored">&#x1F7E2; Ready to merge; rerequest Copilot review</td>
+  <td class="ci" title="28 passed, 0 failed, 0 running">&#x2705; 28/0/0</td>
+  <td class="disc heat-3">&#x1F525; 0/0t 7ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;7 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">419d</td>
+  <td class="num">1d</td>
+  <td class="num" title="3 files, 18 lines (additions + deletions)">18</td>
+  <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/KarthikRajaKalaimani.png?size=32" alt="KarthikRajaKalaimani"><a href="https://github.com/KarthikRajaKalaimani">@KarthikRajaKalaimani</a><a class="filter-btn" href="#" onclick="filterByUser('KarthikRajaKalaimani');return false" title="Show only @KarthikRajaKalaimani">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-controls-scrollview');return false" title="Show only area-controls-scrollview">controls-scrollview</a></td>
+</tr>
 <tr data-people="sheiksyedm,Oxymoron290" data-labels="">
-  <td class="score ready-high">8.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;community author (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;high interest: 5t 6ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;high interest (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="score ready-high">8.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;community author (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;high interest: 5t 7ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;high interest (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/maui/pull/34337" title="Fix LayoutCycleException from nested Borders on Windows">#34337</a></td>
   <td class="title">Fix LayoutCycleException from nested Borders on Windows</td>
   <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/sheiksyedm.png?size=32" alt="sheiksyedm"><a href="https://github.com/sheiksyedm">@sheiksyedm</a><a class="filter-btn" href="#" onclick="filterByUser('sheiksyedm');return false" title="Show only @sheiksyedm">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
   <td class="ci" title="135 passed, 0 failed, 0 running">&#x2705; 135/0/0</td>
-  <td class="disc heat-3">&#x1F525; 0/5t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">12d</td>
-  <td class="num">4d</td>
+  <td class="disc heat-3">&#x1F525; 0/5t 7ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;7 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num">13d</td>
+  <td class="num">0d</td>
   <td class="num" title="3 files, 93 lines (additions + deletions)">93</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/Oxymoron290.png?size=32" alt="Oxymoron290"><a href="https://github.com/Oxymoron290">@Oxymoron290</a><a class="filter-btn" href="#" onclick="filterByUser('Oxymoron290');return false" title="Show only @Oxymoron290">&#x1F50D;</a></span></td>
-  
+  <td class="area-col"></td>
 </tr>
 </tbody>
 </table>
