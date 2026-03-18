@@ -156,7 +156,7 @@
       case 'clean':    status = 'SUCCESS';     detail = 'checks passing'; break;
       case 'unstable': status = 'FAILURE';     detail = 'checks failing'; break;
       case 'blocked':  status = 'IN_PROGRESS'; detail = 'waiting'; break;
-      case 'dirty':    status = 'UNKNOWN';     detail = 'conflicts'; break;
+      case 'dirty':    status = 'CONFLICT';    detail = 'conflicts'; break;
       case 'behind':   status = 'UNKNOWN';     detail = 'base behind'; break;
       default:         status = 'UNKNOWN';     detail = 'unknown'; break;
     }
@@ -179,7 +179,8 @@
       if (ciCell) {
         var emoji = result.ci.status === 'SUCCESS' ? '\u2705' :
                     result.ci.status === 'FAILURE' ? '\u274C' :
-                    result.ci.status === 'IN_PROGRESS' ? '\u23F3' : '\u26A0\uFE0F';
+                    result.ci.status === 'IN_PROGRESS' ? '\u23F3' :
+                    result.ci.status === 'CONFLICT' ? '\uD83D\uDED1' : '\u26A0\uFE0F';
         // Detect if CI status actually changed
         var prevStatus = ciCell.getAttribute('data-ci-status');
         if (!prevStatus) {
@@ -188,12 +189,19 @@
           if (t.indexOf('\u2705') >= 0) prevStatus = 'SUCCESS';
           else if (t.indexOf('\u274C') >= 0) prevStatus = 'FAILURE';
           else if (t.indexOf('\u23F3') >= 0) prevStatus = 'IN_PROGRESS';
+          else if (t.indexOf('\uD83D\uDED1') >= 0) prevStatus = 'CONFLICT';
           else prevStatus = 'UNKNOWN';
         }
         if (prevStatus !== result.ci.status) {
           changed = true;
         }
+        // Also detect detail changes (e.g., different UNKNOWN sub-states)
+        var prevDetail = ciCell.getAttribute('data-ci-detail') || '';
+        if (prevDetail && prevDetail !== result.ci.detail) {
+          changed = true;
+        }
         ciCell.setAttribute('data-ci-status', result.ci.status);
+        ciCell.setAttribute('data-ci-detail', result.ci.detail);
         ciCell.textContent = emoji + ' ' + result.ci.detail;
         ciCell.title = 'Approximate status from mergeable_state';
       }
