@@ -126,8 +126,9 @@
           serverTs: getServerTimestamp()
         };
 
-        // Derive CI status from mergeable_state (avoids a second API call)
-        if (pr.state === 'open') {
+        // Derive CI status from mergeable_state (avoids a second API call).
+        // Skip when null/unknown — GitHub is still computing mergeability.
+        if (pr.state === 'open' && pr.mergeable_state && pr.mergeable_state !== 'unknown') {
           result.ci = ciFromMergeableState(pr.mergeable_state);
         }
 
@@ -158,7 +159,7 @@
       case 'blocked':  status = 'IN_PROGRESS'; detail = 'waiting'; break;
       case 'dirty':    status = 'CONFLICT';    detail = 'conflicts'; break;
       case 'behind':   status = 'UNKNOWN';     detail = 'base behind'; break;
-      default:         status = 'UNKNOWN';     detail = 'unknown'; break;
+      default:         status = 'UNKNOWN';     detail = 'computing'; break;
     }
     return { status: status, detail: detail, failCount: 0 };
   }
