@@ -4,7 +4,9 @@
 
 Automated PR triage dashboard for dotnet repositories, updated via GitHub Actions.
 
-## **➡️[View Dashboard](https://danmoseley.github.io/pr-dashboard/)⬅️**
+## **➡️[PR Dashboard](https://danmoseley.github.io/pr-dashboard/)⬅️**
+
+## **[Issue Dashboard](https://matouskozak.github.io/issue-dashboard/runtime/needs-attention.html)**
 
 ## Reports
 
