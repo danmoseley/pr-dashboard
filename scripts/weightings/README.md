@@ -53,7 +53,7 @@ but _raise_ the need for attention. Issue engagement is entirely new signal.
 | | has reviews but no approval | +1 | **Opposite** |
 | | large change (>200 lines) | +0.5 | **Opposite** |
 | | trivial change (≤2 files, ≤20 lines, no unresolved threads) | +0.5 | Aligned |
-| **Blocked** | CI blocking merge (approved, no unresolved threads) | +1.5 | **Opposite** |
+| **Blocked** | CI blocking merge (otherwise merge-ready) | +1.5 | **Opposite** |
 | | unresolved review feedback | +1 | Aligned |
 | | no approval | +1.5 | **Opposite** |
 
