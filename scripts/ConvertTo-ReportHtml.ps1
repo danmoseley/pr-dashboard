@@ -286,6 +286,7 @@ $scoringHtml = @"
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
         <tr><td>1.5</td><td>No approval yet</td></tr>
+        <tr><td>1.5</td><td>CI blocking merge (approved, no unresolved threads)</td></tr>
         <tr><td>1.0</td><td>Community author</td></tr>
         <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
         <tr><td>1.0</td><td>Has unresolved feedback</td></tr>

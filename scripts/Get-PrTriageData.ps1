@@ -581,6 +581,7 @@ foreach ($pr in $candidates) {
     elseif ($totalThreads -gt 5) { $valueRaw += 0.5 }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueRaw += 0.5 }     # old but active
     if ($isTrivial -and $unresolvedThreads -eq 0) { $valueRaw += 0.5 }           # quick win — trivial review
+    if ($baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0) { $valueRaw += 1.5 }  # CI blocking merge — approved but can't land
     # Author response latency: if ball is in author's court, reduce attention (maintainer can't help)
     $daysSinceAuthorComment = if ($lastAuthorCommentDate) { ($now - $lastAuthorCommentDate).TotalDays } else { $ageInDays }
     if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $valueRaw -= 1.5 }   # author silent — not actionable
@@ -605,6 +606,7 @@ foreach ($pr in $candidates) {
     if ($totalLines -gt 200) { $valueWhy += "large change: $totalLines lines (+0.5)" }
     if ($ageInDays -gt 30 -and $daysSinceActivity -le 14) { $valueWhy += "old but active: $([int]$ageInDays)d age (+0.5)" }
     if ($isTrivial -and $unresolvedThreads -eq 0) { $valueWhy += "trivial change, quick win (+0.5)" }
+    if ($baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0) { $valueWhy += "CI blocking merge — approved but can't land (+1.5)" }
     if ($valueWhy.Count -eq 0) { $valueWhy += "no attention signals" }
     if ($valueClamped) { $valueWhy += "(net negative, floored to 0)" }
     $valueWhyStr = $valueWhy -join "&#10;"
@@ -640,6 +642,7 @@ foreach ($pr in $candidates) {
     if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $allContribs += [PSCustomObject]@{ key = "reviewed, not approved"; text = "reviewed, not approved"; pts = 1.0 } }
     if ($unresolvedThreads -gt 0) { $allContribs += [PSCustomObject]@{ key = "unresolved feedback"; text = "has unresolved feedback"; pts = 1.0 } }
     if ($totalThreads -gt 10 -or $distinctCommenters -gt 3) { $allContribs += [PSCustomObject]@{ key = "high interest"; text = "high interest"; pts = 1.0 } }
+    if ($baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0) { $allContribs += [PSCustomObject]@{ key = "ci blocking"; text = "CI blocking merge"; pts = 1.5 } }
     if ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 14) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "author silent $([int]$daysSinceAuthorComment)d, ball in their court"; pts = -1.5 } }
     elseif ($unresolvedThreads -gt 0 -and $daysSinceAuthorComment -gt 7) { $allContribs += [PSCustomObject]@{ key = "author latency"; text = "author slow $([int]$daysSinceAuthorComment)d, ball in their court"; pts = -0.5 } }
     # Group by key, sum points, keep best text
