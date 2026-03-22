@@ -151,11 +151,13 @@
   }
 
   // --- Derive approximate CI status from PR mergeable_state ---
+  // "unstable" means required checks passed but optional checks failed;
+  // skip it to preserve the more accurate scan-time Build Analysis result.
   function ciFromMergeableState(state) {
     var status, detail;
     switch (state) {
       case 'clean':    status = 'SUCCESS';     detail = 'checks passing'; break;
-      case 'unstable': status = 'FAILURE';     detail = 'checks failing'; break;
+      case 'unstable': return null; // don't overwrite — Build Analysis is authoritative
       case 'blocked':  status = 'IN_PROGRESS'; detail = 'waiting'; break;
       case 'dirty':    status = 'CONFLICT';    detail = 'conflicts'; break;
       case 'behind':   status = 'UNKNOWN';     detail = 'base behind'; break;
