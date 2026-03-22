@@ -508,7 +508,7 @@
     if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
     else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
 
-    return '<tr' + moreClass + ' data-people="' + people + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
+    return '<tr' + moreClass + ' data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
       '<td class="score' + readyClass + '">' + readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button></td>' +
       '<td class="score">' + needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button></td>' +
       '<td class="action-score' + actionClass + '">' + actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button></td>' +
