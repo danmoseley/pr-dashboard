@@ -8,13 +8,15 @@
 <style>
   /* Page-specific styles for cross-repo view */
   .user-input { margin-bottom: 1em; display: flex; align-items: center; gap: 8px; }
-  .user-input input { background: var(--header-bg); color: var(--fg); border: 1px solid var(--border);
+  .user-input input[type="text"] { background: var(--header-bg); color: var(--fg); border: 1px solid var(--border);
     border-radius: 6px; padding: 6px 12px; font-size: 0.95em; width: 220px; }
-  .user-input input::placeholder { color: #484f58; }
-  .user-input input:focus { outline: none; border-color: var(--link); }
+  .user-input input[type="text"]::placeholder { color: #484f58; }
+  .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
   .user-input button { background: #238636; color: #fff; border: none; border-radius: 6px;
     padding: 6px 16px; font-size: 0.9em; cursor: pointer; font-weight: 500; }
   .user-input button:hover { background: #2ea043; }
+  .involves-label { font-size: 0.85em; color: #8b949e; cursor: pointer; user-select: none;
+    display: flex; align-items: center; gap: 4px; margin-left: 4px; }
   .summary-bar { background: var(--header-bg); border: 1px solid var(--border); border-radius: 6px;
     padding: 8px 14px; margin-bottom: 1em; font-size: 0.9em; display: none; }
   .summary-bar .total { font-weight: 600; }
@@ -36,8 +38,8 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
-  <label style="margin-left:12px;font-size:0.85em;color:#8b949e;cursor:pointer;user-select:none">
-    <input type="checkbox" id="involves-toggle" onchange="onInvolvesToggle()" style="vertical-align:middle;margin-right:3px">
+  <label class="involves-label" id="involves-label" style="display:none">
+    <input type="checkbox" id="involves-toggle">
     Include all involved PRs
   </label>
 </div>
@@ -115,12 +117,18 @@
   // --- Init ---
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
+  var urlInvolves = params.get('involves');
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
-  try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
+  if (urlInvolves !== null) {
+    involvesMode = urlInvolves === 'true' || urlInvolves === '1';
+  } else {
+    try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
+  }
   var initialUser = urlUser || savedUser;
   if (initialUser) {
     document.getElementById('user-field').value = initialUser;
+    document.getElementById('involves-label').style.display = '';
   }
   document.getElementById('involves-toggle').checked = involvesMode;
 
@@ -130,11 +138,29 @@
   });
 
   // Involves toggle handler
-  window.onInvolvesToggle = function() {
-    involvesMode = document.getElementById('involves-toggle').checked;
-    try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-    if (currentUser && loaded) renderFiltered(currentUser);
-  };
+  var involvesToggle = document.getElementById('involves-toggle');
+  if (!involvesToggle) {
+    console.error('involves-toggle element not found!');
+  } else {
+    involvesToggle.addEventListener('change', function() {
+      involvesMode = this.checked;
+      try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser && loaded) renderFiltered(currentUser);
+    });
+    involvesToggle.addEventListener('click', function() {
+      // Belt-and-suspenders: some browsers/situations don't fire 'change'
+      var self = this;
+      setTimeout(function() {
+        if (self.checked !== involvesMode) {
+          involvesMode = self.checked;
+          try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+          if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+          if (currentUser && loaded) renderFiltered(currentUser);
+        }
+      }, 0);
+    });
+  }
 
   // Start fetching
   fetchData();
@@ -200,12 +226,19 @@
   }
 
   // --- Actions (global) ---
+  function buildUrl(user) {
+    var url = location.pathname + '?user=' + encodeURIComponent(user);
+    if (involvesMode) url += '&involves=true';
+    return url;
+  }
+
   window.applyUser = function() {
     var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
     if (!name) return;
     currentUser = name;
     saveUser(name);
-    history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+    document.getElementById('involves-label').style.display = '';
+    history.replaceState(null, '', buildUrl(name));
     if (loaded) renderFiltered(name);
   };
 
@@ -213,7 +246,8 @@
     document.getElementById('user-field').value = name;
     currentUser = name;
     saveUser(name);
-    history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+    document.getElementById('involves-label').style.display = '';
+    history.replaceState(null, '', buildUrl(name));
     renderFiltered(name);
   };
 
@@ -252,6 +286,7 @@
   window.clearUser = function() {
     currentUser = '';
     document.getElementById('user-field').value = '';
+    document.getElementById('involves-label').style.display = 'none';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
     document.getElementById('filter-banner').style.display = 'none';
@@ -356,7 +391,7 @@
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
-      html += renderRow(prs[i], hasArea, i, smallPrThreshold, smallPrEnabled);
+      html += renderRow(prs[i], hasArea, i, smallPrThreshold, smallPrEnabled, currentUser);
     }
     html += '</tbody></table>';
 
@@ -390,10 +425,21 @@
     } catch(e) {}
   }
 
-  function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled) {
+  function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUser) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
-    var moreClass = idx >= 100 ? ' class="more-row" style="display:none"' : '';
+
+    // Detect if the filtered user is the one who should act next
+    var isYourTurn = false;
+    if (filterUser) {
+      var na = pr.next_action || '';
+      var lc = filterUser.toLowerCase();
+      // next_action starts with "@user:" or "@user," (multiple people)
+      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[,:\\s]', 'i').test(na);
+    }
+
+    var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
+                                : (isYourTurn ? ' class="your-turn"' : '');
 
     // CI emoji
     var ciEmoji = pr.ci === 'SUCCESS' ? '&#x2705;' :
@@ -478,7 +524,7 @@
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
       '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
       '<td class="title">' + safeTitle + '</td>' +
-      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + actionEmoji + convertUserRefs(escHtml(na)) + '</td>' +
+      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na)) + '</td>' +
       '<td class="ci"' + ciTitle + '>' + ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '') + '</td>' +
       '<td class="disc' + discHeat + '">' + discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button></td>' +
       '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +

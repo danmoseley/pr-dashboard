@@ -861,11 +861,11 @@ foreach ($pr in $candidates) {
 
     # Build the "involved" list — all people connected to this PR (for involves: filtering)
     $involvedSet = @{}
-    $involvedSet[$authorLogin] = $true
+    if ($authorLogin) { $involvedSet[$authorLogin] = $true }
     if ($botTrigger) { $involvedSet[$botTrigger] = $true }
-    foreach ($r in $reviewerLogins) { $involvedSet[$r] = $true }
-    foreach ($c in $allCommenters) { $involvedSet[$c] = $true }
-    foreach ($rr in $requestedReviewerLogins) { $involvedSet[$rr] = $true }
+    foreach ($r in $reviewerLogins) { if ($r) { $involvedSet[$r] = $true } }
+    foreach ($c in $allCommenters) { if ($c) { $involvedSet[$c] = $true } }
+    foreach ($rr in $requestedReviewerLogins) { if ($rr) { $involvedSet[$rr] = $true } }
     foreach ($w in $who) { if ($w -and $w -ne 'area owner') { $involvedSet[$w] = $true } }
     $involvedList = @($involvedSet.Keys | Sort-Object)
 
