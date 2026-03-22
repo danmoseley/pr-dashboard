@@ -571,7 +571,7 @@ foreach ($pr in $candidates) {
     $mergeReadiness = [Math]::Round([Math]::Min(($rawScore / $rawMax) * 10, 10.0), 1)
 
     # Value/Attention score — signals that this PR deserves maintainer time
-    $ciBlockingMerge = $baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0 -and -not $hasNeedsAuthorAction -and $pr.mergeable -ne "CONFLICTING"
+    $ciBlockingMerge = $baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0 -and -not $hasNeedsAuthorAction -and $pr.mergeable -eq "MERGEABLE"
     $valueRaw = 0.0
     if ($isCommunity) { $valueRaw += 1.0 }                                         # community effort at risk
     if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $valueRaw += 1.0 }        # reviewed but not approved
