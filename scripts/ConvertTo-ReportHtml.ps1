@@ -172,6 +172,9 @@ $rows = foreach ($pr in $prs) {
     if ($pr.copilot_trigger) { $allText += " @$($pr.copilot_trigger)" }
     $people = @([regex]::Matches($allText, '@([\w-]+)') | ForEach-Object { $_.Groups[1].Value } | Select-Object -Unique) -join ','
 
+    # "involved" list for involves:-style filtering (reviewers, commenters, etc.)
+    $involvedList = if ($pr.involved) { ($pr.involved -join ',') } else { "" }
+
     $labelsList = if ($pr.area_labels) { ($pr.area_labels -join ',') } else { "" }
 
     $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
@@ -194,7 +197,7 @@ $rows = foreach ($pr in $prs) {
     $linesWord = if ($pr.lines_changed -eq 1) { "line" } else { "lines" }
 
     @"
-<tr$moreClass data-people="$people" data-labels="$labelsList">
+<tr$moreClass data-people="$([System.Net.WebUtility]::HtmlEncode($people))" data-involved="$([System.Net.WebUtility]::HtmlEncode($involvedList))" data-labels="$([System.Net.WebUtility]::HtmlEncode($labelsList))">
   <td class="score$readyClass">$($pr.merge_readiness)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeWhy" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">$($pr.value_score)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeValueWhy" aria-label="Show Need score breakdown">?</button></td>
   <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy" aria-label="Show Action score breakdown">?</button></td>

@@ -571,7 +571,7 @@ foreach ($pr in $candidates) {
     $mergeReadiness = [Math]::Round([Math]::Min(($rawScore / $rawMax) * 10, 10.0), 1)
 
     # Value/Attention score — signals that this PR deserves maintainer time
-    $ciBlockingMerge = $baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0 -and -not $hasNeedsAuthorAction -and $pr.mergeable -ne "CONFLICTING"
+    $ciBlockingMerge = $baConclusion -eq "FAILURE" -and $approvalCount -gt 0 -and $unresolvedThreads -eq 0 -and -not $hasNeedsAuthorAction -and $pr.mergeable -eq "MERGEABLE"
     $valueRaw = 0.0
     if ($isCommunity) { $valueRaw += 1.0 }                                         # community effort at risk
     if ($totalThreads -gt 0 -and $approvalCount -eq 0) { $valueRaw += 1.0 }        # reviewed but not approved
@@ -736,7 +736,14 @@ foreach ($pr in $candidates) {
         # Who should click merge? The approving owner or area lead
         if ($approverLogins.Count -gt 0) {
             $who = @($approverLogins | Where-Object { $prOwners -contains $_ } | Select-Object -First 1)
-            if (-not $who -or $who.Count -eq 0) { $who = @($approverLogins | Select-Object -First 1) }
+            if (-not $who -or $who.Count -eq 0) {
+                # Prefer a maintainer from $prioritizedOwners over a non-maintainer approver
+                if ($prioritizedOwners.Count -gt 0) {
+                    $who = @($prioritizedOwners | Select-Object -First 1)
+                } else {
+                    $who = @($approverLogins | Select-Object -First 1)
+                }
+            }
         } elseif ($prioritizedOwners.Count -gt 0) {
             $who = @($prioritizedOwners | Select-Object -First 1)
         }
@@ -824,7 +831,11 @@ foreach ($pr in $candidates) {
     if ($whoStr -and $prNextAction -match '^Maintainer:\s*(.+)') {
         $prNextAction = "$whoStr`: $($Matches[1])"
     } elseif ($whoStr -and $prNextAction -eq "Ready to merge") {
-        $prNextAction = "$whoStr or other maintainer: Ready to merge"
+        # Say "or other maintainer" only if $who is actually a maintainer;
+        # otherwise say "or a maintainer" (e.g., when approver is a community triager)
+        $whoIsMaintainer = $who.Count -gt 0 -and ($allMaintainerPool -contains $who[0])
+        $maintainerPhrase = if ($whoIsMaintainer) { "or other maintainer" } else { "or a maintainer" }
+        $prNextAction = "$whoStr $maintainerPhrase`: Ready to merge"
     }
 
     # Blockers
@@ -847,6 +858,16 @@ foreach ($pr in $candidates) {
         $c = [Math]::Round($_.val * $_.w, 1); "$($_.text) (+$c)"
     })
     $whyStr = $mergeWhy -join "&#10;"
+
+    # Build the "involved" list — all people connected to this PR (for involves: filtering)
+    $involvedSet = @{}
+    if ($authorLogin) { $involvedSet[$authorLogin] = $true }
+    if ($botTrigger) { $involvedSet[$botTrigger] = $true }
+    foreach ($r in $reviewerLogins) { if ($r) { $involvedSet[$r] = $true } }
+    foreach ($c in $allCommenters) { if ($c) { $involvedSet[$c] = $true } }
+    foreach ($rr in $requestedReviewerLogins) { if ($rr) { $involvedSet[$rr] = $true } }
+    foreach ($w in $who) { if ($w -and $w -ne 'area owner') { $involvedSet[$w] = $true } }
+    $involvedList = @($involvedSet.Keys | Sort-Object)
 
     $results += [PSCustomObject]@{
         number = $n
@@ -877,6 +898,7 @@ foreach ($pr in $candidates) {
         lines_changed = $totalLines
         next_action = $prNextAction
         who = $whoStr
+        involved = $involvedList
         blockers = $blockersStr
         why = $whyStr
     }
