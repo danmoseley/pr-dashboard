@@ -36,6 +36,10 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
+  <label style="margin-left:12px;font-size:0.85em;color:#8b949e;cursor:pointer;user-select:none">
+    <input type="checkbox" id="involves-toggle" onchange="onInvolvesToggle()" style="vertical-align:middle;margin-right:3px">
+    Include all involved PRs
+  </label>
 </div>
 
 <details class="scoring">
@@ -103,23 +107,34 @@
   var repoList = [];      // [{slug, repo}]
   var currentUser = '';    // primary filter username
   var loaded = false;
+  var involvesMode = false; // whether "Include all involved PRs" is checked
 
   var LS_KEY = 'pr-dashboard-user';
+  var LS_INVOLVES_KEY = 'pr-dashboard-involves';
 
   // --- Init ---
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
+  try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
   var initialUser = urlUser || savedUser;
   if (initialUser) {
     document.getElementById('user-field').value = initialUser;
   }
+  document.getElementById('involves-toggle').checked = involvesMode;
 
   // Enter key on input
   document.getElementById('user-field').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') applyUser();
   });
+
+  // Involves toggle handler
+  window.onInvolvesToggle = function() {
+    involvesMode = document.getElementById('involves-toggle').checked;
+    try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+    if (currentUser && loaded) renderFiltered(currentUser);
+  };
 
   // Start fetching
   fetchData();
@@ -262,7 +277,14 @@
     var lc = username.toLowerCase();
     var filtered = allPrs.filter(function(pr) {
       var people = getPeople(pr);
-      return people.indexOf(lc) >= 0;
+      if (people.indexOf(lc) >= 0) return true;
+      // In involves mode, also match reviewers/commenters from the involved field
+      if (involvesMode && pr.involved && pr.involved.length > 0) {
+        for (var i = 0; i < pr.involved.length; i++) {
+          if (pr.involved[i].toLowerCase() === lc) return true;
+        }
+      }
+      return false;
     });
     filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
 
@@ -274,7 +296,8 @@
     var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
       .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
     var bar = document.getElementById('summary-bar');
-    bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' +
+    var modeNote = involvesMode ? ' (includes all involved)' : '';
+    bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' + modeNote +
       ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
       '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
       (breakdown ? ': ' + breakdown : '') + '</span>';
@@ -431,6 +454,7 @@
     }
 
     var people = getPeople(pr).join(',');
+    var involved = (pr.involved || []).join(',');
     var labels = (pr.area_labels || []).join(',');
     var safeTitle = escHtml(pr.title);
     var safeWhy = (pr.why || '').replace(/&#10;/g, '\n');
@@ -447,7 +471,7 @@
     if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
     else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
 
-    return '<tr' + moreClass + ' data-people="' + people + '" data-labels="' + escAttr(labels) + '">' +
+    return '<tr' + moreClass + ' data-people="' + people + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
       '<td class="score' + readyClass + '">' + readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button></td>' +
       '<td class="score">' + needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button></td>' +
       '<td class="action-score' + actionClass + '">' + actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button></td>' +

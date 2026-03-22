@@ -859,6 +859,16 @@ foreach ($pr in $candidates) {
     })
     $whyStr = $mergeWhy -join "&#10;"
 
+    # Build the "involved" list — all people connected to this PR (for involves: filtering)
+    $involvedSet = @{}
+    $involvedSet[$authorLogin] = $true
+    if ($botTrigger) { $involvedSet[$botTrigger] = $true }
+    foreach ($r in $reviewerLogins) { $involvedSet[$r] = $true }
+    foreach ($c in $allCommenters) { $involvedSet[$c] = $true }
+    foreach ($rr in $requestedReviewerLogins) { $involvedSet[$rr] = $true }
+    foreach ($w in $who) { if ($w -and $w -ne 'area owner') { $involvedSet[$w] = $true } }
+    $involvedList = @($involvedSet.Keys | Sort-Object)
+
     $results += [PSCustomObject]@{
         number = $n
         title = $pr.title
@@ -888,6 +898,7 @@ foreach ($pr in $candidates) {
         lines_changed = $totalLines
         next_action = $prNextAction
         who = $whoStr
+        involved = $involvedList
         blockers = $blockersStr
         why = $whyStr
     }
