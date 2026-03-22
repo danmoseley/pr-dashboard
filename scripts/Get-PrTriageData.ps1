@@ -736,7 +736,14 @@ foreach ($pr in $candidates) {
         # Who should click merge? The approving owner or area lead
         if ($approverLogins.Count -gt 0) {
             $who = @($approverLogins | Where-Object { $prOwners -contains $_ } | Select-Object -First 1)
-            if (-not $who -or $who.Count -eq 0) { $who = @($approverLogins | Select-Object -First 1) }
+            if (-not $who -or $who.Count -eq 0) {
+                # Prefer a maintainer from $prioritizedOwners over a non-maintainer approver
+                if ($prioritizedOwners.Count -gt 0) {
+                    $who = @($prioritizedOwners | Select-Object -First 1)
+                } else {
+                    $who = @($approverLogins | Select-Object -First 1)
+                }
+            }
         } elseif ($prioritizedOwners.Count -gt 0) {
             $who = @($prioritizedOwners | Select-Object -First 1)
         }
@@ -824,7 +831,11 @@ foreach ($pr in $candidates) {
     if ($whoStr -and $prNextAction -match '^Maintainer:\s*(.+)') {
         $prNextAction = "$whoStr`: $($Matches[1])"
     } elseif ($whoStr -and $prNextAction -eq "Ready to merge") {
-        $prNextAction = "$whoStr or other maintainer: Ready to merge"
+        # Say "or other maintainer" only if $who is actually a maintainer;
+        # otherwise say "or a maintainer" (e.g., when approver is a community triager)
+        $whoIsMaintainer = $who.Count -gt 0 -and ($allMaintainerPool -contains $who[0])
+        $maintainerPhrase = if ($whoIsMaintainer) { "or other maintainer" } else { "or a maintainer" }
+        $prNextAction = "$whoStr $maintainerPhrase`: Ready to merge"
     }
 
     # Blockers
