@@ -148,18 +148,6 @@
       if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
       if (currentUser && loaded) renderFiltered(currentUser);
     });
-    involvesToggle.addEventListener('click', function() {
-      // Belt-and-suspenders: some browsers/situations don't fire 'change'
-      var self = this;
-      setTimeout(function() {
-        if (self.checked !== involvesMode) {
-          involvesMode = self.checked;
-          try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-          if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
-          if (currentUser && loaded) renderFiltered(currentUser);
-        }
-      }, 0);
-    });
   }
 
   // Start fetching
@@ -286,12 +274,15 @@
   window.clearUser = function() {
     currentUser = '';
     document.getElementById('user-field').value = '';
+    involvesMode = false;
+    document.getElementById('involves-toggle').checked = false;
     document.getElementById('involves-label').style.display = 'none';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
     document.getElementById('filter-banner').style.display = 'none';
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     if (loaded) renderTable(allPrs);
   };
 
@@ -435,7 +426,7 @@
       var na = pr.next_action || '';
       var lc = filterUser.toLowerCase();
       // next_action starts with "@user:" or "@user," (multiple people)
-      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[,:\\s]', 'i').test(na);
+      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:[,:\\s]|$)', 'i').test(na);
     }
 
     var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
