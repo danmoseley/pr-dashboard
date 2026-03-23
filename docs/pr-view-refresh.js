@@ -138,15 +138,15 @@
 
   // --- Search for new PRs by user ---
   function searchNewPrs(username, existingKeys, repoList) {
-    // Build repo filter for tracked repos
-    var repoFilter = repoList.map(function(r) { return 'repo:' + r.repo; }).join('+');
+    // Build repo filter for tracked repos (use spaces — encodeURIComponent handles encoding)
+    var repoFilter = repoList.map(function(r) { return 'repo:' + r.repo; }).join(' ');
 
     // Search for PRs authored by the user
     var queries = [
-      'author:' + username + '+is:open+is:pr+' + repoFilter
+      'author:' + username + ' is:open is:pr ' + repoFilter
     ];
     // Also search for Copilot PRs triggered by the user (assigned to them)
-    queries.push('author:copilot-swe-agent+assignee:' + username + '+is:open+is:pr+' + repoFilter);
+    queries.push('author:copilot-swe-agent assignee:' + username + ' is:open is:pr ' + repoFilter);
 
     var newPrs = [];
 
@@ -275,7 +275,7 @@
     var existingKeys = {};
 
     rows.forEach(function(tr) {
-      if (tr.style.display === 'none' && !tr.classList.contains('more-row')) return;
+      if (tr.style.display === 'none') return; // skip hidden rows (including unexpanded .more-row)
       var info = parsePrFromRow(tr);
       if (!info) return;
       var key = info.owner + '/' + info.repo + '#' + info.number;
@@ -426,9 +426,8 @@
               if (!tbody) return;
 
               // Check if table has Area column
-              var hasArea = !!document.querySelector('#pr-table thead th[data-sort="alpha"]:last-child');
               var headerCells = document.querySelectorAll('#pr-table thead th');
-              hasArea = headerCells.length > 13; // 13 base columns + area = 14
+              var hasArea = headerCells.length > 13; // 13 base columns + area = 14
 
               newPrs.forEach(function(pr) {
                 var slug = findSlug(pr.owner, pr.repo, repoList);
@@ -532,8 +531,8 @@
     return { status: status, detail: detail };
   }
 
-  // --- Apply cached refresh results on page load ---
-  function applyCachedViewRefresh() {
+  // --- Expire stale cache on page load ---
+  function expireStaleCache() {
     var serverTs = getServerTimestamp();
     var cache = loadViewCache();
     if (!cache.lastRefresh) return;
@@ -541,7 +540,6 @@
     // Expire if server data is newer than our cache
     if (serverTs && cache.lastRefresh.serverTs && serverTs > cache.lastRefresh.serverTs) {
       localStorage.removeItem(VIEW_REFRESH_CACHE_KEY);
-      return;
     }
   }
 
@@ -657,7 +655,7 @@
 
   // --- Initialize ---
   function init() {
-    applyCachedViewRefresh();
+    expireStaleCache();
     injectRefreshButton();
     fetchAndShowRateLimit();
   }
