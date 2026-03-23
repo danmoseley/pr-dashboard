@@ -97,9 +97,7 @@ try {
     Write-Verbose "Warning: could not fetch area-owners.md, using empty owner table"
 }
 
-$communityTriagers = @("a74nh","am11","clamp03","Clockwork-Muse","filipnavara",
-    "huoyaoyuan","martincostello","omajid","Sergio0694","shushanhf",
-    "SingleAccretion","teo-tsirpanis","tmds","vcsjones","xoofx")
+$communityTriagers = @()  # Community triagers cannot merge or sign off; treat as regular reviewers
 
 # --- Step 1: List PRs ---
 Write-Verbose "Fetching PR list..."
