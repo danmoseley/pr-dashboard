@@ -595,9 +595,11 @@
   // --- Rate limit footer (shared with pr-refresh.js) ---
   // Reuses the same .rate-limit-footer element if pr-refresh.js already created one.
   function ensureRateLimitFooter() {
-    var el = document.querySelector('.rate-limit-footer');
+    // Use a dedicated element to avoid conflicting with pr-refresh.js's .rate-limit-footer
+    var el = document.getElementById('view-refresh-rate-limit');
     if (!el) {
       el = document.createElement('div');
+      el.id = 'view-refresh-rate-limit';
       el.className = 'rate-limit-footer';
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');

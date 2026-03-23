@@ -427,7 +427,7 @@
       // Use the 'who' field (the person(s) who should act), not next_action
       // (which also mentions who left feedback — e.g., "respond to threads from @X")
       var who = (pr.who || '').toLowerCase();
-      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(who);
+      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=[,;:\\s]|$)', 'i').test(who);
     }
 
     var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
