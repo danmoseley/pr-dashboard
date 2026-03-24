@@ -423,10 +423,11 @@
     // Detect if the filtered user is the one who should act next
     var isYourTurn = false;
     if (filterUser) {
-      var na = pr.next_action || '';
       var lc = filterUser.toLowerCase();
-      // next_action starts with "@user:" or "@user," (multiple people)
-      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?:[,:\\s]|$)', 'i').test(na);
+      // Use the 'who' field (the person(s) who should act), not next_action
+      // (which also mentions who left feedback — e.g., "respond to threads from @X")
+      var who = (pr.who || '').toLowerCase();
+      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=[,;:\\s]|$)', 'i').test(who);
     }
 
     var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
@@ -538,9 +539,18 @@
 
   // userHtml() and convertUserRefs() are now in shared-ui.js
 
+  // Expose internals for pr-view-refresh.js
+  window._prDashboard = {
+    get currentUser() { return currentUser; },
+    get repoList() { return repoList; },
+    get allPrs() { return allPrs; },
+    renderRow: renderRow
+  };
+
 })();
 </script>
 <script src="../pr-refresh.js"></script>
+<script src="../pr-view-refresh.js"></script>
 <footer style="margin-top:2em;padding-top:1em;border-top:1px solid var(--border);font-size:0.8em;color:#8b949e;text-align:center;">
   <a href="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml"><img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Generate All Reports" style="vertical-align:middle"></a>
 </footer>
