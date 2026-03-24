@@ -30,7 +30,12 @@ param(
     [string]$Observations = "",
     [string]$Repo = "dotnet/runtime",
     [Parameter(Mandatory)][string]$OutputFile,
-    [string]$Timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm 'UTC'"),
+    [string]$Timestamp = (& {
+        $tz = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles')
+        $pt = [TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $tz)
+        $abbr = if ($tz.IsDaylightSavingTime($pt)) { 'PDT' } else { 'PST' }
+        $pt.ToString("yyyy-MM-dd HH:mm") + " $abbr"
+    }),
     [string]$TimestampIso = (Get-Date).ToUniversalTime().ToString("o"),
     [string]$ScheduleDesc = "",
     [hashtable]$NavLinks = @{},

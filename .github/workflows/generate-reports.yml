@@ -132,7 +132,7 @@ jobs:
               echo "No changes to commit"
               break
             fi
-            git commit -m "Update reports $(date -u +'%Y-%m-%d %H:%M UTC')"
+            git commit -m "Update reports $(TZ='America/Los_Angeles' date +'%Y-%m-%d %H:%M %Z')"
             if git push; then
               break
             fi
