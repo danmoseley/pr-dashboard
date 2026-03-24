@@ -321,15 +321,16 @@ Do NOT repeat what's in the table. Output ONLY the bullet points, each starting 
 
 # --- Write meta.json ---
 $meta = @{
-    repo     = $Repo
-    slug     = $Slug
-    updated  = $timestampIso
-    scanned  = $scan.scanned
-    analyzed = $scan.analyzed
-    drafts   = if ($scan.screened_out) { [int]$scan.screened_out.drafts_count } else { 0 }
-    bots     = if ($scan.screened_out -and $scan.screened_out.bots) { @($scan.screened_out.bots).Count } else { 0 }
-    elapsed  = $scan.elapsed_seconds
-    reports  = $reportMeta
+    repo          = $Repo
+    slug          = $Slug
+    updated       = $timestampIso
+    schedule_desc = $ScheduleDesc
+    scanned       = $scan.scanned
+    analyzed      = $scan.analyzed
+    drafts        = if ($scan.screened_out) { [int]$scan.screened_out.drafts_count } else { 0 }
+    bots          = if ($scan.screened_out -and $scan.screened_out.bots) { @($scan.screened_out.bots).Count } else { 0 }
+    elapsed       = $scan.elapsed_seconds
+    reports       = $reportMeta
 }
 $meta | ConvertTo-Json -Depth 3 | Out-File -FilePath (Join-Path $outDir "meta.json") -Encoding utf8
 

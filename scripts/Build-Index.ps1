@@ -163,7 +163,8 @@ $dataRows = foreach ($rt in $reportTypes) {
 
 # Build updated row
 $updatedCells = $repos | ForEach-Object {
-    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-schedule=`"$([System.Net.WebUtility]::HtmlEncode($ScheduleDesc))`">...</td>"
+    $sd = if ($_.schedule_desc) { $_.schedule_desc } elseif ($ScheduleDesc) { $ScheduleDesc } else { '~daily' }
+    "<td class=`"updated`" data-updated=`"$($_.updated)`" data-schedule=`"$([System.Net.WebUtility]::HtmlEncode($sd))`">...</td>"
 }
 $updatedRow = "<tr class=`"updated-row`"><td class=`"report-name`">Updated</td>$($updatedCells -join '')</tr>"
 
