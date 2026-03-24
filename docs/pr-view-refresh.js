@@ -283,6 +283,7 @@
     var total = visibleRows.length;
     var checked = 0;
     var succeeded = 0;
+    var failed = 0;
     var hidden = 0;
     var ciUpdated = 0;
     var coreExhausted = false;
@@ -354,6 +355,7 @@
                 if (statusEl) statusEl.textContent = '\u26A0\uFE0F Core API exhausted, searching for new PRs\u2026';
                 throw err;
               }
+              failed++;
               if (statusEl) statusEl.textContent = 'Checking ' + checked + '/' + total + '\u2026';
               console.warn('Failed to check PR #' + item.info.number + ':', err.message);
             });
@@ -439,10 +441,10 @@
                   }
                 }
 
-                // Set scores to — for display (no data for scoring)
-                scanPr.merge_readiness = '-';
-                scanPr.value_score = '-';
-                scanPr.action_score = '-';
+                // Set scores to a neutral numeric value (no data for scoring yet)
+                scanPr.merge_readiness = 0;
+                scanPr.value_score = 0;
+                scanPr.action_score = 0;
 
                 // Add to allPrs so it participates in filtering
                 allPrs.push(scanPr);
@@ -476,6 +478,7 @@
         if (hidden > 0) parts.push(hidden + ' closed/merged hidden');
         if (ciUpdated > 0) parts.push(ciUpdated + ' CI updated');
         if (added > 0) parts.push(added + ' new PR' + (added > 1 ? 's' : '') + ' found');
+        if (failed > 0) parts.push(failed + ' PR' + (failed !== 1 ? 's' : '') + ' failed to check');
         var unchecked = total - succeeded;
         if (coreExhausted && unchecked > 0) {
           parts.push('core API exhausted \u2014 ' + unchecked + ' PR' + (unchecked !== 1 ? 's' : '') + ' not checked (closed/merged detection and CI unavailable)');
@@ -484,7 +487,7 @@
         if (parts.length === 0) parts.push('all PRs up to date');
 
         var ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        var icon = (coreExhausted || searchExhausted) ? '\u26A0\uFE0F' : '\u2705';
+        var icon = (coreExhausted || searchExhausted || failed > 0) ? '\u26A0\uFE0F' : '\u2705';
         if (statusEl) statusEl.textContent = icon + ' ' + parts.join(', ') + ' (at ' + ts + ')';
 
         // Cache result
@@ -588,6 +591,9 @@
         observer._timer = setTimeout(tryInject, 50);
       });
       observer.observe(bar, { attributes: true, childList: true, subtree: true });
+
+      // Try injecting immediately in case the bar is already visible on page load
+      tryInject();
     }
   }
 
