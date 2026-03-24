@@ -147,6 +147,7 @@
 
     var newPrs = [];
     var searchTruncated = false;
+    var searchFailed = false;
 
     return queries.reduce(function(chain, q) {
       return chain.then(function() {
@@ -186,11 +187,12 @@
           })
           .catch(function(err) {
             if (err.name === 'RateLimitError') throw err;
+            searchFailed = true;
             console.warn('PR search failed:', err.message);
           });
       });
     }, Promise.resolve()).then(function() {
-      return { prs: newPrs, truncated: searchTruncated };
+      return { prs: newPrs, truncated: searchTruncated, failed: searchFailed };
     });
   }
 
@@ -293,6 +295,7 @@
     var coreExhausted = false;
     var searchExhausted = false;
     var searchTruncated = false;
+    var searchFailed = false;
 
     // If we already know core is exhausted, skip phase 1 entirely
     var skipPhase1 = rateLimitRemaining !== null && rateLimitRemaining <= 0;
@@ -316,8 +319,7 @@
               if (pr.merged || pr.state === 'closed') {
                 // Remove from DOM so filter/clear logic can't re-show it
                 if (item.tr.parentNode) item.tr.parentNode.removeChild(item.tr);
-                // Remove from allPrs so re-renders don't bring it back
-                var allPrs = window._prDashboard && window._prDashboard.allPrs;
+                // Remove from allPrs (the parameter) so re-renders don't bring it back
                 if (allPrs) {
                   var itemRepoId = item.info.owner + '/' + item.info.repo;
                   for (var i = allPrs.length - 1; i >= 0; i--) {
@@ -392,13 +394,14 @@
         if (statusEl) statusEl.textContent = 'Searching for new PRs\u2026';
         return searchNewPrs(currentUser, existingKeys, repoList)
           .catch(function(err) {
-            if (err.name === 'RateLimitError') { searchExhausted = true; return { prs: [], truncated: false }; }
+            if (err.name === 'RateLimitError') { searchExhausted = true; return { prs: [], truncated: false, failed: false }; }
             throw err;
           });
       })
       .then(function(searchResult) {
         var newPrs = searchResult.prs;
         searchTruncated = searchResult.truncated;
+        searchFailed = searchResult.failed;
         var added = 0;
 
         if (newPrs.length > 0) {
@@ -507,10 +510,11 @@
         }
         if (searchExhausted) parts.push('search API exhausted \u2014 new PR discovery unavailable');
         if (searchTruncated) parts.push('search results truncated \u2014 some new PRs may not appear');
+        if (searchFailed) parts.push('search query failed \u2014 new PR discovery may be incomplete');
         if (parts.length === 0) parts.push('all PRs up to date');
 
         var ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        var icon = (coreExhausted || searchExhausted || failed > 0) ? '\u26A0\uFE0F' : '\u2705';
+        var icon = (coreExhausted || searchExhausted || failed > 0 || searchFailed) ? '\u26A0\uFE0F' : '\u2705';
         if (statusEl) statusEl.textContent = icon + ' ' + parts.join(', ') + ' (at ' + ts + ')';
 
         // Cache result
@@ -523,11 +527,6 @@
           added: added
         };
         saveViewCache(cache);
-
-        // Re-inject per-PR refresh buttons on new rows
-        if (added > 0 && window.dispatchEvent) {
-          window.dispatchEvent(new Event('pr-view-refresh-done'));
-        }
       })
       .catch(function(err) {
         if (statusEl) statusEl.textContent = '\u274C Refresh failed: ' + err.message;
