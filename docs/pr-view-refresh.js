@@ -14,14 +14,11 @@
   // --- Rate limit tracking (shared with pr-refresh.js footer) ---
   var rateLimitRemaining = null;
 
-  function updateRateLimitFromResponse(response) {
+  function updateRateLimitFromResponse(response, isCore) {
     var rem = response.headers.get('X-RateLimit-Remaining');
     var limit = response.headers.get('X-RateLimit-Limit');
     if (rem == null || limit == null) return;
-    rateLimitRemaining = parseInt(rem, 10);
-    // Store for inline status text only (not the footer — different endpoints
-    // return different rate limits e.g. core vs search, so the footer uses
-    // the /rate_limit endpoint for accuracy)
+    if (isCore) rateLimitRemaining = parseInt(rem, 10);
     rateLimitDisplay = rem + '/' + limit;
     var reset = response.headers.get('X-RateLimit-Reset');
     if (reset) {
@@ -79,7 +76,7 @@
     var url = 'https://api.github.com/repos/' + owner + '/' + repo + '/pulls/' + number;
     return fetch(url, FETCH_OPTS)
       .then(function(r) {
-        updateRateLimitFromResponse(r);
+        updateRateLimitFromResponse(r, true);
         if (r.status === 403 || r.status === 429) throw new RateLimitError('Rate limited');
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
@@ -155,7 +152,7 @@
         var url = 'https://api.github.com/search/issues?q=' + encodeURIComponent(q) + '&per_page=100';
         return fetch(url, FETCH_OPTS)
           .then(function(r) {
-            updateRateLimitFromResponse(r);
+            updateRateLimitFromResponse(r, false);
             if (r.status === 403 || r.status === 429) throw new RateLimitError('Search rate limited');
             if (!r.ok) throw new Error('Search failed: HTTP ' + r.status);
             return r.json();
@@ -178,7 +175,7 @@
                 updated_at: item.updated_at,
                 labels: (item.labels || []).map(function(l) { return l.name; }),
                 assignees: (item.assignees || []).map(function(a) { return a.login; }),
-                draft: item.draft || false,
+                draft: item.draft || (item.pull_request && item.pull_request.draft) || false,
                 state: item.state
               });
             });
@@ -557,7 +554,7 @@
       btn.id = 'view-refresh-btn';
       btn.className = 'view-refresh-btn';
       btn.textContent = '\u21BB Refresh View';
-      btn.title = 'Check for closed/merged PRs and discover new ones (uses ~25 unauthenticated API calls)';
+      btn.title = 'Check for closed/merged PRs and discover new ones (uses unauthenticated API calls, one per visible PR)';
       btn.addEventListener('click', function() {
         var user = window._prDashboard && window._prDashboard.currentUser;
         var repos = window._prDashboard && window._prDashboard.repoList;
@@ -570,6 +567,8 @@
       var status = document.createElement('span');
       status.id = 'view-refresh-status';
       status.className = 'view-refresh-status';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
       status.style.display = 'none';
 
       bar.appendChild(document.createTextNode(' '));
@@ -578,7 +577,7 @@
       bar.appendChild(status);
     }
 
-    // Use a MutationObserver on the summary bar AND its parent to catch
+    // Use a MutationObserver on the summary bar to catch
     // both style changes (bar becoming visible) and innerHTML replacements
     // (which destroy the button).
     var bar = document.getElementById('summary-bar');
@@ -604,6 +603,9 @@
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');
       document.body.appendChild(el);
+      // Hide pr-refresh.js's separate footer if it exists, to avoid two footers
+      var prRefreshFooter = document.querySelector('.rate-limit-footer:not(#view-refresh-rate-limit)');
+      if (prRefreshFooter) prRefreshFooter.style.display = 'none';
     }
     // Add refresh-limitations note if not already present
     if (!document.querySelector('.refresh-limitations')) {
