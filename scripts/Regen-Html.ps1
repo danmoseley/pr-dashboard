@@ -57,7 +57,9 @@ foreach ($slug in $repos.Keys | Sort-Object) {
         try {
             $meta = Get-Content $metaFile -Raw | ConvertFrom-Json
             if ($meta.schedule_desc) { $repoScheduleDesc = $meta.schedule_desc }
-        } catch { }
+        } catch {
+            Write-Warning "Failed to read '$metaFile': $($_.Exception.Message)"
+        }
     }
     Write-Host "=== Regenerating $slug ===" -ForegroundColor Cyan
     $params = @{
