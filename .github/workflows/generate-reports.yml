@@ -1,10 +1,10 @@
 name: Generate All Reports
 
 on:
-  # schedule-desc: ~twice daily (weekdays 2x, weekends 1x)
+  # schedule-desc: priority repos ~4x daily, others ~daily
   schedule:
-    - cron: '0 6,18 * * 1-5'  # weekdays 2x: 6am + 6pm UTC (Pacific evening/morning, varies with DST)
-    - cron: '0 16 * * 0,6'    # weekends 1x: 4pm UTC (Pacific morning, varies with DST)
+    - cron: '0 0,6,12,18 * * 1-5'  # weekdays 4x: priority repos every 6h, standard repos at 6 UTC only
+    - cron: '0 6,18 * * 0,6'       # weekends 2x: priority repos both, standard repos at 6 UTC only
   workflow_dispatch: {}
 
 permissions:
@@ -39,9 +39,20 @@ jobs:
       - name: Read schedule description
         if: env.SKIP_RUN != 'true'
         run: |
-          # Read schedule-desc from the workflow YAML comment (single source of truth)
-          desc=$(grep -oP '^\s*#\s*schedule-desc:\s*\K.+' .github/workflows/generate-reports.yml | head -1 || true)
-          echo "SCHEDULE_DESC=${desc:-~twice daily (weekdays 2x, weekends 1x)}" >> "$GITHUB_ENV"
+          # Per-tier schedule descriptions
+          echo "PRIORITY_SCHEDULE_DESC=~4x daily" >> "$GITHUB_ENV"
+          echo "STANDARD_SCHEDULE_DESC=~daily" >> "$GITHUB_ENV"
+          # Determine if this is a daily slot where standard repos should also refresh.
+          # Standard repos run at the 06 UTC slot. We check the runtime clock with a
+          # ±1h tolerance (05-07 UTC) to handle GitHub Actions queuing delays.
+          current_hour=$(date -u +%H)
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$current_hour" = "05" ] || [ "$current_hour" = "06" ] || [ "$current_hour" = "07" ]; then
+            echo "RUN_STANDARD=true" >> "$GITHUB_ENV"
+            echo "Running all tiers (daily slot or manual trigger)"
+          else
+            echo "RUN_STANDARD=false" >> "$GITHUB_ENV"
+            echo "Running priority tier only (hour=$current_hour)"
+          fi
 
       - name: Install gh-models extension
         if: env.SKIP_RUN != 'true'
@@ -56,22 +67,36 @@ jobs:
         run: |
           failed=()
           repos=(
-            "dotnet/runtime:runtime"
-            "dotnet/aspnetcore:aspnetcore"
-            "dotnet/aspire:aspire"
-            "dotnet/extensions:extensions"
-            "dotnet/sdk:sdk"
-            "dotnet/msbuild:msbuild"
-            "dotnet/winforms:winforms"
-            "dotnet/wpf:wpf"
-            "dotnet/roslyn:roslyn"
-            "dotnet/machinelearning:machinelearning"
-            "dotnet/skills:skills"
-            "dotnet/maui:maui"
+            "dotnet/runtime:runtime:priority"
+            "dotnet/aspnetcore:aspnetcore:standard"
+            "dotnet/aspire:aspire:priority"
+            "dotnet/extensions:extensions:standard"
+            "dotnet/sdk:sdk:standard"
+            "dotnet/msbuild:msbuild:standard"
+            "dotnet/winforms:winforms:standard"
+            "dotnet/wpf:wpf:standard"
+            "dotnet/roslyn:roslyn:standard"
+            "dotnet/machinelearning:machinelearning:standard"
+            "dotnet/skills:skills:standard"
+            "dotnet/maui:maui:standard"
           )
           for entry in "${repos[@]}"; do
-            IFS=':' read -r repo slug <<< "$entry"
-            echo "=== Scanning $repo ==="
+            IFS=':' read -r repo slug tier <<< "$entry"
+
+            # Skip standard-tier repos unless this is the daily slot or manual trigger
+            if [ "$tier" = "standard" ] && [ "$RUN_STANDARD" != "true" ]; then
+              echo "--- Skipping $repo (standard tier, not daily slot) ---"
+              continue
+            fi
+
+            # Set per-repo schedule description based on tier
+            if [ "$tier" = "priority" ]; then
+              schedule_desc="$PRIORITY_SCHEDULE_DESC"
+            else
+              schedule_desc="$STANDARD_SCHEDULE_DESC"
+            fi
+
+            echo "=== Scanning $repo ($tier tier) ==="
             mkdir -p "docs/${slug}"
             # Read maintainers for this repo from config
             maintainers=$(pwsh -Command "(Get-Content config/maintainers.json | ConvertFrom-Json).'$repo' -join ','")
@@ -97,7 +122,7 @@ jobs:
                 continue
               fi
             fi
-            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$SCHEDULE_DESC" -SkipAI; then
+            if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
               continue
@@ -112,7 +137,7 @@ jobs:
         if: env.SKIP_RUN != 'true'
         run: |
           mkdir -p docs/all
-          pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "$SCHEDULE_DESC"
+          pwsh ./scripts/Build-Index.ps1
 
       - name: Commit and push
         if: env.SKIP_RUN != 'true'
@@ -125,7 +150,7 @@ jobs:
             git stash --include-untracked || true
             git pull origin main || true
             git stash pop || true
-            pwsh ./scripts/Build-Index.ps1 -ScheduleDesc "$SCHEDULE_DESC"
+            pwsh ./scripts/Build-Index.ps1
             pwsh ./scripts/Build-Changelog.ps1 || echo "::warning::Changelog generation failed, continuing without update"
             git add docs/
             if git diff --cached --quiet; then
