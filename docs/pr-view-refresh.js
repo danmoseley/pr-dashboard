@@ -146,6 +146,7 @@
     queries.push('author:copilot-swe-agent assignee:' + username + ' is:open is:pr ' + repoFilter);
 
     var newPrs = [];
+    var searchTruncated = false;
 
     return queries.reduce(function(chain, q) {
       return chain.then(function() {
@@ -158,6 +159,9 @@
             return r.json();
           })
           .then(function(data) {
+            if (data.total_count > (data.items || []).length || data.incomplete_results) {
+              searchTruncated = true;
+            }
             (data.items || []).forEach(function(item) {
               // Extract owner/repo from the html_url
               var m = item.html_url.match(/github\.com\/([^\/]+)\/([^\/]+)\/(?:pull|issues)\/(\d+)/);
@@ -186,7 +190,7 @@
           });
       });
     }, Promise.resolve()).then(function() {
-      return newPrs;
+      return { prs: newPrs, truncated: searchTruncated };
     });
   }
 
@@ -288,6 +292,7 @@
     var ciUpdated = 0;
     var coreExhausted = false;
     var searchExhausted = false;
+    var searchTruncated = false;
 
     // If we already know core is exhausted, skip phase 1 entirely
     var skipPhase1 = rateLimitRemaining !== null && rateLimitRemaining <= 0;
@@ -374,11 +379,13 @@
         if (statusEl) statusEl.textContent = 'Searching for new PRs\u2026';
         return searchNewPrs(currentUser, existingKeys, repoList)
           .catch(function(err) {
-            if (err.name === 'RateLimitError') { searchExhausted = true; return []; }
+            if (err.name === 'RateLimitError') { searchExhausted = true; return { prs: [], truncated: false }; }
             throw err;
           });
       })
-      .then(function(newPrs) {
+      .then(function(searchResult) {
+        var newPrs = searchResult.prs;
+        searchTruncated = searchResult.truncated;
         var added = 0;
 
         if (newPrs.length > 0) {
@@ -484,6 +491,7 @@
           parts.push('core API exhausted \u2014 ' + unchecked + ' PR' + (unchecked !== 1 ? 's' : '') + ' not checked (closed/merged detection and CI unavailable)');
         }
         if (searchExhausted) parts.push('search API exhausted \u2014 new PR discovery unavailable');
+        if (searchTruncated) parts.push('search results truncated \u2014 some new PRs may not appear');
         if (parts.length === 0) parts.push('all PRs up to date');
 
         var ts = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -609,10 +617,11 @@
       el.setAttribute('role', 'status');
       el.setAttribute('aria-live', 'polite');
       document.body.appendChild(el);
-      // Hide pr-refresh.js's separate footer if it exists, to avoid two footers
-      var prRefreshFooter = document.querySelector('.rate-limit-footer:not(#view-refresh-rate-limit)');
-      if (prRefreshFooter) prRefreshFooter.style.display = 'none';
     }
+    // Hide pr-refresh.js's separate footer if it exists, on every call
+    // (pr-refresh.js may create its footer after ours)
+    var others = document.querySelectorAll('.rate-limit-footer:not(#view-refresh-rate-limit)');
+    others.forEach(function(f) { f.style.display = 'none'; });
     // Add refresh-limitations note if not already present
     if (!document.querySelector('.refresh-limitations')) {
       var note = document.createElement('div');
