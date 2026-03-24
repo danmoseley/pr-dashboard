@@ -17,14 +17,14 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $docsDir = Join-Path $root "docs"
 
-# Read schedule description from the workflow YAML (single source of truth)
-# Looks for a comment like: # schedule-desc: ~twice daily
+# Read schedule description from the workflow YAML (used as fallback for repos without per-repo meta)
+# Looks for a comment like: # schedule-desc: priority repos ~4x daily, others ~daily
 $workflowFile = Join-Path $root ".github/workflows/generate-reports.yml"
-$scheduleDesc = "~twice daily (weekdays 2x, weekends 1x)"  # fallback
+$globalScheduleDesc = "priority repos ~4x daily, others ~daily"  # fallback
 if (Test-Path $workflowFile) {
     $descLine = Get-Content $workflowFile | Where-Object { $_ -match '^\s*#\s*schedule-desc:\s*(.+)' } | Select-Object -First 1
     if ($descLine -and $descLine -match '^\s*#\s*schedule-desc:\s*(.+)') {
-        $scheduleDesc = $Matches[1].Trim()
+        $globalScheduleDesc = $Matches[1].Trim()
     }
 }
 
@@ -50,13 +50,22 @@ foreach ($slug in $repos.Keys | Sort-Object) {
         continue
     }
     $cfg = $repos[$slug]
+    # Preserve per-repo schedule_desc from meta.json (written by last workflow run)
+    $repoScheduleDesc = $globalScheduleDesc
+    $metaFile = Join-Path $docsDir "$slug/meta.json"
+    if (Test-Path $metaFile) {
+        try {
+            $meta = Get-Content $metaFile -Raw | ConvertFrom-Json
+            if ($meta.schedule_desc) { $repoScheduleDesc = $meta.schedule_desc }
+        } catch { }
+    }
     Write-Host "=== Regenerating $slug ===" -ForegroundColor Cyan
     $params = @{
         ScanFile      = $scanFile
         Repo          = $cfg.Repo
         Slug          = $slug
         ReportTypes   = $cfg.Types
-        ScheduleDesc  = $scheduleDesc
+        ScheduleDesc  = $repoScheduleDesc
     }
     if ($SkipAI) { $params["SkipAI"] = $true }
     & "$PSScriptRoot\Build-Reports.ps1" @params
@@ -69,6 +78,6 @@ if ($found -eq 0) {
 }
 
 Write-Host "`n=== Rebuilding index ===" -ForegroundColor Cyan
-& "$PSScriptRoot\Build-Index.ps1" -ScheduleDesc $scheduleDesc
+& "$PSScriptRoot\Build-Index.ps1" -ScheduleDesc $globalScheduleDesc
 
 Write-Host "`nDone — regenerated $found repos from cached scan data." -ForegroundColor Green

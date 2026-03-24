@@ -7,6 +7,10 @@ on:
     - cron: '0 6,18 * * 0,6'       # weekends 2x: priority repos both, standard repos at 6 UTC only
   workflow_dispatch: {}
 
+concurrency:
+  group: generate-reports
+  cancel-in-progress: false  # let the running job finish; new run will queue
+
 permissions:
   contents: write
   models: read
