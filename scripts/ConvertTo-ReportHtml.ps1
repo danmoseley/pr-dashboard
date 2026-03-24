@@ -12,7 +12,7 @@
 .PARAMETER OutputFile
     Path to write the HTML output.
 .PARAMETER Timestamp
-    ISO 8601 timestamp string for the "Updated" line.
+    Human-readable timestamp string for the "Updated" line (e.g., "2026-03-24 10:35 PDT").
 .PARAMETER TimestampIso
     ISO 8601 UTC timestamp used for the page's data-server-updated attribute,
     which enables client-side cache invalidation for per-PR refresh.
@@ -31,7 +31,8 @@ param(
     [string]$Repo = "dotnet/runtime",
     [Parameter(Mandatory)][string]$OutputFile,
     [string]$Timestamp = (& {
-        $tz = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles')
+        try { $tz = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles') }
+        catch { $tz = [TimeZoneInfo]::FindSystemTimeZoneById('Pacific Standard Time') }
         $pt = [TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $tz)
         $abbr = if ($tz.IsDaylightSavingTime($pt)) { 'PDT' } else { 'PST' }
         $pt.ToString("yyyy-MM-dd HH:mm") + " $abbr"

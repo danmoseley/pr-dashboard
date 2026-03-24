@@ -195,7 +195,8 @@ foreach ($pr in $allPrs) {
 }
 $allPrs = @($allPrs | Sort-Object -Property action_score -Descending)
 
-$pacific = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles')
+try { $pacific = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles') }
+catch { $pacific = [TimeZoneInfo]::FindSystemTimeZoneById('Pacific Standard Time') }
 $pacificNow = [TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $pacific)
 $tzAbbr = if ($pacific.IsDaylightSavingTime($pacificNow)) { 'PDT' } else { 'PST' }
 $timestamp = $pacificNow.ToString("yyyy-MM-dd HH:mm") + " $tzAbbr"
