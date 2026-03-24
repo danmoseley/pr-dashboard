@@ -314,7 +314,18 @@
               if (statusEl) statusEl.textContent = 'Checking ' + checked + '/' + total + '\u2026' + rl;
 
               if (pr.merged || pr.state === 'closed') {
-                item.tr.style.display = 'none';
+                // Remove from DOM so filter/clear logic can't re-show it
+                if (item.tr.parentNode) item.tr.parentNode.removeChild(item.tr);
+                // Remove from allPrs so re-renders don't bring it back
+                var allPrs = window._prDashboard && window._prDashboard.allPrs;
+                if (allPrs) {
+                  for (var i = allPrs.length - 1; i >= 0; i--) {
+                    if (allPrs[i].number === item.info.number && allPrs[i].repo === item.info.owner + '/' + item.info.repo) {
+                      allPrs.splice(i, 1);
+                      break;
+                    }
+                  }
+                }
                 hidden++;
                 return;
               }
@@ -460,7 +471,7 @@
                 var rowHtml = renderRowFn(scanPr, hasArea, 0, 0, false, currentUser);
                 var temp = document.createElement('tbody');
                 temp.innerHTML = rowHtml;
-                var newRow = temp.firstChild;
+                var newRow = temp.firstElementChild;
                 if (newRow) {
                   // Add "NEW" badge to the title cell
                   var titleCell = newRow.querySelector('.title');
