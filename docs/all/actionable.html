@@ -194,7 +194,11 @@
         if (timestamps.length > 0) {
           timestamps.sort(function(a, b) { return a - b; });
           var oldest = timestamps[0];
-          var ts = oldest.toISOString().replace('T', ' ').replace(/\.\d+Z$/, ' UTC');
+          var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' }).formatToParts(oldest);
+          var p = {}; parts.forEach(function(x) { p[x.type] = x.value; });
+          var tz = p.timeZoneName || '';
+          var tzAbbr = /^P[SD]T$/.test(tz) ? tz : (tz.indexOf('-7') >= 0 ? 'PDT' : 'PST');
+          var ts = p.year + '-' + p.month + '-' + p.day + ' ' + p.hour + ':' + p.minute + ' ' + tzAbbr;
           document.getElementById('meta-line').textContent =
             'Updated every 12h, last at ' + ts + ' \u00B7 ' + allPrs.length + ' PRs across ' + results.length + ' repos';
         }

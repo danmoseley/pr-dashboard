@@ -195,7 +195,11 @@ foreach ($pr in $allPrs) {
 }
 $allPrs = @($allPrs | Sort-Object -Property action_score -Descending)
 
-$timestamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-dd HH:mm 'UTC'")
+try { $pacific = [TimeZoneInfo]::FindSystemTimeZoneById('America/Los_Angeles') }
+catch { $pacific = [TimeZoneInfo]::FindSystemTimeZoneById('Pacific Standard Time') }
+$pacificNow = [TimeZoneInfo]::ConvertTimeFromUtc((Get-Date).ToUniversalTime(), $pacific)
+$tzAbbr = if ($pacific.IsDaylightSavingTime($pacificNow)) { 'PDT' } else { 'PST' }
+$timestamp = $pacificNow.ToString("yyyy-MM-dd HH:mm") + " $tzAbbr"
 $timestampIso = (Get-Date).ToUniversalTime().ToString("o")
 
 $outDir = Join-Path $DocsDir $Slug
