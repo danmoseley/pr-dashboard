@@ -319,8 +319,10 @@
                 // Remove from allPrs so re-renders don't bring it back
                 var allPrs = window._prDashboard && window._prDashboard.allPrs;
                 if (allPrs) {
+                  var itemRepoId = item.info.owner + '/' + item.info.repo;
                   for (var i = allPrs.length - 1; i >= 0; i--) {
-                    if (allPrs[i].number === item.info.number && allPrs[i].repo === item.info.owner + '/' + item.info.repo) {
+                    var repoId = allPrs[i].repo || allPrs[i]._repo;
+                    if (allPrs[i].number === item.info.number && repoId === itemRepoId) {
                       allPrs.splice(i, 1);
                       break;
                     }
@@ -444,7 +446,9 @@
 
               // Check if table has Area column
               var headerCells = document.querySelectorAll('#pr-table thead th');
-              var hasArea = headerCells.length > 13; // 13 base columns + area = 14
+              var hasArea = Array.prototype.some.call(headerCells, function(th) {
+                return (th.textContent || '').trim().toLowerCase() === 'area';
+              });
 
               newPrs.forEach(function(pr) {
                 var slug = findSlug(pr.owner, pr.repo, repoList);
@@ -497,7 +501,7 @@
         if (ciUpdated > 0) parts.push(ciUpdated + ' CI updated');
         if (added > 0) parts.push(added + ' new PR' + (added > 1 ? 's' : '') + ' found');
         if (failed > 0) parts.push(failed + ' PR' + (failed !== 1 ? 's' : '') + ' failed to check');
-        var unchecked = total - succeeded;
+        var unchecked = total - checked;
         if (coreExhausted && unchecked > 0) {
           parts.push('core API exhausted \u2014 ' + unchecked + ' PR' + (unchecked !== 1 ? 's' : '') + ' not checked (closed/merged detection and CI unavailable)');
         }
@@ -616,8 +620,9 @@
     }
   }
 
-  // --- Rate limit footer (shared with pr-refresh.js) ---
-  // Reuses the same .rate-limit-footer element if pr-refresh.js already created one.
+  // --- Rate limit footer ---
+  // Creates a dedicated #view-refresh-rate-limit element and hides any
+  // other .rate-limit-footer nodes (e.g. from pr-refresh.js) to avoid duplicates.
   function ensureRateLimitFooter() {
     // Use a dedicated element to avoid conflicting with pr-refresh.js's .rate-limit-footer
     var el = document.getElementById('view-refresh-rate-limit');
