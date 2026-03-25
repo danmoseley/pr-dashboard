@@ -42,6 +42,10 @@
     <input type="checkbox" id="involves-toggle">
     Include all involved PRs
   </label>
+  <label class="involves-label" id="next-action-label" style="display:none">
+    <input type="checkbox" id="next-action-toggle">
+    Next action on me only
+  </label>
 </div>
 
 <details class="scoring">
@@ -110,14 +114,17 @@
   var currentUser = '';    // primary filter username
   var loaded = false;
   var involvesMode = false; // whether "Include all involved PRs" is checked
+  var nextActionOnlyMode = false; // whether "Next action on me only" is checked
 
   var LS_KEY = 'pr-dashboard-user';
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
+  var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
 
   // --- Init ---
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   var urlInvolves = params.get('involves');
+  var urlNextAction = params.get('nextaction');
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
   if (urlInvolves !== null) {
@@ -125,12 +132,19 @@
   } else {
     try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
   }
+  if (urlNextAction !== null) {
+    nextActionOnlyMode = urlNextAction === 'true' || urlNextAction === '1';
+  } else {
+    try { nextActionOnlyMode = localStorage.getItem(LS_NEXT_ACTION_KEY) === 'true'; } catch(e) {}
+  }
   var initialUser = urlUser || savedUser;
   if (initialUser) {
     document.getElementById('user-field').value = initialUser;
     document.getElementById('involves-label').style.display = '';
+    document.getElementById('next-action-label').style.display = '';
   }
   document.getElementById('involves-toggle').checked = involvesMode;
+  document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
 
   // Enter key on input
   document.getElementById('user-field').addEventListener('keydown', function(e) {
@@ -148,6 +162,39 @@
       if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
       if (currentUser && loaded) renderFiltered(currentUser);
     });
+  }
+
+  // Next action on me only toggle handler
+  var nextActionToggle = document.getElementById('next-action-toggle');
+  var savedInvolvesBeforeNextAction = involvesMode;
+  if (nextActionToggle) {
+    nextActionToggle.addEventListener('change', function() {
+      nextActionOnlyMode = this.checked;
+      try { localStorage.setItem(LS_NEXT_ACTION_KEY, nextActionOnlyMode ? 'true' : 'false'); } catch(e) {}
+      if (nextActionOnlyMode) {
+        // Save involves state, then check and disable it
+        savedInvolvesBeforeNextAction = involvesMode;
+        involvesToggle.checked = true;
+        involvesToggle.disabled = true;
+        involvesMode = true;
+      } else {
+        // Restore involves to its previous state
+        involvesMode = savedInvolvesBeforeNextAction;
+        involvesToggle.checked = involvesMode;
+        involvesToggle.disabled = false;
+      }
+      try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser && loaded) renderFiltered(currentUser);
+    });
+  }
+
+  // Apply initial disabled state if next-action was persisted
+  if (nextActionOnlyMode) {
+    savedInvolvesBeforeNextAction = involvesMode;
+    involvesToggle.checked = true;
+    involvesToggle.disabled = true;
+    involvesMode = true;
   }
 
   // Start fetching
@@ -227,6 +274,7 @@
   function buildUrl(user) {
     var url = location.pathname + '?user=' + encodeURIComponent(user);
     if (involvesMode) url += '&involves=true';
+    if (nextActionOnlyMode) url += '&nextaction=true';
     return url;
   }
 
@@ -236,6 +284,7 @@
     currentUser = name;
     saveUser(name);
     document.getElementById('involves-label').style.display = '';
+    document.getElementById('next-action-label').style.display = '';
     history.replaceState(null, '', buildUrl(name));
     if (loaded) renderFiltered(name);
   };
@@ -245,6 +294,7 @@
     currentUser = name;
     saveUser(name);
     document.getElementById('involves-label').style.display = '';
+    document.getElementById('next-action-label').style.display = '';
     history.replaceState(null, '', buildUrl(name));
     renderFiltered(name);
   };
@@ -285,14 +335,19 @@
     currentUser = '';
     document.getElementById('user-field').value = '';
     involvesMode = false;
+    nextActionOnlyMode = false;
     document.getElementById('involves-toggle').checked = false;
+    document.getElementById('involves-toggle').disabled = false;
+    document.getElementById('next-action-toggle').checked = false;
     document.getElementById('involves-label').style.display = 'none';
+    document.getElementById('next-action-label').style.display = 'none';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
     document.getElementById('filter-banner').style.display = 'none';
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
     if (loaded) renderTable(allPrs);
   };
 
@@ -309,6 +364,14 @@
       repoCount + ' repositories (' + count + ' open PRs).</p>';
   }
 
+  // Check whether the given username is the person who should act next on this PR
+  function isUsersTurn(pr, username) {
+    if (!username) return false;
+    var lc = username.toLowerCase();
+    var who = (pr.who || '').toLowerCase();
+    return new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=[,;:\\s]|$)', 'i').test(who);
+  }
+
   function renderFiltered(username) {
     var lc = username.toLowerCase();
     var filtered = allPrs.filter(function(pr) {
@@ -322,6 +385,12 @@
       }
       return false;
     });
+
+    // Apply "next action on me only" filter
+    if (nextActionOnlyMode) {
+      filtered = filtered.filter(function(pr) { return isUsersTurn(pr, username); });
+    }
+
     filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
 
     // Summary bar
@@ -332,7 +401,7 @@
     var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
       .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
     var bar = document.getElementById('summary-bar');
-    var modeNote = involvesMode ? ' (includes all involved)' : '';
+    var modeNote = nextActionOnlyMode ? ' (next action on me only)' : involvesMode ? ' (includes all involved)' : '';
     bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' + modeNote +
       ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
       '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
@@ -431,14 +500,7 @@
     var repoUrl = '../' + pr._slug + '/actionable.html';
 
     // Detect if the filtered user is the one who should act next
-    var isYourTurn = false;
-    if (filterUser) {
-      var lc = filterUser.toLowerCase();
-      // Use the 'who' field (the person(s) who should act), not next_action
-      // (which also mentions who left feedback — e.g., "respond to threads from @X")
-      var who = (pr.who || '').toLowerCase();
-      isYourTurn = new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=[,;:\\s]|$)', 'i').test(who);
-    }
+    var isYourTurn = isUsersTurn(pr, filterUser);
 
     var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
                                 : (isYourTurn ? ' class="your-turn"' : '');
@@ -510,7 +572,8 @@
     var safeActionWhy = (pr.action_why || '').replace(/&#10;/g, '\n');
 
     // Score indicators
-    var readyVal = pr.merge_readiness != null ? pr.merge_readiness : pr.score;
+    var isNewlyDiscovered = pr.action_score === null;
+    var readyVal = pr.merge_readiness != null ? pr.merge_readiness : (pr.score != null ? pr.score : 0);
     var needVal = pr.value_score != null ? pr.value_score : 0;
     var actionVal = pr.action_score != null ? pr.action_score : readyVal;
     var readyClass = readyVal >= 6 ? ' ready-high' : '';
@@ -519,16 +582,19 @@
     if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
     else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
 
+    var unknownCell = '<span style="color:#8b949e;font-style:italic">unknown</span>';
+    var unknownScore = '<span style="color:#8b949e">?</span>';
+
     return '<tr' + moreClass + ' data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
-      '<td class="score' + readyClass + '">' + readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button></td>' +
-      '<td class="score">' + needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button></td>' +
-      '<td class="action-score' + actionClass + '">' + actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button></td>' +
+      '<td class="score' + readyClass + '">' + (isNewlyDiscovered ? unknownScore : readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button>') + '</td>' +
+      '<td class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
+      '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
       '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
       '<td class="title">' + safeTitle + '</td>' +
-      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na)) + '</td>' +
-      '<td class="ci"' + ciTitle + '>' + ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '') + '</td>' +
-      '<td class="disc' + discHeat + '">' + discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button></td>' +
+      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na))) + '</td>' +
+      '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
+      '<td class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
       '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
       '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
       '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' ' + ((pr.changed_files || 0) === 1 ? 'file' : 'files') + ', ' + linesChanged + ' ' + (linesChanged === 1 ? 'line' : 'lines') + ' (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
