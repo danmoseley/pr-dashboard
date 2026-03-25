@@ -25,9 +25,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Skip this scheduled run if a manual run completed successfully in the last 10 hours
+          # Skip this scheduled run if a manual run completed successfully in the last 4 hours
           # Non-fatal: if the API call fails, proceed with the run anyway
-          cutoff=$(date -u -d '10 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
+          cutoff=$(date -u -d '4 hours ago' '+%Y-%m-%dT%H:%M:%SZ')
           recent=$(gh api "repos/${{ github.repository }}/actions/workflows/generate-reports.yml/runs?branch=main&event=workflow_dispatch&status=completed&per_page=20" \
             --jq '[.workflow_runs[] | select(.conclusion == "success")][0].updated_at // empty' 2>/dev/null || true)
           if [ -n "$recent" ] && [[ "$recent" > "$cutoff" ]]; then
