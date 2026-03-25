@@ -15,7 +15,7 @@
     ' <a href="https://danmoseley.github.io/repo-health-metrics/" style="margin-left:1em">&#x1F4CA; Repo Health</a>' +
     ' <a href="' + prefix + 'changelog.html" style="margin-left:1em">&#x1F4DD; Changelog</a>' +
     ' <a href="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml" style="margin-left:1em">' +
-    '<img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Pipeline status" style="vertical-align:middle"></a>';
+    '<img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Pipeline status" style="height:20px;vertical-align:middle"></a>';
 
   document.body.appendChild(footer);
 })();
