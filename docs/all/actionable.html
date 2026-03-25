@@ -602,7 +602,7 @@
       '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
       '<td class="title">' + safeTitle + '</td>' +
       '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na))) + '</td>' +
-      '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
+      '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
       '<td class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
       '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
       '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
