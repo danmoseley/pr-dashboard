@@ -14,10 +14,10 @@
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
 </style>
 </head>
-<body data-server-updated="2026-03-24T18:50:40.5362696Z">
+<body data-server-updated="2026-03-25T07:12:41.6443473Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/roslyn/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/roslyn</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-24T18:50:40.5362696Z">at 2026-03-24 11:50 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-25T07:12:41.6443473Z">at 2026-03-25 00:12 PDT</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort.</p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -68,7 +68,61 @@
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
+  <col style="width:4%">
+  <col>
+  <col style="width:24%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
+<thead>
+<tr>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="dibarbet,CyrusNajmabadi" data-involved="CyrusNajmabadi,dibarbet,JoeRobich" data-labels="Area-IDE">
+  <td class="score ready-high">9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;large change: 393 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/roslyn/pull/82834" title="Add tests for inline regex options in conditional expression branches">#82834</a></td>
+  <td class="title">Add tests for inline regex options in conditional expression branches</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/dibarbet.png?size=32" alt="dibarbet"><a href="https://github.com/dibarbet">@dibarbet</a><a class="filter-btn" href="#" onclick="filterByUser('dibarbet');return false" title="Show only @dibarbet">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="26 passed, 0 failed, 0 running">&#x2705; 26/0/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num">7d</td>
+  <td class="num heat-1">7d</td>
+  <td class="num heat-1" title="2 files, 393 lines (additions + deletions)">393</td>
+  <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/CyrusNajmabadi.png?size=32" alt="CyrusNajmabadi"><a href="https://github.com/CyrusNajmabadi">@CyrusNajmabadi</a><a class="filter-btn" href="#" onclick="filterByUser('CyrusNajmabadi');return false" title="Show only @CyrusNajmabadi">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('Area-IDE');return false" title="Show only Area-IDE">IDE</a></td>
+</tr>
+<tr data-people="JoeRobich,app,jjonescz" data-involved="copilot-swe-agent,jaredpar,jasonmalinowski,jjonescz,JoeRobich,RikkiGibson,Youssef1313" data-labels="Area-Compilers">
+  <td class="score ready-high">9.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 12t 3ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/roslyn/pull/82741" title="Embed AnalyzerConfigFiles in binlog">#82741</a></td>
+  <td class="title">Embed AnalyzerConfigFiles in binlog</td>
+  <td class="action" title="Approval not on latest commit">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/JoeRobich.png?size=32" alt="JoeRobich"><a href="https://github.com/JoeRobich">@JoeRobich</a><a class="filter-btn" href="#" onclick="filterByUser('JoeRobich');return false" title="Show only @JoeRobich">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="28 passed, 0 failed, 0 running">&#x2705; 28/0/0</td>
+  <td class="disc heat-2">0/12t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 12 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num">12d</td>
+  <td class="num">0d</td>
+  <td class="num" title="5 files, 102 lines (additions + deletions)">102</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jjonescz.png?size=32" alt="jjonescz"><a href="https://github.com/jjonescz">@jjonescz</a><a class="filter-btn" href="#" onclick="filterByUser('jjonescz');return false" title="Show only @jjonescz">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via <span class="bot-icon" role="img" aria-label="Copilot">&#x1F916;</span></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('Area-Compilers');return false" title="Show only Area-Compilers">Compilers</a></td>
+</tr>
+</tbody>
+</table>
 
 
 <script src="../shared-ui.js"></script>
@@ -140,7 +194,8 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
