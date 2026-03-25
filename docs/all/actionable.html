@@ -364,12 +364,21 @@
       repoCount + ' repositories (' + count + ' open PRs).</p>';
   }
 
+  // Cache compiled regexes per lowercase username to avoid rebuilding them in hot loops
+  var userTurnRegexCache = {};
+
   // Check whether the given username is the person who should act next on this PR
   function isUsersTurn(pr, username) {
     if (!username) return false;
     var lc = username.toLowerCase();
     var who = (pr.who || '').toLowerCase();
-    return new RegExp('@' + lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(?=[,;:\\s]|$)', 'i').test(who);
+    var re = userTurnRegexCache[lc];
+    if (!re) {
+      var escaped = lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      re = new RegExp('@' + escaped + '(?=[,;:\\s]|$)', 'i');
+      userTurnRegexCache[lc] = re;
+    }
+    return re.test(who);
   }
 
   function renderFiltered(username) {

@@ -466,8 +466,9 @@
                   }
                 }
 
-                // Leave scores as null to indicate newly discovered (no data for scoring yet)
-                // renderRow uses this to show 'unknown' in CI/action/disc columns
+                // restPrToScanPr() already initializes score fields to null; for newly
+                // discovered PRs we leave those null values so renderRow shows "unknown"
+                // in the score, CI, next action, and discussion columns.
 
                 // Add to allPrs so it participates in filtering
                 allPrs.push(scanPr);
