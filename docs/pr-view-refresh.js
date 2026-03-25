@@ -466,9 +466,10 @@
                   }
                 }
 
-                // restPrToScanPr() already initializes score fields to null; for newly
-                // discovered PRs we leave those null values so renderRow shows "unknown"
-                // in the score, CI, next action, and discussion columns.
+                // restPrToScanPr() already initializes score-related fields to null; for
+                // newly discovered PRs we leave those null values so renderRow shows
+                // "unknown" in the score, next action, and discussion columns. CI may
+                // still be derived from mergeable_state above when available.
 
                 // Add to allPrs so it participates in filtering
                 allPrs.push(scanPr);

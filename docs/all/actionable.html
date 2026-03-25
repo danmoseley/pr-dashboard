@@ -581,7 +581,7 @@
     var safeActionWhy = (pr.action_why || '').replace(/&#10;/g, '\n');
 
     // Score indicators
-    var isNewlyDiscovered = pr.action_score === null;
+    var isNewlyDiscovered = pr._isNew === true;
     var readyVal = pr.merge_readiness != null ? pr.merge_readiness : (pr.score != null ? pr.score : 0);
     var needVal = pr.value_score != null ? pr.value_score : 0;
     var actionVal = pr.action_score != null ? pr.action_score : readyVal;
