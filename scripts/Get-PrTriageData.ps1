@@ -131,6 +131,86 @@ try {
     Write-Verbose "Warning: could not fetch area-owners.md, using empty owner table"
 }
 
+# --- CODEOWNERS lookup ---
+# CODEOWNERS owners are more authoritative than area-label owners because they are tied
+# to the actual code paths rather than labels (which may be mis-applied).
+$codeownersRules = @()  # Ordered list of {pattern; owners[]}; last matching rule wins (git semantics)
+
+# Convert a CODEOWNERS glob pattern to a .NET regex string
+function ConvertTo-CodeownersRegex($pattern) {
+    $anchored = $pattern.StartsWith('/')
+    $p = $pattern.TrimStart('/')
+    $dirOnly = $p.EndsWith('/')
+    if ($dirOnly) { $p = $p.TrimEnd('/') }
+    # Escape regex metacharacters, then restore glob semantics
+    $regex = [regex]::Escape($p)
+    $regex = $regex -replace '\\\*\\\*', "`x00DBLSTAR`x00"  # placeholder for **; x00 can't appear in paths
+    $regex = $regex -replace '\\\*',     '[^/]*'             # * -> any non-slash chars
+    $regex = $regex -replace "`x00DBLSTAR`x00", '.*'        # ** -> any chars including /
+    $regex = $regex -replace '\\\?',     '[^/]'              # ? -> single non-slash char
+    $prefix = if ($anchored) { '^' } else { '(^|/)' }
+    $suffix = if ($dirOnly)  { '(/|$)' } else { '(/.*)?$' }
+    return "$prefix$regex$suffix"
+}
+
+# Test whether a file path matches a single CODEOWNERS pattern
+function Test-CodeownersPattern($pattern, $filePath) {
+    try {
+        $filePath = $filePath.TrimStart('/')
+        $regex = ConvertTo-CodeownersRegex $pattern
+        return $filePath -match $regex
+    } catch { return $false }
+}
+
+# Return the union of owners for all matching CODEOWNERS rules (last match per file wins)
+function Get-CodeownersForFiles($filePaths) {
+    if ($codeownersRules.Count -eq 0 -or -not $filePaths) { return @() }
+    $ownerSet = @{}
+    foreach ($file in $filePaths) {
+        $lastMatch = $null
+        foreach ($rule in $codeownersRules) {
+            if (Test-CodeownersPattern $rule.pattern $file) { $lastMatch = $rule.owners }
+        }
+        if ($lastMatch) { foreach ($o in $lastMatch) { $ownerSet[$o] = $true } }
+    }
+    return @($ownerSet.Keys)
+}
+
+# CODEOWNERS can live in .github/CODEOWNERS, CODEOWNERS, or docs/CODEOWNERS
+$codeownersLocations = @(
+    "repos/$($repoParts[0])/$($repoParts[1])/contents/.github/CODEOWNERS",
+    "repos/$($repoParts[0])/$($repoParts[1])/contents/CODEOWNERS",
+    "repos/$($repoParts[0])/$($repoParts[1])/contents/docs/CODEOWNERS"
+)
+foreach ($loc in $codeownersLocations) {
+    try {
+        $raw = gh api -H "Accept: application/vnd.github.raw" $loc 2>$null
+        if ($LASTEXITCODE -ne 0 -or -not $raw) { continue }
+        foreach ($line in $raw -split "`n") {
+            $line = $line.Trim()
+            if ($line -eq '' -or $line.StartsWith('#')) { continue }
+            $parts = $line -split '\s+'
+            if ($parts.Count -lt 2) { continue }
+            $pat = $parts[0]
+            $rawOwners = @($parts[1..($parts.Count - 1)] | Where-Object { $_ -match '^@' } | ForEach-Object { $_.TrimStart('@') })
+            if ($rawOwners.Count -eq 0) { continue }
+            $expanded = @()
+            foreach ($o in $rawOwners) {
+                if ($o -match '/') { $expanded += @(Expand-TeamHandle $o) }
+                else { $expanded += $o }
+            }
+            if ($expanded.Count -gt 0) {
+                $codeownersRules += [PSCustomObject]@{ pattern = $pat; owners = $expanded }
+            }
+        }
+        Write-Verbose "Loaded $($codeownersRules.Count) CODEOWNERS rules from $loc"
+        break  # Use the first location found
+    } catch {
+        # Not found at this location — try next
+    }
+}
+if ($codeownersRules.Count -eq 0) { Write-Verbose "No CODEOWNERS file found or it contained no rules" }
+
 $communityTriagers = @()  # Community triagers cannot merge or sign off; treat as regular reviewers
 
 # --- Step 1: List PRs ---
@@ -199,8 +279,8 @@ if ($candidates.Count -eq 0) {
     return
 }
 
-# --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors) ---
-$fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}'
+# --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors, changed files) ---
+$fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}} files(first:100){nodes{path}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
@@ -353,9 +433,17 @@ foreach ($pr in $candidates) {
     $gql = $graphqlData[$n]
     $labelNames = @($pr.labels | ForEach-Object { $_.name })
 
-    # Per-PR owners (use label-specific or fallback to filter-level, then -Maintainers)
+    # Per-PR owners (codeowners > area-label owners > filter-level > -Maintainers)
     $labelOwners = Get-OwnersForPr $labelNames
-    $prOwners = $labelOwners
+    # Resolve changed file paths from GraphQL to find CODEOWNERS for this PR.
+    # Limited to first 100 files per the fragment; PRs with more files get best-effort matching.
+    $changedFilePaths = @()
+    if ($gql -and $gql.files -and $gql.files.nodes) {
+        $changedFilePaths = @($gql.files.nodes | ForEach-Object { $_.path } | Where-Object { $_ })
+    }
+    $codeownersForPr = Get-CodeownersForFiles $changedFilePaths
+    # Merge: codeowners first (higher authority), then area-label owners
+    $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
 
@@ -506,7 +594,8 @@ foreach ($pr in $candidates) {
     }
 
     # Build engagement-prioritized owner list for $who selection.
-    # Priority: (1) assigned reviewers, (2) area owners, (3) engaged maintainers, (4) remaining.
+    # Priority: (1) assigned reviewers, (2) CODEOWNERS for changed files,
+    #           (3) area-label owners, (4) engaged maintainers, (5) remaining.
     # $prOwners is kept for ownership membership checks (e.g., $hasOwnerApproval).
     $allMaintainerPool = @(@($prOwners) + @($Maintainers) | Select-Object -Unique)
     $prioritizedOwners = [System.Collections.ArrayList]@()
@@ -516,19 +605,25 @@ foreach ($pr in $candidates) {
             [void]$prioritizedOwners.Add($r)
         }
     }
-    # Tier 2: Area owners (cached from label match above)
+    # Tier 2: CODEOWNERS for changed files (code-path ownership is more authoritative than labels)
+    foreach ($o in $codeownersForPr) {
+        if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
+            [void]$prioritizedOwners.Add($o)
+        }
+    }
+    # Tier 3: Area owners from label match
     foreach ($o in $labelOwners) {
         if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
             [void]$prioritizedOwners.Add($o)
         }
     }
-    # Tier 3: Maintainers engaged in the PR (reviewers, thread/PR commenters)
+    # Tier 4: Maintainers engaged in the PR (reviewers, thread/PR commenters)
     foreach ($e in @(@($reviewerLogins) + @($allCommenters) | Select-Object -Unique)) {
         if ($e -ne $authorLogin -and $allMaintainerPool -contains $e -and $prioritizedOwners -notcontains $e) {
             [void]$prioritizedOwners.Add($e)
         }
     }
-    # Tier 4: Remaining from $prOwners (preserves original order)
+    # Tier 5: Remaining from $prOwners (preserves original order)
     foreach ($m in $prOwners) {
         if ($m -ne $authorLogin -and $prioritizedOwners -notcontains $m) {
             [void]$prioritizedOwners.Add($m)
