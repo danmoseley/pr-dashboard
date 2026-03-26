@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 
 REPOS = [
     "dotnet/runtime",
-    "dotnet/aspire",
+    "microsoft/aspire",
     "dotnet/aspnetcore",
     "dotnet/extensions",
     "dotnet/machinelearning",
