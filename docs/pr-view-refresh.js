@@ -466,10 +466,10 @@
                   }
                 }
 
-                // Set scores to a neutral numeric value (no data for scoring yet)
-                scanPr.merge_readiness = 0;
-                scanPr.value_score = 0;
-                scanPr.action_score = 0;
+                // restPrToScanPr() already initializes score-related fields to null; for
+                // newly discovered PRs we leave those null values so renderRow shows
+                // "unknown" in the score, next action, and discussion columns. CI may
+                // still be derived from mergeable_state above when available.
 
                 // Add to allPrs so it participates in filtering
                 allPrs.push(scanPr);
@@ -578,7 +578,7 @@
       var btn = document.createElement('button');
       btn.id = 'view-refresh-btn';
       btn.className = 'view-refresh-btn';
-      btn.textContent = '\u21BB Refresh View';
+      btn.textContent = '\u21BB Best-effort Refresh View';
       btn.title = 'Check for closed/merged PRs and discover new ones (uses unauthenticated API calls, one per visible PR)';
       btn.addEventListener('click', function() {
         var user = window._prDashboard && window._prDashboard.currentUser;
