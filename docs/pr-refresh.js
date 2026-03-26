@@ -269,8 +269,16 @@
   // --- Rate limit footer ---
   var rateLimitEl = null;
 
+  var viewRefreshOwnsFooter = false;
+
   function ensureRateLimitFooter() {
     if (rateLimitEl) return;
+    // pr-view-refresh.js has a more comprehensive rate-limit footer;
+    // skip ours entirely when that one is present.
+    if (document.getElementById('view-refresh-rate-limit')) {
+      viewRefreshOwnsFooter = true;
+      return;
+    }
     rateLimitEl = document.createElement('div');
     rateLimitEl.className = 'rate-limit-footer';
     rateLimitEl.setAttribute('role', 'status');
@@ -284,6 +292,7 @@
     var reset = response.headers.get('X-RateLimit-Reset');
     if (remaining == null || limit == null) return;
     ensureRateLimitFooter();
+    if (viewRefreshOwnsFooter) return;
     var resetText = '';
     if (reset) {
       var resetSec = parseInt(reset, 10);

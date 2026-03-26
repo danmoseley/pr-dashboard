@@ -33,7 +33,8 @@
   <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20all/actionable.html" target="_blank">&#x1F4AC; Feedback</a>
 </nav>
 <h1>Actionable PRs &#8212; All Repos</h1>
-<p class="meta" id="meta-line">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
+<p class="meta">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
+<p class="meta" id="meta-line"></p>
 
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
@@ -254,6 +255,8 @@
           if (!schedText) schedText = '~daily';
           document.getElementById('meta-line').textContent =
             'Updated ' + schedText + ', last at ' + ts + ' \u00B7 ' + allPrs.length + ' PRs across ' + results.length + ' repos';
+          // Expose oldest scan timestamp so pr-view-refresh.js can filter new-PR discovery
+          document.getElementById('meta-line').setAttribute('data-server-updated', timestamps[0].toISOString());
         }
 
         if (initialUser) {
@@ -474,9 +477,9 @@
     }
     html += '</tbody></table>';
 
-    // Show more/fewer toggle for >100 rows
-    if (prs.length > 100) {
-      var extra = prs.length - 100;
+    // Show more/fewer toggle for >500 rows
+    if (prs.length > 500) {
+      var extra = prs.length - 500;
       html += '<button class="show-more-btn" id="toggle-more">Show ' + extra + ' more \u25BC</button>';
     }
 
@@ -511,7 +514,7 @@
     // Detect if the filtered user is the one who should act next
     var isYourTurn = isUsersTurn(pr, filterUser);
 
-    var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
+    var moreClass = idx >= 500 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
                                 : (isYourTurn ? ' class="your-turn"' : '');
 
     // CI emoji
@@ -614,7 +617,13 @@
 
   // --- Helpers ---
   function getPeople(pr) {
-    var text = (pr.who || '') + ' @' + (pr.author || '') + ' ' + (pr.next_action || '');
+    var text = (pr.who || '') + ' @' + (pr.author || '');
+    // From next_action, only extract the actor (first @mention before the colon),
+    // not people mentioned in the description (e.g., "respond to threads from @X")
+    if (pr.next_action) {
+      var actorMatch = pr.next_action.match(/^@([\w-]+)/);
+      if (actorMatch) text += ' @' + actorMatch[1];
+    }
     if (pr.copilot_trigger) text += ' @' + pr.copilot_trigger;
     var matches = text.match(/@([\w-]+)/g) || [];
     var seen = {};

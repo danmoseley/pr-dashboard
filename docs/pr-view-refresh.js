@@ -438,9 +438,13 @@
           }
 
           return detailPromise.then(function() {
-            // Filter out closed/merged, drafts
+            // Filter out closed/merged, drafts, and PRs created before the report
+            var serverTs = getServerTimestamp();
             newPrs = newPrs.filter(function(pr) {
-              return pr.state === 'open' && !pr.merged && !pr.draft;
+              if (pr.state !== 'open' || pr.merged || pr.draft) return false;
+              // Only show PRs created after the report was generated
+              if (serverTs && pr.created_at && new Date(pr.created_at) < new Date(serverTs)) return false;
+              return true;
             });
 
             if (newPrs.length > 0) {

@@ -79,6 +79,28 @@ try {   # Top-level catch ensures stdout is always valid JSON
 $areaOwners = @{}
 $repoParts = $Repo -split '/'
 $areaOwnersUrl = "repos/$($repoParts[0])/$($repoParts[1])/contents/docs/area-owners.md"
+# Cache for expanding @org/team handles to individual logins
+$teamMemberCache = @{}
+function Expand-TeamHandle($handle) {
+    if ($teamMemberCache.ContainsKey($handle)) { return $teamMemberCache[$handle] }
+    $parts = $handle -split '/', 2
+    if ($parts.Count -ne 2) { $teamMemberCache[$handle] = @(); return @() }
+    $org = $parts[0]; $slug = $parts[1]
+    try {
+        $raw = gh api --paginate "/orgs/$org/teams/$slug/members?per_page=100" --jq '.[].login' 2>$null
+        if ($LASTEXITCODE -ne 0) { $members = $null }
+        else { $members = @($raw) | Where-Object { $_ -match '^\w[\w-]*$' } }
+    } catch { $members = $null }
+    if ($null -eq $members) {
+        # Cache failure to avoid repeated API calls for the same team within this run
+        $teamMemberCache[$handle] = @()
+        Write-Verbose "Warning: could not expand team @$handle"
+        return @()
+    }
+    $teamMemberCache[$handle] = $members
+    if ($members.Count -gt 0) { Write-Verbose "Expanded @$handle to $($members.Count) members" }
+    return $members
+}
 try {
     $areaOwnersMd = gh api -H "Accept: application/vnd.github.raw" $areaOwnersUrl 2>$null
     foreach ($line in $areaOwnersMd -split "`n") {
@@ -86,9 +108,21 @@ try {
             $areaName = $matches[1].Trim()
             $lead = $matches[2].Trim().TrimEnd(',', ';')
             $ownerField = $matches[3].Trim()
-            $people = @([regex]::Matches($ownerField, '@(\S+)') | ForEach-Object { $_.Groups[1].Value.TrimEnd(',', ';') } |
-                Where-Object { $_ -notmatch '^dotnet/' })
-            if ($people.Count -eq 0) { $people = @($lead) }
+            $allMentions = @([regex]::Matches($ownerField, '@(\S+)') | ForEach-Object { $_.Groups[1].Value.TrimEnd(',', ';') })
+            $people = @($allMentions | Where-Object { $_ -notmatch '/' })
+            # Expand team handles (e.g. dotnet/ncl) to individual members
+            $teamHandles = @($allMentions | Where-Object { $_ -match '/' })
+            foreach ($th in $teamHandles) {
+                $people += Expand-TeamHandle $th
+            }
+            $seen = @{}; $deduped = @()
+            foreach ($p in $people) { if (-not $seen.ContainsKey($p)) { $seen[$p] = $true; $deduped += $p } }
+            $people = $deduped
+            if ($people.Count -eq 0) {
+                # Lead may also be a team handle
+                if ($lead -match '/') { $people = @(Expand-TeamHandle $lead) }
+                else { $people = @($lead) }
+            }
             $areaOwners[$areaName] = $people
         }
     }
@@ -463,11 +497,12 @@ foreach ($pr in $candidates) {
     $hasAnyReview = $reviews.Count -gt 0
 
     # Extract explicitly requested reviewers (GitHub "Reviewers" sidebar)
+    # Exclude the PR author — they can't review their own PR.
     $requestedReviewerLogins = @()
     if ($gql -and $gql.reviewRequests.nodes) {
         $requestedReviewerLogins = @($gql.reviewRequests.nodes | ForEach-Object {
             if ($_.requestedReviewer.login) { $_.requestedReviewer.login }
-        } | Where-Object { $_ } | Select-Object -Unique)
+        } | Where-Object { $_ -and $_ -ne $authorLogin } | Select-Object -Unique)
     }
 
     # Build engagement-prioritized owner list for $who selection.
