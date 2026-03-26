@@ -255,6 +255,8 @@
           if (!schedText) schedText = '~daily';
           document.getElementById('meta-line').textContent =
             'Updated ' + schedText + ', last at ' + ts + ' \u00B7 ' + allPrs.length + ' PRs across ' + results.length + ' repos';
+          // Expose oldest scan timestamp so pr-view-refresh.js can filter new-PR discovery
+          document.getElementById('meta-line').setAttribute('data-server-updated', timestamps[0].toISOString());
         }
 
         if (initialUser) {
