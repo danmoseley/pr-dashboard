@@ -199,16 +199,48 @@ $rows = foreach ($pr in $prs) {
         $actionEmoji2 = "<span style=`"opacity:$boltOpacity`">&#x26A1;</span> "
     }
 
+    # Easy action category
+    $easyCategory = ""
+    $easyLabel = ""
+    $easyTip = ""
+    $ci = $pr.ci
+    $mergeable = $pr.mergeable
+    $approvals = $pr.approval_count -as [int]
+    $unresolved = $pr.unresolved_threads -as [int]
+    $lines = $pr.lines_changed -as [int]
+    $files = $pr.changed_files -as [int]
+    $comments = $pr.total_comments -as [int]
+    $commenters = $pr.distinct_commenters -as [int]
+
+    if ($pr.next_action -match "Ready to merge$") {
+        $easyCategory = "merge"; $easyLabel = "&#x1F7E2;"; $easyTextLabel = "Merge it"; $easyTip = "Merge it: CI green, maintainer approved, no conflicts, no unresolved threads"
+    } elseif ($lines -le 50 -and $files -le 3 -and $ci -ne "FAILURE" -and $unresolved -le 1 -and $comments -le 3 -and $commenters -le 2) {
+        $easyCategory = "quick-review"; $easyLabel = "&#x1F440;"; $easyTextLabel = "Quick review"; $easyTip = "Quick review: small PR, minimal discussion, CI not failing"
+    } elseif ($ci -eq "SUCCESS" -and $mergeable -eq "MERGEABLE" -and $unresolved -eq 0 -and $lines -le 200 -and $comments -le 5 -and ($pr.blockers -match "No owner approval|No review")) {
+        $easyCategory = "needs-approval"; $easyLabel = "&#x2705;"; $easyTextLabel = "Needs approval"; $easyTip = "Needs approval: CI green, no conflicts, no unresolved threads, no maintainer approval yet"
+    } elseif ($approvals -ge 1 -and $mergeable -eq "CONFLICTING" -and $unresolved -eq 0) {
+        $easyCategory = "needs-rebase"; $easyLabel = "&#x1F527;"; $easyTextLabel = "Needs rebase"; $easyTip = "Needs rebase: approved, has merge conflicts, no unresolved threads"
+    }
+
+    $easyBadgeHtml = ""
+    $easyDataAttr = ""
+    if ($easyCategory) {
+        $safeEasyTip = [System.Net.WebUtility]::HtmlEncode($easyTip)
+        $safeEasyTextLabel = [System.Net.WebUtility]::HtmlEncode($easyTextLabel)
+        $easyBadgeHtml = "<span class=`"easy-badge`">$easyLabel<button type=`"button`" class=`"why-btn easy-why-btn`" onclick=`"showWhy(this)`" data-why=`"$safeEasyTip`" aria-label=`"Easy action: $safeEasyTextLabel — show criteria`">?</button></span> "
+        $easyDataAttr = " data-easy=`"$easyCategory`""
+    }
+
     $filesWord = if ($pr.changed_files -eq 1) { "file" } else { "files" }
     $linesWord = if ($pr.lines_changed -eq 1) { "line" } else { "lines" }
 
     @"
-<tr$moreClass data-people="$([System.Net.WebUtility]::HtmlEncode($people))" data-involved="$([System.Net.WebUtility]::HtmlEncode($involvedList))" data-labels="$([System.Net.WebUtility]::HtmlEncode($labelsList))">
+<tr$moreClass data-people="$([System.Net.WebUtility]::HtmlEncode($people))" data-involved="$([System.Net.WebUtility]::HtmlEncode($involvedList))" data-labels="$([System.Net.WebUtility]::HtmlEncode($labelsList))"$easyDataAttr>
   <td class="score$readyClass">$($pr.merge_readiness)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeWhy" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">$($pr.value_score)<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$safeValueWhy" aria-label="Show Need score breakdown">?</button></td>
   <td class="action-score$actionClass">$actionEmoji2$($pr.action_score)<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="$safeActionWhy" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="$prUrl" title="$safeTitle">#$($pr.number)</a></td>
-  <td class="title">$safeTitle</td>
+  <td class="title">$easyBadgeHtml$safeTitle</td>
   <td class="action" title="$safeBlockers">$actionEmoji$(ConvertTo-UserHtml ([System.Net.WebUtility]::HtmlEncode($pr.next_action)) $communityAuthors)</td>
   <td class="ci"$ciTitle>$ciEmoji$ciFailHint $($pr.ci_detail)</td>
   <td class="disc$discHeat">$discEmoji$($pr.unresolved_threads)/$($pr.total_threads)t $($pr.distinct_commenters)ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="$($pr.unresolved_threads) unresolved of $($pr.total_threads) review threads&#10;$($pr.distinct_commenters) distinct commenters" aria-label="Show discussion breakdown">?</button></td>
@@ -271,8 +303,8 @@ $scoringHtml = @"
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
   <p>Each PR has three scores on a 0&ndash;10 scale:</p>
-  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
-    <div style="flex:1; min-width:250px;">
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap; min-width:0;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -290,7 +322,7 @@ $scoringHtml = @"
         <tr><td>0.3</td><td>Good review momentum <sup>1</sup></td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -307,11 +339,20 @@ $scoringHtml = @"
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
       <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
       <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
       <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+    <div style="flex:1; min-width:180px;" id="easy-action-details">
+      <h4 style="margin:0.5em 0 0.3em">Easy next action filter</h4>
+      <table class="scoring-table">
+        <tr><td>&#x1F7E2;</td><td><b>Merge it</b></td><td>&ldquo;Ready to merge&rdquo;</td></tr>
+        <tr><td>&#x1F440;</td><td><b>Quick review</b></td><td>&le;50 lines, &le;3 files, CI ok, &le;3 comments</td></tr>
+        <tr><td>&#x2705;</td><td><b>Needs approval</b></td><td>CI green, no conflicts, no threads, &le;200 lines</td></tr>
+        <tr><td>&#x1F527;</td><td><b>Needs rebase</b></td><td>Approved, has conflicts, no threads</td></tr>
+      </table>
     </div>
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
@@ -337,13 +378,15 @@ $html = @"
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .easy-badge { font-size: 0.95em; white-space: nowrap; }
+  .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
 <body data-server-updated="$TimestampIso">
 $navHtml
 <h1>$([System.Net.WebUtility]::HtmlEncode($Title))</h1>
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
-$(if ($Description) { "<p class=`"report-desc`">$Description</p><!-- Description is trusted HTML from hardcoded report definitions -->" })
+$(if ($Description) { "<p class=`"report-desc`">$Description <label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->" } else { "<div style=`"margin:0.5em 0;`"><label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></div>" })
 $scoringHtml
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 $(if ($prCount -eq 0) {
@@ -384,12 +427,16 @@ $obsHtml
 <script src="../shared-ui.js"></script>
 <script>
 var _filterKey = 'prFilter:' + location.pathname;
+function isEasyHidden(r) {
+  var toggle = document.getElementById('easy-action-toggle');
+  return toggle && toggle.checked && !r.getAttribute('data-easy');
+}
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -409,7 +456,7 @@ function filterByUser(name) {
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -426,8 +473,11 @@ function filterByUser(name) {
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
+  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
   rows.forEach(function(r) {
-    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
+    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
   });
   document.getElementById('filter-banner').style.display = 'none';
   var btn = document.getElementById('toggle-more');
@@ -435,6 +485,38 @@ function clearFilter() {
   history.replaceState(null, '', location.pathname);
   try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
+function applyEasyFilter(easyOn) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  rows.forEach(function(r) {
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
+    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
+  });
+}
+(function() {
+  var LS_EASY_KEY = 'pr-dashboard-easy-action';
+  var toggle = document.getElementById('easy-action-toggle');
+  if (!toggle) return;
+  // Restore state
+  var params = new URLSearchParams(location.search);
+  var urlEasy = params.get('easyaction');
+  var easyOn = false;
+  if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
+  else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
+  toggle.checked = easyOn;
+  if (easyOn) { applyEasyFilter(true); }
+  toggle.addEventListener('change', function() {
+    var on = this.checked;
+    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
+    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
+      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
+    } catch(e) {}
+    applyEasyFilter(on);
+  });
+})();
 // Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);

@@ -24,6 +24,8 @@
   .status { color: #8b949e; font-size: 0.9em; margin: 2em 0; }
   .error { color: #f85149; }
   .repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9em; }
+  .easy-badge { font-size: 0.95em; white-space: nowrap; }
+  .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
   table#pr-table { table-layout: fixed; }
 </style>
 </head>
@@ -47,13 +49,17 @@
     <input type="checkbox" id="next-action-toggle">
     Next action on me only
   </label>
+  <label class="involves-label" id="easy-action-label" style="display:none">
+    <input type="checkbox" id="easy-action-toggle">
+    Easy next actions only
+  </label>
 </div>
 
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
   <p>Each PR has three scores on a 0&ndash;10 scale:</p>
-  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
-    <div style="flex:1; min-width:250px;">
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap; min-width:0;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -71,7 +77,7 @@
         <tr><td>0.3</td><td>Good review momentum <sup>1</sup></td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -88,11 +94,20 @@
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
       <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
       <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
       <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+    <div style="flex:1; min-width:180px;" id="easy-action-details">
+      <h4 style="margin:0.5em 0 0.3em">Easy next action filter</h4>
+      <table class="scoring-table">
+        <tr><td>&#x1F7E2;</td><td><b>Merge it</b></td><td>&ldquo;Ready to merge&rdquo;</td></tr>
+        <tr><td>&#x1F440;</td><td><b>Quick review</b></td><td>&le;50 lines, &le;3 files, CI ok, &le;3 comments</td></tr>
+        <tr><td>&#x2705;</td><td><b>Needs approval</b></td><td>CI green, no conflicts, no threads, &le;200 lines</td></tr>
+        <tr><td>&#x1F527;</td><td><b>Needs rebase</b></td><td>Approved, has conflicts, no threads</td></tr>
+      </table>
     </div>
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
@@ -117,15 +132,19 @@
   var involvesMode = false; // whether "Include all involved PRs" is checked
   var nextActionOnlyMode = false; // whether "Next action on me only" is checked
 
+  var easyActionMode = false;    // whether "Easy next actions only" is checked
+
   var LS_KEY = 'pr-dashboard-user';
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
   var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
+  var LS_EASY_ACTION_KEY = 'pr-dashboard-easy-action';
 
   // --- Init ---
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   var urlInvolves = params.get('involves');
   var urlNextAction = params.get('nextaction');
+  var urlEasyAction = params.get('easyaction');
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
   if (urlInvolves !== null) {
@@ -138,14 +157,21 @@
   } else {
     try { nextActionOnlyMode = localStorage.getItem(LS_NEXT_ACTION_KEY) === 'true'; } catch(e) {}
   }
+  if (urlEasyAction !== null) {
+    easyActionMode = urlEasyAction === 'true' || urlEasyAction === '1';
+  } else {
+    try { easyActionMode = localStorage.getItem(LS_EASY_ACTION_KEY) === 'true'; } catch(e) {}
+  }
   var initialUser = urlUser || savedUser;
   if (initialUser) {
     document.getElementById('user-field').value = initialUser;
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
   }
   document.getElementById('involves-toggle').checked = involvesMode;
   document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
+  document.getElementById('easy-action-toggle').checked = easyActionMode;
 
   // Enter key on input
   document.getElementById('user-field').addEventListener('keydown', function(e) {
@@ -198,6 +224,17 @@
     involvesMode = true;
   }
 
+  // Easy action toggle handler
+  var easyActionToggle = document.getElementById('easy-action-toggle');
+  if (easyActionToggle) {
+    easyActionToggle.addEventListener('change', function() {
+      easyActionMode = this.checked;
+      try { localStorage.setItem(LS_EASY_ACTION_KEY, easyActionMode ? 'true' : 'false'); } catch(e) {}
+      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser && loaded) renderFiltered(currentUser);
+    });
+  }
+
   // Start fetching
   fetchData();
 
@@ -235,6 +272,8 @@
           if (r.updated) timestamps.push(new Date(r.updated));
         });
         allPrs.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+        // Pre-compute easy action categories once after load so renderFiltered doesn't recompute them on every call
+        allPrs.forEach(function(pr) { pr._easyCategory = getEasyActionCategory(pr); });
         loaded = true;
         document.getElementById('status').style.display = 'none';
 
@@ -278,6 +317,7 @@
     var url = location.pathname + '?user=' + encodeURIComponent(user);
     if (involvesMode) url += '&involves=true';
     if (nextActionOnlyMode) url += '&nextaction=true';
+    if (easyActionMode) url += '&easyaction=true';
     return url;
   }
 
@@ -288,6 +328,7 @@
     saveUser(name);
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
     history.replaceState(null, '', buildUrl(name));
     if (loaded) renderFiltered(name);
   };
@@ -298,6 +339,7 @@
     saveUser(name);
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
     history.replaceState(null, '', buildUrl(name));
     renderFiltered(name);
   };
@@ -339,11 +381,14 @@
     document.getElementById('user-field').value = '';
     involvesMode = false;
     nextActionOnlyMode = false;
+    easyActionMode = false;
     document.getElementById('involves-toggle').checked = false;
     document.getElementById('involves-toggle').disabled = false;
     document.getElementById('next-action-toggle').checked = false;
+    document.getElementById('easy-action-toggle').checked = false;
     document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
+    document.getElementById('easy-action-label').style.display = 'none';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
     document.getElementById('filter-banner').style.display = 'none';
@@ -351,6 +396,7 @@
     try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
     if (loaded) renderTable(allPrs);
   };
 
@@ -384,6 +430,37 @@
     return re.test(who);
   }
 
+  // Classify a PR into an "easy next action" category, or null if it doesn't qualify
+  function getEasyActionCategory(pr) {
+    var ci = pr.ci || '';
+    var mergeable = pr.mergeable || '';
+    var approvals = parseInt(pr.approval_count) || 0;
+    var unresolved = parseInt(pr.unresolved_threads) || 0;
+    var lines = parseInt(pr.lines_changed) || 0;
+    var files = parseInt(pr.changed_files) || 0;
+    var comments = parseInt(pr.total_comments) || 0;
+    var commenters = parseInt(pr.distinct_commenters) || 0;
+
+    // Merge it: next_action says ready to merge (backend validates owner approval, CI, conflicts, threads)
+    if (/Ready to merge$/.test(pr.next_action || '')) {
+      return { tag: '\uD83D\uDFE2', label: 'Merge it', tip: 'CI green, maintainer approved, no conflicts, no unresolved threads' };
+    }
+    // Quick review: small, quiet, CI not failed
+    if (lines <= 50 && files <= 3 && ci !== 'FAILURE' && unresolved <= 1 && comments <= 3 && commenters <= 2) {
+      return { tag: '\uD83D\uDC40', label: 'Quick review', tip: 'Small PR (\u226450 lines, \u22643 files), minimal discussion, CI not failing' };
+    }
+    // Needs approval: CI green, clean, but no maintainer approval yet
+    if (ci === 'SUCCESS' && mergeable === 'MERGEABLE' && unresolved === 0 && lines <= 200 && comments <= 5 &&
+        /No owner approval|No review/.test(pr.blockers || '')) {
+      return { tag: '\u2705', label: 'Needs approval', tip: 'CI green, no conflicts, no unresolved threads, no maintainer approval yet, \u2264200 lines, \u22645 comments' };
+    }
+    // Needs rebase: approved but conflicting
+    if (approvals >= 1 && mergeable === 'CONFLICTING' && unresolved === 0) {
+      return { tag: '\uD83D\uDD27', label: 'Needs rebase', tip: 'Approved, has merge conflicts, no unresolved threads' };
+    }
+    return null;
+  }
+
   function renderFiltered(username) {
     var lc = username.toLowerCase();
     var filtered = allPrs.filter(function(pr) {
@@ -403,6 +480,11 @@
       filtered = filtered.filter(function(pr) { return isUsersTurn(pr, username); });
     }
 
+    // Apply "easy next actions only" filter using pre-computed categories
+    if (easyActionMode) {
+      filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
+    }
+
     filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
 
     // Summary bar
@@ -414,6 +496,7 @@
       .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
     var bar = document.getElementById('summary-bar');
     var modeNote = nextActionOnlyMode ? ' (next action on me only)' : involvesMode ? ' (includes all involved)' : '';
+    if (easyActionMode) modeNote += ' (easy actions only)';
     bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' + modeNote +
       ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
       '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
@@ -534,7 +617,7 @@
 
     // Next action emoji
     var na = pr.next_action || '';
-    var actionEmoji = /Ready to merge/.test(na) ? '&#x1F7E2; ' :
+    var actionEmoji = /Ready to merge$/.test(na) ? '&#x1F7E2; ' :
                       /resolve conflicts/.test(na) ? '&#x1F6D1; ' :
                       /fix CI/.test(na) ? '&#x1F6D1; ' :
                       /review needed/.test(na) ? '<span class="action-icon-lg">&#x1F441;</span> ' :
@@ -594,6 +677,14 @@
     if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
     else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
 
+    // Easy action badge
+    var easyBadge = '';
+    if (pr._easyCategory) {
+      var easyTip = pr._easyCategory.label + ': ' + pr._easyCategory.tip;
+      easyBadge = '<span class="easy-badge">' + escHtml(pr._easyCategory.tag) +
+        '<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="' + escAttr(easyTip) + '" aria-label="Easy action: ' + escAttr(pr._easyCategory.label) + ' \u2014 show criteria">?</button></span> ';
+    }
+
     var unknownCell = '<span style="color:#8b949e;font-style:italic">unknown</span>';
     var unknownScore = '<span style="color:#8b949e">?</span>';
 
@@ -603,7 +694,7 @@
       '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
       '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
-      '<td class="title">' + safeTitle + '</td>' +
+      '<td class="title">' + easyBadge + safeTitle + '</td>' +
       '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na))) + '</td>' +
       '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
       '<td class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
