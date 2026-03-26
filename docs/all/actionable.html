@@ -617,7 +617,13 @@
 
   // --- Helpers ---
   function getPeople(pr) {
-    var text = (pr.who || '') + ' @' + (pr.author || '') + ' ' + (pr.next_action || '');
+    var text = (pr.who || '') + ' @' + (pr.author || '');
+    // From next_action, only extract the actor (first @mention before the colon),
+    // not people mentioned in the description (e.g., "respond to threads from @X")
+    if (pr.next_action) {
+      var actorMatch = pr.next_action.match(/^@([\w-]+)/);
+      if (actorMatch) text += ' @' + actorMatch[1];
+    }
     if (pr.copilot_trigger) text += ' @' + pr.copilot_trigger;
     var matches = text.match(/@([\w-]+)/g) || [];
     var seen = {};
