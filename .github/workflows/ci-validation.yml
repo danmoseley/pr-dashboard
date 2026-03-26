@@ -15,6 +15,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Run Pester tests
+        run: |
+          pwsh -Command "Invoke-Pester ./scripts/Tests/ -CI"
+
       - name: Run validation checks
         run: pwsh ./scripts/Test-CiValidation.ps1 -ArtifactDir "${{ runner.temp }}/ci-output"
 

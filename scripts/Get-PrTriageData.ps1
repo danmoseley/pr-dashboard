@@ -132,51 +132,10 @@ try {
 }
 
 # --- CODEOWNERS lookup ---
-# CODEOWNERS owners are more authoritative than area-label owners because they are tied
-# to the actual code paths rather than labels (which may be mis-applied).
-$codeownersRules = @()  # Ordered list of {pattern; owners[]}; last matching rule wins (git semantics)
-
-# Convert a CODEOWNERS glob pattern to a .NET regex string
-function ConvertTo-CodeownersRegex($pattern) {
-    $anchored = $pattern.StartsWith('/')
-    $p = $pattern.TrimStart('/')
-    $dirOnly = $p.EndsWith('/')
-    if ($dirOnly) { $p = $p.TrimEnd('/') }
-    # Escape regex metacharacters, then restore glob semantics
-    $regex = [regex]::Escape($p)
-    $regex = $regex -replace '\\\*\\\*', "`x00DBLSTAR`x00"  # placeholder for **; x00 can't appear in paths
-    $regex = $regex -replace '\\\*',     '[^/]*'             # * -> any non-slash chars
-    $regex = $regex -replace "`x00DBLSTAR`x00", '.*'        # ** -> any chars including /
-    $regex = $regex -replace '\\\?',     '[^/]'              # ? -> single non-slash char
-    $prefix = if ($anchored) { '^' } else { '(^|/)' }
-    $suffix = if ($dirOnly)  { '(/|$)' } else { '(/.*)?$' }
-    return "$prefix$regex$suffix"
-}
-
-# Test whether a file path matches a single CODEOWNERS pattern
-function Test-CodeownersPattern($pattern, $filePath) {
-    try {
-        $filePath = $filePath.TrimStart('/')
-        $regex = ConvertTo-CodeownersRegex $pattern
-        return $filePath -match $regex
-    } catch { return $false }
-}
-
-# Return the union of owners for all matching CODEOWNERS rules (last match per file wins)
-function Get-CodeownersForFiles($filePaths) {
-    if ($codeownersRules.Count -eq 0 -or -not $filePaths) { return @() }
-    $ownerSet = @{}
-    foreach ($file in $filePaths) {
-        $lastMatch = $null
-        foreach ($rule in $codeownersRules) {
-            if (Test-CodeownersPattern $rule.pattern $file) { $lastMatch = $rule.owners }
-        }
-        if ($lastMatch) { foreach ($o in $lastMatch) { $ownerSet[$o] = $true } }
-    }
-    return @($ownerSet.Keys)
-}
-
-# CODEOWNERS can live in .github/CODEOWNERS, CODEOWNERS, or docs/CODEOWNERS
+# Import helpers (ConvertFrom-CodeownersText, Get-CodeownersForFiles).
+# Functions are in a separate module so they can be independently tested.
+Import-Module (Join-Path $PSScriptRoot 'Codeowners.psm1') -Force
+$codeownersRules = @()
 $codeownersLocations = @(
     "repos/$($repoParts[0])/$($repoParts[1])/contents/.github/CODEOWNERS",
     "repos/$($repoParts[0])/$($repoParts[1])/contents/CODEOWNERS",
@@ -186,23 +145,7 @@ foreach ($loc in $codeownersLocations) {
     try {
         $raw = gh api -H "Accept: application/vnd.github.raw" $loc 2>$null
         if ($LASTEXITCODE -ne 0 -or -not $raw) { continue }
-        foreach ($line in $raw -split "`n") {
-            $line = $line.Trim()
-            if ($line -eq '' -or $line.StartsWith('#')) { continue }
-            $parts = $line -split '\s+'
-            if ($parts.Count -lt 2) { continue }
-            $pat = $parts[0]
-            $rawOwners = @($parts[1..($parts.Count - 1)] | Where-Object { $_ -match '^@' } | ForEach-Object { $_.TrimStart('@') })
-            if ($rawOwners.Count -eq 0) { continue }
-            $expanded = @()
-            foreach ($o in $rawOwners) {
-                if ($o -match '/') { $expanded += @(Expand-TeamHandle $o) }
-                else { $expanded += $o }
-            }
-            if ($expanded.Count -gt 0) {
-                $codeownersRules += [PSCustomObject]@{ pattern = $pat; owners = $expanded }
-            }
-        }
+        $codeownersRules = @(ConvertFrom-CodeownersText $raw)
         Write-Verbose "Loaded $($codeownersRules.Count) CODEOWNERS rules from $loc"
         break  # Use the first location found
     } catch {
@@ -441,7 +384,13 @@ foreach ($pr in $candidates) {
     if ($gql -and $gql.files -and $gql.files.nodes) {
         $changedFilePaths = @($gql.files.nodes | ForEach-Object { $_.path } | Where-Object { $_ })
     }
-    $codeownersForPr = Get-CodeownersForFiles $changedFilePaths
+    $codeownersForPr = Get-CodeownersForFiles -rules $codeownersRules -filePaths $changedFilePaths -expandOwnerFn {
+        param($o)
+        if ($o -match '/') {
+            try { Expand-TeamHandle $o }
+            catch { Write-Verbose "Warning: could not expand CODEOWNERS team handle @$o - $_"; @() }
+        } else { @($o) }
+    }
     # Merge: codeowners first (higher authority), then area-label owners
     $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
