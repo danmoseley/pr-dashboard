@@ -79,6 +79,22 @@ try {   # Top-level catch ensures stdout is always valid JSON
 $areaOwners = @{}
 $repoParts = $Repo -split '/'
 $areaOwnersUrl = "repos/$($repoParts[0])/$($repoParts[1])/contents/docs/area-owners.md"
+# Cache for expanding @org/team handles to individual logins
+$teamMemberCache = @{}
+function Expand-TeamHandle($handle) {
+    if ($teamMemberCache.ContainsKey($handle)) { return $teamMemberCache[$handle] }
+    $parts = $handle -split '/', 2
+    if ($parts.Count -ne 2) { $teamMemberCache[$handle] = @(); return @() }
+    $org = $parts[0]; $slug = $parts[1]
+    try {
+        $members = @(gh api "/orgs/$org/teams/$slug/members" --jq '.[].login' 2>$null)
+        if ($LASTEXITCODE -ne 0) { $members = @() }
+    } catch { $members = @() }
+    $teamMemberCache[$handle] = $members
+    if ($members.Count -gt 0) { Write-Verbose "Expanded @$handle to $($members.Count) members" }
+    else { Write-Verbose "Warning: could not expand team @$handle" }
+    return $members
+}
 try {
     $areaOwnersMd = gh api -H "Accept: application/vnd.github.raw" $areaOwnersUrl 2>$null
     foreach ($line in $areaOwnersMd -split "`n") {
@@ -86,9 +102,19 @@ try {
             $areaName = $matches[1].Trim()
             $lead = $matches[2].Trim().TrimEnd(',', ';')
             $ownerField = $matches[3].Trim()
-            $people = @([regex]::Matches($ownerField, '@(\S+)') | ForEach-Object { $_.Groups[1].Value.TrimEnd(',', ';') } |
-                Where-Object { $_ -notmatch '^dotnet/' })
-            if ($people.Count -eq 0) { $people = @($lead) }
+            $allMentions = @([regex]::Matches($ownerField, '@(\S+)') | ForEach-Object { $_.Groups[1].Value.TrimEnd(',', ';') })
+            $people = @($allMentions | Where-Object { $_ -notmatch '/' })
+            # Expand team handles (e.g. dotnet/ncl) to individual members
+            $teamHandles = @($allMentions | Where-Object { $_ -match '/' })
+            foreach ($th in $teamHandles) {
+                $people += Expand-TeamHandle $th
+            }
+            $people = @($people | Select-Object -Unique)
+            if ($people.Count -eq 0) {
+                # Lead may also be a team handle
+                if ($lead -match '/') { $people = @(Expand-TeamHandle $lead) }
+                else { $people = @($lead) }
+            }
             $areaOwners[$areaName] = $people
         }
     }
