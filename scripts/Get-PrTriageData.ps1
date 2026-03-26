@@ -134,25 +134,35 @@ try {
 # --- CODEOWNERS lookup ---
 # Import helpers (ConvertFrom-CodeownersText, Get-CodeownersForFiles).
 # Functions are in a separate module so they can be independently tested.
-Import-Module (Join-Path $PSScriptRoot 'Codeowners.psm1') -Force
+# The import is best-effort: if the module cannot be loaded, CODEOWNERS matching
+# is disabled and the script falls back to area-label owners only.
 $codeownersRules = @()
-$codeownersLocations = @(
-    "repos/$($repoParts[0])/$($repoParts[1])/contents/.github/CODEOWNERS",
-    "repos/$($repoParts[0])/$($repoParts[1])/contents/CODEOWNERS",
-    "repos/$($repoParts[0])/$($repoParts[1])/contents/docs/CODEOWNERS"
-)
-foreach ($loc in $codeownersLocations) {
-    try {
-        $raw = gh api -H "Accept: application/vnd.github.raw" $loc 2>$null
-        if ($LASTEXITCODE -ne 0 -or -not $raw) { continue }
-        $codeownersRules = @(ConvertFrom-CodeownersText $raw)
-        Write-Verbose "Loaded $($codeownersRules.Count) CODEOWNERS rules from $loc"
-        break  # Use the first location found
-    } catch {
-        # Not found at this location — try next
-    }
+$codeownersModuleLoaded = $false
+try {
+    Import-Module (Join-Path $PSScriptRoot 'Codeowners.psm1') -Force -ErrorAction Stop
+    $codeownersModuleLoaded = $true
+} catch {
+    Write-Verbose "Warning: could not load Codeowners.psm1; CODEOWNERS matching disabled: $_"
 }
-if ($codeownersRules.Count -eq 0) { Write-Verbose "No CODEOWNERS file found or it contained no rules" }
+if ($codeownersModuleLoaded) {
+    $codeownersLocations = @(
+        "repos/$($repoParts[0])/$($repoParts[1])/contents/.github/CODEOWNERS",
+        "repos/$($repoParts[0])/$($repoParts[1])/contents/CODEOWNERS",
+        "repos/$($repoParts[0])/$($repoParts[1])/contents/docs/CODEOWNERS"
+    )
+    foreach ($loc in $codeownersLocations) {
+        try {
+            $raw = gh api -H "Accept: application/vnd.github.raw" $loc 2>$null
+            if ($LASTEXITCODE -ne 0 -or -not $raw) { continue }
+            $codeownersRules = @(ConvertFrom-CodeownersText $raw)
+            Write-Verbose "Loaded $($codeownersRules.Count) CODEOWNERS rules from $loc"
+            break  # Use the first location found
+        } catch {
+            # Not found at this location — try next
+        }
+    }
+    if ($codeownersRules.Count -eq 0) { Write-Verbose "No CODEOWNERS file found or it contained no rules" }
+}
 
 $communityTriagers = @()  # Community triagers cannot merge or sign off; treat as regular reviewers
 

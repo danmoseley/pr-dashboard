@@ -32,6 +32,14 @@ Describe 'ConvertTo-CodeownersRegex' {
         $re.IsMatch('lib/src/bar.cs')   | Should -Be $false
     }
 
+    It 'anchors patterns with an interior slash to the repo root' {
+        # 'docs/*' has an interior slash → must only match from repo root
+        $re = ConvertTo-CodeownersRegex 'docs/*'
+        $re.IsMatch('docs/README.md')        | Should -Be $true
+        $re.IsMatch('docs/sub/page.md')      | Should -Be $true
+        $re.IsMatch('src/docs/README.md')    | Should -Be $false  # must not match nested path
+    }
+
     It 'matches **/*.cs in subdirectories' {
         $re = ConvertTo-CodeownersRegex '**/*.cs'
         $re.IsMatch('src/lib/deep/File.cs')  | Should -Be $true

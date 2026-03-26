@@ -3,18 +3,24 @@
     Helpers for parsing CODEOWNERS files and matching changed file paths to owners.
 .DESCRIPTION
     Exports three functions:
-      ConvertTo-CodeownersRegex  – converts a CODEOWNERS glob pattern to a compiled .NET Regex
+      ConvertTo-CodeownersRegex  – converts a CODEOWNERS glob pattern to a .NET Regex (case-sensitive, Compiled)
       ConvertFrom-CodeownersText – parses raw CODEOWNERS text into an ordered rule list
       Get-CodeownersForFiles     – returns owners for a set of changed file paths (last-match-wins)
 #>
 
 # Convert a CODEOWNERS glob pattern to a compiled, case-sensitive .NET Regex.
+# Anchoring rules (gitignore/CODEOWNERS spec):
+#   - Pattern starts with '/'  → root-anchored.
+#   - Pattern contains '/' after the leading one is stripped → root-relative (also anchored).
+#   - Pattern with no '/' at all (e.g. '*.js') → match at any depth via '(^|/)' prefix.
 function ConvertTo-CodeownersRegex {
     param([string]$pattern)
     $anchored = $pattern.StartsWith('/')
     $p = $pattern.TrimStart('/')
     $dirOnly = $p.EndsWith('/')
     if ($dirOnly) { $p = $p.TrimEnd('/') }
+    # A pattern with an interior slash is implicitly root-relative (must match from repo root).
+    if (-not $anchored -and $p.Contains('/')) { $anchored = $true }
     # Escape all regex metacharacters, then restore CODEOWNERS glob semantics.
     $regexStr = [regex]::Escape($p)
     # Use a null-byte placeholder that can never appear in a file path.
@@ -24,7 +30,7 @@ function ConvertTo-CodeownersRegex {
     $regexStr = $regexStr -replace '\\\?',     '[^/]'             # ? → single non-slash char
     $prefix = if ($anchored) { '^' }  else { '(^|/)' }
     $suffix = if ($dirOnly)  { '(/|$)' } else { '(/.*)?$' }
-    return [regex]::new("$prefix$regexStr$suffix")
+    return [regex]::new("$prefix$regexStr$suffix", [System.Text.RegularExpressions.RegexOptions]::Compiled)
 }
 
 # Parse raw CODEOWNERS file text into an ordered list of rules.
