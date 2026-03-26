@@ -92,6 +92,8 @@ function Expand-TeamHandle($handle) {
         else { $members = @($raw) | Where-Object { $_ -match '^\w[\w-]*$' } }
     } catch { $members = $null }
     if ($null -eq $members) {
+        # Cache failure to avoid repeated API calls for the same team within this run
+        $teamMemberCache[$handle] = @()
         Write-Verbose "Warning: could not expand team @$handle"
         return @()
     }

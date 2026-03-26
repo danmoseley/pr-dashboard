@@ -443,7 +443,7 @@
             newPrs = newPrs.filter(function(pr) {
               if (pr.state !== 'open' || pr.merged || pr.draft) return false;
               // Only show PRs created after the report was generated
-              if (serverTs && pr.created_at && pr.created_at < serverTs) return false;
+              if (serverTs && pr.created_at && new Date(pr.created_at) < new Date(serverTs)) return false;
               return true;
             });
 
