@@ -14,7 +14,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 OUTPUT_DIR = os.environ.get("WEIGHTINGS_DATA_DIR", str(SCRIPT_DIR / "data"))
 
 REPOS = [
-    "dotnet/runtime", "dotnet/aspire", "dotnet/aspnetcore",
+    "dotnet/runtime", "microsoft/aspire", "dotnet/aspnetcore",
     "dotnet/extensions", "dotnet/machinelearning", "dotnet/maui",
     "dotnet/msbuild", "dotnet/roslyn", "dotnet/sdk",
     "dotnet/winforms", "dotnet/wpf",
