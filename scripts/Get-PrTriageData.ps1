@@ -463,11 +463,12 @@ foreach ($pr in $candidates) {
     $hasAnyReview = $reviews.Count -gt 0
 
     # Extract explicitly requested reviewers (GitHub "Reviewers" sidebar)
+    # Exclude the PR author — they can't review their own PR.
     $requestedReviewerLogins = @()
     if ($gql -and $gql.reviewRequests.nodes) {
         $requestedReviewerLogins = @($gql.reviewRequests.nodes | ForEach-Object {
             if ($_.requestedReviewer.login) { $_.requestedReviewer.login }
-        } | Where-Object { $_ } | Select-Object -Unique)
+        } | Where-Object { $_ -and $_ -ne $authorLogin } | Select-Object -Unique)
     }
 
     # Build engagement-prioritized owner list for $who selection.
