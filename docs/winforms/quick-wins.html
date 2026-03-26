@@ -12,18 +12,20 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .easy-badge { font-size: 0.95em; white-space: nowrap; }
+  .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-03-26T07:42:16.7990157Z">
+<body data-server-updated="2026-03-26T16:16:12.2286620Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/winforms/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/winforms</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-26T07:42:16.7990157Z">at 2026-03-26 00:42 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
-<p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort.</p><!-- Description is trusted HTML from hardcoded report definitions -->
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-26T16:16:12.2286620Z">at 2026-03-26 09:16 PDT</span> &middot; 3 PRs &middot; <a href="https://github.com/dotnet/winforms">dotnet/winforms</a></p>
+<p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
   <p>Each PR has three scores on a 0&ndash;10 scale:</p>
-  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
-    <div style="flex:1; min-width:250px;">
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap; min-width:0;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -41,7 +43,7 @@
         <tr><td>0.3</td><td>Good review momentum <sup>1</sup></td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -58,28 +60,110 @@
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
       <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
       <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
       <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
     </div>
+    <div style="flex:1; min-width:180px;" id="easy-action-details">
+      <h4 style="margin:0.5em 0 0.3em">Easy next action filter</h4>
+      <table class="scoring-table">
+        <tr><td>&#x1F7E2;</td><td><b>Merge it</b></td><td>&ldquo;Ready to merge&rdquo;</td></tr>
+        <tr><td>&#x1F440;</td><td><b>Quick review</b></td><td>&le;50 lines, &le;3 files, CI ok, &le;3 comments</td></tr>
+        <tr><td>&#x2705;</td><td><b>Needs approval</b></td><td>CI green, no conflicts, no threads, &le;200 lines</td></tr>
+        <tr><td>&#x1F527;</td><td><b>Needs rebase</b></td><td>Approved, has conflicts, no threads</td></tr>
+      </table>
+    </div>
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
+  <col style="width:4%">
+  <col>
+  <col style="width:24%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
+<thead>
+<tr>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="LeafShi1,SimonZhao888" data-involved="codecov,copilot-pull-request-reviewer,KlausLoeffelmann,LeafShi1,ricardobossan,Shyam-Gupta,SimonZhao888" data-labels="area-DarkMode" data-easy="merge">
+  <td class="score ready-high">9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 5t 4ppl (+1.0)&#10;old but active: 44d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14288" title="Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in dark mode after enabled SystemColorMode.Dark">#14288</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> Fix issue 11956: [Dark Mode] CheckBox in TreeView/ListView is not in dark mode after enabled SystemColorMode.Dark</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="8 passed, 0 failed, 0 running">&#x2705; 8/0/0</td>
+  <td class="disc heat-2">0/5t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-2">44d</td>
+  <td class="num heat-2">14d</td>
+  <td class="num" title="2 files, 130 lines (additions + deletions)">130</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/SimonZhao888.png?size=32" alt="SimonZhao888"><a href="https://github.com/SimonZhao888">@SimonZhao888</a><a class="filter-btn" href="#" onclick="filterByUser('SimonZhao888');return false" title="Show only @SimonZhao888">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DarkMode');return false" title="Show only area-DarkMode">DarkMode</a></td>
+</tr>
+<tr data-people="KlausLoeffelmann,LeafShi1" data-involved="KlausLoeffelmann,LeafShi1,merriemcgaw,Shyam-Gupta" data-labels="area-Infrastructure" data-easy="merge">
+  <td class="score ready-high">9.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="old but active: 82d age (+0.5)&#10;trivial change, quick win (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14179" title="Update the link of the &quot;APIs of DotNet&quot; in porting-guidelines.md">#14179</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> Update the link of the &quot;APIs of DotNet&quot; in porting-guidelines.md</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/KlausLoeffelmann.png?size=32" alt="KlausLoeffelmann"><a href="https://github.com/KlausLoeffelmann">@KlausLoeffelmann</a><a class="filter-btn" href="#" onclick="filterByUser('KlausLoeffelmann');return false" title="Show only @KlausLoeffelmann">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
+  <td class="disc">0/0t 0ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;0 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">82d</td>
+  <td class="num heat-1">9d</td>
+  <td class="num" title="1 file, 4 lines (additions + deletions)">4</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
+</tr>
+<tr data-people="LeafShi1,aerworker" data-involved="aerworker,codecov,KlausLoeffelmann,LeafShi1,timbset" data-labels="area-DesignerSupport" data-easy="merge">
+  <td class="score ready-high">9.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="old but active: 52d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/winforms/pull/14260" title="Fix issue 14259: Deserialization of the CodeTypeReference to generic type is incorrect">#14260</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> Fix issue 14259: Deserialization of the CodeTypeReference to generic type is incorrect</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/LeafShi1.png?size=32" alt="LeafShi1"><a href="https://github.com/LeafShi1">@LeafShi1</a><a class="filter-btn" href="#" onclick="filterByUser('LeafShi1');return false" title="Show only @LeafShi1">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="9 passed, 0 failed, 0 running">&#x2705; 9/0/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-2">52d</td>
+  <td class="num">3d</td>
+  <td class="num" title="2 files, 26 lines (additions + deletions)">26</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/aerworker.png?size=32" alt="aerworker"><a href="https://github.com/aerworker">@aerworker</a><a class="filter-btn" href="#" onclick="filterByUser('aerworker');return false" title="Show only @aerworker">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-DesignerSupport');return false" title="Show only area-DesignerSupport">DesignerSupport</a></td>
+</tr>
+</tbody>
+</table>
 
 
 <script src="../shared-ui.js"></script>
 <script>
 var _filterKey = 'prFilter:' + location.pathname;
+function isEasyHidden(r) {
+  var toggle = document.getElementById('easy-action-toggle');
+  return toggle && toggle.checked && !r.getAttribute('data-easy');
+}
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -99,7 +183,7 @@ function filterByUser(name) {
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -116,8 +200,11 @@ function filterByUser(name) {
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
+  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
   rows.forEach(function(r) {
-    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
+    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
   });
   document.getElementById('filter-banner').style.display = 'none';
   var btn = document.getElementById('toggle-more');
@@ -125,6 +212,38 @@ function clearFilter() {
   history.replaceState(null, '', location.pathname);
   try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
+function applyEasyFilter(easyOn) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  rows.forEach(function(r) {
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
+    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
+  });
+}
+(function() {
+  var LS_EASY_KEY = 'pr-dashboard-easy-action';
+  var toggle = document.getElementById('easy-action-toggle');
+  if (!toggle) return;
+  // Restore state
+  var params = new URLSearchParams(location.search);
+  var urlEasy = params.get('easyaction');
+  var easyOn = false;
+  if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
+  else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
+  toggle.checked = easyOn;
+  if (easyOn) { applyEasyFilter(true); }
+  toggle.addEventListener('change', function() {
+    var on = this.checked;
+    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
+    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
+      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
+    } catch(e) {}
+    applyEasyFilter(on);
+  });
+})();
 // Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
@@ -140,7 +259,8 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {

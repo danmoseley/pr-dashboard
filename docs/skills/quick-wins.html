@@ -12,18 +12,20 @@
   .observations h3 { font-size: 1.1em; margin-bottom: 0.5em; }
   .observations ul { padding-left: 1.5em; }
   .observations li { margin-bottom: 0.4em; line-height: 1.4; }
+  .easy-badge { font-size: 0.95em; white-space: nowrap; }
+  .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-03-26T07:44:47.4019968Z">
+<body data-server-updated="2026-03-26T16:18:59.0116024Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/skills/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/skills</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-26T07:44:47.4019968Z">at 2026-03-26 00:44 PDT</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/skills">dotnet/skills</a></p>
-<p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort.</p><!-- Description is trusted HTML from hardcoded report definitions -->
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-26T16:18:59.0116024Z">at 2026-03-26 09:18 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/skills">dotnet/skills</a></p>
+<p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
   <p>Each PR has three scores on a 0&ndash;10 scale:</p>
-  <div style="display:flex; gap:1.5em; flex-wrap:wrap;">
-    <div style="flex:1; min-width:250px;">
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap; min-width:0;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -41,7 +43,7 @@
         <tr><td>0.3</td><td>Good review momentum <sup>1</sup></td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
       <table class="scoring-table">
         <tr><th>Points</th><th>Signal</th></tr>
@@ -58,82 +60,41 @@
         <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
       </table>
     </div>
-    <div style="flex:1; min-width:250px;">
+    <div style="flex:1; min-width:200px;">
       <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
       <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
       <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
       <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
     </div>
+    <div style="flex:1; min-width:180px;" id="easy-action-details">
+      <h4 style="margin:0.5em 0 0.3em">Easy next action filter</h4>
+      <table class="scoring-table">
+        <tr><td>&#x1F7E2;</td><td><b>Merge it</b></td><td>&ldquo;Ready to merge&rdquo;</td></tr>
+        <tr><td>&#x1F440;</td><td><b>Quick review</b></td><td>&le;50 lines, &le;3 files, CI ok, &le;3 comments</td></tr>
+        <tr><td>&#x2705;</td><td><b>Needs approval</b></td><td>CI green, no conflicts, no threads, &le;200 lines</td></tr>
+        <tr><td>&#x1F527;</td><td><b>Needs rebase</b></td><td>Approved, has conflicts, no threads</td></tr>
+      </table>
+    </div>
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table id="pr-table">
-<colgroup>
-  <col style="width:4.5%">
-  <col style="width:4%">
-  <col style="width:5%">
-  <col style="width:4%">
-  <col>
-  <col style="width:24%">
-  <col style="width:7%">
-  <col style="width:3%">
-  <col style="width:2.5%">
-  <col style="width:2.5%">
-  <col style="width:2.5%">
-  <col style="width:8%">
-  
-</colgroup>
-<thead>
-<tr>
-  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
-  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th>
-</tr>
-</thead>
-<tbody>
-<tr data-people="DamianEdwards,jjonescz" data-involved="agocke,copilot-pull-request-reviewer,DamianEdwards,github-actions,jjonescz,ViktorHofer" data-labels="">
-  <td class="score ready-high">8.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 3t 6ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/307" title="Mention more directives in the FBA skill">#307</a></td>
-  <td class="title">Mention more directives in the FBA skill</td>
-  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/DamianEdwards.png?size=32" alt="DamianEdwards"><a href="https://github.com/DamianEdwards">@DamianEdwards</a><a class="filter-btn" href="#" onclick="filterByUser('DamianEdwards');return false" title="Show only @DamianEdwards">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
-  <td class="ci" title="7 passed, 0 failed, 0 running">&#x2705; 7/0/0</td>
-  <td class="disc heat-3">&#x1F525; 0/3t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 3 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">16d</td>
-  <td class="num">5d</td>
-  <td class="num" title="1 file, 56 lines (additions + deletions)">56</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jjonescz.png?size=32" alt="jjonescz"><a href="https://github.com/jjonescz">@jjonescz</a><a class="filter-btn" href="#" onclick="filterByUser('jjonescz');return false" title="Show only @jjonescz">&#x1F50D;</a></span></td>
-  
-</tr>
-<tr data-people="JanKrivanek,danmoseley" data-involved="copilot-pull-request-reviewer,danmoseley,github-actions,JanKrivanek,ViktorHofer" data-labels="">
-  <td class="score ready-high">9.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">0.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="thorough review: 6 resolved threads (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/451" title="Improve investigation guide: PR number in prompt, document reject_tools, baseline-already-good pattern">#451</a></td>
-  <td class="title">Improve investigation guide: PR number in prompt, document reject_tools, baseline-already-good pattern</td>
-  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/JanKrivanek.png?size=32" alt="JanKrivanek"><a href="https://github.com/JanKrivanek">@JanKrivanek</a><a class="filter-btn" href="#" onclick="filterByUser('JanKrivanek');return false" title="Show only @JanKrivanek">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-1">0/6t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 6 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">0d</td>
-  <td class="num">0d</td>
-  <td class="num" title="2 files, 71 lines (additions + deletions)">71</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/danmoseley.png?size=32" alt="danmoseley"><a href="https://github.com/danmoseley">@danmoseley</a><a class="filter-btn" href="#" onclick="filterByUser('danmoseley');return false" title="Show only @danmoseley">&#x1F50D;</a></span></td>
-  
-</tr>
-</tbody>
-</table>
+<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
 
 
 <script src="../shared-ui.js"></script>
 <script>
 var _filterKey = 'prFilter:' + location.pathname;
+function isEasyHidden(r) {
+  var toggle = document.getElementById('easy-action-toggle');
+  return toggle && toggle.checked && !r.getAttribute('data-easy');
+}
 function filterByLabel(label) {
   var rows = document.querySelectorAll('tbody tr');
   var count = 0;
   rows.forEach(function(r) {
     var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0) {
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -153,7 +114,7 @@ function filterByUser(name) {
   var count = 0;
   rows.forEach(function(r) {
     var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0) {
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
       r.style.display = '';
       count++;
     } else {
@@ -170,8 +131,11 @@ function filterByUser(name) {
 }
 function clearFilter() {
   var rows = document.querySelectorAll('#pr-table tbody tr');
+  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
   rows.forEach(function(r) {
-    r.style.display = r.classList.contains('more-row') ? 'none' : '';
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
+    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
   });
   document.getElementById('filter-banner').style.display = 'none';
   var btn = document.getElementById('toggle-more');
@@ -179,6 +143,38 @@ function clearFilter() {
   history.replaceState(null, '', location.pathname);
   try { localStorage.removeItem(_filterKey); } catch(e) {}
 }
+function applyEasyFilter(easyOn) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  rows.forEach(function(r) {
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
+    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
+  });
+}
+(function() {
+  var LS_EASY_KEY = 'pr-dashboard-easy-action';
+  var toggle = document.getElementById('easy-action-toggle');
+  if (!toggle) return;
+  // Restore state
+  var params = new URLSearchParams(location.search);
+  var urlEasy = params.get('easyaction');
+  var easyOn = false;
+  if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
+  else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
+  toggle.checked = easyOn;
+  if (easyOn) { applyEasyFilter(true); }
+  toggle.addEventListener('change', function() {
+    var on = this.checked;
+    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
+    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
+      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
+    } catch(e) {}
+    applyEasyFilter(on);
+  });
+})();
 // Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
@@ -194,8 +190,7 @@ function clearFilter() {
     } catch(e) {}
   }
 })();
-initTableSort('pr-table', 2);
-initResizableColumns('pr-table');
+
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
