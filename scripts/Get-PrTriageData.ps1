@@ -87,7 +87,7 @@ function Expand-TeamHandle($handle) {
     if ($parts.Count -ne 2) { $teamMemberCache[$handle] = @(); return @() }
     $org = $parts[0]; $slug = $parts[1]
     try {
-        $raw = gh api "/orgs/$org/teams/$slug/members" --jq '.[].login' 2>$null
+        $raw = gh api --paginate "/orgs/$org/teams/$slug/members?per_page=100" --jq '.[].login' 2>$null
         if ($LASTEXITCODE -ne 0) { $members = @() }
         else { $members = @($raw) | Where-Object { $_ -match '^\w[\w-]*$' } }
     } catch { $members = @() }
