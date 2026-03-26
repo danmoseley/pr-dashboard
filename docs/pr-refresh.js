@@ -272,8 +272,12 @@
   function ensureRateLimitFooter() {
     if (rateLimitEl) return;
     // pr-view-refresh.js has a more comprehensive rate-limit footer;
-    // skip ours when that one is present to avoid duplication.
-    if (document.getElementById('view-refresh-rate-limit')) return;
+    // reuse it when present to avoid duplication.
+    var existing = document.getElementById('view-refresh-rate-limit');
+    if (existing) {
+      rateLimitEl = existing;
+      return;
+    }
     rateLimitEl = document.createElement('div');
     rateLimitEl.className = 'rate-limit-footer';
     rateLimitEl.setAttribute('role', 'status');

@@ -246,10 +246,10 @@ if ($Observations.Trim()) {
 
 $prCount = @($prs).Count
 
-# Show more / collapse toggle (pages of 100)
+# Show more / collapse toggle (pages of 500)
 $toggleHtml = ""
-if ($prCount -gt 100) {
-    $extraCount = $prCount - 100
+if ($prCount -gt 500) {
+    $extraCount = $prCount - 500
     $toggleHtml = @"
 <button class="show-more-btn" id="toggle-more">Show $extraCount more &#x25BC;</button>
 <script>
