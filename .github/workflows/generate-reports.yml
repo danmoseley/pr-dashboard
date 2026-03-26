@@ -3,7 +3,7 @@ name: Generate All Reports
 on:
   # schedule-desc: priority repos ~4x daily, others ~daily
   schedule:
-    - cron: '11 0,6,12,18 * * 1-5'  # weekdays 4x: priority repos every 6h, standard repos at 6 UTC only (off-hour to reduce GitHub delays)
+    - cron: '11 0,6,12,18 * * 1-5'  # weekdays 4x: priority repos every 6h at :11 past, standard repos at 6:11 UTC only (off-minute to reduce GitHub delays)
     - cron: '11 6,18 * * 0,6'       # weekends 2x: priority repos both, standard repos at 6 UTC only
   workflow_dispatch: {}
 
