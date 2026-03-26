@@ -183,7 +183,7 @@ $rows = foreach ($pr in $prs) {
 
     $labelsList = if ($pr.area_labels) { ($pr.area_labels -join ',') } else { "" }
 
-    $moreClass = if ($rowIndex -gt 100) { ' class="more-row" style="display:none"' } else { "" }
+    $moreClass = if ($rowIndex -gt 500) { ' class="more-row" style="display:none"' } else { "" }
 
     $safeValueWhy = $pr.value_why
     $safeActionWhy = $pr.action_why

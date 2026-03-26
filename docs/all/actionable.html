@@ -475,9 +475,9 @@
     }
     html += '</tbody></table>';
 
-    // Show more/fewer toggle for >100 rows
-    if (prs.length > 100) {
-      var extra = prs.length - 100;
+    // Show more/fewer toggle for >500 rows
+    if (prs.length > 500) {
+      var extra = prs.length - 500;
       html += '<button class="show-more-btn" id="toggle-more">Show ' + extra + ' more \u25BC</button>';
     }
 
@@ -512,7 +512,7 @@
     // Detect if the filtered user is the one who should act next
     var isYourTurn = isUsersTurn(pr, filterUser);
 
-    var moreClass = idx >= 100 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
+    var moreClass = idx >= 500 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
                                 : (isYourTurn ? ' class="your-turn"' : '');
 
     // CI emoji
