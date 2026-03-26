@@ -272,6 +272,8 @@
           if (r.updated) timestamps.push(new Date(r.updated));
         });
         allPrs.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+        // Pre-compute easy action categories once after load so renderFiltered doesn't recompute them on every call
+        allPrs.forEach(function(pr) { pr._easyCategory = getEasyActionCategory(pr); });
         loaded = true;
         document.getElementById('status').style.display = 'none';
 
@@ -440,7 +442,7 @@
     var commenters = parseInt(pr.distinct_commenters) || 0;
 
     // Merge it: next_action says ready to merge (backend validates owner approval, CI, conflicts, threads)
-    if (/Ready to merge/.test(pr.next_action || '')) {
+    if (/Ready to merge$/.test(pr.next_action || '')) {
       return { tag: '\uD83D\uDFE2', label: 'Merge it', tip: 'CI green, maintainer approved, no conflicts, no unresolved threads' };
     }
     // Quick review: small, quiet, CI not failed
@@ -478,16 +480,9 @@
       filtered = filtered.filter(function(pr) { return isUsersTurn(pr, username); });
     }
 
-    // Apply "easy next actions only" filter and cache categories
+    // Apply "easy next actions only" filter using pre-computed categories
     if (easyActionMode) {
-      filtered = filtered.filter(function(pr) {
-        var cat = getEasyActionCategory(pr);
-        pr._easyCategory = cat;
-        return cat !== null;
-      });
-    } else {
-      // Still compute categories for badge display
-      filtered.forEach(function(pr) { pr._easyCategory = getEasyActionCategory(pr); });
+      filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
     }
 
     filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
@@ -622,7 +617,7 @@
 
     // Next action emoji
     var na = pr.next_action || '';
-    var actionEmoji = /Ready to merge/.test(na) ? '&#x1F7E2; ' :
+    var actionEmoji = /Ready to merge$/.test(na) ? '&#x1F7E2; ' :
                       /resolve conflicts/.test(na) ? '&#x1F6D1; ' :
                       /fix CI/.test(na) ? '&#x1F6D1; ' :
                       /review needed/.test(na) ? '<span class="action-icon-lg">&#x1F441;</span> ' :
@@ -687,7 +682,7 @@
     if (pr._easyCategory) {
       var easyTip = pr._easyCategory.label + ': ' + pr._easyCategory.tip;
       easyBadge = '<span class="easy-badge">' + escHtml(pr._easyCategory.tag) +
-        '<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="' + escAttr(easyTip) + '" aria-label="Show easy action details">?</button></span> ';
+        '<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="' + escAttr(easyTip) + '" aria-label="Easy action: ' + escAttr(pr._easyCategory.label) + ' \u2014 show criteria">?</button></span> ';
     }
 
     var unknownCell = '<span style="color:#8b949e;font-style:italic">unknown</span>';

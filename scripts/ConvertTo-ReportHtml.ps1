@@ -205,28 +205,29 @@ $rows = foreach ($pr in $prs) {
     $easyTip = ""
     $ci = $pr.ci
     $mergeable = $pr.mergeable
-    $approvals = [int]$pr.approval_count
-    $unresolved = [int]$pr.unresolved_threads
-    $lines = [int]$pr.lines_changed
-    $files = [int]$pr.changed_files
-    $comments = [int]$pr.total_comments
-    $commenters = [int]$pr.distinct_commenters
+    $approvals = $pr.approval_count -as [int]
+    $unresolved = $pr.unresolved_threads -as [int]
+    $lines = $pr.lines_changed -as [int]
+    $files = $pr.changed_files -as [int]
+    $comments = $pr.total_comments -as [int]
+    $commenters = $pr.distinct_commenters -as [int]
 
-    if ($pr.next_action -match "Ready to merge") {
-        $easyCategory = "merge"; $easyLabel = "&#x1F7E2;"; $easyTip = "Merge it: CI green, maintainer approved, no conflicts, no unresolved threads"
+    if ($pr.next_action -match "Ready to merge$") {
+        $easyCategory = "merge"; $easyLabel = "&#x1F7E2;"; $easyTextLabel = "Merge it"; $easyTip = "Merge it: CI green, maintainer approved, no conflicts, no unresolved threads"
     } elseif ($lines -le 50 -and $files -le 3 -and $ci -ne "FAILURE" -and $unresolved -le 1 -and $comments -le 3 -and $commenters -le 2) {
-        $easyCategory = "quick-review"; $easyLabel = "&#x1F440;"; $easyTip = "Quick review: small PR, minimal discussion, CI not failing"
+        $easyCategory = "quick-review"; $easyLabel = "&#x1F440;"; $easyTextLabel = "Quick review"; $easyTip = "Quick review: small PR, minimal discussion, CI not failing"
     } elseif ($ci -eq "SUCCESS" -and $mergeable -eq "MERGEABLE" -and $unresolved -eq 0 -and $lines -le 200 -and $comments -le 5 -and ($pr.blockers -match "No owner approval|No review")) {
-        $easyCategory = "needs-approval"; $easyLabel = "&#x2705;"; $easyTip = "Needs approval: CI green, no conflicts, no unresolved threads, no maintainer approval yet"
+        $easyCategory = "needs-approval"; $easyLabel = "&#x2705;"; $easyTextLabel = "Needs approval"; $easyTip = "Needs approval: CI green, no conflicts, no unresolved threads, no maintainer approval yet"
     } elseif ($approvals -ge 1 -and $mergeable -eq "CONFLICTING" -and $unresolved -eq 0) {
-        $easyCategory = "needs-rebase"; $easyLabel = "&#x1F527;"; $easyTip = "Needs rebase: approved, has merge conflicts, no unresolved threads"
+        $easyCategory = "needs-rebase"; $easyLabel = "&#x1F527;"; $easyTextLabel = "Needs rebase"; $easyTip = "Needs rebase: approved, has merge conflicts, no unresolved threads"
     }
 
     $easyBadgeHtml = ""
     $easyDataAttr = ""
     if ($easyCategory) {
         $safeEasyTip = [System.Net.WebUtility]::HtmlEncode($easyTip)
-        $easyBadgeHtml = "<span class=`"easy-badge`">$easyLabel<button type=`"button`" class=`"why-btn easy-why-btn`" onclick=`"showWhy(this)`" data-why=`"$safeEasyTip`" aria-label=`"Show easy action details`">?</button></span> "
+        $safeEasyTextLabel = [System.Net.WebUtility]::HtmlEncode($easyTextLabel)
+        $easyBadgeHtml = "<span class=`"easy-badge`">$easyLabel<button type=`"button`" class=`"why-btn easy-why-btn`" onclick=`"showWhy(this)`" data-why=`"$safeEasyTip`" aria-label=`"Easy action: $safeEasyTextLabel — show criteria`">?</button></span> "
         $easyDataAttr = " data-easy=`"$easyCategory`""
     }
 
