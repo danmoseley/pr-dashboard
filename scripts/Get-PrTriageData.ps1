@@ -88,12 +88,15 @@ function Expand-TeamHandle($handle) {
     $org = $parts[0]; $slug = $parts[1]
     try {
         $raw = gh api --paginate "/orgs/$org/teams/$slug/members?per_page=100" --jq '.[].login' 2>$null
-        if ($LASTEXITCODE -ne 0) { $members = @() }
+        if ($LASTEXITCODE -ne 0) { $members = $null }
         else { $members = @($raw) | Where-Object { $_ -match '^\w[\w-]*$' } }
-    } catch { $members = @() }
+    } catch { $members = $null }
+    if ($null -eq $members) {
+        Write-Verbose "Warning: could not expand team @$handle"
+        return @()
+    }
     $teamMemberCache[$handle] = $members
     if ($members.Count -gt 0) { Write-Verbose "Expanded @$handle to $($members.Count) members" }
-    else { Write-Verbose "Warning: could not expand team @$handle" }
     return $members
 }
 try {
@@ -110,7 +113,9 @@ try {
             foreach ($th in $teamHandles) {
                 $people += Expand-TeamHandle $th
             }
-            $people = @($people | Select-Object -Unique)
+            $seen = @{}; $deduped = @()
+            foreach ($p in $people) { if (-not $seen.ContainsKey($p)) { $seen[$p] = $true; $deduped += $p } }
+            $people = $deduped
             if ($people.Count -eq 0) {
                 # Lead may also be a team handle
                 if ($lead -match '/') { $people = @(Expand-TeamHandle $lead) }
