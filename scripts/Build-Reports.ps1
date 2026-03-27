@@ -68,9 +68,9 @@ foreach ($pr in $allPrs) {
     $conflictS = switch ($pr.mergeable) { "MERGEABLE" { 1.0 } "UNKNOWN" { 0.5 } "CONFLICTING" { 0.0 } default { 0.5 } }
     $hasNAA = $pr.blockers -match 'needs-author-action'
     $noReview = $pr.blockers -match 'No review'
-    $noOwner = $pr.blockers -match 'No owner approval'
+    $noMaintainerApproval = $pr.blockers -match 'No maintainer approval'
     $staleApproval = $pr.blockers -match 'Approval not on latest'
-    $maintS = if ($noReview) { 0.0 } elseif ($noOwner) { 0.5 } else { 1.0 }
+    $maintS = if ($noReview) { 0.0 } elseif ($noMaintainerApproval) { 0.5 } else { 1.0 }
     $feedbackS = if ($hasNAA) { 0.0 } elseif ([int]$pr.unresolved_threads -eq 0) { 1.0 } else { 0.5 }
     $approvalS = if ([int]$pr.approval_count -ge 2) { 1.0 } elseif ([int]$pr.approval_count -ge 1) { 0.5 } else { 0.0 }
     if ($staleApproval -and $approvalS -gt 0) { $approvalS = [Math]::Max(0, $approvalS - 0.25) }

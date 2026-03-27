@@ -216,8 +216,8 @@ $rows = foreach ($pr in $prs) {
         $easyCategory = "merge"; $easyLabel = "&#x1F7E2;"; $easyTextLabel = "Merge it"; $easyTip = "Merge it: CI green, maintainer approved, no conflicts, no unresolved threads"
     } elseif ($lines -le 50 -and $files -le 3 -and $ci -ne "FAILURE" -and $unresolved -le 1 -and $comments -le 3 -and $commenters -le 2) {
         $easyCategory = "quick-review"; $easyLabel = "&#x1F440;"; $easyTextLabel = "Quick review"; $easyTip = "Quick review: small PR, minimal discussion, CI not failing"
-    } elseif ($ci -eq "SUCCESS" -and $mergeable -eq "MERGEABLE" -and $unresolved -eq 0 -and $lines -le 200 -and $comments -le 5 -and ($pr.blockers -match "No owner approval|No review")) {
-        $easyCategory = "needs-approval"; $easyLabel = "&#x2705;"; $easyTextLabel = "Needs approval"; $easyTip = "Needs approval: CI green, no conflicts, no unresolved threads, no maintainer approval yet"
+    } elseif ($ci -eq "SUCCESS" -and $mergeable -eq "MERGEABLE" -and $unresolved -eq 0 -and $lines -le 200 -and $comments -le 5 -and ($pr.blockers -match "No maintainer approval|No review")) {
+        $easyCategory = "needs-approval"; $easyLabel = "&#x2705;"; $easyTextLabel = "Needs review/approval"; $easyTip = "Needs review/approval: CI green, no conflicts, no unresolved threads, but either has no review yet or no maintainer approval"
     } elseif ($approvals -ge 1 -and $mergeable -eq "CONFLICTING" -and $unresolved -eq 0) {
         $easyCategory = "needs-rebase"; $easyLabel = "&#x1F527;"; $easyTextLabel = "Needs rebase"; $easyTip = "Needs rebase: approved, has merge conflicts, no unresolved threads"
     }
