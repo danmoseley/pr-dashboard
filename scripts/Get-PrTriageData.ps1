@@ -407,7 +407,9 @@ foreach ($pr in $candidates) {
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
     # Any maintainer's approval satisfies the merge gate; $prOwners is used to
     # suggest reviewers, not to gate merging. Compute once for reuse below.
-    $allMaintainerPool = @(@($prOwners) + @($Maintainers) | Select-Object -Unique)
+    # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
+    # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
+    $allMaintainerPool = @($Maintainers | Select-Object -Unique)
 
     # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null

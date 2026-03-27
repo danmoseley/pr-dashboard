@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<test-results xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="nunit_schema_2.5.xsd" name="Pester" total="24" errors="0" failures="0" not-run="0" inconclusive="0" ignored="0" skipped="0" invalid="0" date="2026-03-27" time="06:10:04">
+  <environment user="runner" cwd="/home/runner/work/pr-dashboard/pr-dashboard" machine-name="runnervm46oaq" os-version="6.14.0-1017-azure" platform="Linux" nunit-version="2.5.8.0" user-domain="" clr-version="8.0.21" />
+  <culture-info current-culture="" current-uiculture="" />
+  <test-suite type="TestFixture" name="Pester" executed="True" result="Success" success="True" time="1.0508" asserts="0" description="Pester">
+    <results>
+      <test-suite type="TestFixture" name="/home/runner/work/pr-dashboard/pr-dashboard/scripts/Tests/Codeowners.Tests.ps1" executed="True" result="Success" success="True" time="1.0508" asserts="0" description="/home/runner/work/pr-dashboard/pr-dashboard/scripts/Tests/Codeowners.Tests.ps1">
+        <results>
+          <test-suite type="TestFixture" name="ConvertTo-CodeownersRegex" executed="True" result="Success" success="True" time="0.3164" asserts="0" description="ConvertTo-CodeownersRegex">
+            <results>
+              <test-case description="matches * at any depth (CODEOWNERS * means all files everywhere)" name="ConvertTo-CodeownersRegex.matches * at any depth (CODEOWNERS * means all files everywhere)" time="0.1402" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="matches *.js at any depth (no leading /)" name="ConvertTo-CodeownersRegex.matches *.js at any depth (no leading /)" time="0.0188" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="anchors a leading / to the root" name="ConvertTo-CodeownersRegex.anchors a leading / to the root" time="0.0149" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="anchors patterns with an interior slash to the repo root" name="ConvertTo-CodeownersRegex.anchors patterns with an interior slash to the repo root" time="0.0165" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="matches **/*.cs in subdirectories" name="ConvertTo-CodeownersRegex.matches **/*.cs in subdirectories" time="0.0457" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="matches an anchored file pattern" name="ConvertTo-CodeownersRegex.matches an anchored file pattern" time="0.0152" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="handles ? as single non-separator character" name="ConvertTo-CodeownersRegex.handles ? as single non-separator character" time="0.0141" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="ConvertFrom-CodeownersText" executed="True" result="Success" success="True" time="0.4601" asserts="0" description="ConvertFrom-CodeownersText">
+            <results>
+              <test-case description="skips blank lines and comment lines" name="ConvertFrom-CodeownersText.skips blank lines and comment lines" time="0.0273" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="parses a simple rule with one owner" name="ConvertFrom-CodeownersText.parses a simple rule with one owner" time="0.0134" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="parses a rule with multiple owners including a team handle" name="ConvertFrom-CodeownersText.parses a rule with multiple owners including a team handle" time="0.0099" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="records unown entries with empty rawOwners (no @ handles)" name="ConvertFrom-CodeownersText.records unown entries with empty rawOwners (no @ handles)" time="0.0137" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="ignores tokens without @ prefix (emails etc.)" name="ConvertFrom-CodeownersText.ignores tokens without @ prefix (emails etc.)" time="0.0094" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="returns multiple rules in order" name="ConvertFrom-CodeownersText.returns multiple rules in order" time="0.0175" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="handles malformed patterns without throwing" name="ConvertFrom-CodeownersText.handles malformed patterns without throwing" time="0.0393" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+          <test-suite type="TestFixture" name="Get-CodeownersForFiles" executed="True" result="Success" success="True" time="0.6522" asserts="0" description="Get-CodeownersForFiles">
+            <results>
+              <test-case description="returns empty array when rules list is empty" name="Get-CodeownersForFiles.returns empty array when rules list is empty" time="0.0244" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="returns empty array when file list is empty" name="Get-CodeownersForFiles.returns empty array when file list is empty" time="0.0176" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="applies last-match-wins: /docs/ overrides catch-all *" name="Get-CodeownersForFiles.applies last-match-wins: /docs/ overrides catch-all *" time="0.0336" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="unown entry means no owners for that file path" name="Get-CodeownersForFiles.unown entry means no owners for that file path" time="0.0078" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="uses catch-all for a file not covered by specific rules" name="Get-CodeownersForFiles.uses catch-all for a file not covered by specific rules" time="0.0073" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="unions owners from multiple files preserving insertion order" name="Get-CodeownersForFiles.unions owners from multiple files preserving insertion order" time="0.0111" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="deduplicates owners that appear for multiple files" name="Get-CodeownersForFiles.deduplicates owners that appear for multiple files" time="0.0124" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="expands team handles via expandOwnerFn" name="Get-CodeownersForFiles.expands team handles via expandOwnerFn" time="0.0179" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="excludes null/empty logins from expandOwnerFn" name="Get-CodeownersForFiles.excludes null/empty logins from expandOwnerFn" time="0.017" asserts="0" success="True" result="Success" executed="True" />
+              <test-case description="works without expandOwnerFn (uses rawOwner as login)" name="Get-CodeownersForFiles.works without expandOwnerFn (uses rawOwner as login)" time="0.0242" asserts="0" success="True" result="Success" executed="True" />
+            </results>
+          </test-suite>
+        </results>
+      </test-suite>
+    </results>
+  </test-suite>
+</test-results>
