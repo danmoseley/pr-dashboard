@@ -533,7 +533,10 @@ foreach ($pr in $candidates) {
             # Check if approval is on the current head commit
             $isStale = $headCommitOid -and $rev.commit -and $rev.commit.oid -and ($rev.commit.oid -ne $headCommitOid)
             if ($isStale) { $hasStaleApproval = $true }
-            if ($prOwners -contains $login) {
+            if (($prOwners -contains $login) -or ($Maintainers -contains $login)) {
+                # Any maintainer's approval satisfies the merge gate; $prOwners
+                # (CODEOWNERS / area-label owners) is used to suggest reviewers,
+                # not to gate merging.
                 $hasOwnerApproval = $true
                 if (-not $isStale) { $hasCurrentOwnerApproval = $true }
             }
@@ -814,7 +817,7 @@ foreach ($pr in $candidates) {
     }
     elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
         $prNextAction = "Maintainer: re-review needed (approval on older commit)"
-        $staleOwners = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
+        $staleOwners = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) }) | Select-Object -First 2
         if ($staleOwners.Count -gt 0) { $who = $staleOwners }
         elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
     }
@@ -822,7 +825,7 @@ foreach ($pr in $candidates) {
         $prNextAction = "Ready to merge"
         # Who should click merge? The approving owner or area lead
         if ($approverLogins.Count -gt 0) {
-            $who = @($approverLogins | Where-Object { $prOwners -contains $_ } | Select-Object -First 1)
+            $who = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) } | Select-Object -First 1)
             if (-not $who -or $who.Count -eq 0) {
                 # Prefer a maintainer from $prioritizedOwners over a non-maintainer approver
                 if ($prioritizedOwners.Count -gt 0) {
@@ -875,7 +878,7 @@ foreach ($pr in $candidates) {
             }
         }
         elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
-            $staleReviewers = @($approverLogins | Where-Object { $prOwners -contains $_ }) | Select-Object -First 2
+            $staleReviewers = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
                          elseif ($prioritizedOwners.Count -gt 0) { @($prioritizedOwners | Select-Object -First 2) }
