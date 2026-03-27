@@ -516,8 +516,8 @@ foreach ($pr in $candidates) {
     }
 
     # Classify reviewers
-    $hasOwnerApproval = $false
-    $hasCurrentOwnerApproval = $false
+    $hasMaintainerApproval = $false
+    $hasCurrentMaintainerApproval = $false
     $hasTriagerApproval = $false
     $hasAnyApproval = $false
     $hasStaleApproval = $false
@@ -540,8 +540,8 @@ foreach ($pr in $candidates) {
                 # Any maintainer's approval satisfies the merge gate; $prOwners
                 # (CODEOWNERS / area-label owners) is used to suggest reviewers,
                 # not to gate merging.
-                $hasOwnerApproval = $true
-                if (-not $isStale) { $hasCurrentOwnerApproval = $true }
+                $hasMaintainerApproval = $true
+                if (-not $isStale) { $hasCurrentMaintainerApproval = $true }
             }
             elseif ($communityTriagers -contains $login) { $hasTriagerApproval = $true }
         }
@@ -627,7 +627,7 @@ foreach ($pr in $candidates) {
 
     $ciScore = switch ($baConclusion) { "SUCCESS" { 1.0 } "IN_PROGRESS" { 0.5 } default { 0.0 } }
     $stalenessScore = if ($daysSinceActivity -le 3) { 1.0 } elseif ($daysSinceActivity -le 14) { 0.5 } else { 0.0 }
-    $maintScore = if ($hasOwnerApproval) { 1.0 } elseif ($hasTriagerApproval) { 0.75 } elseif ($hasAnyReview) { 0.5 } else { 0.0 }
+    $maintScore = if ($hasMaintainerApproval) { 1.0 } elseif ($hasTriagerApproval) { 0.75 } elseif ($hasAnyReview) { 0.5 } else { 0.0 }
     $hasNeedsAuthorAction = $labelNames -contains "needs-author-action"
     $feedbackScore = if ($hasNeedsAuthorAction) { 0.0 } elseif ($unresolvedThreads -eq 0) { 1.0 } else { 0.5 }
     $conflictScore = switch ($pr.mergeable) { "MERGEABLE" { 1.0 } "UNKNOWN" { 0.5 } "CONFLICTING" { 0.0 } default { 0.5 } }
@@ -638,8 +638,8 @@ foreach ($pr in $candidates) {
     $sizeScore = if ($isTrivial) { 1.5 } elseif ($pr.changedFiles -le 5 -and $totalLines -le 200) { 1.0 } elseif ($pr.changedFiles -le 20 -and $totalLines -le 500) { 0.5 } else { 0.0 }
     $communityScore = if ($isCommunity) { 0.5 } else { 1.0 }
     # Stale approval: reduce approval score if approval is not on current commit
-    $approvalScore = if ($approvalCount -ge 2 -and $hasOwnerApproval) { 1.0 }
-                     elseif ($hasOwnerApproval -or ($hasTriagerApproval -and $approvalCount -ge 2)) { 0.75 }
+    $approvalScore = if ($approvalCount -ge 2 -and $hasMaintainerApproval) { 1.0 }
+                     elseif ($hasMaintainerApproval -or ($hasTriagerApproval -and $approvalCount -ge 2)) { 0.75 }
                      elseif ($hasTriagerApproval -or $approvalCount -ge 2) { 0.5 }
                      elseif ($approvalCount -ge 1) { 0.5 }
                      else { 0.0 }
@@ -816,7 +816,7 @@ foreach ($pr in $candidates) {
         $prNextAction = "@$($authorLogin): merge main (stale $([int]$daysSinceUpdate)d)"
         $who = @($authorLogin)
     }
-    elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
+    elseif ($hasMaintainerApproval -and -not $hasCurrentMaintainerApproval) {
         $prNextAction = "Maintainer: re-review needed (approval on older commit)"
         $staleOwners = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ }) | Select-Object -First 2
         if ($staleOwners.Count -gt 0) { $who = $staleOwners }
@@ -839,7 +839,7 @@ foreach ($pr in $candidates) {
             $who = @($prioritizedOwners | Select-Object -First 1)
         }
     }
-    elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
+    elseif (-not $hasMaintainerApproval -and -not $hasTriagerApproval) {
         $prNextAction = "Maintainer: review needed"
         # Prefer explicitly requested reviewers, then prioritized owners not yet reviewing
         if ($requestedReviewerLogins.Count -gt 0) {
@@ -878,7 +878,7 @@ foreach ($pr in $candidates) {
                 $prNextAction += "; review needed"
             }
         }
-        elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
+        elseif ($hasMaintainerApproval -and -not $hasCurrentMaintainerApproval) {
             $staleReviewers = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
@@ -891,7 +891,7 @@ foreach ($pr in $candidates) {
                 $prNextAction += "; re-review needed"
             }
         }
-        elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) {
+        elseif (-not $hasMaintainerApproval -and -not $hasTriagerApproval) {
             $pendingOwners = @($prioritizedOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($pendingOwners.Count -gt 0) { $pendingOwners }
@@ -938,7 +938,7 @@ foreach ($pr in $candidates) {
     if ($unresolvedThreads -gt 0) { $blockers += "$unresolvedThreads threads" }
     if ($hasNeedsAuthorAction) { $blockers += "needs-author-action" }
     if (-not $hasAnyReview) { $blockers += "No review" }
-    elseif (-not $hasOwnerApproval -and -not $hasTriagerApproval) { $blockers += "No owner approval" }
+    elseif (-not $hasMaintainerApproval -and -not $hasTriagerApproval) { $blockers += "No maintainer approval" }
     if ($daysSinceUpdate -gt 14) { $blockers += "Stale $([int]$daysSinceUpdate)d" }
     if ($hasStaleApproval) { $blockers += "Approval not on latest commit" }
     if ($copilotReviewFailed) { $blockers += "Copilot review errored" }
