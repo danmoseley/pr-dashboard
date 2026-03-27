@@ -405,6 +405,9 @@ foreach ($pr in $candidates) {
     $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
+    # Any maintainer's approval satisfies the merge gate; $prOwners is used to
+    # suggest reviewers, not to gate merging. Compute once for reuse below.
+    $allMaintainerPool = @(@($prOwners) + @($Maintainers) | Select-Object -Unique)
 
     # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null
@@ -533,7 +536,7 @@ foreach ($pr in $candidates) {
             # Check if approval is on the current head commit
             $isStale = $headCommitOid -and $rev.commit -and $rev.commit.oid -and ($rev.commit.oid -ne $headCommitOid)
             if ($isStale) { $hasStaleApproval = $true }
-            if (($prOwners -contains $login) -or ($Maintainers -contains $login)) {
+            if ($allMaintainerPool -contains $login) {
                 # Any maintainer's approval satisfies the merge gate; $prOwners
                 # (CODEOWNERS / area-label owners) is used to suggest reviewers,
                 # not to gate merging.
@@ -558,8 +561,6 @@ foreach ($pr in $candidates) {
     # Build engagement-prioritized owner list for $who selection.
     # Priority: (1) assigned reviewers, (2) CODEOWNERS for changed files,
     #           (3) area-label owners, (4) engaged maintainers, (5) remaining.
-    # $prOwners is kept for ownership membership checks (e.g., $hasOwnerApproval).
-    $allMaintainerPool = @(@($prOwners) + @($Maintainers) | Select-Object -Unique)
     $prioritizedOwners = [System.Collections.ArrayList]@()
     # Tier 1: Requested reviewers who are maintainers
     foreach ($r in $requestedReviewerLogins) {
@@ -817,7 +818,7 @@ foreach ($pr in $candidates) {
     }
     elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
         $prNextAction = "Maintainer: re-review needed (approval on older commit)"
-        $staleOwners = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) }) | Select-Object -First 2
+        $staleOwners = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ }) | Select-Object -First 2
         if ($staleOwners.Count -gt 0) { $who = $staleOwners }
         elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
     }
@@ -825,7 +826,7 @@ foreach ($pr in $candidates) {
         $prNextAction = "Ready to merge"
         # Who should click merge? The approving owner or area lead
         if ($approverLogins.Count -gt 0) {
-            $who = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) } | Select-Object -First 1)
+            $who = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ } | Select-Object -First 1)
             if (-not $who -or $who.Count -eq 0) {
                 # Prefer a maintainer from $prioritizedOwners over a non-maintainer approver
                 if ($prioritizedOwners.Count -gt 0) {
@@ -878,7 +879,7 @@ foreach ($pr in $candidates) {
             }
         }
         elseif ($hasOwnerApproval -and -not $hasCurrentOwnerApproval) {
-            $staleReviewers = @($approverLogins | Where-Object { ($prOwners -contains $_) -or ($Maintainers -contains $_) }) | Select-Object -First 2
+            $staleReviewers = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ }) | Select-Object -First 2
             $reviewWho = if ($requestedReviewerLogins.Count -gt 0) { @($requestedReviewerLogins | Select-Object -First 2) }
                          elseif ($staleReviewers.Count -gt 0) { $staleReviewers }
                          elseif ($prioritizedOwners.Count -gt 0) { @($prioritizedOwners | Select-Object -First 2) }
