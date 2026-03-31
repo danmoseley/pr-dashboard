@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-03-30T08:10:59.7788034Z">
+<body data-server-updated="2026-03-31T07:54:15.2899111Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/roslyn/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/roslyn</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-30T08:10:59.7788034Z">at 2026-03-30 01:10 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-03-31T07:54:15.2899111Z">at 2026-03-31 00:54 PDT</span> &middot; 1 PRs &middot; <a href="https://github.com/dotnet/roslyn">dotnet/roslyn</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -79,7 +79,46 @@
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
-<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
+  <col style="width:4%">
+  <col>
+  <col style="width:24%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
+<thead>
+<tr>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="333fred,jharjung" data-involved="333fred,CyrusNajmabadi,jharjung,jjonescz" data-labels="Area-Compilers" data-easy="merge">
+  <td class="score ready-high">7.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;large change: 508 lines (+0.5)&#10;old but active: 249d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/roslyn/pull/79609" title="FAWMN add support for [method: MyGenerator] to target primary constructors">#79609</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> FAWMN add support for [method: MyGenerator] to target primary constructors</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/333fred.png?size=32" alt="333fred"><a href="https://github.com/333fred">@333fred</a><a class="filter-btn" href="#" onclick="filterByUser('333fred');return false" title="Show only @333fred">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="22 passed, 0 failed, 0 running">&#x2705; 22/0/0</td>
+  <td class="disc">0/4t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-3">249d</td>
+  <td class="num">1d</td>
+  <td class="num heat-2" title="2 files, 508 lines (additions + deletions)">508</td>
+  <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/jharjung.png?size=32" alt="jharjung"><a href="https://github.com/jharjung">@jharjung</a><a class="filter-btn" href="#" onclick="filterByUser('jharjung');return false" title="Show only @jharjung">&#x1F50D;</a></span></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('Area-Compilers');return false" title="Show only Area-Compilers">Compilers</a></td>
+</tr>
+</tbody>
+</table>
 
 
 <script src="../shared-ui.js"></script>
@@ -190,7 +229,8 @@ function applyEasyFilter(easyOn) {
     } catch(e) {}
   }
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
