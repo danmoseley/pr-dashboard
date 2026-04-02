@@ -171,19 +171,46 @@ async function runTests() {
         if (newTabOpened) fail('Ctrl+click on button opened new tab — <button> regression');
         else pass('Ctrl+click first label: no new tab (button element correct)');
 
+        // Diagnostic: see what the page state looks like
+        const dbg = await page.evaluate(() => ({
+          bannerDisplay: (document.getElementById('filter-banner') || {}).style && document.getElementById('filter-banner').style.display,
+          chips: document.querySelectorAll('.filter-chip').length,
+          debugText: (document.getElementById('ctrl-debug') || {}).textContent || '',
+          bannerHTML: (document.getElementById('filter-banner') || {}).innerHTML || ''
+        }));
+        log('DOM state after ctrl+click: chips=' + dbg.chips + ' banner=' + dbg.bannerDisplay + ' debug="' + dbg.debugText + '"');
+
         const chipsAfterA = await page.$$('.filter-chip');
         if (chipsAfterA.length < 1) {
           fail('Ctrl+click first label', 'no chip appeared');
         } else {
           pass('Ctrl+click first area: ' + chipsAfterA.length + ' chip(s) — "' + lA + '" added');
 
-          // Step 2: Ctrl+click lB from the same now-visible row → should ADD lB (2 chips)
-          const coordsB = await getVisibleBtnCoords(lB);
-          if (!coordsB) {
-            fail('Ctrl+click second label', '"' + lB + '" not visible after filtering to "' + lA + '"');
+          // Step 2: Ctrl+click lB. Hold Ctrl FIRST (keydown un-hides all rows, shifting layout),
+          // then get FRESH coords after layout settles, then click.
+          await page.keyboard.down('Control');
+          await wait(150); // let keydown handler run + layout settle
+          const coordsB = await page.evaluate((label) => {
+            const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
+            if (!btn) return null;
+            btn.scrollIntoView({ behavior: 'instant', block: 'center' });
+            const r = btn.getBoundingClientRect();
+            const vh = window.innerHeight;
+            return (r.width > 0 && r.top >= 0 && r.bottom <= vh) ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+          }, lB);
+          await wait(50); // scrollIntoView settle
+          const coordsB2 = coordsB && await page.evaluate((label) => {
+            const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
+            if (!btn) return null;
+            const r = btn.getBoundingClientRect();
+            const vh = window.innerHeight;
+            return (r.width > 0 && r.top >= 0 && r.bottom <= vh) ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+          }, lB);
+          if (!coordsB2) {
+            await page.keyboard.up('Control');
+            fail('Ctrl+click second label', '"' + lB + '" not visible while Ctrl held');
           } else {
-            await page.keyboard.down('Control');
-            await page.mouse.click(coordsB.x, coordsB.y);
+            await page.mouse.click(coordsB2.x, coordsB2.y);
             await page.keyboard.up('Control');
             await wait(300);
             const chipsAfterBoth = await page.$$('.filter-chip');
