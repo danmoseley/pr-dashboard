@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T22:00:11.2785923Z">
+<body data-server-updated="2026-04-02T22:32:20.0219772Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/maui/actionable.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Most Actionable PRs — dotnet/maui</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T22:00:11.2785923Z">at 2026-04-02 15:00 PDT</span> &middot; 256 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T22:32:20.0219772Z">at 2026-04-02 15:32 PDT</span> &middot; 256 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
 <p class="report-desc">All open PRs sorted by Action score. Higher-scored PRs are closer to merge-ready <em>and</em> would benefit most from maintainer attention. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -4075,7 +4075,7 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   try {
-    var urlArea = params.get('area') || '';
+    var urlArea = params.get('area') || params.get('label') || '';
     if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
   } catch(e) {}
   if (urlUser) activeUser = urlUser;

@@ -552,7 +552,7 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   try {
-    var urlArea = params.get('area') || '';
+    var urlArea = params.get('area') || params.get('label') || '';
     if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
   } catch(e) {}
   if (urlUser) activeUser = urlUser;

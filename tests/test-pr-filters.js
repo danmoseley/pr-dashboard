@@ -394,6 +394,7 @@ async function runTests() {
     // ── Summary ─────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     if (errors.length) console.log('JS errors: ' + errors.join('\n  '));
+    if (failed > 0) process.exitCode = 1;
 
   } finally {
     await browser.close();

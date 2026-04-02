@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T22:00:23.7213442Z">
+<body data-server-updated="2026-04-02T22:32:30.6178505Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/sdk/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/sdk</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T22:00:23.7213442Z">at 2026-04-02 15:00 PDT</span> &middot; 1 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T22:32:30.6178505Z">at 2026-04-02 15:32 PDT</span> &middot; 1 PRs &middot; <a href="https://github.com/dotnet/sdk">dotnet/sdk</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -250,7 +250,7 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   try {
-    var urlArea = params.get('area') || '';
+    var urlArea = params.get('area') || params.get('label') || '';
     if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
   } catch(e) {}
   if (urlUser) activeUser = urlUser;
