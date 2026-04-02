@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T22:32:25.3364550Z">
+<body data-server-updated="2026-04-02T19:17:35.7309244Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/runtime/consider-closing.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Consider Closing — dotnet/runtime</h1>
-<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-02T22:32:25.3364550Z">at 2026-04-02 15:32 PDT</span> &middot; 68 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-02T19:17:35.7309244Z">at 2026-04-02 12:17 PDT</span> &middot; 68 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <p class="report-desc">PRs that are old and have not been updated recently&mdash;likely abandoned or superseded. Consider closing with a polite note; authors can always reopen. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -78,7 +78,7 @@
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
-<div class="filter-banner" id="filter-banner"></div>
+<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
 <table id="pr-table">
 <colgroup>
   <col style="width:4.5%">
@@ -115,7 +115,7 @@
   <td class="num heat-3">632d</td>
   <td class="num" title="3 files, 77 lines (additions + deletions)">77</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/BrzVlad.png?size=32" alt="BrzVlad"><a href="https://github.com/BrzVlad">@BrzVlad</a><a class="filter-btn" href="#" onclick="filterByUser('BrzVlad');return false" title="Show only @BrzVlad">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-VM-meta-mono')" title="Filter to area-VM-meta-mono (Ctrl+click to add)">VM-meta-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VM-meta-mono');return false" title="Show only area-VM-meta-mono">VM-meta-mono</a></td>
 </tr>
 <tr data-people="jkoritzinsky" data-involved="am11,azure-pipelines,jkoritzinsky" data-labels="area-Infrastructure">
   <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -130,7 +130,7 @@
   <td class="num heat-3">576d</td>
   <td class="num heat-1" title="13 files, 215 lines (additions + deletions)">215</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jkoritzinsky.png?size=32" alt="jkoritzinsky"><a href="https://github.com/jkoritzinsky">@jkoritzinsky</a><a class="filter-btn" href="#" onclick="filterByUser('jkoritzinsky');return false" title="Show only @jkoritzinsky">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure')" title="Filter to area-Infrastructure (Ctrl+click to add)">Infrastructure</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="hoyosjs,jkotas,AaronRobinsonMSFT" data-involved="AaronRobinsonMSFT,dotnet-policy-service,hoyosjs,jkotas" data-labels="area-Diagnostics-coreclr">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -145,7 +145,7 @@
   <td class="num heat-3">574d</td>
   <td class="num heat-1" title="7 files, 150 lines (additions + deletions)">150</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/hoyosjs.png?size=32" alt="hoyosjs"><a href="https://github.com/hoyosjs">@hoyosjs</a><a class="filter-btn" href="#" onclick="filterByUser('hoyosjs');return false" title="Show only @hoyosjs">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Diagnostics-coreclr');return false" title="Show only area-Diagnostics-coreclr">Diagnostics-coreclr</a></td>
 </tr>
 <tr data-people="akoeplinger,agocke,jkotas" data-involved="agocke,akoeplinger,dotnet-policy-service,jkoritzinsky,jkotas" data-labels="area-Infrastructure">
   <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -160,7 +160,7 @@
   <td class="num heat-3">510d</td>
   <td class="num" title="1 file, 2 lines (additions + deletions)">&#x1F401; 2</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/akoeplinger.png?size=32" alt="akoeplinger"><a href="https://github.com/akoeplinger">@akoeplinger</a><a class="filter-btn" href="#" onclick="filterByUser('akoeplinger');return false" title="Show only @akoeplinger">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure')" title="Filter to area-Infrastructure (Ctrl+click to add)">Infrastructure</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="maraf" data-involved="akoeplinger,ilonatommy,lewing,maraf" data-labels="area-Workloads">
   <td class="score">5.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -175,7 +175,7 @@
   <td class="num heat-3">479d</td>
   <td class="num" title="4 files, 102 lines (additions + deletions)">102</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/maraf.png?size=32" alt="maraf"><a href="https://github.com/maraf">@maraf</a><a class="filter-btn" href="#" onclick="filterByUser('maraf');return false" title="Show only @maraf">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Workloads')" title="Filter to area-Workloads (Ctrl+click to add)">Workloads</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Workloads');return false" title="Show only area-Workloads">Workloads</a></td>
 </tr>
 <tr data-people="333fred,cston" data-involved="333fred,cston" data-labels="area-System.Linq.Expressions">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -190,7 +190,7 @@
   <td class="num heat-3">471d</td>
   <td class="num" title="2 files, 152 lines (additions + deletions)">152</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/cston.png?size=32" alt="cston"><a href="https://github.com/cston">@cston</a><a class="filter-btn" href="#" onclick="filterByUser('cston');return false" title="Show only @cston">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Linq.Expressions')" title="Filter to area-System.Linq.Expressions (Ctrl+click to add)">System.Linq.Expressions</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Linq.Expressions');return false" title="Show only area-System.Linq.Expressions">System.Linq.Expressions</a></td>
 </tr>
 <tr data-people="akoeplinger,LoopedBard3,DrewScoggins" data-involved="akoeplinger,caaavik-msft,dotnet-policy-service,DrewScoggins,LoopedBard3" data-labels="area-Infrastructure-coreclr">
   <td class="score">4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -205,7 +205,7 @@
   <td class="num heat-3">443d</td>
   <td class="num heat-2" title="3 files, 943 lines (additions + deletions)">943</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DrewScoggins.png?size=32" alt="DrewScoggins"><a href="https://github.com/DrewScoggins">@DrewScoggins</a><a class="filter-btn" href="#" onclick="filterByUser('DrewScoggins');return false" title="Show only @DrewScoggins">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure-coreclr')" title="Filter to area-Infrastructure-coreclr (Ctrl+click to add)">Infrastructure-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure-coreclr');return false" title="Show only area-Infrastructure-coreclr">Infrastructure-coreclr</a></td>
 </tr>
 <tr data-people="agocke,cshung" data-involved="agocke,cshung,dotnet-policy-service,mangod9,mrsharm" data-labels="area-GC-coreclr">
   <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -220,7 +220,7 @@
   <td class="num heat-3">427d</td>
   <td class="num" title="4 files, 26 lines (additions + deletions)">26</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/cshung.png?size=32" alt="cshung"><a href="https://github.com/cshung">@cshung</a><a class="filter-btn" href="#" onclick="filterByUser('cshung');return false" title="Show only @cshung">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-GC-coreclr')" title="Filter to area-GC-coreclr (Ctrl+click to add)">GC-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-GC-coreclr');return false" title="Show only area-GC-coreclr">GC-coreclr</a></td>
 </tr>
 <tr data-people="mikelle-rogers,jkotas" data-involved="dotnet-policy-service,janvorli,jkotas,mikelle-rogers,noahfalk" data-labels="area-VM-coreclr">
   <td class="score">4.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -235,7 +235,7 @@
   <td class="num heat-3">424d</td>
   <td class="num" title="5 files, 23 lines (additions + deletions)">23</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mikelle-rogers.png?size=32" alt="mikelle-rogers"><a href="https://github.com/mikelle-rogers">@mikelle-rogers</a><a class="filter-btn" href="#" onclick="filterByUser('mikelle-rogers');return false" title="Show only @mikelle-rogers">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-VM-coreclr')" title="Filter to area-VM-coreclr (Ctrl+click to add)">VM-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VM-coreclr');return false" title="Show only area-VM-coreclr">VM-coreclr</a></td>
 </tr>
 <tr data-people="MichalPetryka,EgorBo" data-involved="EgorBo,JulieLeeMSFT,MichalPetryka" data-labels="area-CodeGen-coreclr">
   <td class="score">4.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -250,7 +250,7 @@
   <td class="num heat-3">370d</td>
   <td class="num" title="1 file, 8 lines (additions + deletions)">8</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MichalPetryka.png?size=32" alt="MichalPetryka"><a href="https://github.com/MichalPetryka">@MichalPetryka</a><a class="filter-btn" href="#" onclick="filterByUser('MichalPetryka');return false" title="Show only @MichalPetryka">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="jkoritzinsky" data-involved="am11,azure-pipelines,dotnet-policy-service,huoyaoyuan,jkoritzinsky,jkotas" data-labels="area-Infrastructure">
   <td class="score">1.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -265,7 +265,7 @@
   <td class="num heat-3">325d</td>
   <td class="num heat-2" title="122 files, 29603 lines (additions + deletions)">29603</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jkoritzinsky.png?size=32" alt="jkoritzinsky"><a href="https://github.com/jkoritzinsky">@jkoritzinsky</a><a class="filter-btn" href="#" onclick="filterByUser('jkoritzinsky');return false" title="Show only @jkoritzinsky">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure')" title="Filter to area-Infrastructure (Ctrl+click to add)">Infrastructure</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="mikelle-rogers,tommcdon,noahfalk" data-involved="AaronRobinsonMSFT,dotnet-policy-service,hoyosjs,mikelle-rogers,noahfalk,stephentoub,tommcdon" data-labels="area-Diagnostics-coreclr">
   <td class="score">3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -280,7 +280,7 @@
   <td class="num heat-3">308d</td>
   <td class="num heat-1" title="10 files, 138 lines (additions + deletions)">138</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mikelle-rogers.png?size=32" alt="mikelle-rogers"><a href="https://github.com/mikelle-rogers">@mikelle-rogers</a><a class="filter-btn" href="#" onclick="filterByUser('mikelle-rogers');return false" title="Show only @mikelle-rogers">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Diagnostics-coreclr');return false" title="Show only area-Diagnostics-coreclr">Diagnostics-coreclr</a></td>
 </tr>
 <tr data-people="steveisok" data-involved="am11,jkoritzinsky,steveisok" data-labels="area-Build-mono">
   <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -295,7 +295,7 @@
   <td class="num heat-3">306d</td>
   <td class="num heat-1" title="7 files, 36 lines (additions + deletions)">36</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/steveisok.png?size=32" alt="steveisok"><a href="https://github.com/steveisok">@steveisok</a><a class="filter-btn" href="#" onclick="filterByUser('steveisok');return false" title="Show only @steveisok">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Build-mono')" title="Filter to area-Build-mono (Ctrl+click to add)">Build-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Build-mono');return false" title="Show only area-Build-mono">Build-mono</a></td>
 </tr>
 <tr data-people="BrzVlad,kotlarmilos" data-involved="BrzVlad,copilot-pull-request-reviewer,dotnet-policy-service,jakobbotsch,kotlarmilos,steveisok,vitek-karas" data-labels="area-Codegen-Interpreter-mono">
   <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -310,7 +310,7 @@
   <td class="num heat-3">302d</td>
   <td class="num" title="2 files, 53 lines (additions + deletions)">53</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/BrzVlad.png?size=32" alt="BrzVlad"><a href="https://github.com/BrzVlad">@BrzVlad</a><a class="filter-btn" href="#" onclick="filterByUser('BrzVlad');return false" title="Show only @BrzVlad">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Codegen-Interpreter-mono')" title="Filter to area-Codegen-Interpreter-mono (Ctrl+click to add)">Codegen-Interpreter-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Codegen-Interpreter-mono');return false" title="Show only area-Codegen-Interpreter-mono">Codegen-Interpreter-mono</a></td>
 </tr>
 <tr data-people="lateralusX,vargaz,VSadov" data-involved="BrzVlad,lambdageek,lateralusX,mangod9,risc-vv,SamMonoRT,steveisok,vargaz,VSadov" data-labels="area-VM-meta-mono">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -325,7 +325,7 @@
   <td class="num heat-3">272d</td>
   <td class="num heat-1" title="12 files, 260 lines (additions + deletions)">260</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/lateralusX.png?size=32" alt="lateralusX"><a href="https://github.com/lateralusX">@lateralusX</a><a class="filter-btn" href="#" onclick="filterByUser('lateralusX');return false" title="Show only @lateralusX">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-VM-meta-mono')" title="Filter to area-VM-meta-mono (Ctrl+click to add)">VM-meta-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VM-meta-mono');return false" title="Show only area-VM-meta-mono">VM-meta-mono</a></td>
 </tr>
 <tr data-people="AndyAyersMS" data-involved="AndyAyersMS,copilot-pull-request-reviewer,dotnet-policy-service,jakobbotsch,jkotas" data-labels="area-CodeGen-coreclr">
   <td class="score">4.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="has approval (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -340,7 +340,7 @@
   <td class="num heat-3">262d</td>
   <td class="num heat-1" title="7 files, 130 lines (additions + deletions)">130</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AndyAyersMS.png?size=32" alt="AndyAyersMS"><a href="https://github.com/AndyAyersMS">@AndyAyersMS</a><a class="filter-btn" href="#" onclick="filterByUser('AndyAyersMS');return false" title="Show only @AndyAyersMS">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="jkotas,davidwrighton" data-involved="AndyAyersMS,azure-pipelines,davidwrighton,jkotas" data-labels="area-crossgen2-coreclr">
   <td class="score">4.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -355,7 +355,7 @@
   <td class="num heat-3">258d</td>
   <td class="num" title="1 file, 3 lines (additions + deletions)">&#x1F401; 3</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jkotas.png?size=32" alt="jkotas"><a href="https://github.com/jkotas">@jkotas</a><a class="filter-btn" href="#" onclick="filterByUser('jkotas');return false" title="Show only @jkotas">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-crossgen2-coreclr')" title="Filter to area-crossgen2-coreclr (Ctrl+click to add)">crossgen2-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-crossgen2-coreclr');return false" title="Show only area-crossgen2-coreclr">crossgen2-coreclr</a></td>
 </tr>
 <tr data-people="kunalspathak" data-involved="a74nh,dotnet-policy-service,EgorBo,jkoritzinsky,jkotas,KennethHoff,kunalspathak,MichalStrehovsky,tannergooding" data-labels="area-Infrastructure-coreclr">
   <td class="score">5.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;small, easy to review (+2)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -370,7 +370,7 @@
   <td class="num heat-3">246d</td>
   <td class="num" title="3 files, 24 lines (additions + deletions)">24</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kunalspathak.png?size=32" alt="kunalspathak"><a href="https://github.com/kunalspathak">@kunalspathak</a><a class="filter-btn" href="#" onclick="filterByUser('kunalspathak');return false" title="Show only @kunalspathak">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure-coreclr')" title="Filter to area-Infrastructure-coreclr (Ctrl+click to add)">Infrastructure-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure-coreclr');return false" title="Show only area-Infrastructure-coreclr">Infrastructure-coreclr</a></td>
 </tr>
 <tr data-people="jkotas,tannergooding" data-involved="dotnet-policy-service,jkotas,MichalPetryka,NinoFloris,reflectronic,tannergooding,xtqqczze" data-labels="area-System.Runtime">
   <td class="score">4.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -385,7 +385,7 @@
   <td class="num heat-3">240d</td>
   <td class="num heat-1" title="1 file, 247 lines (additions + deletions)">247</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jkotas.png?size=32" alt="jkotas"><a href="https://github.com/jkotas">@jkotas</a><a class="filter-btn" href="#" onclick="filterByUser('jkotas');return false" title="Show only @jkotas">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Runtime')" title="Filter to area-System.Runtime (Ctrl+click to add)">System.Runtime</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Runtime');return false" title="Show only area-System.Runtime">System.Runtime</a></td>
 </tr>
 <tr data-people="elinor-fung" data-involved="adamsitnik,copilot-pull-request-reviewer,dotnet-policy-service,elinor-fung" data-labels="area-System.Runtime">
   <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -400,7 +400,7 @@
   <td class="num heat-3">237d</td>
   <td class="num" title="1 file, 21 lines (additions + deletions)">21</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/elinor-fung.png?size=32" alt="elinor-fung"><a href="https://github.com/elinor-fung">@elinor-fung</a><a class="filter-btn" href="#" onclick="filterByUser('elinor-fung');return false" title="Show only @elinor-fung">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Runtime')" title="Filter to area-System.Runtime (Ctrl+click to add)">System.Runtime</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Runtime');return false" title="Show only area-System.Runtime">System.Runtime</a></td>
 </tr>
 <tr data-people="jozkee,tarekgh" data-involved="dotnet-policy-service,jkotas,jozkee,tarekgh" data-labels="area-Meta">
   <td class="score">5.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -415,7 +415,7 @@
   <td class="num heat-3">233d</td>
   <td class="num heat-2" title="19 files, 1279 lines (additions + deletions)">1279</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jozkee.png?size=32" alt="jozkee"><a href="https://github.com/jozkee">@jozkee</a><a class="filter-btn" href="#" onclick="filterByUser('jozkee');return false" title="Show only @jozkee">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Meta')" title="Filter to area-Meta (Ctrl+click to add)">Meta</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Meta');return false" title="Show only area-Meta">Meta</a></td>
 </tr>
 <tr data-people="akoeplinger" data-involved="akoeplinger,azure-pipelines,lewing,maraf" data-labels="area-Build-mono">
   <td class="score ready-high">6.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -430,7 +430,7 @@
   <td class="num heat-3">233d</td>
   <td class="num" title="3 files, 112 lines (additions + deletions)">112</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/akoeplinger.png?size=32" alt="akoeplinger"><a href="https://github.com/akoeplinger">@akoeplinger</a><a class="filter-btn" href="#" onclick="filterByUser('akoeplinger');return false" title="Show only @akoeplinger">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Build-mono')" title="Filter to area-Build-mono (Ctrl+click to add)">Build-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Build-mono');return false" title="Show only area-Build-mono">Build-mono</a></td>
 </tr>
 <tr data-people="StephenMolloy,imcarolwang" data-involved="imcarolwang,StephenMolloy" data-labels="area-Serialization">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -445,7 +445,7 @@
   <td class="num heat-3">231d</td>
   <td class="num" title="2 files, 35 lines (additions + deletions)">35</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/imcarolwang.png?size=32" alt="imcarolwang"><a href="https://github.com/imcarolwang">@imcarolwang</a><a class="filter-btn" href="#" onclick="filterByUser('imcarolwang');return false" title="Show only @imcarolwang">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Serialization')" title="Filter to area-Serialization (Ctrl+click to add)">Serialization</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Serialization');return false" title="Show only area-Serialization">Serialization</a></td>
 </tr>
 <tr data-people="MichalStrehovsky,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,jkotas,marek-safar,MichalStrehovsky" data-labels="area-NativeAOT-coreclr">
   <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -460,7 +460,7 @@
   <td class="num heat-3">230d</td>
   <td class="num" title="3 files, 11 lines (additions + deletions)">11</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MichalStrehovsky.png?size=32" alt="MichalStrehovsky"><a href="https://github.com/MichalStrehovsky">@MichalStrehovsky</a><a class="filter-btn" href="#" onclick="filterByUser('MichalStrehovsky');return false" title="Show only @MichalStrehovsky">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-NativeAOT-coreclr')" title="Filter to area-NativeAOT-coreclr (Ctrl+click to add)">NativeAOT-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-NativeAOT-coreclr');return false" title="Show only area-NativeAOT-coreclr">NativeAOT-coreclr</a></td>
 </tr>
 <tr data-people="SamMonoRT,deeprobin" data-involved="deeprobin,SamMonoRT" data-labels="area-System.Transactions">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -475,7 +475,7 @@
   <td class="num heat-3">225d</td>
   <td class="num heat-2" title="27 files, 565 lines (additions + deletions)">565</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/deeprobin.png?size=32" alt="deeprobin"><a href="https://github.com/deeprobin">@deeprobin</a><a class="filter-btn" href="#" onclick="filterByUser('deeprobin');return false" title="Show only @deeprobin">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Transactions')" title="Filter to area-System.Transactions (Ctrl+click to add)">System.Transactions</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Transactions');return false" title="Show only area-System.Transactions">System.Transactions</a></td>
 </tr>
 <tr data-people="grendello" data-involved="bartonjs,copilot-pull-request-reviewer,dotnet-policy-service,filipnavara,grendello,jkotas,MichalStrehovsky" data-labels="area-System.Security">
   <td class="score">4.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -490,7 +490,7 @@
   <td class="num heat-3">223d</td>
   <td class="num heat-1" title="7 files, 74 lines (additions + deletions)">74</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/grendello.png?size=32" alt="grendello"><a href="https://github.com/grendello">@grendello</a><a class="filter-btn" href="#" onclick="filterByUser('grendello');return false" title="Show only @grendello">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Security')" title="Filter to area-System.Security (Ctrl+click to add)">System.Security</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Security');return false" title="Show only area-System.Security">System.Security</a></td>
 </tr>
 <tr data-people="max-charlamb,steveisok,jkoritzinsky" data-involved="copilot-pull-request-reviewer,dotnet-policy-service,eduardo-vp,jkoritzinsky,max-charlamb,steveisok" data-labels="area-Diagnostics-coreclr">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -505,7 +505,7 @@
   <td class="num heat-3">219d</td>
   <td class="num heat-1" title="11 files, 432 lines (additions + deletions)">432</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/max-charlamb.png?size=32" alt="max-charlamb"><a href="https://github.com/max-charlamb">@max-charlamb</a><a class="filter-btn" href="#" onclick="filterByUser('max-charlamb');return false" title="Show only @max-charlamb">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Diagnostics-coreclr');return false" title="Show only area-Diagnostics-coreclr">Diagnostics-coreclr</a></td>
 </tr>
 <tr data-people="agocke,jkotas,MichalStrehovsky" data-involved="agocke,azure-pipelines,davidwrighton,jkotas,MichalStrehovsky" data-labels="area-NativeAOT-coreclr">
   <td class="score">4.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -520,7 +520,7 @@
   <td class="num heat-3">218d</td>
   <td class="num heat-1" title="11 files, 427 lines (additions + deletions)">427</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MichalStrehovsky.png?size=32" alt="MichalStrehovsky"><a href="https://github.com/MichalStrehovsky">@MichalStrehovsky</a><a class="filter-btn" href="#" onclick="filterByUser('MichalStrehovsky');return false" title="Show only @MichalStrehovsky">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-NativeAOT-coreclr')" title="Filter to area-NativeAOT-coreclr (Ctrl+click to add)">NativeAOT-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-NativeAOT-coreclr');return false" title="Show only area-NativeAOT-coreclr">NativeAOT-coreclr</a></td>
 </tr>
 <tr data-people="amanasifkhalid" data-involved="amanasifkhalid,AndyAyersMS,copilot-pull-request-reviewer,dotnet-policy-service,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score ready-high">7.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -535,7 +535,7 @@
   <td class="num heat-3">211d</td>
   <td class="num" title="1 file, 39 lines (additions + deletions)">39</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="agocke,kg" data-involved="agocke,copilot-pull-request-reviewer,dotnet-policy-service,kg" data-labels="area-crossgen2-coreclr" data-easy="quick-review">
   <td class="score ready-high">6.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -550,7 +550,7 @@
   <td class="num heat-3">191d</td>
   <td class="num" title="1 file, 20 lines (additions + deletions)">20</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kg.png?size=32" alt="kg"><a href="https://github.com/kg">@kg</a><a class="filter-btn" href="#" onclick="filterByUser('kg');return false" title="Show only @kg">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-crossgen2-coreclr')" title="Filter to area-crossgen2-coreclr (Ctrl+click to add)">crossgen2-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-crossgen2-coreclr');return false" title="Show only area-crossgen2-coreclr">crossgen2-coreclr</a></td>
 </tr>
 <tr data-people="mconnew,StephenMolloy" data-involved="copilot-pull-request-reviewer,mconnew,StephenMolloy" data-labels="area-Serialization">
   <td class="score">4.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -565,7 +565,7 @@
   <td class="num heat-3">188d</td>
   <td class="num" title="1 file, 32 lines (additions + deletions)">32</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/StephenMolloy.png?size=32" alt="StephenMolloy"><a href="https://github.com/StephenMolloy">@StephenMolloy</a><a class="filter-btn" href="#" onclick="filterByUser('StephenMolloy');return false" title="Show only @StephenMolloy">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Serialization')" title="Filter to area-Serialization (Ctrl+click to add)">Serialization</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Serialization');return false" title="Show only area-Serialization">Serialization</a></td>
 </tr>
 <tr data-people="reflectronic" data-involved="agocke,reflectronic,StephenMolloy,teo-tsirpanis" data-labels="area-System.ServiceModel.Syndication">
   <td class="score">3.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -580,7 +580,7 @@
   <td class="num heat-3">188d</td>
   <td class="num heat-1" title="20 files, 253 lines (additions + deletions)">253</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/reflectronic.png?size=32" alt="reflectronic"><a href="https://github.com/reflectronic">@reflectronic</a><a class="filter-btn" href="#" onclick="filterByUser('reflectronic');return false" title="Show only @reflectronic">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.ServiceModel.Syndication')" title="Filter to area-System.ServiceModel.Syndication (Ctrl+click to add)">System.ServiceModel.Syndication</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.ServiceModel.Syndication');return false" title="Show only area-System.ServiceModel.Syndication">System.ServiceModel.Syndication</a></td>
 </tr>
 <tr data-people="EgorBo,jkotas" data-involved="dotnet-policy-service,EgorBo,jkotas,MichalStrehovsky" data-labels="area-CodeGen-coreclr">
   <td class="score">4.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -595,7 +595,7 @@
   <td class="num heat-3">184d</td>
   <td class="num heat-1" title="20 files, 359 lines (additions + deletions)">359</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/EgorBo.png?size=32" alt="EgorBo"><a href="https://github.com/EgorBo">@EgorBo</a><a class="filter-btn" href="#" onclick="filterByUser('EgorBo');return false" title="Show only @EgorBo">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="JulieLeeMSFT,AndyAyersMS,amanasifkhalid" data-involved="amanasifkhalid,AndyAyersMS,dotnet-policy-service,JulieLeeMSFT,kunalspathak" data-labels="area-CodeGen-coreclr">
   <td class="score">4.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -610,7 +610,7 @@
   <td class="num heat-3">182d</td>
   <td class="num" title="1 file, 10 lines (additions + deletions)">10</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="amanasifkhalid" data-involved="amanasifkhalid,AndyAyersMS,dotnet-policy-service" data-labels="area-CodeGen-coreclr">
   <td class="score">3.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -625,7 +625,7 @@
   <td class="num heat-3">182d</td>
   <td class="num" title="3 files, 143 lines (additions + deletions)">143</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="JulieLeeMSFT,AndyAyersMS,amanasifkhalid" data-involved="amanasifkhalid,AndyAyersMS,copilot-pull-request-reviewer,dotnet-policy-service,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score">5.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -640,7 +640,7 @@
   <td class="num heat-3">182d</td>
   <td class="num" title="2 files, 41 lines (additions + deletions)">41</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="JulieLeeMSFT,AndyAyersMS,amanasifkhalid" data-involved="amanasifkhalid,AndyAyersMS,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -655,7 +655,7 @@
   <td class="num heat-3">182d</td>
   <td class="num" title="1 file, 50 lines (additions + deletions)">50</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="amanasifkhalid,copilot-pull-request-reviewer" data-involved="amanasifkhalid,AndyAyersMS,azure-pipelines,copilot-pull-request-reviewer,dotnet-policy-service" data-labels="area-CodeGen-coreclr">
   <td class="score">3.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -670,7 +670,7 @@
   <td class="num heat-3">182d</td>
   <td class="num heat-1" title="16 files, 110 lines (additions + deletions)">110</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="jakobbotsch,app" data-involved="azure-pipelines,copilot-swe-agent,dotnet-policy-service,jakobbotsch" data-labels="area-CodeGen-coreclr">
   <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -685,7 +685,7 @@
   <td class="num heat-3">161d</td>
   <td class="num" title="5 files, 15 lines (additions + deletions)">15</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jakobbotsch.png?size=32" alt="jakobbotsch"><a href="https://github.com/jakobbotsch">@jakobbotsch</a><a class="filter-btn" href="#" onclick="filterByUser('jakobbotsch');return false" title="Show only @jakobbotsch">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via <span class="bot-icon" role="img" aria-label="Copilot">&#x1F916;</span></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="jtschuster" data-involved="AaronRobinsonMSFT,copilot-pull-request-reviewer,dotnet-policy-service,jkoritzinsky,jtschuster,MichalStrehovsky" data-labels="area-System.Runtime.InteropServices" data-easy="needs-rebase">
   <td class="score ready-high">6.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -700,7 +700,7 @@
   <td class="num heat-3">160d</td>
   <td class="num heat-1" title="6 files, 150 lines (additions + deletions)">150</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jtschuster.png?size=32" alt="jtschuster"><a href="https://github.com/jtschuster">@jtschuster</a><a class="filter-btn" href="#" onclick="filterByUser('jtschuster');return false" title="Show only @jtschuster">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Runtime.InteropServices')" title="Filter to area-System.Runtime.InteropServices (Ctrl+click to add)">System.Runtime.InteropServices</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Runtime.InteropServices');return false" title="Show only area-System.Runtime.InteropServices">System.Runtime.InteropServices</a></td>
 </tr>
 <tr data-people="agocke,jkotas,ericstj" data-involved="agocke,artl93,copilot-pull-request-reviewer,dotnet-policy-service,ericstj,jeffhandley,jeffschwMSFT,jkotas,steveisok" data-labels="area-Meta">
   <td class="score">4.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;CI pending (+1.2)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -715,7 +715,7 @@
   <td class="num heat-3">156d</td>
   <td class="num" title="1 file, 56 lines (additions + deletions)">56</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/agocke.png?size=32" alt="agocke"><a href="https://github.com/agocke">@agocke</a><a class="filter-btn" href="#" onclick="filterByUser('agocke');return false" title="Show only @agocke">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Meta')" title="Filter to area-Meta (Ctrl+click to add)">Meta</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Meta');return false" title="Show only area-Meta">Meta</a></td>
 </tr>
 <tr data-people="cshung" data-involved="cshung,dotnet-policy-service,mrsharm" data-labels="area-GC-coreclr">
   <td class="score ready-high">6.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -730,7 +730,7 @@
   <td class="num heat-3">152d</td>
   <td class="num" title="2 files, 9 lines (additions + deletions)">9</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/cshung.png?size=32" alt="cshung"><a href="https://github.com/cshung">@cshung</a><a class="filter-btn" href="#" onclick="filterByUser('cshung');return false" title="Show only @cshung">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-GC-coreclr')" title="Filter to area-GC-coreclr (Ctrl+click to add)">GC-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-GC-coreclr');return false" title="Show only area-GC-coreclr">GC-coreclr</a></td>
 </tr>
 <tr data-people="JulieLeeMSFT,amanasifkhalid" data-involved="amanasifkhalid,dotnet-policy-service,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -745,7 +745,7 @@
   <td class="num heat-3">132d</td>
   <td class="num" title="3 files, 122 lines (additions + deletions)">122</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="amanasifkhalid,jakobbotsch" data-involved="amanasifkhalid,AndyAyersMS,azure-pipelines,jakobbotsch,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score ready-high">7.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -760,7 +760,7 @@
   <td class="num heat-3">132d</td>
   <td class="num" title="2 files, 7 lines (additions + deletions)">&#x1F401; 7</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/amanasifkhalid.png?size=32" alt="amanasifkhalid"><a href="https://github.com/amanasifkhalid">@amanasifkhalid</a><a class="filter-btn" href="#" onclick="filterByUser('amanasifkhalid');return false" title="Show only @amanasifkhalid">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="maraf,akoeplinger,yamachu" data-involved="akoeplinger,maraf,yamachu" data-labels="area-Build-mono" data-easy="quick-review">
   <td class="score ready-high">6.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -775,7 +775,7 @@
   <td class="num heat-3">125d</td>
   <td class="num" title="1 file, 3 lines (additions + deletions)">&#x1F401; 3</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/yamachu.png?size=32" alt="yamachu"><a href="https://github.com/yamachu">@yamachu</a><a class="filter-btn" href="#" onclick="filterByUser('yamachu');return false" title="Show only @yamachu">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Build-mono')" title="Filter to area-Build-mono (Ctrl+click to add)">Build-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Build-mono');return false" title="Show only area-Build-mono">Build-mono</a></td>
 </tr>
 <tr data-people="tommcdon,AaronRobinsonMSFT" data-involved="AaronRobinsonMSFT,dotnet-policy-service,tommcdon" data-labels="area-Diagnostics-coreclr" data-easy="quick-review">
   <td class="score ready-high">6.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -790,7 +790,7 @@
   <td class="num heat-3">117d</td>
   <td class="num" title="2 files, 14 lines (additions + deletions)">14</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AaronRobinsonMSFT.png?size=32" alt="AaronRobinsonMSFT"><a href="https://github.com/AaronRobinsonMSFT">@AaronRobinsonMSFT</a><a class="filter-btn" href="#" onclick="filterByUser('AaronRobinsonMSFT');return false" title="Show only @AaronRobinsonMSFT">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Diagnostics-coreclr');return false" title="Show only area-Diagnostics-coreclr">Diagnostics-coreclr</a></td>
 </tr>
 <tr data-people="StephenMolloy,daeghanelkin" data-involved="daeghanelkin,filipnavara,StephenMolloy" data-labels="area-Serialization">
   <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -805,7 +805,7 @@
   <td class="num heat-3">113d</td>
   <td class="num heat-2" title="4 files, 2661 lines (additions + deletions)">2661</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/daeghanelkin.png?size=32" alt="daeghanelkin"><a href="https://github.com/daeghanelkin">@daeghanelkin</a><a class="filter-btn" href="#" onclick="filterByUser('daeghanelkin');return false" title="Show only @daeghanelkin">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Serialization')" title="Filter to area-Serialization (Ctrl+click to add)">Serialization</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Serialization');return false" title="Show only area-Serialization">Serialization</a></td>
 </tr>
 <tr data-people="janvorli,tannergooding" data-involved="BrzVlad,davidwrighton,dotnet-policy-service,janvorli,jkotas,kg,tannergooding" data-labels="area-CodeGen-Interpreter-coreclr">
   <td class="score ready-high">7.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -820,7 +820,7 @@
   <td class="num heat-3">112d</td>
   <td class="num" title="2 files, 6 lines (additions + deletions)">&#x1F401; 6</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/janvorli.png?size=32" alt="janvorli"><a href="https://github.com/janvorli">@janvorli</a><a class="filter-btn" href="#" onclick="filterByUser('janvorli');return false" title="Show only @janvorli">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-Interpreter-coreclr')" title="Filter to area-CodeGen-Interpreter-coreclr (Ctrl+click to add)">CodeGen-Interpreter-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-Interpreter-coreclr');return false" title="Show only area-CodeGen-Interpreter-coreclr">CodeGen-Interpreter-coreclr</a></td>
 </tr>
 <tr data-people="mdh1418,noahfalk" data-involved="copilot-pull-request-reviewer,jkotas,lateralusX,mdh1418,MichalStrehovsky,noahfalk,steveisok,vitek-karas" data-labels="area-Tracing-coreclr">
   <td class="score">4.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -835,7 +835,7 @@
   <td class="num heat-3">106d</td>
   <td class="num heat-1" title="15 files, 450 lines (additions + deletions)">450</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mdh1418.png?size=32" alt="mdh1418"><a href="https://github.com/mdh1418">@mdh1418</a><a class="filter-btn" href="#" onclick="filterByUser('mdh1418');return false" title="Show only @mdh1418">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Tracing-coreclr')" title="Filter to area-Tracing-coreclr (Ctrl+click to add)">Tracing-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Tracing-coreclr');return false" title="Show only area-Tracing-coreclr">Tracing-coreclr</a></td>
 </tr>
 <tr data-people="pedrobsaila,amanasifkhalid" data-involved="amanasifkhalid,JulieLeeMSFT,pedrobsaila" data-labels="area-CodeGen-coreclr">
   <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -850,7 +850,7 @@
   <td class="num heat-3">93d</td>
   <td class="num heat-2" title="3 files, 541 lines (additions + deletions)">541</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/pedrobsaila.png?size=32" alt="pedrobsaila"><a href="https://github.com/pedrobsaila">@pedrobsaila</a><a class="filter-btn" href="#" onclick="filterByUser('pedrobsaila');return false" title="Show only @pedrobsaila">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="sbomer" data-involved="copilot-pull-request-reviewer,dotnet-policy-service,jtschuster,marek-safar,MichalStrehovsky,sbomer" data-labels="area-Tools-ILLink">
   <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -865,7 +865,7 @@
   <td class="num heat-3">83d</td>
   <td class="num heat-2" title="28 files, 463 lines (additions + deletions)">463</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Tools-ILLink')" title="Filter to area-Tools-ILLink (Ctrl+click to add)">Tools-ILLink</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Tools-ILLink');return false" title="Show only area-Tools-ILLink">Tools-ILLink</a></td>
 </tr>
 <tr data-people="stephentoub,app,StephenMolloy" data-involved="copilot-swe-agent,dotnet-policy-service,StephenMolloy,stephentoub" data-labels="area-Serialization">
   <td class="score">4.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -880,7 +880,7 @@
   <td class="num heat-3">69d</td>
   <td class="num heat-1" title="7 files, 73 lines (additions + deletions)">73</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/StephenMolloy.png?size=32" alt="StephenMolloy"><a href="https://github.com/StephenMolloy">@StephenMolloy</a><a class="filter-btn" href="#" onclick="filterByUser('StephenMolloy');return false" title="Show only @StephenMolloy">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via <span class="bot-icon" role="img" aria-label="Copilot">&#x1F916;</span></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Serialization')" title="Filter to area-Serialization (Ctrl+click to add)">Serialization</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Serialization');return false" title="Show only area-Serialization">Serialization</a></td>
 </tr>
 <tr data-people="maraf,akoeplinger,ilonatommy" data-involved="akoeplinger,am11,azure-pipelines,dotnet-policy-service,ilonatommy,jkotas,maraf,pavelsavara,steveisok,thaystg,vitek-karas" data-labels="area-Build-mono">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -895,7 +895,7 @@
   <td class="num heat-3">64d</td>
   <td class="num heat-1" title="8 files, 193 lines (additions + deletions)">193</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ilonatommy.png?size=32" alt="ilonatommy"><a href="https://github.com/ilonatommy">@ilonatommy</a><a class="filter-btn" href="#" onclick="filterByUser('ilonatommy');return false" title="Show only @ilonatommy">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Build-mono')" title="Filter to area-Build-mono (Ctrl+click to add)">Build-mono</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Build-mono');return false" title="Show only area-Build-mono">Build-mono</a></td>
 </tr>
 <tr data-people="39otsu,MichalStrehovsky,BrzVlad" data-involved="39otsu,agocke,azure-pipelines,BrzVlad,copilot-pull-request-reviewer,janvorli,jkoritzinsky,jkotas,kg,MichalStrehovsky" data-labels="area-Infrastructure" data-easy="needs-rebase">
   <td class="score">3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -910,7 +910,7 @@
   <td class="num heat-3">63d</td>
   <td class="num heat-1" title="15 files, 119 lines (additions + deletions)">119</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/39otsu.png?size=32" alt="39otsu"><a href="https://github.com/39otsu">@39otsu</a><a class="filter-btn" href="#" onclick="filterByUser('39otsu');return false" title="Show only @39otsu">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure')" title="Filter to area-Infrastructure (Ctrl+click to add)">Infrastructure</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure');return false" title="Show only area-Infrastructure">Infrastructure</a></td>
 </tr>
 <tr data-people="NikolaMilosavljevic,csa7mdm" data-involved="csa7mdm,NikolaMilosavljevic" data-labels="area-Infrastructure-installer" data-easy="quick-review">
   <td class="score ready-high">6.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -925,7 +925,7 @@
   <td class="num heat-3">61d</td>
   <td class="num" title="1 file, 4 lines (additions + deletions)">&#x1F401; 4</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/csa7mdm.png?size=32" alt="csa7mdm"><a href="https://github.com/csa7mdm">@csa7mdm</a><a class="filter-btn" href="#" onclick="filterByUser('csa7mdm');return false" title="Show only @csa7mdm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure-installer')" title="Filter to area-Infrastructure-installer (Ctrl+click to add)">Infrastructure-installer</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure-installer');return false" title="Show only area-Infrastructure-installer">Infrastructure-installer</a></td>
 </tr>
 <tr data-people="agocke,app,copilot-pull-request-reviewer" data-involved="agocke,copilot-pull-request-reviewer,jkoritzinsky,VSadov" data-labels="">
   <td class="score ready-high">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;discussion healthy (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)" aria-label="Show Ready score breakdown">?</button></td>
@@ -955,7 +955,7 @@
   <td class="num heat-3">56d</td>
   <td class="num" title="2 files, 40 lines (additions + deletions)">40</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/tommcdon.png?size=32" alt="tommcdon"><a href="https://github.com/tommcdon">@tommcdon</a><a class="filter-btn" href="#" onclick="filterByUser('tommcdon');return false" title="Show only @tommcdon">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Diagnostics-coreclr');return false" title="Show only area-Diagnostics-coreclr">Diagnostics-coreclr</a></td>
 </tr>
 <tr data-people="trungnt2910,copilot-pull-request-reviewer,huoyaoyuan" data-involved="copilot-pull-request-reviewer,huoyaoyuan,jeffhandley,jkotas,trungnt2910" data-labels="area-System.Diagnostics.Process">
   <td class="score">2.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -970,7 +970,7 @@
   <td class="num heat-3">46d</td>
   <td class="num heat-2" title="9 files, 904 lines (additions + deletions)">904</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/trungnt2910.png?size=32" alt="trungnt2910"><a href="https://github.com/trungnt2910">@trungnt2910</a><a class="filter-btn" href="#" onclick="filterByUser('trungnt2910');return false" title="Show only @trungnt2910">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Diagnostics.Process')" title="Filter to area-System.Diagnostics.Process (Ctrl+click to add)">System.Diagnostics.Process</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Diagnostics.Process');return false" title="Show only area-System.Diagnostics.Process">System.Diagnostics.Process</a></td>
 </tr>
 <tr data-people="sbomer,ericstj" data-involved="eiriktsarpalis,ericstj,sbomer,ViktorHofer" data-labels="area-Infrastructure-libraries">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -985,7 +985,7 @@
   <td class="num heat-3">44d</td>
   <td class="num heat-1" title="20 files, 97 lines (additions + deletions)">97</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sbomer.png?size=32" alt="sbomer"><a href="https://github.com/sbomer">@sbomer</a><a class="filter-btn" href="#" onclick="filterByUser('sbomer');return false" title="Show only @sbomer">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Infrastructure-libraries')" title="Filter to area-Infrastructure-libraries (Ctrl+click to add)">Infrastructure-libraries</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-Infrastructure-libraries');return false" title="Show only area-Infrastructure-libraries">Infrastructure-libraries</a></td>
 </tr>
 <tr data-people="bartonjs,vcsjones" data-involved="bartonjs,copilot-pull-request-reviewer,dotnet-policy-service,vcsjones" data-labels="area-System.Security">
   <td class="score">4.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1000,7 +1000,7 @@
   <td class="num heat-3">41d</td>
   <td class="num heat-1" title="5 files, 382 lines (additions + deletions)">382</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/vcsjones.png?size=32" alt="vcsjones"><a href="https://github.com/vcsjones">@vcsjones</a><a class="filter-btn" href="#" onclick="filterByUser('vcsjones');return false" title="Show only @vcsjones">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Security')" title="Filter to area-System.Security (Ctrl+click to add)">System.Security</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Security');return false" title="Show only area-System.Security">System.Security</a></td>
 </tr>
 <tr data-people="teo-tsirpanis,AaronRobinsonMSFT,copilot-pull-request-reviewer" data-involved="AaronRobinsonMSFT,agocke,am11,copilot-pull-request-reviewer,jeffhandley,jkotas,stephentoub,steveharter,teo-tsirpanis" data-labels="area-System.Reflection.Metadata">
   <td class="score">3.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1015,7 +1015,7 @@
   <td class="num heat-3">31d</td>
   <td class="num heat-2" title="20 files, 1152 lines (additions + deletions)">1152</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/teo-tsirpanis.png?size=32" alt="teo-tsirpanis"><a href="https://github.com/teo-tsirpanis">@teo-tsirpanis</a><a class="filter-btn" href="#" onclick="filterByUser('teo-tsirpanis');return false" title="Show only @teo-tsirpanis">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Reflection.Metadata')" title="Filter to area-System.Reflection.Metadata (Ctrl+click to add)">System.Reflection.Metadata</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Reflection.Metadata');return false" title="Show only area-System.Reflection.Metadata">System.Reflection.Metadata</a></td>
 </tr>
 <tr data-people="eduardo-vp,stephentoub" data-involved="danmoseley,dotnet-policy-service,eduardo-vp,stephentoub" data-labels="area-System.Collections">
   <td class="score">4.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1030,7 +1030,7 @@
   <td class="num heat-2">28d</td>
   <td class="num" title="1 file, 68 lines (additions + deletions)">68</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/eduardo-vp.png?size=32" alt="eduardo-vp"><a href="https://github.com/eduardo-vp">@eduardo-vp</a><a class="filter-btn" href="#" onclick="filterByUser('eduardo-vp');return false" title="Show only @eduardo-vp">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Collections')" title="Filter to area-System.Collections (Ctrl+click to add)">System.Collections</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Collections');return false" title="Show only area-System.Collections">System.Collections</a></td>
 </tr>
 <tr data-people="pedrobsaila" data-involved="gfoidl,jeffhandley,pedrobsaila,PranavSenthilnathan" data-labels="area-System.Memory">
   <td class="score">4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1045,7 +1045,7 @@
   <td class="num heat-2">25d</td>
   <td class="num" title="4 files, 123 lines (additions + deletions)">123</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/pedrobsaila.png?size=32" alt="pedrobsaila"><a href="https://github.com/pedrobsaila">@pedrobsaila</a><a class="filter-btn" href="#" onclick="filterByUser('pedrobsaila');return false" title="Show only @pedrobsaila">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Memory')" title="Filter to area-System.Memory (Ctrl+click to add)">System.Memory</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Memory');return false" title="Show only area-System.Memory">System.Memory</a></td>
 </tr>
 <tr data-people="pedrobsaila,MichalStrehovsky" data-involved="AaronRobinsonMSFT,jeffhandley,marek-safar,MichalStrehovsky,pedrobsaila,sbomer,steveisok,thaystg,vitek-karas" data-labels="area-System.Reflection">
   <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1060,7 +1060,7 @@
   <td class="num heat-2">24d</td>
   <td class="num heat-1" title="6 files, 207 lines (additions + deletions)">207</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/pedrobsaila.png?size=32" alt="pedrobsaila"><a href="https://github.com/pedrobsaila">@pedrobsaila</a><a class="filter-btn" href="#" onclick="filterByUser('pedrobsaila');return false" title="Show only @pedrobsaila">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Reflection')" title="Filter to area-System.Reflection (Ctrl+click to add)">System.Reflection</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Reflection');return false" title="Show only area-System.Reflection">System.Reflection</a></td>
 </tr>
 <tr data-people="MichalStrehovsky" data-involved="akoeplinger,am11,dotnet-policy-service,jkotas,MichalStrehovsky" data-labels="area-VM-coreclr">
   <td class="score ready-high">7.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1075,7 +1075,7 @@
   <td class="num heat-2">21d</td>
   <td class="num" title="2 files, 34 lines (additions + deletions)">34</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MichalStrehovsky.png?size=32" alt="MichalStrehovsky"><a href="https://github.com/MichalStrehovsky">@MichalStrehovsky</a><a class="filter-btn" href="#" onclick="filterByUser('MichalStrehovsky');return false" title="Show only @MichalStrehovsky">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-VM-coreclr')" title="Filter to area-VM-coreclr (Ctrl+click to add)">VM-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-VM-coreclr');return false" title="Show only area-VM-coreclr">VM-coreclr</a></td>
 </tr>
 <tr data-people="jeffhandley,jkotas,pentp" data-involved="copilot-pull-request-reviewer,eiriktsarpalis,jeffhandley,jkotas,MihaZupan,MihuBot,pentp,PranavSenthilnathan,stephentoub" data-labels="area-System.Text.Json">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1090,7 +1090,7 @@
   <td class="num heat-2">18d</td>
   <td class="num heat-1" title="11 files, 448 lines (additions + deletions)">448</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/pentp.png?size=32" alt="pentp"><a href="https://github.com/pentp">@pentp</a><a class="filter-btn" href="#" onclick="filterByUser('pentp');return false" title="Show only @pentp">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-System.Text.Json')" title="Filter to area-System.Text.Json (Ctrl+click to add)">System.Text.Json</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-System.Text.Json');return false" title="Show only area-System.Text.Json">System.Text.Json</a></td>
 </tr>
 <tr data-people="Daniel-Svensson,EgorBo,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,Daniel-Svensson,EgorBo,JulieLeeMSFT" data-labels="area-CodeGen-coreclr">
   <td class="score">3.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1105,7 +1105,7 @@
   <td class="num heat-2">17d</td>
   <td class="num heat-1" title="11 files, 431 lines (additions + deletions)">431</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/Daniel-Svensson.png?size=32" alt="Daniel-Svensson"><a href="https://github.com/Daniel-Svensson">@Daniel-Svensson</a><a class="filter-btn" href="#" onclick="filterByUser('Daniel-Svensson');return false" title="Show only @Daniel-Svensson">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-CodeGen-coreclr');return false" title="Show only area-CodeGen-coreclr">CodeGen-coreclr</a></td>
 </tr>
 <tr data-people="ashaurtaev,cshung,janvorli" data-involved="agocke,am11,ashaurtaev,cshung,dotnet-policy-service,janvorli,mangod9,Maoni0,markples,MichalStrehovsky" data-labels="area-GC-coreclr">
   <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, 30-second review (+3)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;has maintainer review (+0.8)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -1120,7 +1120,7 @@
   <td class="num heat-2">16d</td>
   <td class="num" title="2 files, 8 lines (additions + deletions)">8</td>
   <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/ashaurtaev.png?size=32" alt="ashaurtaev"><a href="https://github.com/ashaurtaev">@ashaurtaev</a><a class="filter-btn" href="#" onclick="filterByUser('ashaurtaev');return false" title="Show only @ashaurtaev">&#x1F50D;</a></span></td>
-  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-GC-coreclr')" title="Filter to area-GC-coreclr (Ctrl+click to add)">GC-coreclr</button></td>
+  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-GC-coreclr');return false" title="Show only area-GC-coreclr">GC-coreclr</a></td>
 </tr>
 </tbody>
 </table>
@@ -1128,138 +1128,111 @@
 
 <script src="../shared-ui.js"></script>
 <script>
-var activeAreas = [];
-var activeUser = '';
-var moreRowsExpanded = false;
-var ctrlHeld = false;
-var LS_EASY_KEY = 'pr-dashboard-easy-action';
-
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+var _filterKey = 'prFilter:' + location.pathname;
+function isEasyHidden(r) {
+  var toggle = document.getElementById('easy-action-toggle');
+  return toggle && toggle.checked && !r.getAttribute('data-easy');
 }
-function escAttr(s) {
-  return escHtml(s).replace(/'/g,'&#39;');
-}
-function applyTableFilter() {
-  var table = document.getElementById('pr-table');
-  if (!table) return;
-  var easyOn = !!(document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked);
-  var hasFilters = activeAreas.length > 0 || !!activeUser || easyOn;
-  var rows = table.querySelectorAll('tbody tr');
+function filterByLabel(label) {
+  var rows = document.querySelectorAll('tbody tr');
+  var count = 0;
   rows.forEach(function(r) {
-    var show = true;
-    if (activeAreas.length > 0) {
-      var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-      var match = activeAreas.some(function(a) {
-        return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
-      });
-      if (!match) show = false;
+    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
     }
-    if (activeUser && show) {
-      var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-      if (people.indexOf(',' + activeUser.toLowerCase() + ',') < 0) show = false;
-    }
-    if (easyOn && show && !r.getAttribute('data-easy')) show = false;
-    if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
-    r.style.display = show ? '' : 'none';
   });
-  var btn = document.getElementById('toggle-more');
-  if (btn) {
-    btn.style.display = hasFilters ? 'none' : '';
-    if (!hasFilters && !moreRowsExpanded) {
-      var moreCount = table.querySelectorAll('tbody tr.more-row').length;
-      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
-    }
-  }
-  renderFilterBanner();
-  updateUrl();
-}
-function renderFilterBanner() {
   var banner = document.getElementById('filter-banner');
-  if (!banner) return;
-  var hasFilters = activeAreas.length > 0 || !!activeUser;
-  if (!hasFilters) { banner.style.display = 'none'; banner.innerHTML = ''; return; }
-  var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
-  if (activeUser) {
-    html += '<span class="filter-chip">@' + escHtml(activeUser) +
-      ' <a class="chip-remove" href="#" onclick="removeUserFilter();return false" title="Remove user filter" aria-label="Remove user filter">&#x2715;</a></span>';
-  }
-  activeAreas.forEach(function(a) {
-    var short = a.replace(/^area-/, '');
-    html += '<span class="filter-chip">' + escHtml(short) +
-      ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
-  });
-  html += ' <a href="#" onclick="clearAllFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
-  banner.innerHTML = html;
-  banner.style.display = 'flex';
+  document.getElementById('filter-name').textContent = label;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
 }
-function updateUrl() {
-  var params = [];
-  if (activeUser) params.push('user=' + encodeURIComponent(activeUser));
-  if (activeAreas.length > 0) params.push('area=' + activeAreas.map(encodeURIComponent).join(','));
-  var easyToggle = document.getElementById('easy-action-toggle');
-  if (easyToggle && easyToggle.checked) params.push('easyaction=true');
-  history.replaceState(null, '', location.pathname + (params.length ? '?' + params.join('&') : ''));
-}
-function filterByArea(event, label) {
-  var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
-  var idx = activeAreas.indexOf(label);
-  if (ctrl) {
-    if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
-    renderFilterBanner();
-    updateUrl();
-  } else {
-    activeAreas = [label];
-    applyTableFilter();
-  }
-}
-document.addEventListener('keydown', function(e) {
-  if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
-    ctrlHeld = true;
-    if (activeAreas.length > 0) {
-      document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
+function filterByUser(name) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  var count = 0;
+  rows.forEach(function(r) {
+    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
+      r.style.display = '';
+      count++;
+    } else {
+      r.style.display = 'none';
     }
-  }
-});
-document.addEventListener('keyup', function(e) {
-  if (e.key === 'Control' || e.key === 'Meta') {
-    ctrlHeld = false;
-    applyTableFilter();
-  }
-});
-function filterByUser(name) { activeUser = name; applyTableFilter(); }
-function removeAreaFilter(label) {
-  var idx = activeAreas.indexOf(label);
-  if (idx >= 0) activeAreas.splice(idx, 1);
-  applyTableFilter();
+  });
+  var banner = document.getElementById('filter-banner');
+  document.getElementById('filter-name').textContent = '@' + name;
+  banner.style.display = 'block';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = 'none';
+  history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
+  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
 }
-function removeUserFilter() { activeUser = ''; applyTableFilter(); }
-function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded = false; applyTableFilter(); }
-// Easy action toggle
+function clearFilter() {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
+  rows.forEach(function(r) {
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
+    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
+  });
+  document.getElementById('filter-banner').style.display = 'none';
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = '';
+  history.replaceState(null, '', location.pathname);
+  try { localStorage.removeItem(_filterKey); } catch(e) {}
+}
+function applyEasyFilter(easyOn) {
+  var rows = document.querySelectorAll('#pr-table tbody tr');
+  rows.forEach(function(r) {
+    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
+    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
+    else { r.style.display = ''; }
+  });
+}
 (function() {
+  var LS_EASY_KEY = 'pr-dashboard-easy-action';
   var toggle = document.getElementById('easy-action-toggle');
   if (!toggle) return;
+  // Restore state
   var params = new URLSearchParams(location.search);
   var urlEasy = params.get('easyaction');
   var easyOn = false;
   if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
   else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
   toggle.checked = easyOn;
+  if (easyOn) { applyEasyFilter(true); }
   toggle.addEventListener('change', function() {
-    try { localStorage.setItem(LS_EASY_KEY, this.checked ? 'true' : 'false'); } catch(e) {}
-    applyTableFilter();
+    var on = this.checked;
+    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
+    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
+      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
+    } catch(e) {}
+    applyEasyFilter(on);
   });
 })();
-// Init from URL params
+// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
 (function() {
   var params = new URLSearchParams(location.search);
-  var urlUser = params.get('user') || '';
-  try {
-    var urlArea = params.get('area') || params.get('label') || '';
-    if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
-  } catch(e) {}
-  if (urlUser) activeUser = urlUser;
-  applyTableFilter();
+  var user = params.get('user');
+  var label = params.get('label');
+  if (user) filterByUser(user);
+  else if (label) filterByLabel(label);
+  else {
+    try {
+      var saved = JSON.parse(localStorage.getItem(_filterKey));
+      if (saved && saved.type === 'user') filterByUser(saved.value);
+      else if (saved && saved.type === 'label') filterByLabel(saved.value);
+    } catch(e) {}
+  }
 })();
 initTableSort('pr-table', 9);
 initResizableColumns('pr-table');
