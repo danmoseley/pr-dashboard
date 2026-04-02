@@ -250,13 +250,21 @@ async function runTests() {
     else fail('URL filter params', url);
 
     // ── Test 11: URL bookmark round-trip ───────────────────────────────────
+    // Pick a real area label dynamically so the test isn't tied to a specific label name
+    const anyAreaLabel = await page.evaluate(() => {
+      for (const btn of document.querySelectorAll('#pr-table tbody tr button.area-label')) {
+        const lbl = btn.getAttribute('onclick').match(/filterByArea\(event,'([^']+)'\)/);
+        if (lbl) return lbl[1];
+      }
+      return null;
+    });
     const page2 = await browser.newPage();
-    await page2.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'domcontentloaded' });
+    await page2.goto(PAGE + '?area=' + encodeURIComponent(anyAreaLabel || 'area-runtime'), { waitUntil: 'domcontentloaded' });
     await page2.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
     await wait(500);
     const chipsOnLoad = await page2.$$('.filter-chip');
     if (chipsOnLoad.length > 0) pass('URL ?area= param restores filter chip on load');
-    else fail('URL area param restore', 'no chips after loading ?area=area-CodeGen-coreclr');
+    else fail('URL area param restore', 'no chips after loading ?area=' + (anyAreaLabel || 'area-runtime'));
     await page2.close();
 
     // ── Test 12: User filter + area filter combo ────────────────────────────
@@ -304,13 +312,18 @@ async function runTests() {
     await page3.close();
 
     // ── Test 13: URL ?repo= bookmark round-trip ──────────────────────────────
+    // Pick a real repo slug from rendered rows so the test isn't tied to a specific repo name
+    const anyRepoSlug = await page.evaluate(() => {
+      const row = document.querySelector('#pr-table tbody tr[data-repo]');
+      return row ? row.getAttribute('data-repo') : null;
+    });
     const page4 = await browser.newPage();
-    await page4.goto(PAGE + '?repo=runtime', { waitUntil: 'domcontentloaded' });
+    await page4.goto(PAGE + '?repo=' + encodeURIComponent(anyRepoSlug || 'runtime'), { waitUntil: 'domcontentloaded' });
     await page4.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
     await wait(300);
     const repoChipsOnLoad = await page4.$$('.filter-chip');
     if (repoChipsOnLoad.length > 0) pass('URL ?repo= param restores repo filter chip on load');
-    else fail('URL repo param restore', 'no chips after loading ?repo=runtime');
+    else fail('URL repo param restore', 'no chips after loading ?repo=' + (anyRepoSlug || 'runtime'));
     await page4.close();
 
     // ── Test 14: Ctrl+click same area twice deselects it ────────────────────

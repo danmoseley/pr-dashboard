@@ -158,8 +158,7 @@ $rows = foreach ($pr in $prs) {
             $name = $_ -replace '^area-', ''
             $safeName = [System.Net.WebUtility]::HtmlEncode($name)
             $safeFullName = [System.Net.WebUtility]::HtmlEncode($_)
-            $safeFullNameForJs = $_.Replace('\','\\').Replace("'","\'")
-            " <button type=`"button`" class=`"badge area-label`" onclick=`"filterByArea(event,'$safeFullNameForJs')`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</button>"
+            $safeFullNameForJs = $_.Replace('\','\\').Replace("'","\'").Replace('"','\x22')            " <button type=`"button`" class=`"badge area-label`" onclick=`"filterByArea(event,'$safeFullNameForJs')`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</button>"
         }) -join ""
     }
 
