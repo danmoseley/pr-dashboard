@@ -388,7 +388,6 @@ $navHtml
 $(if ($Description) { "<p class=`"report-desc`">$Description <label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->" } else { "<div style=`"margin:0.5em 0;`"><label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></div>" })
 $scoringHtml
 <div class="filter-banner" id="filter-banner"></div>
-<div id="ctrl-debug" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9999;display:none;font-size:0.8em;padding:4px 12px;background:#2d1f00;color:#f0a000;border-radius:6px;font-family:monospace;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
 $(if ($prCount -eq 0) {
 '<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
 } else {
@@ -506,28 +505,10 @@ function filterByArea(event, label) {
     if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
     renderFilterBanner();
     updateUrl();
-    showCtrlClickFeedback(label, true);
   } else {
     activeAreas = [label];
     applyTableFilter();
   }
-}
-function updateCtrlDebug(held) {
-  var el = document.getElementById('ctrl-debug');
-  if (!el) return;
-  if (held) {
-    el.style.display = '';
-    el.textContent = '\u2328\ufe0f  Ctrl/Cmd held \u2014 click any area label to add to filter; release to apply';
-  } else {
-    el.style.display = 'none';
-  }
-}
-function showCtrlClickFeedback(label, wasCtrl) {
-  var el = document.getElementById('ctrl-debug');
-  if (!el) return;
-  el.style.display = '';
-  el.textContent = (wasCtrl ? '\u2705 Ctrl+click detected' : '\u274c Regular click') + ' \u2014 label: ' + label + ' | activeAreas: [' + activeAreas.join(', ') + ']';
-  if (!wasCtrl) setTimeout(function() { if (!ctrlHeld) el.style.display = 'none'; }, 3000);
 }
 document.addEventListener('keydown', function(e) {
   if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
@@ -535,14 +516,12 @@ document.addEventListener('keydown', function(e) {
     if (activeAreas.length > 0) {
       document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
     }
-    updateCtrlDebug(true);
   }
 });
 document.addEventListener('keyup', function(e) {
   if (e.key === 'Control' || e.key === 'Meta') {
     ctrlHeld = false;
     applyTableFilter();
-    updateCtrlDebug(false);
   }
 });
 function filterByUser(name) { activeUser = name; applyTableFilter(); }

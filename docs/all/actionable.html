@@ -115,7 +115,6 @@
 
 <div class="summary-bar" id="summary-bar"></div>
 <div class="filter-banner" id="filter-banner"></div>
-<div id="ctrl-debug" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9999;display:none;font-size:0.8em;padding:4px 12px;background:#2d1f00;color:#f0a000;border-radius:6px;font-family:monospace;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
 
 <div id="status" class="status">Loading repository data&#8230;</div>
 <div id="content"></div>
@@ -421,34 +420,14 @@
     banner.style.display = 'flex';
   }
 
-  function updateCtrlDebug(held) {
-    var el = document.getElementById('ctrl-debug');
-    if (!el) return;
-    if (held) {
-      el.style.display = '';
-      el.textContent = '⌨️  Ctrl/Cmd held — click any area label to add to filter; release to apply';
-    } else {
-      el.style.display = 'none';
-    }
-  }
-
-  function showCtrlClickFeedback(label, wasCtrl) {
-    var el = document.getElementById('ctrl-debug');
-    if (!el) return;
-    el.style.display = '';
-    el.textContent = (wasCtrl ? '✅ Ctrl+click detected' : '❌ Regular click') + ' — label: ' + label + ' | activeAreas: [' + activeAreas.join(', ') + ']';
-    if (!wasCtrl) setTimeout(function() { if (!ctrlHeld) el.style.display = 'none'; }, 3000);
-  }
 
   window.filterByArea = function(event, label) {
     var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
     var idx = activeAreas.indexOf(label);
     if (ctrl) {
       if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
-      // Don't hide rows yet — wait for keyup so user can keep Ctrl+clicking
       renderFilterBanner();
       history.replaceState(null, '', buildCurrentUrl());
-      showCtrlClickFeedback(label, ctrl);
     } else {
       activeAreas = [label];
       activeRepos = [];
@@ -725,14 +704,12 @@
         if (activeAreas.length > 0 || activeRepos.length > 0) {
           document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
         }
-        updateCtrlDebug(true);
       }
     });
     document.addEventListener('keyup', function(e) {
       if (e.key === 'Control' || e.key === 'Meta') {
         ctrlHeld = false;
         applyTableFilter();
-        updateCtrlDebug(false);
       }
     });
   }

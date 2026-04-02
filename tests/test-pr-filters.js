@@ -171,15 +171,6 @@ async function runTests() {
         if (newTabOpened) fail('Ctrl+click on button opened new tab — <button> regression');
         else pass('Ctrl+click first label: no new tab (button element correct)');
 
-        // Diagnostic: see what the page state looks like
-        const dbg = await page.evaluate(() => ({
-          bannerDisplay: (document.getElementById('filter-banner') || {}).style && document.getElementById('filter-banner').style.display,
-          chips: document.querySelectorAll('.filter-chip').length,
-          debugText: (document.getElementById('ctrl-debug') || {}).textContent || '',
-          bannerHTML: (document.getElementById('filter-banner') || {}).innerHTML || ''
-        }));
-        log('DOM state after ctrl+click: chips=' + dbg.chips + ' banner=' + dbg.bannerDisplay + ' debug="' + dbg.debugText + '"');
-
         const chipsAfterA = await page.$$('.filter-chip');
         if (chipsAfterA.length < 1) {
           fail('Ctrl+click first label', 'no chip appeared');

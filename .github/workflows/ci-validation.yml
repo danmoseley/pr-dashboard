@@ -54,3 +54,34 @@ jobs:
           path: screenshots/
           if-no-files-found: ignore
           retention-days: 7
+
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: tests/package-lock.json
+
+      - name: Install dependencies
+        run: cd tests && npm ci
+
+      - name: Install Playwright browser
+        run: cd tests && npx playwright install --with-deps chromium
+
+      - name: Start HTTP server
+        run: |
+          cd docs && python3 -m http.server 8080 &
+          # Wait until server is ready
+          for i in $(seq 1 20); do
+            curl -sf http://localhost:8080/all/actionable.html > /dev/null && break
+            sleep 1
+          done
+
+      - name: Run Playwright tests
+        run: cd tests && node test-pr-filters.js

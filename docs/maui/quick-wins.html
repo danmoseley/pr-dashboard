@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T20:41:13.0621906Z">
+<body data-server-updated="2026-04-02T20:49:45.6859205Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/maui/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/maui</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T20:41:13.0621906Z">at 2026-04-02 13:41 PDT</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T20:49:45.6859205Z">at 2026-04-02 13:49 PDT</span> &middot; 2 PRs &middot; <a href="https://github.com/dotnet/maui">dotnet/maui</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -79,7 +79,6 @@
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner"></div>
-<div id="ctrl-debug" style="position:fixed;bottom:8px;left:50%;transform:translateX(-50%);z-index:9999;display:none;font-size:0.8em;padding:4px 12px;background:#2d1f00;color:#f0a000;border-radius:6px;font-family:monospace;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,0.4)"></div>
 <table id="pr-table">
 <colgroup>
   <col style="width:4.5%">
@@ -219,28 +218,10 @@ function filterByArea(event, label) {
     if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
     renderFilterBanner();
     updateUrl();
-    showCtrlClickFeedback(label, true);
   } else {
     activeAreas = [label];
     applyTableFilter();
   }
-}
-function updateCtrlDebug(held) {
-  var el = document.getElementById('ctrl-debug');
-  if (!el) return;
-  if (held) {
-    el.style.display = '';
-    el.textContent = '\u2328\ufe0f  Ctrl/Cmd held \u2014 click any area label to add to filter; release to apply';
-  } else {
-    el.style.display = 'none';
-  }
-}
-function showCtrlClickFeedback(label, wasCtrl) {
-  var el = document.getElementById('ctrl-debug');
-  if (!el) return;
-  el.style.display = '';
-  el.textContent = (wasCtrl ? '\u2705 Ctrl+click detected' : '\u274c Regular click') + ' \u2014 label: ' + label + ' | activeAreas: [' + activeAreas.join(', ') + ']';
-  if (!wasCtrl) setTimeout(function() { if (!ctrlHeld) el.style.display = 'none'; }, 3000);
 }
 document.addEventListener('keydown', function(e) {
   if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
@@ -248,14 +229,12 @@ document.addEventListener('keydown', function(e) {
     if (activeAreas.length > 0) {
       document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
     }
-    updateCtrlDebug(true);
   }
 });
 document.addEventListener('keyup', function(e) {
   if (e.key === 'Control' || e.key === 'Meta') {
     ctrlHeld = false;
     applyTableFilter();
-    updateCtrlDebug(false);
   }
 });
 function filterByUser(name) { activeUser = name; applyTableFilter(); }
