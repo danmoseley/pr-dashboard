@@ -711,6 +711,7 @@
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
     var safeSlug = escAttr(pr._slug);
+    var safeSlugJs = escJs(pr._slug || '');
 
     // Detect if the filtered user is the one who should act next
     var isYourTurn = isUsersTurn(pr, filterUser);
@@ -811,7 +812,7 @@
       '<td class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
       '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
-      '<td class="repo-col"><button type="button" class="repo-filter-btn" onclick="filterByRepo(event,\'' + safeSlug + '\')" title="Filter to ' + escHtml(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</button><a href="' + repoUrl + '" class="repo-nav-icon" title="Go to ' + escHtml(pr._slug) + ' dashboard" aria-label="Open ' + escHtml(pr._slug) + ' dashboard">&#x2197;</a></td>' +
+      '<td class="repo-col"><button type="button" class="repo-filter-btn" onclick="filterByRepo(event,\'' + safeSlugJs + '\')" title="Filter to ' + escHtml(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</button><a href="' + repoUrl + '" class="repo-nav-icon" title="Go to ' + escHtml(pr._slug) + ' dashboard" aria-label="Open ' + escHtml(pr._slug) + ' dashboard">&#x2197;</a></td>' +
       '<td class="title">' + easyBadge + safeTitle + '</td>' +
       '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na))) + '</td>' +
       '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +

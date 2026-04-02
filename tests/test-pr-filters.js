@@ -67,9 +67,9 @@ async function runTests() {
     const labelText = await areaLabelLocator.textContent();
     log('Clicking area label: ' + labelText);
     await areaLabelLocator.click();
-    await wait(300);
+    await page.waitForFunction(() => document.getElementById('filter-banner').style.display === 'flex', { timeout: 5000 });
 
-    const bannerAfter = await page.$eval('#filter-banner', e => e.style.display).catch(() => '?');
+    const bannerAfter= await page.$eval('#filter-banner', e => e.style.display).catch(() => '?');
     if (bannerAfter === 'flex') pass('Filter banner visible after area click (display=flex)');
     else fail('Filter banner after area click', 'display=' + bannerAfter);
 
@@ -87,9 +87,8 @@ async function runTests() {
     // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
     await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
-    await wait(300);
 
-    // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
+    // Find a row with 2+ area labelsso after filtering by label1, label2 is still in a visible row
     const labelPair = await page.$$eval('#pr-table tbody tr', rows => {
       for (const row of rows) {
         if (row.style.display === 'none') continue;
@@ -119,8 +118,9 @@ async function runTests() {
           return null;
         }, fl);
         if (coordsF) {
-          await page.keyboard.down('Control'); await page.mouse.click(coordsF.x, coordsF.y); await page.keyboard.up('Control'); await wait(300);
-          const cnt = await page.$$eval('.filter-chip', els => els.length);
+          await page.keyboard.down('Control'); await page.mouse.click(coordsF.x, coordsF.y); await page.keyboard.up('Control');
+          await page.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 5000 });
+          const cnt= await page.$$eval('.filter-chip', els => els.length);
           if (cnt >= 1) pass('Ctrl+click (single) added chip: ' + cnt + ' chip(s)');
           else fail('Ctrl+click fallback', 'no chip after ctrl+click');
         } else fail('Ctrl+click fallback', 'coords not found');
@@ -140,7 +140,7 @@ async function runTests() {
             }
           }
         }, text);
-        await wait(50); // let browser settle after scroll
+        await page.evaluate(() => new Promise(r => requestAnimationFrame(r))); // flush layout after scrollIntoView
         // Now get fresh viewport-relative coordinates
         return page.evaluate((targetText) => {
           for (const row of document.querySelectorAll('#pr-table tbody tr')) {
@@ -166,8 +166,8 @@ async function runTests() {
         await page.keyboard.down('Control');
         await page.mouse.click(coordsA.x, coordsA.y);
         await page.keyboard.up('Control');
-        await wait(300);
-        if (newTabOpened) fail('Ctrl+click on button opened new tab — <button> regression');
+        await page.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 5000 });
+        if (newTabOpened)fail('Ctrl+click on button opened new tab — <button> regression');
         else pass('Ctrl+click first label: no new tab (button element correct)');
 
         const chipsAfterA = await page.$$('.filter-chip');
@@ -179,8 +179,8 @@ async function runTests() {
           // Step 2: Ctrl+click lB. Hold Ctrl FIRST (keydown un-hides all rows, shifting layout),
           // then get FRESH coords after layout settles, then click.
           await page.keyboard.down('Control');
-          await wait(150); // let keydown handler run + layout settle
-          const coordsB = await page.evaluate((label) => {
+          await page.waitForFunction(() => [...document.querySelectorAll('#pr-table tbody tr')].every(r => r.style.display !== 'none'), { timeout: 2000 }).catch(() => null); // wait for Ctrl keydown to un-hide all rows
+          const coordsB= await page.evaluate((label) => {
             const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
             if (!btn) return null;
             btn.scrollIntoView({ behavior: 'instant', block: 'center' });
@@ -188,8 +188,8 @@ async function runTests() {
             const vh = window.innerHeight;
             return (r.width > 0 && r.top >= 0 && r.bottom <= vh) ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
           }, lB);
-          await wait(50); // scrollIntoView settle
-          const coordsB2 = coordsB && await page.evaluate((label) => {
+          await page.evaluate(() => new Promise(r => requestAnimationFrame(r))); // flush layout after scrollIntoView
+          const coordsB2= coordsB && await page.evaluate((label) => {
             const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
             if (!btn) return null;
             const r = btn.getBoundingClientRect();
@@ -202,8 +202,8 @@ async function runTests() {
           } else {
             await page.mouse.click(coordsB2.x, coordsB2.y);
             await page.keyboard.up('Control');
-            await wait(300);
-            const chipsAfterBoth = await page.$$('.filter-chip');
+            await page.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 2, { timeout: 5000 });
+            const chipsAfterBoth= await page.$$('.filter-chip');
             if (chipsAfterBoth.length >= 2) pass('Ctrl+click multi-select: ' + chipsAfterBoth.length + ' chips — "' + lA + '" + "' + lB + '"');
             else fail('Ctrl+click multi-select', 'only ' + chipsAfterBoth.length + ' chip(s) after two Ctrl+clicks — ctrlKey may not be detected');
           }
@@ -214,17 +214,18 @@ async function runTests() {
     // ── Test 7: Chip X removes filter ─────────────────────────────────────
     const removeBtn = await page.$('.filter-chip .chip-remove');
     if (removeBtn) {
+      const chipCountBefore = (await page.$$('.filter-chip')).length;
       await removeBtn.click();
-      await wait(300);
-      const chipsAfterRemove = await page.$$('.filter-chip');
+      await page.waitForFunction(n => document.querySelectorAll('.filter-chip').length < n, chipCountBefore, { timeout: 5000 });
+      const chipsAfterRemove= await page.$$('.filter-chip');
       pass('After chip remove: ' + chipsAfterRemove.length + ' chip(s) remain');
     } else fail('Chip remove button', 'not found');
 
     // Clear remaining chip so all rows visible
     await page.evaluate(() => { if (window.clearAllSecondaryFilters) window.clearAllSecondaryFilters(); });
-    await wait(200);
+    await page.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 5000 }).catch(() => null);
 
-    // ── Test 8: Repo filter buttons present ────────────────────────────────
+    // ── Test 8:Repo filter buttons present ────────────────────────────────
     const repoLinks = await page.$$('button.repo-filter-btn');
     if (repoLinks.length > 0) pass('Repo filter buttons found: ' + repoLinks.length);
     else fail('Repo filter buttons', 'none found');
@@ -236,8 +237,8 @@ async function runTests() {
       const repoText = await repoLocator.textContent();
       log('Clicking repo button: ' + repoText);
       await repoLocator.click();
-      await wait(300);
-      const repoChips = await page.$$eval('.filter-chip', chips => chips.map(c => c.textContent.trim()));
+      await page.waitForFunction(() => [...document.querySelectorAll('.filter-chip')].some(c => c.textContent.includes('Repo:')), { timeout: 5000 });
+      const repoChips= await page.$$eval('.filter-chip', chips => chips.map(c => c.textContent.trim()));
       if (repoChips.some(t => t.includes('Repo:'))) pass('Repo chip appeared after clicking ' + repoText.trim() + ': ' + repoChips.join(', '));
       else fail('Repo chip', 'no Repo: chip — chips: ' + repoChips.join(', '));
     }
@@ -260,8 +261,8 @@ async function runTests() {
     const page2 = await browser.newPage();
     await page2.goto(PAGE + '?area=' + encodeURIComponent(anyAreaLabel || 'area-runtime'), { waitUntil: 'domcontentloaded' });
     await page2.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
-    await wait(500);
-    const chipsOnLoad = await page2.$$('.filter-chip');
+    await page2.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 5000 }).catch(() => null);
+    const chipsOnLoad= await page2.$$('.filter-chip');
     if (chipsOnLoad.length > 0) pass('URL ?area= param restores filter chip on load');
     else fail('URL area param restore', 'no chips after loading ?area=' + (anyAreaLabel || 'area-runtime'));
     await page2.close();
@@ -287,9 +288,9 @@ async function runTests() {
     else {
     await page3.$eval('#user-field', (el, u) => { el.value = u; }, firstAuthor);
     await page3.click('button[onclick*="applyUser"]');
-    await wait(1000); // wait for re-render
+    await page3.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null); // wait for URL to update after user filter applied
 
-    const summaryBar = await page3.$eval('#summary-bar', e => e.style.display).catch(() => '?');
+    const summaryBar= await page3.$eval('#summary-bar', e => e.style.display).catch(() => '?');
     log('Summary bar display after user filter: ' + summaryBar);
 
     // Now click an area label in the filtered results
@@ -299,8 +300,8 @@ async function runTests() {
       const aLabel = await userAreaLabelLocator.textContent();
       log('Clicking area label after user filter: ' + aLabel);
       await userAreaLabelLocator.click();
-      await wait(300);
-      const bannerUser = await page3.$eval('#filter-banner', e => e.style.display).catch(() => '?');
+      await page3.waitForFunction(() => document.getElementById('filter-banner').style.display === 'flex', { timeout: 5000 });
+      const bannerUser= await page3.$eval('#filter-banner', e => e.style.display).catch(() => '?');
       if (bannerUser === 'flex') pass('Filter banner visible after area click WITH user filter active');
       else fail('Filter banner with user filter', 'display=' + bannerUser + ' (expected flex)');
     } else {
@@ -319,8 +320,8 @@ async function runTests() {
     const page4 = await browser.newPage();
     await page4.goto(PAGE + '?repo=' + encodeURIComponent(anyRepoSlug || 'runtime'), { waitUntil: 'domcontentloaded' });
     await page4.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
-    await wait(300);
-    const repoChipsOnLoad = await page4.$$('.filter-chip');
+    await page4.waitForFunction(() => [...document.querySelectorAll('.filter-chip')].some(c => c.textContent.includes('Repo:')), { timeout: 5000 }).catch(() => null);
+    const repoChipsOnLoad= await page4.$$('.filter-chip');
     if (repoChipsOnLoad.length > 0) pass('URL ?repo= param restores repo filter chip on load');
     else fail('URL repo param restore', 'no chips after loading ?repo=' + (anyRepoSlug || 'runtime'));
     await page4.close();
@@ -330,7 +331,6 @@ async function runTests() {
       const p14 = await browser.newPage();
       await p14.goto(PAGE, { waitUntil: 'domcontentloaded' });
       await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
-      await wait(300);
       // Find any visible area label
       const firstAreaLabel = await p14.evaluate(() => {
         for (const row of document.querySelectorAll('#pr-table tbody tr')) {
@@ -351,28 +351,27 @@ async function runTests() {
           const r = btn.getBoundingClientRect();
           return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
         }, firstAreaLabel);
-        await wait(100);
         if (coordsC1) await p14.mouse.click(coordsC1.x, coordsC1.y);
         await p14.keyboard.up('Control');
-        await wait(200);
-        const chipsAfterSelect = await p14.$$('.filter-chip');
+        await p14.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 5000 });
+        const chipsAfterSelect= await p14.$$('.filter-chip');
         if (chipsAfterSelect.length < 1) { fail('Ctrl+click deselect (setup)', 'no chip after first ctrl+click'); }
         else {
           // Second Ctrl+click → deselect
           await p14.keyboard.down('Control');
-          await wait(150);
-          const coordsC2 = await p14.evaluate((label) => {
+          await p14.waitForFunction(() => [...document.querySelectorAll('#pr-table tbody tr')].every(r => r.style.display !== 'none'), { timeout: 2000 }).catch(() => null);
+          const coordsC2= await p14.evaluate((label) => {
             const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
             if (!btn) return null;
             btn.scrollIntoView({ behavior: 'instant', block: 'center' });
             const r = btn.getBoundingClientRect();
             return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
           }, firstAreaLabel);
-          await wait(50);
+          await p14.evaluate(() => new Promise(r => requestAnimationFrame(r)));
           if (coordsC2) await p14.mouse.click(coordsC2.x, coordsC2.y);
           await p14.keyboard.up('Control');
-          await wait(300);
-          const chipsAfterDeselect = await p14.$$('.filter-chip');
+          await p14.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 5000 });
+          const chipsAfterDeselect= await p14.$$('.filter-chip');
           if (chipsAfterDeselect.length === 0) pass('Ctrl+click same area twice deselects (0 chips)');
           else fail('Ctrl+click deselect', chipsAfterDeselect.length + ' chips remain after deselect');
         }
@@ -385,8 +384,7 @@ async function runTests() {
       const p15 = await browser.newPage();
       await p15.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'domcontentloaded' });
       await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 1, { timeout: 10000 }).catch(() => null);
-      await wait(200);
-      const chipsBeforeClear = await p15.$$('.filter-chip');
+      const chipsBeforeClear= await p15.$$('.filter-chip');
       if (chipsBeforeClear.length < 1) { fail('Clear all setup', 'expected 1+ chips, got ' + chipsBeforeClear.length); }
       else {
         // Click the "Clear all" link in the banner
@@ -394,8 +392,8 @@ async function runTests() {
         if (!clearAll) { fail('Clear all', '"Clear all" link not found in banner'); }
         else {
           await clearAll.click();
-          await wait(300);
-          const chipsAfterClear = await p15.$$('.filter-chip');
+          await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 5000 });
+          const chipsAfterClear= await p15.$$('.filter-chip');
           if (chipsAfterClear.length === 0) pass('Clear all removes all chips');
           else fail('Clear all', chipsAfterClear.length + ' chips remain after clear all');
         }
