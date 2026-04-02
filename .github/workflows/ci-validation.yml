@@ -13,9 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Run Pester tests
+        uses: actions/checkout@v6
         run: |
           pwsh -Command "Invoke-Pester ./scripts/Tests/ -CI"
 
@@ -59,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup Node
         uses: actions/setup-node@v4
