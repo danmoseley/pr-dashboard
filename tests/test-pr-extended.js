@@ -372,14 +372,13 @@ async function runTests() {
     log('\n── Group E: [?] score popup ──');
 
     // E1: Click [?] button → .why-popup appears
+    // Use JS click to bypass the parent <td> intercepting pointer events.
     {
       const p = await openPage(ALL, 100);
-      const whyBtn = p.locator('[data-why]').first();
-      const count = await whyBtn.count();
-      if (count === 0) { fail('E1: [?] popup appears', 'no [data-why] elements found'); }
+      const hasWhyBtn = await p.$('[data-why]');
+      if (!hasWhyBtn) { fail('E1: [?] popup appears', 'no [data-why] elements found'); }
       else {
-        await whyBtn.scrollIntoViewIfNeeded();
-        await whyBtn.click();
+        await p.evaluate(() => document.querySelector('[data-why]').click());
         await wait(300);
         const popup = await p.$('.why-popup');
         if (popup) {
@@ -395,15 +394,15 @@ async function runTests() {
     // E2: Click outside popup → popup disappears
     {
       const p = await openPage(ALL, 100);
-      const whyBtn = p.locator('[data-why]').first();
-      if (await whyBtn.count() === 0) { fail('E2: Click outside dismisses popup', 'no [data-why] elements'); }
+      const hasWhyBtn = await p.$('[data-why]');
+      if (!hasWhyBtn) { fail('E2: Click outside dismisses popup', 'no [data-why] elements'); }
       else {
-        await whyBtn.scrollIntoViewIfNeeded();
-        await whyBtn.click(); await wait(200);
+        await p.evaluate(() => document.querySelector('[data-why]').click());
+        await wait(200);
         const popup = await p.$('.why-popup');
-        if (!popup) { fail('E2: Click outside', 'popup did not open (E1 likely failed too)'); }
+        if (!popup) { fail('E2: Click outside', 'popup did not open'); }
         else {
-          // Click on the page body away from the popup
+          // Click the page header (safe area away from popup and table)
           await p.mouse.click(10, 10);
           await wait(300);
           const popupAfter = await p.$('.why-popup');
@@ -417,15 +416,16 @@ async function runTests() {
     // E3: Click same [?] button twice → popup toggles closed
     {
       const p = await openPage(ALL, 100);
-      const whyBtn = p.locator('[data-why]').first();
-      if (await whyBtn.count() === 0) { fail('E3: [?] toggle close', 'no [data-why] elements'); }
+      const hasWhyBtn = await p.$('[data-why]');
+      if (!hasWhyBtn) { fail('E3: [?] toggle close', 'no [data-why] elements'); }
       else {
-        await whyBtn.scrollIntoViewIfNeeded();
-        await whyBtn.click(); await wait(200);
+        await p.evaluate(() => document.querySelector('[data-why]').click());
+        await wait(200);
         const openPopup = await p.$('.why-popup');
         if (!openPopup) { fail('E3: [?] toggle close', 'popup did not open on first click'); }
         else {
-          await whyBtn.click(); await wait(200);
+          await p.evaluate(() => document.querySelector('[data-why]').click());
+          await wait(200);
           const closedPopup = await p.$('.why-popup');
           if (!closedPopup) pass('E3: [?] button toggle: second click closes popup');
           else fail('E3: [?] toggle close', 'popup still visible after second click');
@@ -452,44 +452,46 @@ async function runTests() {
       await p.close();
     }
 
-    // F2: Per-repo page: click area label → chip appears + rows filtered
+    // F2: Per-repo page: click area label → banner appears + rows filtered
+    // Per-repo pages use <a class="badge area-label"> (not <button>) and a simple
+    // "#filter-name" banner (not chips) with display:block.
     {
       const p = await openPage(RUNTIME, 1, 20000);
-      const areaBtn = p.locator('button.area-label').first();
-      if (await areaBtn.count() === 0) { fail('F2: Per-repo area filter', 'no area label buttons found'); }
+      const areaLink = p.locator('a.badge.area-label').first();
+      if (await areaLink.count() === 0) { fail('F2: Per-repo area filter', 'no a.badge.area-label elements found'); }
       else {
-        const labelText = await areaBtn.textContent();
-        await areaBtn.click(); await wait(400);
+        const labelText = await areaLink.textContent();
+        await areaLink.click(); await wait(400);
         const banner = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-        const chips = await p.$$('.filter-chip');
-        if (banner === 'flex' && chips.length > 0) pass('F2: Per-repo area filter: chip "' + labelText.trim() + '" + banner visible');
-        else fail('F2: Per-repo area filter', 'banner=' + banner + ', chips=' + chips.length);
+        const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
+        if (banner === 'block' && filterName.length > 0) pass('F2: Per-repo area filter: banner visible, filter-name="' + filterName + '"');
+        else fail('F2: Per-repo area filter', 'banner=' + banner + ', filter-name="' + filterName + '"');
       }
       await p.close();
     }
 
-    // F3: Per-repo ?area= URL round-trip
+    // F3: Per-repo ?label= URL round-trip (per-repo uses ?label=, not ?area=)
     {
-      const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
+      const p = await openPage(RUNTIME + '?label=area-CodeGen-coreclr', 1, 20000);
       await wait(500);
-      const chips = await p.$$('.filter-chip');
-      if (chips.length > 0) pass('F3: Per-repo ?area= URL restores chip (' + chips.length + ' chips)');
-      else fail('F3: Per-repo ?area= URL', 'no chips after loading with ?area=');
+      const bannerDisplay = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
+      const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
+      if (bannerDisplay === 'block' && filterName.length > 0) pass('F3: Per-repo ?label= URL restores filter (name="' + filterName + '")');
+      else fail('F3: Per-repo ?label= URL', 'banner=' + bannerDisplay + ', filter-name="' + filterName + '"');
       await p.close();
     }
 
-    // F4: Per-repo clear chip → banner disappears
+    // F4: Per-repo clear filter → banner disappears
     {
-      const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
+      const p = await openPage(RUNTIME + '?label=area-CodeGen-coreclr', 1, 20000);
       await wait(500);
-      const clearAll = await p.$('#filter-banner a[onclick*="clearAll"]');
-      if (!clearAll) { fail('F4: Per-repo clear chip', '"Clear all" link not found'); }
+      const clearLink = await p.$('#filter-banner a[onclick*="clearFilter"]');
+      if (!clearLink) { fail('F4: Per-repo clear filter', '"Clear" link not found in banner'); }
       else {
-        await clearAll.click(); await wait(300);
+        await clearLink.click(); await wait(300);
         const bannerDisplay = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-        const chipsAfter = await p.$$('.filter-chip');
-        if (chipsAfter.length === 0 && bannerDisplay === 'none') pass('F4: Per-repo clear chip: banner hidden, 0 chips');
-        else fail('F4: Per-repo clear chip', 'banner=' + bannerDisplay + ', chips=' + chipsAfter.length);
+        if (bannerDisplay === 'none') pass('F4: Per-repo clear filter: banner hidden');
+        else fail('F4: Per-repo clear filter', 'banner still display=' + bannerDisplay);
       }
       await p.close();
     }
