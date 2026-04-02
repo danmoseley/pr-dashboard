@@ -36,7 +36,7 @@ async function runTests() {
 
     // Wait for table data (up to 15s)
     log('Waiting for PR table...');
-    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 });
 
     const rowCount = await page.$eval('#pr-table tbody', tb => tb.querySelectorAll('tr').length).catch(() => 0);
     if (rowCount > 0) pass('Table loaded with ' + rowCount + ' rows');
@@ -87,7 +87,7 @@ async function runTests() {
     // ── Test 6: Ctrl+click adds second area filter (REAL modifier, not synthetic) ──
     // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
     await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
     await wait(300);
 
     // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
@@ -264,7 +264,7 @@ async function runTests() {
     const page3 = await browser.newPage();
     page3.on('console', msg => { if (msg.type() === 'error') errors.push('p3:' + msg.text()); });
     await page3.goto(PAGE, { waitUntil: 'domcontentloaded' });
-    await page3.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
+    await page3.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
 
     // Pick a real author from the table so the user filter returns results
     const firstAuthor = await page3.evaluate(() => {
@@ -317,7 +317,7 @@ async function runTests() {
     {
       const p14 = await browser.newPage();
       await p14.goto(PAGE, { waitUntil: 'domcontentloaded' });
-      await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
+      await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
       await wait(300);
       // Find any visible area label
       const firstAreaLabel = await p14.evaluate(() => {

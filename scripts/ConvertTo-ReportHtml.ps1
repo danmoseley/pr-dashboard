@@ -432,6 +432,10 @@ var moreRowsExpanded = false;
 var ctrlHeld = false;
 var LS_EASY_KEY = 'pr-dashboard-easy-action';
 
+function escJs(s) {
+  return String(s == null ? '' : s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\x22');
+}
+
 function applyTableFilter() {
   var table = document.getElementById('pr-table');
   if (!table) return;
@@ -479,7 +483,7 @@ function renderFilterBanner() {
   activeAreas.forEach(function(a) {
     var short = a.replace(/^area-/i, '');
     html += '<span class="filter-chip">' + escHtml(short) +
-      ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
+      ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escJs(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
   });
   html += ' <a href="#" onclick="clearAllFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
   banner.innerHTML = html;

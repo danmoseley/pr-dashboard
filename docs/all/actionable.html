@@ -128,7 +128,7 @@
   // HTML entity escaping is NOT sufficient here — the HTML parser decodes entities
   // before the JS engine sees them, so &#39; becomes ' and breaks the string.
   function escJs(s) {
-    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\x22');
   }
 
   // --- State ---
