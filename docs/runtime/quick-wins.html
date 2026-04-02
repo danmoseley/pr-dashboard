@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T17:48:43.8734664Z">
+<body data-server-updated="2026-04-02T18:00:55.6983808Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/runtime/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/runtime</h1>
-<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-02T17:48:43.8734664Z">at 2026-04-02 10:48 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-02T18:00:55.6983808Z">at 2026-04-02 11:00 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -119,7 +119,13 @@ function applyTableFilter() {
     r.style.display = show ? '' : 'none';
   });
   var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = hasFilters ? 'none' : '';
+  if (btn) {
+    btn.style.display = hasFilters ? 'none' : '';
+    if (!hasFilters && !moreRowsExpanded) {
+      var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+    }
+  }
   renderFilterBanner();
   updateUrl();
 }

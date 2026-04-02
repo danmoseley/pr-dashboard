@@ -288,10 +288,9 @@ if ($prCount -gt 500) {
 (function() {
   var btn = document.getElementById('toggle-more');
   btn.addEventListener('click', function() {
-    var rows = document.querySelectorAll('.more-row');
-    var showing = rows[0] && rows[0].style.display !== 'none';
-    rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
-    btn.innerHTML = showing ? 'Show $extraCount more \u25BC' : 'Show fewer \u25B2';
+    moreRowsExpanded = !moreRowsExpanded;
+    btn.textContent = moreRowsExpanded ? 'Show fewer \u25B2' : 'Show $extraCount more \u25BC';
+    applyTableFilter();
   });
 })();
 </script>
@@ -461,7 +460,13 @@ function applyTableFilter() {
     r.style.display = show ? '' : 'none';
   });
   var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = hasFilters ? 'none' : '';
+  if (btn) {
+    btn.style.display = hasFilters ? 'none' : '';
+    if (!hasFilters && !moreRowsExpanded) {
+      var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+    }
+  }
   renderFilterBanner();
   updateUrl();
 }

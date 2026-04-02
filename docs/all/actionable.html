@@ -383,7 +383,14 @@
     });
     // Hide the show-more toggle when filters are active (all matching rows are already shown)
     var btn = document.getElementById('toggle-more');
-    if (btn) btn.style.display = hasFilters ? 'none' : '';
+    if (btn) {
+      btn.style.display = hasFilters ? 'none' : '';
+      // Reset button text when filters cleared and rows are collapsed again
+      if (!hasFilters && !moreRowsExpanded) {
+        var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+        if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+      }
+    }
     renderFilterBanner();
     history.replaceState(null, '', buildCurrentUrl());
   }
