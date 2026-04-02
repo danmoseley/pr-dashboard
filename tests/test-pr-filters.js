@@ -48,7 +48,6 @@ async function runTests() {
     }
 
     // ── Test 2: Area column present ─────────────────────────────────────────
-    const hasAreaCol = await page.$('#pr-table th:last-child').then(el => el ? el.innerText() : '').catch(() => '');
     const areaHeader = await page.$eval('#pr-table th:last-child', e => e.textContent).catch(() => '');
     if (areaHeader.includes('Area')) pass('Area column visible');
     else fail('Area column', 'last th text: ' + areaHeader);

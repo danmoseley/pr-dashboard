@@ -440,7 +440,8 @@ function applyTableFilter() {
   var table = document.getElementById('pr-table');
   if (!table) return;
   var easyOn = !!(document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked);
-  var hasFilters = activeAreas.length > 0 || !!activeUser || easyOn;
+  // hasFilters controls "Show N more" button visibility; easyOn is a separate toggle, not a secondary filter
+  var hasFilters = activeAreas.length > 0 || !!activeUser;
   var rows = table.querySelectorAll('tbody tr');
   rows.forEach(function(r) {
     var show = true;
