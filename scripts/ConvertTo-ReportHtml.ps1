@@ -158,7 +158,8 @@ $rows = foreach ($pr in $prs) {
             $name = $_ -replace '^area-', ''
             $safeName = [System.Net.WebUtility]::HtmlEncode($name)
             $safeFullName = [System.Net.WebUtility]::HtmlEncode($_)
-            " <button type=`"button`" class=`"badge area-label`" onclick=`"filterByArea(event,'$safeFullName')`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</button>"
+            $safeFullNameForJs = $_.Replace('\','\\').Replace("'","\'")
+            " <button type=`"button`" class=`"badge area-label`" onclick=`"filterByArea(event,'$safeFullNameForJs')`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</button>"
         }) -join ""
     }
 
@@ -431,12 +432,6 @@ var moreRowsExpanded = false;
 var ctrlHeld = false;
 var LS_EASY_KEY = 'pr-dashboard-easy-action';
 
-function escHtml(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-function escAttr(s) {
-  return escHtml(s).replace(/'/g,'&#39;');
-}
 function applyTableFilter() {
   var table = document.getElementById('pr-table');
   if (!table) return;
@@ -553,7 +548,7 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   var urlUser = params.get('user') || '';
   try {
     var urlArea = params.get('area') || params.get('label') || '';
-    if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
+    if (urlArea) activeAreas = urlArea.split(',').filter(Boolean);
   } catch(e) {}
   if (urlUser) activeUser = urlUser;
   applyTableFilter();

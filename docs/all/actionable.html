@@ -124,6 +124,13 @@
 (function() {
   'use strict';
 
+  // Escapes a string for use as a JS string literal inside an inline event handler.
+  // HTML entity escaping is NOT sufficient here — the HTML parser decodes entities
+  // before the JS engine sees them, so &#39; becomes ' and breaks the string.
+  function escJs(s) {
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  }
+
   // --- State ---
   var allPrs = [];        // merged from all repos, each with .slug and .repo
   var repoList = [];      // [{slug, repo}]
@@ -169,8 +176,8 @@
   try {
     var urlArea = params.get('area') || '';
     var urlRepo = params.get('repo') || '';
-    if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
-    if (urlRepo) activeRepos = urlRepo.split(',').map(decodeURIComponent).filter(Boolean);
+    if (urlArea) activeAreas = urlArea.split(',').filter(Boolean);
+    if (urlRepo) activeRepos = urlRepo.split(',').filter(Boolean);
   } catch(e) {}
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
@@ -426,11 +433,11 @@
     activeAreas.forEach(function(a) {
       var short = a.replace(/^area-/i, '');
       html += '<span class="filter-chip">' + escHtml(short) +
-        ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
+        ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escJs(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
     });
     activeRepos.forEach(function(r) {
       html += '<span class="filter-chip">Repo: ' + escHtml(r) +
-        ' <a class="chip-remove" href="#" onclick="removeRepoFilter(\'' + escAttr(r) + '\');return false" title="Remove repo filter" aria-label="Remove ' + escAttr(r) + ' filter">&#x2715;</a></span>';
+        ' <a class="chip-remove" href="#" onclick="removeRepoFilter(\'' + escJs(r) + '\');return false" title="Remove repo filter" aria-label="Remove ' + escAttr(r) + ' filter">&#x2715;</a></span>';
     });
     html += ' <a href="#" onclick="clearAllSecondaryFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
     banner.innerHTML = html;
@@ -765,7 +772,7 @@
     if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
       areaHtml = pr.area_labels.map(function(lbl) {
         var short = lbl.replace(/^area-/i, '');
-        return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escAttr(lbl) + '\')" title="Filter to ' + escHtml(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
+        return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escJs(lbl) + '\')" title="Filter to ' + escHtml(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
       }).join('');
     }
 

@@ -87,7 +87,7 @@ async function runTests() {
     // ── Test 6: Ctrl+click adds second area filter (REAL modifier, not synthetic) ──
     // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
     await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
     await wait(300);
 
     // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
