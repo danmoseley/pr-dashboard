@@ -28,7 +28,7 @@ async function runTests() {
 
     // ── Test 1: Page loads ──────────────────────────────────────────────────
     log('Navigating to ' + PAGE);
-    await page.goto(PAGE, { waitUntil: 'networkidle' });
+    await page.goto(PAGE, { waitUntil: 'domcontentloaded' });
 
     const title = await page.title();
     if (title.includes('Actionable')) pass('Page title correct: ' + title);
@@ -36,7 +36,7 @@ async function runTests() {
 
     // Wait for table data (up to 15s)
     log('Waiting for PR table...');
-    await page.waitForSelector('#pr-table tbody tr', { timeout: 15000 }).catch(() => null);
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
 
     const rowCount = await page.$eval('#pr-table tbody', tb => tb.querySelectorAll('tr').length).catch(() => 0);
     if (rowCount > 0) pass('Table loaded with ' + rowCount + ' rows');
@@ -53,10 +53,10 @@ async function runTests() {
     if (areaHeader.includes('Area')) pass('Area column visible');
     else fail('Area column', 'last th text: ' + areaHeader);
 
-    // ── Test 3: Area label links present ───────────────────────────────────
-    const areaLabels = await page.$$('a.area-label');
-    if (areaLabels.length > 0) pass('Area label links found: ' + areaLabels.length);
-    else fail('Area label links', 'none found — check hasArea / area_labels data');
+    // ── Test 3: Area label buttons present ─────────────────────────────────
+    const areaLabels = await page.$$('button.area-label');
+    if (areaLabels.length > 0) pass('Area label buttons found: ' + areaLabels.length);
+    else fail('Area label buttons', 'none found — check hasArea / area_labels data');
 
     // ── Test 4: filter-banner hidden initially ─────────────────────────────
     const bannerInitial = await page.$eval('#filter-banner', e => getComputedStyle(e).display).catch(() => 'missing');
@@ -64,56 +64,134 @@ async function runTests() {
     else fail('Filter banner initial state', 'display=' + bannerInitial);
 
     // ── Test 5: Click area label → banner appears ──────────────────────────
-    if (areaLabels.length > 0) {
-      const labelText = await areaLabels[0].textContent();
-      log('Clicking area label: ' + labelText);
-      await areaLabels[0].click();
-      await wait(300);
+    const areaLabelLocator = page.locator('button.area-label').first();
+    const labelText = await areaLabelLocator.textContent();
+    log('Clicking area label: ' + labelText);
+    await areaLabelLocator.click();
+    await wait(300);
 
-      const bannerAfter = await page.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-      if (bannerAfter === 'flex') pass('Filter banner visible after area click (display=flex)');
-      else fail('Filter banner after area click', 'display=' + bannerAfter);
+    const bannerAfter = await page.$eval('#filter-banner', e => e.style.display).catch(() => '?');
+    if (bannerAfter === 'flex') pass('Filter banner visible after area click (display=flex)');
+    else fail('Filter banner after area click', 'display=' + bannerAfter);
 
-      const chips = await page.$$('.filter-chip');
-      if (chips.length > 0) {
-        const chipText = await chips[0].textContent();
-        pass('Filter chip rendered: "' + chipText.trim() + '"');
-      } else fail('Filter chip', 'no .filter-chip elements found');
+    const chips = await page.$$('.filter-chip');
+    if (chips.length > 0) {
+      const chipText = await chips[0].textContent();
+      pass('Filter chip rendered: "' + chipText.trim() + '"');
+    } else fail('Filter chip', 'no .filter-chip elements found');
 
-      // Check filtered rows
-      const visibleRows = await page.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
-      const hiddenRows  = await page.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display === 'none').length);
-      pass('After area filter: ' + visibleRows + ' visible, ' + hiddenRows + ' hidden');
-    }
+    const visibleRows = await page.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+    const hiddenRows  = await page.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display === 'none').length);
+    pass('After area filter: ' + visibleRows + ' visible, ' + hiddenRows + ' hidden');
 
-    // ── Test 6: Ctrl+click adds second area filter ─────────────────────────
-    // Must pick a label from a VISIBLE row (other rows are now hidden)
-    const currentChip = await page.$eval('.filter-chip', e => e.textContent.trim().replace('✕','').trim()).catch(() => '');
-    const visibleAreaLabels = await page.$$eval(
-      '#pr-table tbody tr:not([style*="display: none"]) a.area-label',
-      els => els.map(e => e.textContent.trim())
-    );
-    log('Visible area labels after first filter: ' + visibleAreaLabels.slice(0, 5).join(', '));
+    // ── Test 6: Ctrl+click adds second area filter (REAL modifier, not synthetic) ──
+    // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
+    await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 });
+    await wait(300);
 
-    const secondLabelText = visibleAreaLabels.find(t => t !== currentChip);
-    if (secondLabelText) {
-      // Click it via evaluate to pass ctrlKey
-      log('Ctrl+clicking second area: ' + secondLabelText);
-      const result = await page.evaluate(async (targetText) => {
-        const labels = Array.from(document.querySelectorAll('#pr-table tbody tr:not([style*="display: none"]) a.area-label'));
-        const el = labels.find(e => e.textContent.trim() === targetText);
-        if (!el) return 'not found';
-        const evt = new MouseEvent('click', { ctrlKey: true, bubbles: true, cancelable: true });
-        el.dispatchEvent(evt);
-        return 'clicked';
-      }, secondLabelText);
-      await wait(300);
-      const chipsAfterCtrl = await page.$$('.filter-chip');
-      if (chipsAfterCtrl.length >= 2) pass('Ctrl+click added second area chip (now ' + chipsAfterCtrl.length + ' chips)');
-      else fail('Ctrl+click multi-select', result + ' — still only ' + chipsAfterCtrl.length + ' chip(s)');
+    // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
+    const labelPair = await page.$$eval('#pr-table tbody tr', rows => {
+      for (const row of rows) {
+        if (row.style.display === 'none') continue;
+        const btns = Array.from(row.querySelectorAll('button.area-label'));
+        if (btns.length >= 2) return [btns[0].textContent.trim(), btns[1].textContent.trim()];
+      }
+      return null;
+    });
+
+    if (!labelPair) {
+      // Fallback: just verify Ctrl+click adds a chip (no multi-label row found)
+      log('⚠️  No multi-label row found; testing basic Ctrl+click chip behavior');
+      const allLabels2 = await page.$$eval('#pr-table tbody tr', rows =>
+        rows.filter(r => r.style.display !== 'none')
+            .flatMap(r => Array.from(r.querySelectorAll('button.area-label')).map(e => e.textContent.trim()))
+      );
+      const fl = allLabels2[0];
+      if (!fl) { pass('Ctrl+click skipped — no labels found'); }
+      else {
+        const coordsF = await page.evaluate((t) => {
+          for (const row of document.querySelectorAll('#pr-table tbody tr')) {
+            if (row.style.display === 'none') continue;
+            for (const btn of row.querySelectorAll('button.area-label')) {
+              if (btn.textContent.trim() === t) { const r = btn.getBoundingClientRect(); return r.width > 0 ? { x: r.left + r.width/2, y: r.top + r.height/2 } : null; }
+            }
+          }
+          return null;
+        }, fl);
+        if (coordsF) {
+          await page.keyboard.down('Control'); await page.mouse.click(coordsF.x, coordsF.y); await page.keyboard.up('Control'); await wait(300);
+          const cnt = await page.$$eval('.filter-chip', els => els.length);
+          if (cnt >= 1) pass('Ctrl+click (single) added chip: ' + cnt + ' chip(s)');
+          else fail('Ctrl+click fallback', 'no chip after ctrl+click');
+        } else fail('Ctrl+click fallback', 'coords not found');
+      }
     } else {
-      log('⚠️  No second distinct visible area label found (only one area in result set)');
-      pass('Ctrl+click skipped — single area in filtered results (expected)');
+      const [lA, lB] = labelPair;
+      log('Ctrl+click test using multi-label row: "' + lA + '" + "' + lB + '"');
+
+      // Helper: scroll element into view then get viewport-relative coords
+      async function getVisibleBtnCoords(text) {
+        // First scroll into view via evaluate
+        await page.evaluate((targetText) => {
+          for (const row of document.querySelectorAll('#pr-table tbody tr')) {
+            if (row.style.display === 'none') continue;
+            for (const btn of row.querySelectorAll('button.area-label')) {
+              if (btn.textContent.trim() === targetText) { btn.scrollIntoView({ behavior: 'instant', block: 'center' }); return; }
+            }
+          }
+        }, text);
+        await wait(50); // let browser settle after scroll
+        // Now get fresh viewport-relative coordinates
+        return page.evaluate((targetText) => {
+          for (const row of document.querySelectorAll('#pr-table tbody tr')) {
+            if (row.style.display === 'none') continue;
+            for (const btn of row.querySelectorAll('button.area-label')) {
+              if (btn.textContent.trim() === targetText) {
+                const r = btn.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0 && r.top >= 0) return { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height };
+              }
+            }
+          }
+          return null;
+        }, text);
+      }
+
+      // Step 1: Click lA (single click) → filter to lA; multi-label row remains visible showing lB
+      const coordsA = await getVisibleBtnCoords(lA);
+      if (!coordsA) { fail('Ctrl+click multi-select', 'could not locate "' + lA + '"'); }
+      else {
+        // Check no new tab (button element sanity check)
+        let newTabOpened = false;
+        page.once('popup', () => { newTabOpened = true; });
+        await page.keyboard.down('Control');
+        await page.mouse.click(coordsA.x, coordsA.y);
+        await page.keyboard.up('Control');
+        await wait(300);
+        if (newTabOpened) fail('Ctrl+click on button opened new tab — <button> regression');
+        else pass('Ctrl+click first label: no new tab (button element correct)');
+
+        const chipsAfterA = await page.$$('.filter-chip');
+        if (chipsAfterA.length < 1) {
+          fail('Ctrl+click first label', 'no chip appeared');
+        } else {
+          pass('Ctrl+click first area: ' + chipsAfterA.length + ' chip(s) — "' + lA + '" added');
+
+          // Step 2: Ctrl+click lB from the same now-visible row → should ADD lB (2 chips)
+          const coordsB = await getVisibleBtnCoords(lB);
+          if (!coordsB) {
+            fail('Ctrl+click second label', '"' + lB + '" not visible after filtering to "' + lA + '"');
+          } else {
+            await page.keyboard.down('Control');
+            await page.mouse.click(coordsB.x, coordsB.y);
+            await page.keyboard.up('Control');
+            await wait(300);
+            const chipsAfterBoth = await page.$$('.filter-chip');
+            if (chipsAfterBoth.length >= 2) pass('Ctrl+click multi-select: ' + chipsAfterBoth.length + ' chips — "' + lA + '" + "' + lB + '"');
+            else fail('Ctrl+click multi-select', 'only ' + chipsAfterBoth.length + ' chip(s) after two Ctrl+clicks — ctrlKey may not be detected');
+          }
+        }
+      }
     }
 
     // ── Test 7: Chip X removes filter ─────────────────────────────────────
@@ -129,23 +207,21 @@ async function runTests() {
     await page.evaluate(() => { if (window.clearAllSecondaryFilters) window.clearAllSecondaryFilters(); });
     await wait(200);
 
-    // ── Test 8: Repo filter link present ───────────────────────────────────
-    const repoLinks = await page.$$('.repo-col a[onclick*="filterByRepo"]');
-    if (repoLinks.length > 0) pass('Repo filter links found: ' + repoLinks.length);
-    else fail('Repo filter links', 'none found');
+    // ── Test 8: Repo filter buttons present ────────────────────────────────
+    const repoLinks = await page.$$('button.repo-filter-btn');
+    if (repoLinks.length > 0) pass('Repo filter buttons found: ' + repoLinks.length);
+    else fail('Repo filter buttons', 'none found');
 
-    // ── Test 9: Click repo link → repo chip appears ────────────────────────
+    // ── Test 9: Click repo button → repo chip appears ──────────────────────
     if (repoLinks.length > 0) {
-      // Use evaluate so we don't need the element to be visible
-      const repoText = await page.evaluate(() => {
-        const el = document.querySelector('.repo-col a[onclick*="filterByRepo"]');
-        if (!el) return null;
-        el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-        return el.textContent.trim();
-      });
+      // Use locator for auto scroll-into-view
+      const repoLocator = page.locator('button.repo-filter-btn').first();
+      const repoText = await repoLocator.textContent();
+      log('Clicking repo button: ' + repoText);
+      await repoLocator.click();
       await wait(300);
       const repoChips = await page.$$eval('.filter-chip', chips => chips.map(c => c.textContent.trim()));
-      if (repoChips.some(t => t.includes('Repo:'))) pass('Repo chip appeared after clicking ' + repoText + ': ' + repoChips.join(', '));
+      if (repoChips.some(t => t.includes('Repo:'))) pass('Repo chip appeared after clicking ' + repoText.trim() + ': ' + repoChips.join(', '));
       else fail('Repo chip', 'no Repo: chip — chips: ' + repoChips.join(', '));
     }
 
@@ -157,8 +233,8 @@ async function runTests() {
 
     // ── Test 11: URL bookmark round-trip ───────────────────────────────────
     const page2 = await browser.newPage();
-    await page2.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'networkidle' });
-    await page2.waitForSelector('#pr-table tbody tr', { timeout: 15000 }).catch(() => null);
+    await page2.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'domcontentloaded' });
+    await page2.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
     await wait(500);
     const chipsOnLoad = await page2.$$('.filter-chip');
     if (chipsOnLoad.length > 0) pass('URL ?area= param restores filter chip on load');
@@ -169,8 +245,8 @@ async function runTests() {
     // (replicates the case the user likely hit)
     const page3 = await browser.newPage();
     page3.on('console', msg => { if (msg.type() === 'error') errors.push('p3:' + msg.text()); });
-    await page3.goto(PAGE, { waitUntil: 'networkidle' });
-    await page3.waitForSelector('#pr-table tbody tr', { timeout: 15000 }).catch(() => null);
+    await page3.goto(PAGE, { waitUntil: 'domcontentloaded' });
+    await page3.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
 
     // Pick a real author from the table so the user filter returns results
     const firstAuthor = await page3.evaluate(() => {
@@ -192,11 +268,12 @@ async function runTests() {
     log('Summary bar display after user filter: ' + summaryBar);
 
     // Now click an area label in the filtered results
-    const userAreaLabels = await page3.$$('#pr-table tbody tr:not([style*="display: none"]) a.area-label');
-    if (userAreaLabels.length > 0) {
-      const aLabel = await userAreaLabels[0].textContent();
+    const userAreaLabelLocator = page3.locator('button.area-label').first();
+    const userAreaLabelCount = await userAreaLabelLocator.count();
+    if (userAreaLabelCount > 0) {
+      const aLabel = await userAreaLabelLocator.textContent();
       log('Clicking area label after user filter: ' + aLabel);
-      await userAreaLabels[0].click();
+      await userAreaLabelLocator.click();
       await wait(300);
       const bannerUser = await page3.$eval('#filter-banner', e => e.style.display).catch(() => '?');
       if (bannerUser === 'flex') pass('Filter banner visible after area click WITH user filter active');

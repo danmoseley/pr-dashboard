@@ -158,7 +158,7 @@ $rows = foreach ($pr in $prs) {
             $name = $_ -replace '^area-', ''
             $safeName = [System.Net.WebUtility]::HtmlEncode($name)
             $safeFullName = [System.Net.WebUtility]::HtmlEncode($_)
-            " <a class=`"badge area-label`" href=`"#`" onclick=`"filterByArea(event,'$safeFullName');return false`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</a>"
+            " <button type=`"button`" class=`"badge area-label`" onclick=`"filterByArea(event,'$safeFullName')`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</button>"
         }) -join ""
     }
 
