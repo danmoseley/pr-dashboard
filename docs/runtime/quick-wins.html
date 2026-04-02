@@ -217,7 +217,8 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   if (urlUser) activeUser = urlUser;
   applyTableFilter();
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
