@@ -158,7 +158,7 @@ $rows = foreach ($pr in $prs) {
             $name = $_ -replace '^area-', ''
             $safeName = [System.Net.WebUtility]::HtmlEncode($name)
             $safeFullName = [System.Net.WebUtility]::HtmlEncode($_)
-            " <a class=`"badge area-label`" href=`"#`" onclick=`"filterByLabel('$safeFullName');return false`" title=`"Show only $safeFullName`">$safeName</a>"
+            " <a class=`"badge area-label`" href=`"#`" onclick=`"filterByArea(event,'$safeFullName');return false`" title=`"Filter to $safeFullName (Ctrl+click to add)`">$safeName</a>"
         }) -join ""
     }
 
@@ -388,7 +388,7 @@ $navHtml
 <p class="meta">$scheduleNote &middot; $prCount PRs &middot; <a href="https://github.com/$Repo">$Repo</a></p>
 $(if ($Description) { "<p class=`"report-desc`">$Description <label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->" } else { "<div style=`"margin:0.5em 0;`"><label style=`"font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px;`"><input type=`"checkbox`" id=`"easy-action-toggle`"> Easy next actions only</label></div>" })
 $scoringHtml
-<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
+<div class="filter-banner" id="filter-banner"></div>
 $(if ($prCount -eq 0) {
 '<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>'
 } else {
@@ -426,111 +426,112 @@ $toggleHtml
 $obsHtml
 <script src="../shared-ui.js"></script>
 <script>
-var _filterKey = 'prFilter:' + location.pathname;
-function isEasyHidden(r) {
-  var toggle = document.getElementById('easy-action-toggle');
-  return toggle && toggle.checked && !r.getAttribute('data-easy');
+var activeAreas = [];
+var activeUser = '';
+var moreRowsExpanded = false;
+var LS_EASY_KEY = 'pr-dashboard-easy-action';
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-function filterByLabel(label) {
-  var rows = document.querySelectorAll('tbody tr');
-  var count = 0;
+function escAttr(s) {
+  return escHtml(s).replace(/'/g,'&#39;');
+}
+function applyTableFilter() {
+  var table = document.getElementById('pr-table');
+  if (!table) return;
+  var easyOn = !!(document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked);
+  var hasFilters = activeAreas.length > 0 || !!activeUser || easyOn;
+  var rows = table.querySelectorAll('tbody tr');
   rows.forEach(function(r) {
-    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
-      r.style.display = '';
-      count++;
-    } else {
-      r.style.display = 'none';
+    var show = true;
+    if (activeAreas.length > 0) {
+      var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+      var match = activeAreas.some(function(a) {
+        return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
+      });
+      if (!match) show = false;
     }
-  });
-  var banner = document.getElementById('filter-banner');
-  document.getElementById('filter-name').textContent = label;
-  banner.style.display = 'block';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = 'none';
-  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
-  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
-}
-function filterByUser(name) {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  var count = 0;
-  rows.forEach(function(r) {
-    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
-      r.style.display = '';
-      count++;
-    } else {
-      r.style.display = 'none';
+    if (activeUser && show) {
+      var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+      if (people.indexOf(',' + activeUser.toLowerCase() + ',') < 0) show = false;
     }
+    if (easyOn && show && !r.getAttribute('data-easy')) show = false;
+    if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
+    r.style.display = show ? '' : 'none';
   });
+  var btn = document.getElementById('toggle-more');
+  if (btn) btn.style.display = hasFilters ? 'none' : '';
+  renderFilterBanner();
+  updateUrl();
+}
+function renderFilterBanner() {
   var banner = document.getElementById('filter-banner');
-  document.getElementById('filter-name').textContent = '@' + name;
-  banner.style.display = 'block';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = 'none';
-  history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
-  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
-}
-function clearFilter() {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
-  rows.forEach(function(r) {
-    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
-    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
-    else { r.style.display = ''; }
+  if (!banner) return;
+  var hasFilters = activeAreas.length > 0 || !!activeUser;
+  if (!hasFilters) { banner.style.display = 'none'; banner.innerHTML = ''; return; }
+  var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
+  if (activeUser) {
+    html += '<span class="filter-chip">@' + escHtml(activeUser) +
+      ' <a class="chip-remove" href="#" onclick="removeUserFilter();return false" title="Remove user filter" aria-label="Remove user filter">&#x2715;</a></span>';
+  }
+  activeAreas.forEach(function(a) {
+    var short = a.replace(/^area-/, '');
+    html += '<span class="filter-chip">' + escHtml(short) +
+      ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
   });
-  document.getElementById('filter-banner').style.display = 'none';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = '';
-  history.replaceState(null, '', location.pathname);
-  try { localStorage.removeItem(_filterKey); } catch(e) {}
+  html += ' <a href="#" onclick="clearAllFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
+  banner.innerHTML = html;
+  banner.style.display = 'flex';
 }
-function applyEasyFilter(easyOn) {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  rows.forEach(function(r) {
-    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
-    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
-    else { r.style.display = ''; }
-  });
+function updateUrl() {
+  var params = [];
+  if (activeUser) params.push('user=' + encodeURIComponent(activeUser));
+  if (activeAreas.length > 0) params.push('area=' + activeAreas.map(encodeURIComponent).join(','));
+  var easyToggle = document.getElementById('easy-action-toggle');
+  if (easyToggle && easyToggle.checked) params.push('easyaction=true');
+  history.replaceState(null, '', location.pathname + (params.length ? '?' + params.join('&') : ''));
 }
+function filterByArea(event, label) {
+  var ctrl = event && event.ctrlKey;
+  var idx = activeAreas.indexOf(label);
+  if (ctrl) { if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label); }
+  else { activeAreas = [label]; }
+  applyTableFilter();
+}
+function filterByUser(name) { activeUser = name; applyTableFilter(); }
+function removeAreaFilter(label) {
+  var idx = activeAreas.indexOf(label);
+  if (idx >= 0) activeAreas.splice(idx, 1);
+  applyTableFilter();
+}
+function removeUserFilter() { activeUser = ''; applyTableFilter(); }
+function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded = false; applyTableFilter(); }
+// Easy action toggle
 (function() {
-  var LS_EASY_KEY = 'pr-dashboard-easy-action';
   var toggle = document.getElementById('easy-action-toggle');
   if (!toggle) return;
-  // Restore state
   var params = new URLSearchParams(location.search);
   var urlEasy = params.get('easyaction');
   var easyOn = false;
   if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
   else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
   toggle.checked = easyOn;
-  if (easyOn) { applyEasyFilter(true); }
   toggle.addEventListener('change', function() {
-    var on = this.checked;
-    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
-    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
-    try {
-      var saved = JSON.parse(localStorage.getItem(_filterKey));
-      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
-      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
-    } catch(e) {}
-    applyEasyFilter(on);
+    try { localStorage.setItem(LS_EASY_KEY, this.checked ? 'true' : 'false'); } catch(e) {}
+    applyTableFilter();
   });
 })();
-// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
+// Init from URL params
 (function() {
   var params = new URLSearchParams(location.search);
-  var user = params.get('user');
-  var label = params.get('label');
-  if (user) filterByUser(user);
-  else if (label) filterByLabel(label);
-  else {
-    try {
-      var saved = JSON.parse(localStorage.getItem(_filterKey));
-      if (saved && saved.type === 'user') filterByUser(saved.value);
-      else if (saved && saved.type === 'label') filterByLabel(saved.value);
-    } catch(e) {}
-  }
+  var urlUser = params.get('user') || '';
+  try {
+    var urlArea = params.get('area') || '';
+    if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
+  } catch(e) {}
+  if (urlUser) activeUser = urlUser;
+  applyTableFilter();
 })();
 $(if ($prCount -gt 0) { "initTableSort('pr-table', $defaultColIndex);`ninitResizableColumns('pr-table');" })
 // Live relative timestamp for "last Xh ago"
