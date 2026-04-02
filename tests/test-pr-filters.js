@@ -382,20 +382,34 @@ async function runTests() {
     // ── Test 15: Clear all removes all chips ─────────────────────────────────
     {
       const p15 = await browser.newPage();
-      await p15.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'domcontentloaded' });
-      await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 1, { timeout: 10000 }).catch(() => null);
-      const chipsBeforeClear= await p15.$$('.filter-chip');
-      if (chipsBeforeClear.length < 1) { fail('Clear all setup', 'expected 1+ chips, got ' + chipsBeforeClear.length); }
-      else {
-        // Click the "Clear all" link in the banner
-        const clearAll = await p15.$('#filter-banner a[onclick*="clearAll"]');
-        if (!clearAll) { fail('Clear all', '"Clear all" link not found in banner'); }
+      // Pick a real area label from the page so the test isn't tied to a specific label name
+      await p15.goto(PAGE, { waitUntil: 'domcontentloaded' });
+      await p15.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 });
+      const areaLabelForClear = await p15.evaluate(() => {
+        for (const btn of document.querySelectorAll('#pr-table tbody tr button.area-label')) {
+          const m = (btn.getAttribute('onclick') || '').match(/filterByArea\(event,'([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!areaLabelForClear) {
+        fail('Clear all setup', 'could not find a dynamic area label on page');
+      } else {
+        await p15.goto(PAGE + '?area=' + encodeURIComponent(areaLabelForClear), { waitUntil: 'domcontentloaded' });
+        await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 1, { timeout: 10000 }).catch(() => null);
+        const chipsBeforeClear= await p15.$$('.filter-chip');
+        if (chipsBeforeClear.length < 1) { fail('Clear all setup', 'expected 1+ chips, got ' + chipsBeforeClear.length); }
         else {
-          await clearAll.click();
-          await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 5000 });
-          const chipsAfterClear= await p15.$$('.filter-chip');
-          if (chipsAfterClear.length === 0) pass('Clear all removes all chips');
-          else fail('Clear all', chipsAfterClear.length + ' chips remain after clear all');
+          // Click the "Clear all" link in the banner
+          const clearAll = await p15.$('#filter-banner a[onclick*="clearAll"]');
+          if (!clearAll) { fail('Clear all', '"Clear all" link not found in banner'); }
+          else {
+            await clearAll.click();
+            await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 5000 });
+            const chipsAfterClear= await p15.$$('.filter-chip');
+            if (chipsAfterClear.length === 0) pass('Clear all removes all chips');
+            else fail('Clear all', chipsAfterClear.length + ' chips remain after clear all');
+          }
         }
       }
       await p15.close();
@@ -404,7 +418,7 @@ async function runTests() {
     // ── Summary ─────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     if (errors.length) console.log('JS errors: ' + errors.join('\n  '));
-    if (failed > 0) process.exitCode = 1;
+    if (failed > 0 || errors.length > 0) process.exitCode = 1;
 
   } finally {
     await browser.close();
