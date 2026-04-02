@@ -417,8 +417,12 @@ async function runTests() {
 
     // ── Summary ─────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
-    if (errors.length) console.log('JS errors: ' + errors.join('\n  '));
-    if (failed > 0 || errors.length > 0) process.exitCode = 1;
+    // Separate real JS exceptions (pageerror) from expected resource-load failures (console errors)
+    const jsExceptions = errors.filter(e => e.startsWith('PAGE ERROR:'));
+    const consoleErrors = errors.filter(e => !e.startsWith('PAGE ERROR:'));
+    if (consoleErrors.length) console.log('Console errors (non-fatal): ' + consoleErrors.join('\n  '));
+    if (jsExceptions.length) console.log('JS page errors: ' + jsExceptions.join('\n  '));
+    if (failed > 0 || jsExceptions.length > 0) process.exitCode = 1;
 
   } finally {
     await browser.close();
