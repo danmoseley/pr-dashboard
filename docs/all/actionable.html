@@ -138,6 +138,23 @@
   var moreRowsExpanded = false; // track whether "Show N more" rows are visible
   var ctrlHeld = false;   // true while Ctrl/Cmd key is physically held down
 
+  // Ctrl/Cmd held: temporarily un-hide all rows so user can Ctrl+click any area
+  // label even in filtered-out rows. On release, the combined OR filter applies.
+  document.addEventListener('keydown', function(e) {
+    if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
+      ctrlHeld = true;
+      if (activeAreas.length > 0 || activeRepos.length > 0) {
+        document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
+      }
+    }
+  });
+  document.addEventListener('keyup', function(e) {
+    if (e.key === 'Control' || e.key === 'Meta') {
+      ctrlHeld = false;
+      applyTableFilter();
+    }
+  });
+
   var LS_KEY = 'pr-dashboard-user';
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
   var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
@@ -465,21 +482,7 @@
     activeAreas = [];
     activeRepos = [];
     moreRowsExpanded = false;
-    var table = document.getElementById('pr-table');
-    if (table) {
-      table.querySelectorAll('tbody tr').forEach(function(r) {
-        r.style.display = r.classList.contains('more-row') ? 'none' : '';
-      });
-    }
-    var btn = document.getElementById('toggle-more');
-    if (btn) {
-      btn.style.display = '';
-      var moreCount = document.querySelectorAll('.more-row').length;
-      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
-    }
-    var banner = document.getElementById('filter-banner');
-    if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
-    history.replaceState(null, '', buildCurrentUrl());
+    applyTableFilter();
   };
 
   window.clearUser = function() {
@@ -695,23 +698,6 @@
     if (activeAreas.length > 0 || activeRepos.length > 0) {
       applyTableFilter();
     }
-
-    // Ctrl/Cmd held: temporarily un-hide all rows so user can Ctrl+click any area label
-    // even those in rows currently filtered out. On release, the combined OR filter applies.
-    document.addEventListener('keydown', function(e) {
-      if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
-        ctrlHeld = true;
-        if (activeAreas.length > 0 || activeRepos.length > 0) {
-          document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
-        }
-      }
-    });
-    document.addEventListener('keyup', function(e) {
-      if (e.key === 'Control' || e.key === 'Meta') {
-        ctrlHeld = false;
-        applyTableFilter();
-      }
-    });
   }
 
   function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUser) {

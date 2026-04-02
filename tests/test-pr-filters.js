@@ -303,6 +303,94 @@ async function runTests() {
     } // end if firstAuthor
     await page3.close();
 
+    // ── Test 13: URL ?repo= bookmark round-trip ──────────────────────────────
+    const page4 = await browser.newPage();
+    await page4.goto(PAGE + '?repo=runtime', { waitUntil: 'domcontentloaded' });
+    await page4.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
+    await wait(300);
+    const repoChipsOnLoad = await page4.$$('.filter-chip');
+    if (repoChipsOnLoad.length > 0) pass('URL ?repo= param restores repo filter chip on load');
+    else fail('URL repo param restore', 'no chips after loading ?repo=runtime');
+    await page4.close();
+
+    // ── Test 14: Ctrl+click same area twice deselects it ────────────────────
+    {
+      const p14 = await browser.newPage();
+      await p14.goto(PAGE, { waitUntil: 'domcontentloaded' });
+      await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 100, { timeout: 15000 }).catch(() => null);
+      await wait(300);
+      // Find any visible area label
+      const firstAreaLabel = await p14.evaluate(() => {
+        for (const row of document.querySelectorAll('#pr-table tbody tr')) {
+          if (row.style.display === 'none') continue;
+          const btn = row.querySelector('button.area-label');
+          if (btn) { btn.scrollIntoView({ behavior: 'instant', block: 'center' }); return btn.textContent.trim(); }
+        }
+        return null;
+      });
+      if (!firstAreaLabel) { fail('Ctrl+click deselect', 'no area labels found'); }
+      else {
+        // First Ctrl+click → select
+        await p14.keyboard.down('Control');
+        const coordsC1 = await p14.evaluate((label) => {
+          const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
+          if (!btn) return null;
+          btn.scrollIntoView({ behavior: 'instant', block: 'center' });
+          const r = btn.getBoundingClientRect();
+          return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+        }, firstAreaLabel);
+        await wait(100);
+        if (coordsC1) await p14.mouse.click(coordsC1.x, coordsC1.y);
+        await p14.keyboard.up('Control');
+        await wait(200);
+        const chipsAfterSelect = await p14.$$('.filter-chip');
+        if (chipsAfterSelect.length < 1) { fail('Ctrl+click deselect (setup)', 'no chip after first ctrl+click'); }
+        else {
+          // Second Ctrl+click → deselect
+          await p14.keyboard.down('Control');
+          await wait(150);
+          const coordsC2 = await p14.evaluate((label) => {
+            const btn = [...document.querySelectorAll('button.area-label')].find(b => b.textContent.trim() === label);
+            if (!btn) return null;
+            btn.scrollIntoView({ behavior: 'instant', block: 'center' });
+            const r = btn.getBoundingClientRect();
+            return r.width > 0 ? { x: r.left + r.width / 2, y: r.top + r.height / 2 } : null;
+          }, firstAreaLabel);
+          await wait(50);
+          if (coordsC2) await p14.mouse.click(coordsC2.x, coordsC2.y);
+          await p14.keyboard.up('Control');
+          await wait(300);
+          const chipsAfterDeselect = await p14.$$('.filter-chip');
+          if (chipsAfterDeselect.length === 0) pass('Ctrl+click same area twice deselects (0 chips)');
+          else fail('Ctrl+click deselect', chipsAfterDeselect.length + ' chips remain after deselect');
+        }
+      }
+      await p14.close();
+    }
+
+    // ── Test 15: Clear all removes all chips ─────────────────────────────────
+    {
+      const p15 = await browser.newPage();
+      await p15.goto(PAGE + '?area=area-CodeGen-coreclr', { waitUntil: 'domcontentloaded' });
+      await p15.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 1, { timeout: 10000 }).catch(() => null);
+      await wait(200);
+      const chipsBeforeClear = await p15.$$('.filter-chip');
+      if (chipsBeforeClear.length < 1) { fail('Clear all setup', 'expected 1+ chips, got ' + chipsBeforeClear.length); }
+      else {
+        // Click the "Clear all" link in the banner
+        const clearAll = await p15.$('#filter-banner a[onclick*="clearAll"]');
+        if (!clearAll) { fail('Clear all', '"Clear all" link not found in banner'); }
+        else {
+          await clearAll.click();
+          await wait(300);
+          const chipsAfterClear = await p15.$$('.filter-chip');
+          if (chipsAfterClear.length === 0) pass('Clear all removes all chips');
+          else fail('Clear all', chipsAfterClear.length + ' chips remain after clear all');
+        }
+      }
+      await p15.close();
+    }
+
     // ── Summary ─────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     if (errors.length) console.log('JS errors: ' + errors.join('\n  '));
