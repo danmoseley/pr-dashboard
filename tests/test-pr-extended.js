@@ -28,7 +28,9 @@ async function runTests() {
     await p.goto(url, { waitUntil: 'domcontentloaded' });
     if (minRows > 0) {
       await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n,
-        minRows, { timeout }).catch(() => null);
+        minRows, { timeout }).catch(() => {
+          console.log('[WARN] openPage: table did not reach ' + minRows + ' rows within ' + timeout + 'ms — ' + url);
+        });
     }
     await wait(400);
     return p;
@@ -56,7 +58,9 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(800);
+        await p.waitForFunction(
+          () => { const sb = document.getElementById('summary-bar'); return sb && sb.style.display !== ''; },
+          { timeout: 3000 }).catch(() => null);
         const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
         if (summaryDisplay === 'block' || summaryDisplay === 'flex' || summaryDisplay === '') {
           const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
@@ -77,7 +81,9 @@ async function runTests() {
         const firstBtn = p.locator('#pr-table tbody tr .filter-btn').first();
         await firstBtn.scrollIntoViewIfNeeded();
         await firstBtn.click();
-        await wait(800);
+        await p.waitForFunction(
+          () => { const sb = document.getElementById('summary-bar'); return sb && sb.style.display !== ''; },
+          { timeout: 3000 }).catch(() => null);
         const userVal = await p.$eval('#user-field', e => e.value).catch(() => '');
         const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
         if (userVal.length > 0) pass('A2: Avatar filter click fills user field: "' + userVal + '"');
@@ -245,8 +251,9 @@ async function runTests() {
     // C2: Easy badge elements are present in the DOM
     {
       const p = await openPage(ALL, 100);
-      const badgeCount = await p.$$eval('.easy-badge', els => els.length);
-      if (badgeCount > 0) pass('C2: Easy badge elements present: ' + badgeCount);
+      const badgeCount = await p.$$eval('.easy-badge', els =>
+        els.filter(e => e.offsetParent !== null && e.textContent.trim().length > 0).length);
+      if (badgeCount > 0) pass('C2: Easy badge elements present (visible, non-empty): ' + badgeCount);
       else {
         log('  ℹ️  No .easy-badge elements — may require user filter. Checking with user...');
         const author = await p.evaluate(() => {
@@ -294,7 +301,7 @@ async function runTests() {
       else {
         const headerText = await sortableHeader.textContent();
         await sortableHeader.click();
-        await wait(300);
+        await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
         const arrowEl = await p.$('#pr-table thead th.sorted .sort-arrow');
         if (arrowEl) {
           const arrowText = await arrowEl.textContent();
@@ -310,9 +317,13 @@ async function runTests() {
     {
       const p = await openPage(ALL, 100);
       const sortableHeader = p.locator('#pr-table thead th.sortable').first();
-      await sortableHeader.click(); await wait(200);
+      await sortableHeader.click();
+      await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
       const dir1 = await p.$eval('#pr-table thead th.sorted', e => e.classList.contains('desc') ? 'desc' : 'asc').catch(() => '?');
-      await sortableHeader.click(); await wait(200);
+      await sortableHeader.click();
+      await p.waitForFunction(
+        (prev) => { const th = document.querySelector('#pr-table thead th.sorted'); return th && (th.classList.contains('desc') ? 'desc' : 'asc') !== prev; },
+        dir1, { timeout: 2000 }).catch(() => null);
       const dir2 = await p.$eval('#pr-table thead th.sorted', e => e.classList.contains('desc') ? 'desc' : 'asc').catch(() => '?');
       if (dir1 !== dir2) pass('D2: Click same header twice reverses direction: ' + dir1 + ' → ' + dir2);
       else fail('D2: Sort direction toggle', 'direction did not change: ' + dir1 + ' → ' + dir2);
@@ -335,14 +346,56 @@ async function runTests() {
           rows.filter(r => r.style.display !== 'none')
               .map(r => { const c = r.cells[ci]; return c ? parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0 : 0; }),
           colIdx);
-        const first = scores[0], last = scores[scores.length - 1];
-        if (first >= last) pass('D3: Numeric sort desc: first=' + first + ' ≥ last=' + last + ' (' + scores.length + ' rows)');
-        else fail('D3: Numeric sort order', 'first=' + first + ' < last=' + last);
+        const nonZero = scores.filter(s => s !== 0);
+        if (nonZero.length === 0) fail('D3: Numeric sort order', 'all scores are 0 — column may have no numeric data');
+        else {
+          const first = scores[0], last = scores[scores.length - 1];
+          if (first >= last) pass('D3: Numeric sort desc: first=' + first + ' ≥ last=' + last + ' (' + scores.length + ' rows)');
+          else fail('D3: Numeric sort order', 'first=' + first + ' < last=' + last);
+        }
       }
       await p.close();
     }
 
-    // D4: Alpha sort column produces alphabetical order
+    // D5: Sort with area filter active → clear filter → all rows (incl. previously hidden) remain sorted
+    // Guards against sort implementations that skip hidden rows, causing unsorted reveals.
+    {
+      const p = await openPage(ALL + '?area=area-CodeGen-coreclr', 1);
+      await wait(500);
+      const numHeader = await p.$('#pr-table thead th.sortable[data-sort="num"]');
+      if (!numHeader) {
+        pass('D5: Sort+filter+clear — skipped (no numeric sort column)');
+      } else {
+        // Sort descending
+        await numHeader.click();
+        await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
+        const isDesc = await numHeader.evaluate(e => e.classList.contains('desc'));
+        if (!isDesc) { await numHeader.click(); await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted.desc'), { timeout: 2000 }).catch(() => null); }
+        const colIdx = await numHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
+        // Clear the area filter to reveal previously hidden rows
+        await p.evaluate(() => { if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters(); });
+        await wait(300);
+        // Check all visible rows are still in sorted (desc) order
+        const allScores = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
+          rows.filter(r => r.style.display !== 'none')
+              .map(r => { const c = r.cells[ci]; return c ? parseFloat(c.textContent.replace(/[^0-9.]/g,'')) || 0 : 0; }),
+          colIdx);
+        const nonZero = allScores.filter(s => s !== 0);
+        if (nonZero.length === 0) {
+          pass('D5: Sort+filter+clear — skipped (no numeric data after clear)');
+        } else {
+          const isSorted = allScores.every((v, i, a) => i === 0 || a[i-1] >= v);
+          if (isSorted) pass('D5: Sort order preserved after filter clear: ' + allScores.length + ' rows desc');
+          else {
+            const bad = allScores.findIndex((v, i, a) => i > 0 && a[i-1] < v);
+            fail('D5: Sort+filter+clear', 'row ' + bad + ' breaks sort: ' + allScores[bad-1] + ' < ' + allScores[bad]);
+          }
+        }
+      }
+      await p.close();
+    }
+
+
     {
       const p = await openPage(ALL, 100);
       const alphaHeader = await p.$('#pr-table thead th.sortable[data-sort="alpha"]');
