@@ -114,7 +114,7 @@
 </details>
 
 <div class="summary-bar" id="summary-bar"></div>
-<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearSecondaryFilter();return false">&#x2715; Clear</a></div>
+<div class="filter-banner" id="filter-banner"></div>
 
 <div id="status" class="status">Loading repository data&#8230;</div>
 <div id="content"></div>
@@ -133,6 +133,9 @@
   var nextActionOnlyMode = false; // whether "Next action on me only" is checked
 
   var easyActionMode = false;    // whether "Easy next actions only" is checked
+  var activeAreas = [];   // area labels currently filtered (multi-select)
+  var activeRepos = [];   // repo slugs currently filtered (multi-select)
+  var moreRowsExpanded = false; // track whether "Show N more" rows are visible
 
   var LS_KEY = 'pr-dashboard-user';
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
@@ -145,6 +148,12 @@
   var urlInvolves = params.get('involves');
   var urlNextAction = params.get('nextaction');
   var urlEasyAction = params.get('easyaction');
+  try {
+    var urlArea = params.get('area') || '';
+    var urlRepo = params.get('repo') || '';
+    if (urlArea) activeAreas = urlArea.split(',').map(decodeURIComponent).filter(Boolean);
+    if (urlRepo) activeRepos = urlRepo.split(',').map(decodeURIComponent).filter(Boolean);
+  } catch(e) {}
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
   if (urlInvolves !== null) {
@@ -186,7 +195,7 @@
     involvesToggle.addEventListener('change', function() {
       involvesMode = this.checked;
       try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
       if (currentUser && loaded) renderFiltered(currentUser);
     });
   }
@@ -211,7 +220,7 @@
         involvesToggle.disabled = false;
       }
       try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
       if (currentUser && loaded) renderFiltered(currentUser);
     });
   }
@@ -230,7 +239,7 @@
     easyActionToggle.addEventListener('change', function() {
       easyActionMode = this.checked;
       try { localStorage.setItem(LS_EASY_ACTION_KEY, easyActionMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildUrl(currentUser));
+      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
       if (currentUser && loaded) renderFiltered(currentUser);
     });
   }
@@ -313,12 +322,15 @@
   }
 
   // --- Actions (global) ---
-  function buildUrl(user) {
-    var url = location.pathname + '?user=' + encodeURIComponent(user);
-    if (involvesMode) url += '&involves=true';
-    if (nextActionOnlyMode) url += '&nextaction=true';
-    if (easyActionMode) url += '&easyaction=true';
-    return url;
+  function buildCurrentUrl() {
+    var urlParams = [];
+    if (currentUser) urlParams.push('user=' + encodeURIComponent(currentUser));
+    if (involvesMode) urlParams.push('involves=true');
+    if (nextActionOnlyMode) urlParams.push('nextaction=true');
+    if (easyActionMode) urlParams.push('easyaction=true');
+    if (activeAreas.length > 0) urlParams.push('area=' + activeAreas.map(encodeURIComponent).join(','));
+    if (activeRepos.length > 0) urlParams.push('repo=' + activeRepos.map(encodeURIComponent).join(','));
+    return location.pathname + (urlParams.length ? '?' + urlParams.join('&') : '');
   }
 
   window.applyUser = function() {
@@ -329,7 +341,7 @@
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
-    history.replaceState(null, '', buildUrl(name));
+    history.replaceState(null, '', buildCurrentUrl());
     if (loaded) renderFiltered(name);
   };
 
@@ -340,44 +352,126 @@
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
-    history.replaceState(null, '', buildUrl(name));
+    history.replaceState(null, '', buildCurrentUrl());
     renderFiltered(name);
   };
 
-  var FILTER_KEY = 'pr-dashboard-all-filter';
+  // --- Secondary filters ---
 
-  window.filterByLabel = function(label) {
-    // Secondary filter within current view
-    var rows = document.querySelectorAll('#pr-table tbody tr');
+  function applyTableFilter() {
+    var table = document.getElementById('pr-table');
+    if (!table) return;
+    var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
+    var rows = table.querySelectorAll('tbody tr');
     rows.forEach(function(r) {
-      var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-      r.style.display = labels.indexOf(',' + label.toLowerCase() + ',') >= 0 ? '' : 'none';
+      var show = true;
+      if (activeAreas.length > 0) {
+        var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+        var match = activeAreas.some(function(a) {
+          return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
+        });
+        if (!match) show = false;
+      }
+      if (activeRepos.length > 0 && show) {
+        var rowRepo = r.getAttribute('data-repo') || '';
+        if (activeRepos.indexOf(rowRepo) < 0) show = false;
+      }
+      // When filters are active, show ALL matching rows (including more-rows).
+      // When no filters, respect moreRowsExpanded state.
+      if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
+      r.style.display = show ? '' : 'none';
     });
-    document.getElementById('filter-name').textContent = label;
-    document.getElementById('filter-banner').style.display = 'block';
+    // Hide the show-more toggle when filters are active (all matching rows are already shown)
     var btn = document.getElementById('toggle-more');
-    if (btn) btn.style.display = 'none';
-    try { localStorage.setItem(FILTER_KEY, JSON.stringify({type:'label',value:label})); } catch(e) {}
+    if (btn) btn.style.display = hasFilters ? 'none' : '';
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+  }
+
+  function renderFilterBanner() {
+    var banner = document.getElementById('filter-banner');
+    if (!banner) return;
+    var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
+    if (!hasFilters) {
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+      return;
+    }
+    var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
+    activeAreas.forEach(function(a) {
+      var short = a.replace(/^area-/, '');
+      html += '<span class="filter-chip">' + escHtml(short) +
+        ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
+    });
+    activeRepos.forEach(function(r) {
+      html += '<span class="filter-chip">Repo: ' + escHtml(r) +
+        ' <a class="chip-remove" href="#" onclick="removeRepoFilter(\'' + escAttr(r) + '\');return false" title="Remove repo filter" aria-label="Remove ' + escAttr(r) + ' filter">&#x2715;</a></span>';
+    });
+    html += ' <a href="#" onclick="clearAllSecondaryFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
+    banner.innerHTML = html;
+    banner.style.display = 'flex';
+  }
+
+  window.filterByArea = function(event, label) {
+    var ctrl = event && event.ctrlKey;
+    var idx = activeAreas.indexOf(label);
+    if (ctrl) {
+      if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
+    } else {
+      activeAreas = [label];
+    }
+    applyTableFilter();
   };
 
-  window.clearSecondaryFilter = function() {
-    var rows = document.querySelectorAll('#pr-table tbody tr');
-    rows.forEach(function(r) {
-      r.style.display = r.classList.contains('more-row') ? 'none' : '';
-    });
-    document.getElementById('filter-banner').style.display = 'none';
+  window.filterByRepo = function(event, slug) {
+    var ctrl = event && event.ctrlKey;
+    var idx = activeRepos.indexOf(slug);
+    if (ctrl) {
+      if (idx >= 0) activeRepos.splice(idx, 1); else activeRepos.push(slug);
+    } else {
+      activeRepos = [slug];
+    }
+    applyTableFilter();
+  };
+
+  window.removeAreaFilter = function(label) {
+    var idx = activeAreas.indexOf(label);
+    if (idx >= 0) activeAreas.splice(idx, 1);
+    applyTableFilter();
+  };
+
+  window.removeRepoFilter = function(slug) {
+    var idx = activeRepos.indexOf(slug);
+    if (idx >= 0) activeRepos.splice(idx, 1);
+    applyTableFilter();
+  };
+
+  window.clearAllSecondaryFilters = function() {
+    activeAreas = [];
+    activeRepos = [];
+    moreRowsExpanded = false;
+    var table = document.getElementById('pr-table');
+    if (table) {
+      table.querySelectorAll('tbody tr').forEach(function(r) {
+        r.style.display = r.classList.contains('more-row') ? 'none' : '';
+      });
+    }
     var btn = document.getElementById('toggle-more');
     if (btn) {
       btn.style.display = '';
-      // Reset label to "Show N more" in case it was toggled to "Show fewer"
       var moreCount = document.querySelectorAll('.more-row').length;
       if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
     }
-    try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
+    var banner = document.getElementById('filter-banner');
+    if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    history.replaceState(null, '', buildCurrentUrl());
   };
 
   window.clearUser = function() {
     currentUser = '';
+    activeAreas = [];
+    activeRepos = [];
+    moreRowsExpanded = false;
     document.getElementById('user-field').value = '';
     involvesMode = false;
     nextActionOnlyMode = false;
@@ -391,9 +485,9 @@
     document.getElementById('easy-action-label').style.display = 'none';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
-    document.getElementById('filter-banner').style.display = 'none';
+    var banner = document.getElementById('filter-banner');
+    if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
-    try { localStorage.removeItem(FILTER_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
@@ -561,8 +655,8 @@
     html += '</tbody></table>';
 
     // Show more/fewer toggle for >500 rows
+    var extra = prs.length > 500 ? prs.length - 500 : 0;
     if (prs.length > 500) {
-      var extra = prs.length - 500;
       html += '<button class="show-more-btn" id="toggle-more">Show ' + extra + ' more \u25BC</button>';
     }
 
@@ -572,10 +666,9 @@
     var toggleBtn = document.getElementById('toggle-more');
     if (toggleBtn) {
       toggleBtn.addEventListener('click', function() {
-        var rows = document.querySelectorAll('.more-row');
-        var showing = rows[0] && rows[0].style.display !== 'none';
-        rows.forEach(function(r) { r.style.display = showing ? 'none' : ''; });
-        toggleBtn.textContent = showing ? 'Show ' + extra + ' more \u25BC' : 'Show fewer \u25B2';
+        moreRowsExpanded = !moreRowsExpanded;
+        toggleBtn.textContent = moreRowsExpanded ? 'Show fewer \u25B2' : 'Show ' + extra + ' more \u25BC';
+        applyTableFilter();
       });
     }
 
@@ -583,16 +676,16 @@
     initTableSort('pr-table', 2);
     initResizableColumns('pr-table');
 
-    // Restore secondary filter from localStorage
-    try {
-      var saved = JSON.parse(localStorage.getItem(FILTER_KEY));
-      if (saved && saved.type === 'label') filterByLabel(saved.value);
-    } catch(e) {}
+    // Apply any active secondary filters from URL state
+    if (activeAreas.length > 0 || activeRepos.length > 0) {
+      applyTableFilter();
+    }
   }
 
   function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUser) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
+    var safeSlug = escAttr(pr._slug);
 
     // Detect if the filtered user is the one who should act next
     var isYourTurn = isUsersTurn(pr, filterUser);
@@ -654,7 +747,7 @@
     if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
       areaHtml = pr.area_labels.map(function(lbl) {
         var short = lbl.replace(/^area-/, '');
-        return ' <a class="badge area-label" href="#" onclick="filterByLabel(\'' + escAttr(lbl) + '\');return false" title="Show only ' + escHtml(lbl) + '">' + escHtml(short) + '</a>';
+        return ' <a class="badge area-label" href="#" onclick="filterByArea(event,\'' + escAttr(lbl) + '\');return false" title="Filter to ' + escHtml(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</a>';
       }).join('');
     }
 
@@ -688,12 +781,12 @@
     var unknownCell = '<span style="color:#8b949e;font-style:italic">unknown</span>';
     var unknownScore = '<span style="color:#8b949e">?</span>';
 
-    return '<tr' + moreClass + ' data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
+    return '<tr' + moreClass + ' data-repo="' + safeSlug + '" data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
       '<td class="score' + readyClass + '">' + (isNewlyDiscovered ? unknownScore : readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button>') + '</td>' +
       '<td class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
       '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
       '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
-      '<td class="repo-col"><a href="' + repoUrl + '" title="' + escHtml(pr._repo) + '">' + escHtml(pr._slug) + '</a></td>' +
+      '<td class="repo-col"><a href="#" onclick="filterByRepo(event,\'' + safeSlug + '\');return false" title="Filter to ' + escHtml(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</a><a href="' + repoUrl + '" class="repo-nav-icon" title="Go to ' + escHtml(pr._slug) + ' dashboard" aria-label="Open ' + escHtml(pr._slug) + ' dashboard">&#x2197;</a></td>' +
       '<td class="title">' + easyBadge + safeTitle + '</td>' +
       '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na))) + '</td>' +
       '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
