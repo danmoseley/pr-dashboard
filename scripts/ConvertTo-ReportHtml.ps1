@@ -482,7 +482,7 @@ function renderFilterBanner() {
       ' <a class="chip-remove" href="#" onclick="removeUserFilter();return false" title="Remove user filter" aria-label="Remove user filter">&#x2715;</a></span>';
   }
   activeAreas.forEach(function(a) {
-    var short = a.replace(/^area-/, '');
+    var short = a.replace(/^area-/i, '');
     html += '<span class="filter-chip">' + escHtml(short) +
       ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
   });

@@ -77,11 +77,19 @@ jobs:
       - name: Start HTTP server
         run: |
           cd docs && python3 -m http.server 8080 &
-          # Wait until server is ready
+          # Wait until server is ready; fail fast if it never starts
+          server_ready=false
           for i in $(seq 1 20); do
-            curl -sf http://localhost:8080/all/actionable.html > /dev/null && break
+            if curl -sf http://localhost:8080/all/actionable.html > /dev/null; then
+              server_ready=true
+              break
+            fi
             sleep 1
           done
+          if [ "$server_ready" != "true" ]; then
+            echo "::error::HTTP server did not become ready at http://localhost:8080/all/actionable.html"
+            exit 1
+          fi
 
       - name: Run Playwright tests
         run: cd tests && node test-pr-filters.js

@@ -424,7 +424,7 @@
     }
     var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
     activeAreas.forEach(function(a) {
-      var short = a.replace(/^area-/, '');
+      var short = a.replace(/^area-/i, '');
       html += '<span class="filter-chip">' + escHtml(short) +
         ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escAttr(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
     });
@@ -764,7 +764,7 @@
     var areaHtml = '';
     if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
       areaHtml = pr.area_labels.map(function(lbl) {
-        var short = lbl.replace(/^area-/, '');
+        var short = lbl.replace(/^area-/i, '');
         return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escAttr(lbl) + '\')" title="Filter to ' + escHtml(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
       }).join('');
     }

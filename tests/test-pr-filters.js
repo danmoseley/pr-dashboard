@@ -1,5 +1,5 @@
 // Playwright test for PR dashboard filter UI
-// Run: node C:\temp\test-pr-filters.js
+// Run: node test-pr-filters.js  (from the tests/ directory, with server on port 8080)
 
 const { chromium } = require('playwright');
 
