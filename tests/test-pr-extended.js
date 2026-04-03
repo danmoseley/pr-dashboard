@@ -33,10 +33,13 @@ async function runTests() {
     p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
     await p.goto(url, { waitUntil: 'domcontentloaded' });
     if (minRows > 0) {
-      await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n,
-        minRows, { timeout }).catch(() => {
-          console.log('[WARN] openPage: table did not reach ' + minRows + ' rows within ' + timeout + 'ms — ' + url);
-        });
+      try {
+        await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n,
+          minRows, { timeout });
+      } catch (err) {
+        await p.close();
+        throw new Error('openPage: table did not reach ' + minRows + ' rows within ' + timeout + 'ms at ' + url);
+      }
     }
     await p.waitForFunction(() => document.readyState === 'complete', { timeout: 2000 }).catch(() => null);
     return p;
@@ -196,7 +199,7 @@ async function runTests() {
 
     // B1: ?involves=true restores involves checkbox as checked
     {
-      const p = await openPage(ALL + '?user=danmoseley&involves=true', 1);
+      const p = await openPage(ALL + '?user=danmoseley&involves=true', 0);
       const checked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
       if (checked === true) pass('B1: ?involves=true restores involves checkbox');
       else fail('B1: ?involves=true', 'involves-toggle.checked=' + checked);
@@ -205,7 +208,7 @@ async function runTests() {
 
     // B2: ?nextaction=true restores next-action checkbox and involves disabled
     {
-      const p = await openPage(ALL + '?user=danmoseley&nextaction=true', 1);
+      const p = await openPage(ALL + '?user=danmoseley&nextaction=true', 0);
       const naChecked = await p.$eval('#next-action-toggle', e => e.checked).catch(() => null);
       const involvesDisabled = await p.$eval('#involves-toggle', e => e.disabled).catch(() => null);
       if (naChecked === true) pass('B2: ?nextaction=true restores next-action checkbox');
@@ -217,7 +220,7 @@ async function runTests() {
 
     // B3: ?easyaction=true restores easy-action checkbox
     {
-      const p = await openPage(ALL + '?user=danmoseley&easyaction=true', 1);
+      const p = await openPage(ALL + '?user=danmoseley&easyaction=true', 0);
       const eaChecked = await p.$eval('#easy-action-toggle', e => e.checked).catch(() => null);
       if (eaChecked === true) pass('B3: ?easyaction=true restores easy-action checkbox');
       else fail('B3: ?easyaction=true', 'easy-action-toggle.checked=' + eaChecked);
@@ -689,6 +692,16 @@ async function runTests() {
       const hasH1 = await p.$('h1');
       if (title.length > 0 && hasH1) pass('I3: quick-wins.html loads: ' + title);
       else fail('I3: quick-wins.html', 'title="' + title + '", h1=' + !!hasH1);
+      await p.close();
+    }
+
+    // I4: changelog.html loads with content
+    {
+      const p = await openPage(BASE + '/changelog.html', 0);
+      const title = await p.title();
+      const hasH1 = await p.$('h1');
+      if (title.length > 0 && hasH1) pass('I4: changelog.html loads: ' + title);
+      else fail('I4: changelog.html', 'title="' + title + '", h1=' + !!hasH1);
       await p.close();
     }
 
