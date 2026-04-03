@@ -531,46 +531,48 @@ async function runTests() {
       await p.close();
     }
 
-    // F2: Per-repo page: click area label → banner appears + rows filtered
-    // Per-repo pages use <a class="badge area-label"> (not <button>) and a simple
-    // "#filter-name" banner (not chips) with display:block.
+    // F2: Per-repo page: click area label → chip appears in banner
+    // Per-repo pages now use the same button.area-label / filter-chip system as all/actionable.html.
     {
       const p = await openPage(RUNTIME, 1, 20000);
-      const areaLink = p.locator('a.badge.area-label').first();
-      if (await areaLink.count() === 0) { fail('F2: Per-repo area filter', 'no a.badge.area-label elements found'); }
+      const areaBtn = p.locator('button.area-label').first();
+      if (await areaBtn.count() === 0) { fail('F2: Per-repo area filter', 'no button.area-label elements found'); }
       else {
-        const labelText = await areaLink.textContent();
-        await areaLink.click(); await wait(400);
-        const banner = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-        const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
-        if (banner === 'block' && filterName.length > 0) pass('F2: Per-repo area filter: banner visible, filter-name="' + filterName + '"');
-        else fail('F2: Per-repo area filter', 'banner=' + banner + ', filter-name="' + filterName + '"');
+        const labelText = await areaBtn.textContent();
+        await areaBtn.click(); await wait(400);
+        const chipCount = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
+        if (chipCount > 0) pass('F2: Per-repo area filter: chip appears after click on "' + labelText.trim() + '"');
+        else fail('F2: Per-repo area filter', 'no .filter-chip in banner after click');
       }
       await p.close();
     }
 
-    // F3: Per-repo ?label= URL round-trip (per-repo uses ?label=, not ?area=)
+    // F3: Per-repo ?area= URL round-trip (same as all/actionable.html)
     {
-      const p = await openPage(RUNTIME + '?label=area-CodeGen-coreclr', 1, 20000);
+      const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
       await wait(500);
-      const bannerDisplay = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-      const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
-      if (bannerDisplay === 'block' && filterName.length > 0) pass('F3: Per-repo ?label= URL restores filter (name="' + filterName + '")');
-      else fail('F3: Per-repo ?label= URL', 'banner=' + bannerDisplay + ', filter-name="' + filterName + '"');
+      const chipCount = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
+      if (chipCount > 0) pass('F3: Per-repo ?area= URL restores filter chip (' + chipCount + ' chip(s))');
+      else fail('F3: Per-repo ?area= URL', 'no .filter-chip in banner after load with ?area= param');
       await p.close();
     }
 
-    // F4: Per-repo clear filter → banner disappears
+    // F4: Per-repo clear all filters → banner empties
     {
-      const p = await openPage(RUNTIME + '?label=area-CodeGen-coreclr', 1, 20000);
+      const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
       await wait(500);
-      const clearLink = await p.$('#filter-banner a[onclick*="clearFilter"]');
-      if (!clearLink) { fail('F4: Per-repo clear filter', '"Clear" link not found in banner'); }
+      const chipsBefore = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
+      if (chipsBefore === 0) { fail('F4: Per-repo clear filter', 'no chips to clear (check F3)'); }
       else {
-        await clearLink.click(); await wait(300);
-        const bannerDisplay = await p.$eval('#filter-banner', e => e.style.display).catch(() => '?');
-        if (bannerDisplay === 'none') pass('F4: Per-repo clear filter: banner hidden');
-        else fail('F4: Per-repo clear filter', 'banner still display=' + bannerDisplay);
+        // Per-repo pages use clearAllFilters(); all/actionable.html uses clearAllSecondaryFilters()
+        await p.evaluate(() => {
+          if (typeof clearAllFilters === 'function') clearAllFilters();
+          else if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters();
+        });
+        await wait(300);
+        const chipsAfter = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
+        if (chipsAfter === 0) pass('F4: Per-repo clear all filters: banner chips gone');
+        else fail('F4: Per-repo clear filter', chipsAfter + ' chip(s) still present after clear');
       }
       await p.close();
     }
