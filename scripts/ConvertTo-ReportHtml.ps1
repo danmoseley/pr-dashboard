@@ -491,12 +491,13 @@ function renderFilterBanner() {
   banner.style.display = 'flex';
 }
 function updateUrl() {
-  var params = [];
-  if (activeUser) params.push('user=' + encodeURIComponent(activeUser));
-  if (activeAreas.length > 0) params.push('area=' + activeAreas.map(encodeURIComponent).join(','));
+  var p = new URLSearchParams();
+  if (activeUser) p.set('user', activeUser);
+  activeAreas.forEach(function(a) { p.append('area', a); });
   var easyToggle = document.getElementById('easy-action-toggle');
-  if (easyToggle && easyToggle.checked) params.push('easyaction=true');
-  history.replaceState(null, '', location.pathname + (params.length ? '?' + params.join('&') : ''));
+  if (easyToggle && easyToggle.checked) p.set('easyaction', 'true');
+  var qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
 }
 function filterByArea(event, label) {
   var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
@@ -552,8 +553,13 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   var params = new URLSearchParams(location.search);
   var urlUser = params.get('user') || '';
   try {
-    var urlArea = params.get('area') || params.get('label') || '';
-    if (urlArea) activeAreas = urlArea.split(',').filter(Boolean);
+    // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
+    // For backward compat, also accept the legacy comma-separated form (?area=a,b or ?label=a).
+    activeAreas = params.getAll('area').filter(Boolean);
+    if (activeAreas.length === 0) {
+      var legacyArea = params.get('area') || params.get('label') || '';
+      activeAreas = legacyArea ? legacyArea.split(',').map(decodeURIComponent).filter(Boolean) : [];
+    }
   } catch(e) {}
   if (urlUser) activeUser = urlUser;
   applyTableFilter();

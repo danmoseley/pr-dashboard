@@ -174,10 +174,18 @@
   var urlNextAction = params.get('nextaction');
   var urlEasyAction = params.get('easyaction');
   try {
-    var urlArea = params.get('area') || '';
-    var urlRepo = params.get('repo') || '';
-    if (urlArea) activeAreas = urlArea.split(',').filter(Boolean);
-    if (urlRepo) activeRepos = urlRepo.split(',').filter(Boolean);
+    // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
+    // For backward compat, also accept the legacy comma-separated form (?area=a,b).
+    activeAreas = params.getAll('area').filter(Boolean);
+    if (activeAreas.length === 0) {
+      var legacyArea = params.get('area') || '';
+      activeAreas = legacyArea ? legacyArea.split(',').map(decodeURIComponent).filter(Boolean) : [];
+    }
+    activeRepos = params.getAll('repo').filter(Boolean);
+    if (activeRepos.length === 0) {
+      var legacyRepo = params.get('repo') || '';
+      activeRepos = legacyRepo ? legacyRepo.split(',').map(decodeURIComponent).filter(Boolean) : [];
+    }
   } catch(e) {}
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
@@ -348,14 +356,15 @@
 
   // --- Actions (global) ---
   function buildCurrentUrl() {
-    var urlParams = [];
-    if (currentUser) urlParams.push('user=' + encodeURIComponent(currentUser));
-    if (involvesMode) urlParams.push('involves=true');
-    if (nextActionOnlyMode) urlParams.push('nextaction=true');
-    if (easyActionMode) urlParams.push('easyaction=true');
-    if (activeAreas.length > 0) urlParams.push('area=' + activeAreas.map(encodeURIComponent).join(','));
-    if (activeRepos.length > 0) urlParams.push('repo=' + activeRepos.map(encodeURIComponent).join(','));
-    return location.pathname + (urlParams.length ? '?' + urlParams.join('&') : '');
+    var p = new URLSearchParams();
+    if (currentUser) p.set('user', currentUser);
+    if (involvesMode) p.set('involves', 'true');
+    if (nextActionOnlyMode) p.set('nextaction', 'true');
+    if (easyActionMode) p.set('easyaction', 'true');
+    activeAreas.forEach(function(a) { p.append('area', a); });
+    activeRepos.forEach(function(r) { p.append('repo', r); });
+    var qs = p.toString();
+    return location.pathname + (qs ? '?' + qs : '');
   }
 
   window.applyUser = function() {
