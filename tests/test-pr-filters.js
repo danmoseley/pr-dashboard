@@ -8,7 +8,7 @@ const PAGE = BASE + '/all/actionable.html';
 
 async function log(msg) { console.log('[' + new Date().toISOString().slice(11,19) + '] ' + msg); }
 
-async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+const TABLE_TIMEOUT = 15000; // time to wait for table rows to appear after page load / navigation
 
 async function runTests() {
   const browser = await chromium.launch({ headless: true });
@@ -36,7 +36,7 @@ async function runTests() {
 
     // Wait for table data (up to 15s)
     log('Waiting for PR table...');
-    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT });
 
     const rowCount = await page.$eval('#pr-table tbody', tb => tb.querySelectorAll('tr').length).catch(() => 0);
     if (rowCount > 0) pass('Table loaded with ' + rowCount + ' rows');
@@ -86,7 +86,7 @@ async function runTests() {
     // ── Test 6: Ctrl+click adds second area filter (REAL modifier, not synthetic) ──
     // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
     await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
+    await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
 
     // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
     const labelPair = await page.$$eval('#pr-table tbody tr', rows => {
@@ -260,7 +260,7 @@ async function runTests() {
     });
     const page2 = await browser.newPage();
     await page2.goto(PAGE + '?area=' + encodeURIComponent(anyAreaLabel || 'area-runtime'), { waitUntil: 'domcontentloaded' });
-    await page2.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
+    await page2.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
     await page2.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 5000 }).catch(() => null);
     const chipsOnLoad= await page2.$$('.filter-chip');
     if (chipsOnLoad.length > 0) pass('URL ?area= param restores filter chip on load');
@@ -272,7 +272,7 @@ async function runTests() {
     const page3 = await browser.newPage();
     page3.on('console', msg => { if (msg.type() === 'error') errors.push('p3:' + msg.text()); });
     await page3.goto(PAGE, { waitUntil: 'domcontentloaded' });
-    await page3.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
+    await page3.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
 
     // Pick a real author from the table so the user filter returns results
     const firstAuthor = await page3.evaluate(() => {
@@ -319,7 +319,7 @@ async function runTests() {
     });
     const page4 = await browser.newPage();
     await page4.goto(PAGE + '?repo=' + encodeURIComponent(anyRepoSlug || 'runtime'), { waitUntil: 'domcontentloaded' });
-    await page4.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 }).catch(() => null);
+    await page4.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
     await page4.waitForFunction(() => [...document.querySelectorAll('.filter-chip')].some(c => c.textContent.includes('Repo:')), { timeout: 5000 }).catch(() => null);
     const repoChipsOnLoad= await page4.$$('.filter-chip');
     if (repoChipsOnLoad.length > 0) pass('URL ?repo= param restores repo filter chip on load');
@@ -330,7 +330,7 @@ async function runTests() {
     {
       const p14 = await browser.newPage();
       await p14.goto(PAGE, { waitUntil: 'domcontentloaded' });
-      await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
+      await p14.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
       // Find any visible area label
       const firstAreaLabel = await p14.evaluate(() => {
         for (const row of document.querySelectorAll('#pr-table tbody tr')) {
@@ -384,7 +384,7 @@ async function runTests() {
       const p15 = await browser.newPage();
       // Pick a real area label from the page so the test isn't tied to a specific label name
       await p15.goto(PAGE, { waitUntil: 'domcontentloaded' });
-      await p15.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 15000 });
+      await p15.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT });
       const areaLabelForClear = await p15.evaluate(() => {
         for (const btn of document.querySelectorAll('#pr-table tbody tr button.area-label')) {
           const m = (btn.getAttribute('onclick') || '').match(/filterByArea\(event,'([^']+)'\)/);
