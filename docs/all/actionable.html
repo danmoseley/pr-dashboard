@@ -627,6 +627,9 @@
   }
 
   function renderTable(prs) {
+    // Reset expand state each time the table is rebuilt so the button label
+    // and row visibility stay in sync (rows always start hidden in the HTML).
+    moreRowsExpanded = false;
     if (prs.length === 0) {
       document.getElementById('content').innerHTML =
         '<p class="status" style="margin:2em 0">No PRs found' +

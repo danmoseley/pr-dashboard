@@ -88,7 +88,7 @@ async function runTests() {
     await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 5000 }).catch(() => null);
 
-    // Find a row with 2+ area labelsso after filtering by label1, label2 is still in a visible row
+    // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row
     const labelPair = await page.$$eval('#pr-table tbody tr', rows => {
       for (const row of rows) {
         if (row.style.display === 'none') continue;
