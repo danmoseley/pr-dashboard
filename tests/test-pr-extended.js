@@ -20,9 +20,11 @@ async function runTests() {
   function pass(name) { log('✅ PASS: ' + name); passed++; }
   function fail(name, detail) { log('❌ FAIL: ' + name + (detail ? ' — ' + detail : '')); failed++; }
 
-  // Helper: open a fresh page and wait for the PR table to have rows
+  // Helper: open a fresh page in an isolated context (no shared localStorage/cookies)
+  // and wait for the PR table to have rows.
   async function openPage(url, minRows = 1, timeout = 20000) {
-    const p = await browser.newPage();
+    const ctx = await browser.newContext();
+    const p = await ctx.newPage();
     p.on('console', msg => { if (msg.type() === 'error') jsErrors.push(msg.text()); });
     p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
     await p.goto(url, { waitUntil: 'domcontentloaded' });
@@ -59,7 +61,13 @@ async function runTests() {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
         await p.waitForFunction(
-          () => { const sb = document.getElementById('summary-bar'); return sb && sb.style.display !== ''; },
+          () => {
+            const sb = document.getElementById('summary-bar');
+            if (!sb) return false;
+            const display = getComputedStyle(sb).display;
+            const text = (sb.textContent || '').trim();
+            return display !== 'none' && text.length > 0;
+          },
           { timeout: 3000 }).catch(() => null);
         const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
         if (summaryDisplay === 'block' || summaryDisplay === 'flex' || summaryDisplay === '') {
@@ -69,7 +77,7 @@ async function runTests() {
           fail('A1: User filter summary bar', 'display=' + summaryDisplay + ' for user=' + author);
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // A2: Clicking 🔍 (filter-btn) in a table row fills user-field and filters rows
@@ -82,7 +90,13 @@ async function runTests() {
         await firstBtn.scrollIntoViewIfNeeded();
         await firstBtn.click();
         await p.waitForFunction(
-          () => { const sb = document.getElementById('summary-bar'); return sb && sb.style.display !== ''; },
+          () => {
+            const sb = document.getElementById('summary-bar');
+            if (!sb) return false;
+            const display = getComputedStyle(sb).display;
+            const text = (sb.textContent || '').trim();
+            return display !== 'none' && text.length > 0;
+          },
           { timeout: 3000 }).catch(() => null);
         const userVal = await p.$eval('#user-field', e => e.value).catch(() => '');
         const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
@@ -94,24 +108,22 @@ async function runTests() {
           fail('A2: Avatar filter click — summary bar', 'display=' + summaryDisplay);
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
-    // A3: ?user=username URL param pre-fills the field and filters rows
+    // A3: ?user=username URL param pre-fills the field and shows summary bar
     {
-      const p = await openPage(ALL + '?user=dotnet-bot', 1);
+      const p = await openPage(ALL + '?user=dotnet-bot', 0);
       const userVal = await p.$eval('#user-field', e => e.value).catch(() => '');
       if (userVal === 'dotnet-bot') pass('A3: ?user= param pre-fills user field');
       else fail('A3: ?user= param', 'user-field="' + userVal + '", expected "dotnet-bot"');
-      const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
-      if (summaryDisplay === 'block' || summaryDisplay === 'flex' || summaryDisplay === '') {
+      const summaryDisplay = await p.$eval('#summary-bar', e => getComputedStyle(e).display).catch(() => 'missing');
+      if (summaryDisplay !== 'none' && summaryDisplay !== 'missing') {
         pass('A3: ?user= param shows summary bar on load');
       } else {
-        // Summary bar may be hidden if user has 0 PRs — that's still valid behaviour
-        log('  ℹ️  summary bar display=' + summaryDisplay + ' (user may have 0 PRs — acceptable)');
-        pass('A3: ?user= param — page loaded without error');
+        fail('A3: ?user= param summary bar', 'summary-bar display=' + summaryDisplay);
       }
-      await p.close();
+      await p.context().close();
     }
 
     // A4: Involves toggle appears after user filter and is clickable
@@ -132,14 +144,20 @@ async function runTests() {
         const involvesDisplay = await p.$eval('#involves-label', e => getComputedStyle(e).display).catch(() => 'missing');
         if (involvesDisplay !== 'none' && involvesDisplay !== 'missing') pass('A4: Involves label visible after user filter');
         else fail('A4: Involves toggle', 'involves-label display=' + involvesDisplay);
-        // Toggle it
+        // Toggle involves and assert the checkbox state actually changes
+        const beforeChecked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
         const beforeRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         await p.click('#involves-toggle');
         await wait(600);
+        const afterChecked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
         const afterRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
-        pass('A4: Involves toggle changed row count: ' + beforeRows + ' → ' + afterRows);
+        if (beforeChecked !== null && afterChecked !== null && beforeChecked !== afterChecked) {
+          pass('A4: Involves toggle changed checked state: ' + beforeChecked + ' → ' + afterChecked + ' (rows ' + beforeRows + ' → ' + afterRows + ')');
+        } else {
+          fail('A4: Involves toggle', 'checked state did not change (' + beforeChecked + ' → ' + afterChecked + '), rows ' + beforeRows + ' → ' + afterRows);
+        }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // A5: Next-action-only toggle disables the involves checkbox
@@ -163,7 +181,7 @@ async function runTests() {
         if (involvesDisabled === true) pass('A5: Next-action-only toggle disables involves checkbox');
         else fail('A5: Next-action-only toggle', 'involves-toggle.disabled=' + involvesDisabled);
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -178,7 +196,7 @@ async function runTests() {
       const checked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
       if (checked === true) pass('B1: ?involves=true restores involves checkbox');
       else fail('B1: ?involves=true', 'involves-toggle.checked=' + checked);
-      await p.close();
+      await p.context().close();
     }
 
     // B2: ?nextaction=true restores next-action checkbox and involves disabled
@@ -190,7 +208,7 @@ async function runTests() {
       else fail('B2: ?nextaction=true', 'next-action-toggle.checked=' + naChecked);
       if (involvesDisabled === true) pass('B2: ?nextaction=true also disables involves checkbox');
       else fail('B2: ?nextaction=true — involves disabled', 'disabled=' + involvesDisabled);
-      await p.close();
+      await p.context().close();
     }
 
     // B3: ?easyaction=true restores easy-action checkbox
@@ -199,7 +217,7 @@ async function runTests() {
       const eaChecked = await p.$eval('#easy-action-toggle', e => e.checked).catch(() => null);
       if (eaChecked === true) pass('B3: ?easyaction=true restores easy-action checkbox');
       else fail('B3: ?easyaction=true', 'easy-action-toggle.checked=' + eaChecked);
-      await p.close();
+      await p.context().close();
     }
 
     // B4: Combined ?user=X&area=Y&repo=Z restores all three at once
@@ -213,7 +231,7 @@ async function runTests() {
       else fail('B4: Combined URL — area chip', 'chips: ' + chips.join(', '));
       if (hasRepo) pass('B4: Combined URL — repo chip present');
       else fail('B4: Combined URL — repo chip', 'chips: ' + chips.join(', '));
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -225,7 +243,6 @@ async function runTests() {
     // C1: Easy action toggle (no user) filters the table to a smaller set
     {
       const p = await openPage(ALL, 100);
-      const totalBefore = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
       // Easy action toggle is only functional with a user — set one first
       const author = await p.evaluate(() => {
         for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
@@ -245,7 +262,7 @@ async function runTests() {
         const rowsAfterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         pass('C1: Easy action filter: user rows=' + rowsAfterUser + ', after easy filter=' + rowsAfterEasy);
       }
-      await p.close();
+      await p.context().close();
     }
 
     // C2: Easy badge elements are present in the DOM
@@ -272,7 +289,7 @@ async function runTests() {
           else fail('C2: Easy badge elements', '0 .easy-badge found even with user filter');
         } else fail('C2: Easy badge elements', '0 .easy-badge and no author to test with');
       }
-      await p.close();
+      await p.context().close();
     }
 
     // C3: [?] why-button elements present on score cells
@@ -284,7 +301,7 @@ async function runTests() {
         // May only appear with user filter
         pass('C3: Easy [?] why-buttons — skipped (no easy-action PRs visible without user filter)');
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -310,7 +327,7 @@ async function runTests() {
           fail('D1: Sort arrow', 'no .sort-arrow element after click on "' + headerText.trim() + '"');
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // D2: Click same header twice → sort direction reverses
@@ -327,7 +344,7 @@ async function runTests() {
       const dir2 = await p.$eval('#pr-table thead th.sorted', e => e.classList.contains('desc') ? 'desc' : 'asc').catch(() => '?');
       if (dir1 !== dir2) pass('D2: Click same header twice reverses direction: ' + dir1 + ' → ' + dir2);
       else fail('D2: Sort direction toggle', 'direction did not change: ' + dir1 + ' → ' + dir2);
-      await p.close();
+      await p.context().close();
     }
 
     // D3: After sort, first row score ≥ last visible row score (numeric desc)
@@ -354,7 +371,7 @@ async function runTests() {
           else fail('D3: Numeric sort order', 'first=' + first + ' < last=' + last);
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // D5: Sort with area filter active → clear filter → all rows (incl. previously hidden) remain sorted
@@ -392,7 +409,7 @@ async function runTests() {
           }
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
 
@@ -415,7 +432,7 @@ async function runTests() {
         if (isAlpha) pass('D4: Alpha sort asc: ' + texts.length + ' rows in order');
         else fail('D4: Alpha sort order', 'first few: ' + texts.slice(0,4).join(', '));
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -441,7 +458,7 @@ async function runTests() {
           fail('E1: [?] popup appears', 'no .why-popup in DOM after click');
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // E2: Click outside popup → popup disappears
@@ -463,7 +480,7 @@ async function runTests() {
           else fail('E2: Click outside', 'popup still visible after click at (10,10)');
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // E3: Click same [?] button twice → popup toggles closed
@@ -484,7 +501,7 @@ async function runTests() {
           else fail('E3: [?] toggle close', 'popup still visible after second click');
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -502,7 +519,7 @@ async function runTests() {
       const rowCount = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       if (rowCount > 0) pass('F1: Per-repo page loaded ' + rowCount + ' rows');
       else fail('F1: Per-repo page rows', 'no rows found');
-      await p.close();
+      await p.context().close();
     }
 
     // F2: Per-repo page: click area label → banner appears + rows filtered
@@ -520,7 +537,7 @@ async function runTests() {
         if (banner === 'block' && filterName.length > 0) pass('F2: Per-repo area filter: banner visible, filter-name="' + filterName + '"');
         else fail('F2: Per-repo area filter', 'banner=' + banner + ', filter-name="' + filterName + '"');
       }
-      await p.close();
+      await p.context().close();
     }
 
     // F3: Per-repo ?label= URL round-trip (per-repo uses ?label=, not ?area=)
@@ -531,7 +548,7 @@ async function runTests() {
       const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
       if (bannerDisplay === 'block' && filterName.length > 0) pass('F3: Per-repo ?label= URL restores filter (name="' + filterName + '")');
       else fail('F3: Per-repo ?label= URL', 'banner=' + bannerDisplay + ', filter-name="' + filterName + '"');
-      await p.close();
+      await p.context().close();
     }
 
     // F4: Per-repo clear filter → banner disappears
@@ -546,7 +563,7 @@ async function runTests() {
         if (bannerDisplay === 'none') pass('F4: Per-repo clear filter: banner hidden');
         else fail('F4: Per-repo clear filter', 'banner still display=' + bannerDisplay);
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -567,7 +584,7 @@ async function runTests() {
         log('  ℹ️  #toggle-more not found — may not be needed with current data count');
         pass('G1: Show-more button — acceptable absence (not enough rows to paginate)');
       }
-      await p.close();
+      await p.context().close();
     }
 
     // G2: Click "Show more" → hidden .more-row rows become visible
@@ -597,7 +614,7 @@ async function runTests() {
           }
         }
       }
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -614,7 +631,7 @@ async function runTests() {
       const areaChips = chips.filter(t => !t.startsWith('Repo:'));
       if (areaChips.length >= 2) pass('H1: Two area chips loaded from ?area=X,Y: ' + areaChips.join(', '));
       else fail('H1: Two area chips', 'only ' + areaChips.length + ' area chip(s): ' + chips.join(', '));
-      await p.close();
+      await p.context().close();
     }
 
     // H2: ?area=X&repo=Y → one area chip + one repo chip
@@ -628,7 +645,7 @@ async function runTests() {
       else fail('H2: Area chip from combined URL', 'no area chips: ' + chips.join(', '));
       if (repoChips.length >= 1) pass('H2: Repo chip present: ' + repoChips.join(', '));
       else fail('H2: Repo chip from combined URL', 'no repo chips: ' + chips.join(', '));
-      await p.close();
+      await p.context().close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -646,7 +663,7 @@ async function runTests() {
       const runtimeLink = await p.$('a[href*="runtime/actionable"]');
       if (runtimeLink) pass('I1: index.html has runtime/actionable link');
       else fail('I1: index.html runtime link', 'not found');
-      await p.close();
+      await p.context().close();
     }
 
     // I2: Per-repo consider-closing page loads
@@ -656,7 +673,7 @@ async function runTests() {
       const hasH1 = await p.$('h1');
       if (title.length > 0 && hasH1) pass('I2: consider-closing.html loads: ' + title);
       else fail('I2: consider-closing.html', 'title="' + title + '", h1=' + !!hasH1);
-      await p.close();
+      await p.context().close();
     }
 
     // I3: Per-repo quick-wins page loads
@@ -666,7 +683,7 @@ async function runTests() {
       const hasH1 = await p.$('h1');
       if (title.length > 0 && hasH1) pass('I3: quick-wins.html loads: ' + title);
       else fail('I3: quick-wins.html', 'title="' + title + '", h1=' + !!hasH1);
-      await p.close();
+      await p.context().close();
     }
 
     // ── Summary ──────────────────────────────────────────────────────────────
