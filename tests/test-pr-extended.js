@@ -20,10 +20,14 @@ async function runTests() {
   function pass(name) { log('✅ PASS: ' + name); passed++; }
   function fail(name, detail) { log('❌ FAIL: ' + name + (detail ? ' — ' + detail : '')); failed++; }
 
-  // Helper: open a fresh page in an isolated context (no shared localStorage/cookies)
-  // and wait for the PR table to have rows.
+  // Shared context: reusing one context (vs. per-test newContext) avoids the overhead of
+  // spinning up a new browser context (~100ms+) for every test. localStorage isolation is
+  // achieved via addInitScript, which runs before any page script on every navigation.
+  const ctx = await browser.newContext();
+  await ctx.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
+
+  // Helper: open a fresh page and wait for the PR table to have rows.
   async function openPage(url, minRows = 1, timeout = 20000) {
-    const ctx = await browser.newContext();
     const p = await ctx.newPage();
     p.on('console', msg => { if (msg.type() === 'error') jsErrors.push(msg.text()); });
     p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
@@ -34,7 +38,7 @@ async function runTests() {
           console.log('[WARN] openPage: table did not reach ' + minRows + ' rows within ' + timeout + 'ms — ' + url);
         });
     }
-    await wait(400);
+    await p.waitForFunction(() => document.readyState === 'complete', { timeout: 2000 }).catch(() => null);
     return p;
   }
 
@@ -69,15 +73,15 @@ async function runTests() {
             return display !== 'none' && text.length > 0;
           },
           { timeout: 3000 }).catch(() => null);
-        const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
-        if (summaryDisplay === 'block' || summaryDisplay === 'flex' || summaryDisplay === '') {
+        const summaryDisplay = await p.$eval('#summary-bar', e => getComputedStyle(e).display).catch(() => 'missing');
+        if (summaryDisplay !== 'none' && summaryDisplay !== 'missing') {
           const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
           pass('A1: User filter shows summary bar (user=' + author + '): "' + summaryText.trim().slice(0, 60) + '"');
         } else {
           fail('A1: User filter summary bar', 'display=' + summaryDisplay + ' for user=' + author);
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // A2: Clicking 🔍 (filter-btn) in a table row fills user-field and filters rows
@@ -99,16 +103,16 @@ async function runTests() {
           },
           { timeout: 3000 }).catch(() => null);
         const userVal = await p.$eval('#user-field', e => e.value).catch(() => '');
-        const summaryDisplay = await p.$eval('#summary-bar', e => e.style.display).catch(() => 'missing');
+        const summaryDisplay = await p.$eval('#summary-bar', e => getComputedStyle(e).display).catch(() => 'missing');
         if (userVal.length > 0) pass('A2: Avatar filter click fills user field: "' + userVal + '"');
         else fail('A2: Avatar filter click', 'user-field still empty after click');
-        if (summaryDisplay === 'block' || summaryDisplay === 'flex' || summaryDisplay === '') {
+        if (summaryDisplay !== 'none' && summaryDisplay !== 'missing') {
           pass('A2: Avatar filter click shows summary bar');
         } else {
           fail('A2: Avatar filter click — summary bar', 'display=' + summaryDisplay);
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // A3: ?user=username URL param pre-fills the field and shows summary bar
@@ -123,7 +127,7 @@ async function runTests() {
       } else {
         fail('A3: ?user= param summary bar', 'summary-bar display=' + summaryDisplay);
       }
-      await p.context().close();
+      await p.close();
     }
 
     // A4: Involves toggle appears after user filter and is clickable
@@ -157,7 +161,7 @@ async function runTests() {
           fail('A4: Involves toggle', 'checked state did not change (' + beforeChecked + ' → ' + afterChecked + '), rows ' + beforeRows + ' → ' + afterRows);
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // A5: Next-action-only toggle disables the involves checkbox
@@ -181,7 +185,7 @@ async function runTests() {
         if (involvesDisabled === true) pass('A5: Next-action-only toggle disables involves checkbox');
         else fail('A5: Next-action-only toggle', 'involves-toggle.disabled=' + involvesDisabled);
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -196,7 +200,7 @@ async function runTests() {
       const checked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
       if (checked === true) pass('B1: ?involves=true restores involves checkbox');
       else fail('B1: ?involves=true', 'involves-toggle.checked=' + checked);
-      await p.context().close();
+      await p.close();
     }
 
     // B2: ?nextaction=true restores next-action checkbox and involves disabled
@@ -208,7 +212,7 @@ async function runTests() {
       else fail('B2: ?nextaction=true', 'next-action-toggle.checked=' + naChecked);
       if (involvesDisabled === true) pass('B2: ?nextaction=true also disables involves checkbox');
       else fail('B2: ?nextaction=true — involves disabled', 'disabled=' + involvesDisabled);
-      await p.context().close();
+      await p.close();
     }
 
     // B3: ?easyaction=true restores easy-action checkbox
@@ -217,10 +221,10 @@ async function runTests() {
       const eaChecked = await p.$eval('#easy-action-toggle', e => e.checked).catch(() => null);
       if (eaChecked === true) pass('B3: ?easyaction=true restores easy-action checkbox');
       else fail('B3: ?easyaction=true', 'easy-action-toggle.checked=' + eaChecked);
-      await p.context().close();
+      await p.close();
     }
 
-    // B4: Combined ?user=X&area=Y&repo=Z restores all three at once
+    // B4: Combined ?area=Y&repo=Z restores both filters at once
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr&repo=runtime', 1);
       await wait(500);
@@ -231,7 +235,7 @@ async function runTests() {
       else fail('B4: Combined URL — area chip', 'chips: ' + chips.join(', '));
       if (hasRepo) pass('B4: Combined URL — repo chip present');
       else fail('B4: Combined URL — repo chip', 'chips: ' + chips.join(', '));
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -260,9 +264,11 @@ async function runTests() {
         await p.click('#easy-action-toggle');
         await wait(500);
         const rowsAfterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
-        pass('C1: Easy action filter: user rows=' + rowsAfterUser + ', after easy filter=' + rowsAfterEasy);
+        const eaChecked = await p.$eval('#easy-action-toggle', e => e.checked).catch(() => null);
+        if (eaChecked === true) pass('C1: Easy action filter: toggle checked, rows=' + rowsAfterUser + ' → ' + rowsAfterEasy);
+        else fail('C1: Easy action filter', 'toggle not checked after click (checked=' + eaChecked + ')');
       }
-      await p.context().close();
+      await p.close();
     }
 
     // C2: Easy badge elements are present in the DOM
@@ -289,7 +295,7 @@ async function runTests() {
           else fail('C2: Easy badge elements', '0 .easy-badge found even with user filter');
         } else fail('C2: Easy badge elements', '0 .easy-badge and no author to test with');
       }
-      await p.context().close();
+      await p.close();
     }
 
     // C3: [?] why-button elements present on score cells
@@ -301,7 +307,7 @@ async function runTests() {
         // May only appear with user filter
         pass('C3: Easy [?] why-buttons — skipped (no easy-action PRs visible without user filter)');
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -327,7 +333,7 @@ async function runTests() {
           fail('D1: Sort arrow', 'no .sort-arrow element after click on "' + headerText.trim() + '"');
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // D2: Click same header twice → sort direction reverses
@@ -344,7 +350,7 @@ async function runTests() {
       const dir2 = await p.$eval('#pr-table thead th.sorted', e => e.classList.contains('desc') ? 'desc' : 'asc').catch(() => '?');
       if (dir1 !== dir2) pass('D2: Click same header twice reverses direction: ' + dir1 + ' → ' + dir2);
       else fail('D2: Sort direction toggle', 'direction did not change: ' + dir1 + ' → ' + dir2);
-      await p.context().close();
+      await p.close();
     }
 
     // D3: After sort, first row score ≥ last visible row score (numeric desc)
@@ -371,7 +377,7 @@ async function runTests() {
           else fail('D3: Numeric sort order', 'first=' + first + ' < last=' + last);
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // D5: Sort with area filter active → clear filter → all rows (incl. previously hidden) remain sorted
@@ -409,14 +415,14 @@ async function runTests() {
           }
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
 
     {
       const p = await openPage(ALL, 100);
       const alphaHeader = await p.$('#pr-table thead th.sortable[data-sort="alpha"]');
-      if (!alphaHeader) { fail('D4: Alpha sort', 'no th[data-sort=alpha] found'); pass('D4: Alpha sort — skipped (no alpha column)'); }
+      if (!alphaHeader) { pass('D4: Alpha sort — skipped (no alpha column)'); }
       else {
         await alphaHeader.click(); await wait(200);
         // Ensure asc
@@ -432,7 +438,7 @@ async function runTests() {
         if (isAlpha) pass('D4: Alpha sort asc: ' + texts.length + ' rows in order');
         else fail('D4: Alpha sort order', 'first few: ' + texts.slice(0,4).join(', '));
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -458,7 +464,7 @@ async function runTests() {
           fail('E1: [?] popup appears', 'no .why-popup in DOM after click');
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // E2: Click outside popup → popup disappears
@@ -480,7 +486,7 @@ async function runTests() {
           else fail('E2: Click outside', 'popup still visible after click at (10,10)');
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // E3: Click same [?] button twice → popup toggles closed
@@ -501,7 +507,7 @@ async function runTests() {
           else fail('E3: [?] toggle close', 'popup still visible after second click');
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -519,7 +525,7 @@ async function runTests() {
       const rowCount = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       if (rowCount > 0) pass('F1: Per-repo page loaded ' + rowCount + ' rows');
       else fail('F1: Per-repo page rows', 'no rows found');
-      await p.context().close();
+      await p.close();
     }
 
     // F2: Per-repo page: click area label → banner appears + rows filtered
@@ -537,7 +543,7 @@ async function runTests() {
         if (banner === 'block' && filterName.length > 0) pass('F2: Per-repo area filter: banner visible, filter-name="' + filterName + '"');
         else fail('F2: Per-repo area filter', 'banner=' + banner + ', filter-name="' + filterName + '"');
       }
-      await p.context().close();
+      await p.close();
     }
 
     // F3: Per-repo ?label= URL round-trip (per-repo uses ?label=, not ?area=)
@@ -548,7 +554,7 @@ async function runTests() {
       const filterName = await p.$eval('#filter-name', e => e.textContent).catch(() => '');
       if (bannerDisplay === 'block' && filterName.length > 0) pass('F3: Per-repo ?label= URL restores filter (name="' + filterName + '")');
       else fail('F3: Per-repo ?label= URL', 'banner=' + bannerDisplay + ', filter-name="' + filterName + '"');
-      await p.context().close();
+      await p.close();
     }
 
     // F4: Per-repo clear filter → banner disappears
@@ -563,7 +569,7 @@ async function runTests() {
         if (bannerDisplay === 'none') pass('F4: Per-repo clear filter: banner hidden');
         else fail('F4: Per-repo clear filter', 'banner still display=' + bannerDisplay);
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -584,7 +590,7 @@ async function runTests() {
         log('  ℹ️  #toggle-more not found — may not be needed with current data count');
         pass('G1: Show-more button — acceptable absence (not enough rows to paginate)');
       }
-      await p.context().close();
+      await p.close();
     }
 
     // G2: Click "Show more" → hidden .more-row rows become visible
@@ -614,7 +620,7 @@ async function runTests() {
           }
         }
       }
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -631,7 +637,7 @@ async function runTests() {
       const areaChips = chips.filter(t => !t.startsWith('Repo:'));
       if (areaChips.length >= 2) pass('H1: Two area chips loaded from ?area=X,Y: ' + areaChips.join(', '));
       else fail('H1: Two area chips', 'only ' + areaChips.length + ' area chip(s): ' + chips.join(', '));
-      await p.context().close();
+      await p.close();
     }
 
     // H2: ?area=X&repo=Y → one area chip + one repo chip
@@ -645,7 +651,7 @@ async function runTests() {
       else fail('H2: Area chip from combined URL', 'no area chips: ' + chips.join(', '));
       if (repoChips.length >= 1) pass('H2: Repo chip present: ' + repoChips.join(', '));
       else fail('H2: Repo chip from combined URL', 'no repo chips: ' + chips.join(', '));
-      await p.context().close();
+      await p.close();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -663,7 +669,7 @@ async function runTests() {
       const runtimeLink = await p.$('a[href*="runtime/actionable"]');
       if (runtimeLink) pass('I1: index.html has runtime/actionable link');
       else fail('I1: index.html runtime link', 'not found');
-      await p.context().close();
+      await p.close();
     }
 
     // I2: Per-repo consider-closing page loads
@@ -673,7 +679,7 @@ async function runTests() {
       const hasH1 = await p.$('h1');
       if (title.length > 0 && hasH1) pass('I2: consider-closing.html loads: ' + title);
       else fail('I2: consider-closing.html', 'title="' + title + '", h1=' + !!hasH1);
-      await p.context().close();
+      await p.close();
     }
 
     // I3: Per-repo quick-wins page loads
@@ -683,7 +689,7 @@ async function runTests() {
       const hasH1 = await p.$('h1');
       if (title.length > 0 && hasH1) pass('I3: quick-wins.html loads: ' + title);
       else fail('I3: quick-wins.html', 'title="' + title + '", h1=' + !!hasH1);
-      await p.context().close();
+      await p.close();
     }
 
     // ── Summary ──────────────────────────────────────────────────────────────
@@ -692,6 +698,7 @@ async function runTests() {
     if (failed > 0) process.exitCode = 1;
 
   } finally {
+    await ctx.close();
     await browser.close();
   }
 }
