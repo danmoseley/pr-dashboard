@@ -93,6 +93,10 @@ tr.your-turn:hover { background: rgba(210, 153, 34, 0.14); }
 .badge.community { background: var(--badge-community); color: #fff; margin-left: 0; margin-right: 4px; }
 .badge.area-label { background: var(--badge-area); color: #1f2328; margin-left: 2px; text-decoration: none; cursor: pointer; }
 .badge.area-label:hover { text-decoration: none; opacity: 0.8; }
+/* button reset — keeps .badge visual styles when used on <button> */
+button.badge { border: none; font: inherit; }
+.repo-filter-btn { background: none; border: none; color: var(--link); cursor: pointer; padding: 0; font: inherit; }
+.repo-filter-btn:hover { text-decoration: underline; }
 
 /* User refs */
 .user-ref { position: relative; display: inline-block; }
@@ -116,9 +120,19 @@ tr.your-turn:hover { background: rgba(210, 153, 34, 0.14); }
 /* Filter banner */
 .filter-banner {
   position: sticky; top: 0; z-index: 2; background: var(--header-bg); border: 1px solid var(--border);
-  border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em; display: none;
+  border-radius: 6px; padding: 6px 14px; margin-bottom: 0.5em; font-size: 0.9em;
+  display: none; flex-wrap: wrap; align-items: center; gap: 4px;
 }
-.filter-banner a { margin-left: 8px; }
+.filter-banner > a { margin-left: 8px; }
+.filter-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: rgba(56,139,253,0.12); border: 1px solid rgba(56,139,253,0.35);
+  border-radius: 12px; padding: 2px 8px; font-size: 0.85em; white-space: nowrap;
+}
+.filter-chip .chip-remove { cursor: pointer; color: #8b949e; text-decoration: none; font-size: 0.9em; }
+.filter-chip .chip-remove:hover { color: var(--fg); }
+.repo-nav-icon { font-size: 0.75em; color: #8b949e; margin-left: 2px; text-decoration: none; vertical-align: middle; }
+.repo-nav-icon:hover { color: var(--link); }
 
 /* Feedback button */
 a.feedback {
