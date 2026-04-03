@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-02T07:50:58.2413798Z">
+<body data-server-updated="2026-04-03T03:19:31.4258898Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/skills/actionable.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Most Actionable PRs — dotnet/skills</h1>
-<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-02T07:50:58.2413798Z">at 2026-04-02 00:50 PDT</span> &middot; 28 PRs &middot; <a href="https://github.com/dotnet/skills">dotnet/skills</a></p>
+<p class="meta">Updated ~daily, last <span id="last-updated" data-updated="2026-04-03T03:19:31.4258898Z">at 2026-04-02 20:19 PDT</span> &middot; 24 PRs &middot; <a href="https://github.com/dotnet/skills">dotnet/skills</a></p>
 <p class="report-desc">All open PRs sorted by Action score. Higher-scored PRs are closer to merge-ready <em>and</em> would benefit most from maintainer attention. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -78,7 +78,7 @@
   </div>
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
-<div class="filter-banner" id="filter-banner">Showing PRs for <strong id="filter-name"></strong> <a href="#" onclick="clearFilter();return false">&#x2715; Clear</a></div>
+<div class="filter-banner" id="filter-banner"></div>
 <table id="pr-table">
 <colgroup>
   <col style="width:4.5%">
@@ -112,10 +112,10 @@
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 17/17t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="17 unresolved of 17 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num heat-1">8d</td>
+  <td class="num heat-1">9d</td>
   <td class="num heat-1" title="4 files, 439 lines (additions + deletions)">439</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="timheuer,dbreshears,javiercn" data-involved="akoeplinger,copilot-pull-request-reviewer,danroth27,dbreshears,JanKrivanek,javiercn,lewing,timheuer,ViktorHofer" data-labels="area-aspnet">
   <td class="score ready-high">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
@@ -126,31 +126,31 @@
   <td class="action" title="No maintainer approval"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 0/24t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 24 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">20d</td>
-  <td class="num">1d</td>
+  <td class="num heat-1">21d</td>
+  <td class="num">2d</td>
   <td class="num heat-2" title="34 files, 4571 lines (additions + deletions)">4571</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a><a class="filter-btn" href="#" onclick="filterByUser('javiercn');return false" title="Show only @javiercn">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
-<tr data-people="ViktorHofer,JanKrivanek" data-involved="copilot-pull-request-reviewer,github-actions,JanKrivanek,ViktorHofer" data-labels="">
-  <td class="score ready-high">6.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 13t 3ppl (+1.0)&#10;large change: 654 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">3.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/494" title="Add AGENTVIZ session replay integration">#494</a></td>
-  <td class="title">Add AGENTVIZ session replay integration</td>
-  <td class="action" title="No maintainer approval"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span>: review needed</td>
+<tr data-people="T-Gro,danmoseley" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,T-Gro,timheuer" data-labels="">
+  <td class="score ready-high">6.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">3.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/236" title="Add dotnet-fsi-interactive (REPL) skill ">#236</a></td>
+  <td class="title">Add dotnet-fsi-interactive (REPL) skill </td>
+  <td class="action" title="1 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danmoseley.png?size=32" alt="danmoseley"><a href="https://github.com/danmoseley">@danmoseley</a><a class="filter-btn" href="#" onclick="filterByUser('danmoseley');return false" title="Show only @danmoseley">&#x1F50D;</a></span></td>
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-2">0/13t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 13 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">1d</td>
-  <td class="num">1d</td>
-  <td class="num heat-2" title="4 files, 654 lines (additions + deletions)">654</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/JanKrivanek.png?size=32" alt="JanKrivanek"><a href="https://github.com/JanKrivanek">@JanKrivanek</a><a class="filter-btn" href="#" onclick="filterByUser('JanKrivanek');return false" title="Show only @JanKrivanek">&#x1F50D;</a></span></td>
+  <td class="disc">1/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">28d</td>
+  <td class="num">4d</td>
+  <td class="num" title="3 files, 128 lines (additions + deletions)">128</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="timheuer,dbreshears,kotlarmilos" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,JanKrivanek,kotlarmilos,Redth,rolfbjarne,steveisok,timheuer,ViktorHofer" data-labels="">
-  <td class="score ready-high">6.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 50t 7ppl (+1.0)&#10;large change: 5286 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">3.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;recently active (+1)&#10;recently updated (+0.7)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="action-score">3.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/201" title="Add Apple crash symbolication skill">#201</a></td>
   <td class="title">Add Apple crash symbolication skill</td>
   <td class="action" title="No review"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
@@ -160,21 +160,6 @@
   <td class="num">3d</td>
   <td class="num heat-2" title="10 files, 5286 lines (additions + deletions)">5286</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/kotlarmilos.png?size=32" alt="kotlarmilos"><a href="https://github.com/kotlarmilos">@kotlarmilos</a><a class="filter-btn" href="#" onclick="filterByUser('kotlarmilos');return false" title="Show only @kotlarmilos">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
-</tr>
-<tr data-people="Evangelink,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,dbreshears,Evangelink,github-actions,JanKrivanek,timheuer,ViktorHofer" data-labels="">
-  <td class="score">5.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 1020 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/491" title="Add exp-test-smell-detection skill and evaluation">#491</a></td>
-  <td class="title">Add exp-test-smell-detection skill and evaluation</td>
-  <td class="action" title="4 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/Evangelink.png?size=32" alt="Evangelink"><a href="https://github.com/Evangelink">@Evangelink</a><a class="filter-btn" href="#" onclick="filterByUser('Evangelink');return false" title="Show only @Evangelink">&#x1F50D;</a></span>: respond to 4 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc">4/4t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="4 unresolved of 4 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">2d</td>
-  <td class="num">0d</td>
-  <td class="num heat-2" title="12 files, 1020 lines (additions + deletions)">1020</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/Evangelink.png?size=32" alt="Evangelink"><a href="https://github.com/Evangelink">@Evangelink</a><a class="filter-btn" href="#" onclick="filterByUser('Evangelink');return false" title="Show only @Evangelink">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="mrsharm,tarekgh,noahfalk" data-involved="adityamandaleeka,BrennanConroy,copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,ManishJayaswal,mrsharm,noahfalk,tarekgh,timheuer,ViktorHofer" data-labels="area-aspnet">
@@ -187,25 +172,10 @@
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 14/49t 8ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="14 unresolved of 49 review threads&#10;8 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num">1d</td>
+  <td class="num">2d</td>
   <td class="num heat-1" title="3 files, 378 lines (additions + deletions)">378</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
-</tr>
-<tr data-people="T-Gro,danmoseley" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,T-Gro,timheuer" data-labels="">
-  <td class="score ready-high">6.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/236" title="Add dotnet-fsi-interactive (REPL) skill ">#236</a></td>
-  <td class="title">Add dotnet-fsi-interactive (REPL) skill </td>
-  <td class="action" title="1 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danmoseley.png?size=32" alt="danmoseley"><a href="https://github.com/danmoseley">@danmoseley</a><a class="filter-btn" href="#" onclick="filterByUser('danmoseley');return false" title="Show only @danmoseley">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc">1/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">27d</td>
-  <td class="num">3d</td>
-  <td class="num" title="3 files, 128 lines (additions + deletions)">128</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="T-Gro" data-involved="copilot-pull-request-reviewer,dbreshears,github-actions,ManishJayaswal,T-Gro,timheuer,ViktorHofer" data-labels="">
   <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -213,11 +183,11 @@
   <td class="action-score">2.9<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.4)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/248" title="Add fsharp-project-structure skill">#248</a></td>
   <td class="title">Add fsharp-project-structure skill</td>
-  <td class="action" title="No maintainer approval, Stale 23d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span>: merge main (stale 23d)</td>
+  <td class="action" title="No maintainer approval, Stale 24d">&#x1F504; <span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span>: merge main (stale 24d)</td>
   <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
   <td class="disc heat-2">0/4t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">27d</td>
-  <td class="num heat-2">23d</td>
+  <td class="num heat-1">28d</td>
+  <td class="num heat-2">24d</td>
   <td class="num heat-1" title="11 files, 233 lines (additions + deletions)">233</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/T-Gro.png?size=32" alt="T-Gro"><a href="https://github.com/T-Gro">@T-Gro</a><a class="filter-btn" href="#" onclick="filterByUser('T-Gro');return false" title="Show only @T-Gro">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
@@ -231,71 +201,71 @@
   <td class="action" title="5 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-1">5/5t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="5 unresolved of 5 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">1d</td>
+  <td class="num">2d</td>
   <td class="num">1d</td>
   <td class="num heat-2" title="2 files, 542 lines (additions + deletions)">542</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="steveisok,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,JanKrivanek,steveisok,ViktorHofer" data-labels="">
-  <td class="score ready-high">6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">5.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.8<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="action-score">2.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/475" title="Fall back to rubric scores when pairwise judge is position-swap-inconsistent">#475</a></td>
   <td class="title">Fall back to rubric scores when pairwise judge is position-swap-inconsistent</td>
   <td class="action" title="1 threads, No review"><span class="user-ref"><img class="avatar" src="https://github.com/steveisok.png?size=32" alt="steveisok"><a href="https://github.com/steveisok">@steveisok</a><a class="filter-btn" href="#" onclick="filterByUser('steveisok');return false" title="Show only @steveisok">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="11 passed, 0 failed, 0 running">&#x2705; 11/0/0</td>
   <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">3d</td>
-  <td class="num">3d</td>
+  <td class="num">4d</td>
+  <td class="num">4d</td>
   <td class="num" title="3 files, 35 lines (additions + deletions)">&#x1F401; 35</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/steveisok.png?size=32" alt="steveisok"><a href="https://github.com/steveisok">@steveisok</a><a class="filter-btn" href="#" onclick="filterByUser('steveisok');return false" title="Show only @steveisok">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="timheuer,dbreshears,halter73" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,halter73,javiercn,ManishJayaswal,mattleibow,SteveSandersonMS,timheuer,ViktorHofer" data-labels="area-aspnet">
-  <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 6t 9ppl (+1.0)&#10;large change: 740 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/207" title="Add convert-blazor-server-to-webapp skill">#207</a></td>
-  <td class="title">Add convert-blazor-server-to-webapp skill</td>
-  <td class="action" title="No maintainer approval"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
-  <td class="disc heat-3">&#x1F525; 0/6t 9ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 6 review threads&#10;9 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">29d</td>
-  <td class="num heat-1">9d</td>
-  <td class="num heat-2" title="6 files, 740 lines (additions + deletions)">740</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/halter73.png?size=32" alt="halter73"><a href="https://github.com/halter73">@halter73</a><a class="filter-btn" href="#" onclick="filterByUser('halter73');return false" title="Show only @halter73">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+<tr data-people="timheuer,dbreshears,jjonescz" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,jjonescz,timheuer" data-labels="">
+  <td class="score">5.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 4t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/358" title="Add skill for using `dotnet format whitespace`">#358</a></td>
+  <td class="title">Add skill for using `dotnet format whitespace`</td>
+  <td class="action" title="CI fail (1 failed), No review"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="6 passed, 1 failed, 0 running">&#x274C; 6/1/0</td>
+  <td class="disc heat-2">0/4t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">20d</td>
+  <td class="num heat-2">14d</td>
+  <td class="num" title="2 files, 122 lines (additions + deletions)">&#x1F401; 122</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jjonescz.png?size=32" alt="jjonescz"><a href="https://github.com/jjonescz">@jjonescz</a><a class="filter-btn" href="#" onclick="filterByUser('jjonescz');return false" title="Show only @jjonescz">&#x1F50D;</a></span></td>
+  <td class="area-col"></td>
 </tr>
 <tr data-people="DeagleGross,copilot-pull-request-reviewer,JanKrivanek" data-involved="copilot-pull-request-reviewer,DeagleGross,github-actions,JanKrivanek,ViktorHofer" data-labels="">
-  <td class="score">5.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;author silent 23d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;high interest: 8t 5ppl (+1.0)&#10;large change: 289 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)&#10;author silent 23d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="action-score">2.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author silent 23d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/311" title="feat: skill loading tests">#311</a></td>
   <td class="title">feat: skill loading tests</td>
   <td class="action" title="8 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/DeagleGross.png?size=32" alt="DeagleGross"><a href="https://github.com/DeagleGross">@DeagleGross</a><a class="filter-btn" href="#" onclick="filterByUser('DeagleGross');return false" title="Show only @DeagleGross">&#x1F50D;</a></span>: respond to 8 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/JanKrivanek.png?size=32" alt="JanKrivanek"><a href="https://github.com/JanKrivanek">@JanKrivanek</a><a class="filter-btn" href="#" onclick="filterByUser('JanKrivanek');return false" title="Show only @JanKrivanek">&#x1F50D;</a></span></td>
   <td class="ci" title="16 passed, 0 failed, 0 running">&#x2705; 16/0/0</td>
   <td class="disc heat-2">8/8t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="8 unresolved of 8 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">23d</td>
-  <td class="num">3d</td>
+  <td class="num heat-1">24d</td>
+  <td class="num">4d</td>
   <td class="num heat-1" title="9 files, 289 lines (additions + deletions)">289</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/DeagleGross.png?size=32" alt="DeagleGross"><a href="https://github.com/DeagleGross">@DeagleGross</a><a class="filter-btn" href="#" onclick="filterByUser('DeagleGross');return false" title="Show only @DeagleGross">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="javiercn,ViktorHofer" data-involved="dbreshears,github-actions,JanKrivanek,javiercn,timheuer,ViktorHofer" data-labels="">
-  <td class="score">5.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;author slow 14d, ball in their court (-0.5)&#10;large change: 381 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.7<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)&#10;author slow 14d, ball in their court (-0.5)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/376" title="Add skill validator CLI improvements and create-skill-evaluation meta-skill">#376</a></td>
-  <td class="title">Add skill validator CLI improvements and create-skill-evaluation meta-skill</td>
-  <td class="action" title="1 threads, No maintainer approval, Copilot review errored"><span class="user-ref"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a><a class="filter-btn" href="#" onclick="filterByUser('javiercn');return false" title="Show only @javiercn">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span>; rerequest Copilot review</td>
-  <td class="ci" title="11 passed, 0 failed, 0 running">&#x2705; 11/0/0</td>
-  <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">17d</td>
-  <td class="num heat-1">10d</td>
-  <td class="num heat-1" title="5 files, 381 lines (additions + deletions)">381</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a><a class="filter-btn" href="#" onclick="filterByUser('javiercn');return false" title="Show only @javiercn">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
+<tr data-people="sayedihashimi,haileymck" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,haileymck,sayedihashimi,timheuer" data-labels="area-aspnet">
+  <td class="score ready-high">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="unresolved feedback (+1.0)&#10;high interest: 29t 5ppl (+1.0)&#10;large change: 1550 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/329" title="adding scaffolding skill and test">#329</a></td>
+  <td class="title">adding scaffolding skill and test</td>
+  <td class="action" title="1 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/haileymck.png?size=32" alt="haileymck"><a href="https://github.com/haileymck">@haileymck</a><a class="filter-btn" href="#" onclick="filterByUser('haileymck');return false" title="Show only @haileymck">&#x1F50D;</a></span></td>
+  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
+  <td class="disc heat-3">&#x1F525; 1/29t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 29 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">23d</td>
+  <td class="num">2d</td>
+  <td class="num heat-2" title="54 files, 1550 lines (additions + deletions)">1550</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="BrennanConroy,adityamandaleeka,raihanmehran" data-involved="adityamandaleeka,BrennanConroy,copilot-pull-request-reviewer,raihanmehran" data-labels="">
   <td class="score">5.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
@@ -306,25 +276,40 @@
   <td class="action" title="No review"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/BrennanConroy.png?size=32" alt="BrennanConroy"><a href="https://github.com/BrennanConroy">@BrennanConroy</a><a class="filter-btn" href="#" onclick="filterByUser('BrennanConroy');return false" title="Show only @BrennanConroy">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/adityamandaleeka.png?size=32" alt="adityamandaleeka"><a href="https://github.com/adityamandaleeka">@adityamandaleeka</a><a class="filter-btn" href="#" onclick="filterByUser('adityamandaleeka');return false" title="Show only @adityamandaleeka">&#x1F50D;</a></span>: review needed</td>
   <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
   <td class="disc heat-1">0/5t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 5 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num">3d</td>
   <td class="num">2d</td>
-  <td class="num">1d</td>
   <td class="num heat-2" title="4 files, 1078 lines (additions + deletions)">1078</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/raihanmehran.png?size=32" alt="raihanmehran"><a href="https://github.com/raihanmehran">@raihanmehran</a><a class="filter-btn" href="#" onclick="filterByUser('raihanmehran');return false" title="Show only @raihanmehran">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="timheuer,dbreshears,jjonescz" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,jjonescz,timheuer" data-labels="">
-  <td class="score">4.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">3.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 4t 4ppl (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/358" title="Add skill for using `dotnet format whitespace`">#358</a></td>
-  <td class="title">Add skill for using `dotnet format whitespace`</td>
-  <td class="action" title="CI fail (1 failed), No review"><span class="action-icon-lg">&#x1F441;</span> <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
-  <td class="ci" title="6 passed, 1 failed, 0 running">&#x274C; 6/1/0</td>
-  <td class="disc heat-2">0/4t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">20d</td>
-  <td class="num heat-1">13d</td>
-  <td class="num" title="2 files, 122 lines (additions + deletions)">&#x1F401; 122</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jjonescz.png?size=32" alt="jjonescz"><a href="https://github.com/jjonescz">@jjonescz</a><a class="filter-btn" href="#" onclick="filterByUser('jjonescz');return false" title="Show only @jjonescz">&#x1F50D;</a></span></td>
+<tr data-people="halter73,timheuer,dbreshears" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,halter73,javiercn,ManishJayaswal,mattleibow,SteveSandersonMS,timheuer,ViktorHofer" data-labels="area-aspnet">
+  <td class="score">4.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;reviewed, not approved (+1.0)&#10;high interest: 6t 9ppl (+1.0)&#10;large change: 740 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/207" title="Add convert-blazor-server-to-webapp skill">#207</a></td>
+  <td class="title">Add convert-blazor-server-to-webapp skill</td>
+  <td class="action" title="Conflicts, No maintainer approval">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/halter73.png?size=32" alt="halter73"><a href="https://github.com/halter73">@halter73</a><a class="filter-btn" href="#" onclick="filterByUser('halter73');return false" title="Show only @halter73">&#x1F50D;</a></span>: resolve conflicts; <span class="user-ref"><img class="avatar" src="https://github.com/timheuer.png?size=32" alt="timheuer"><a href="https://github.com/timheuer">@timheuer</a><a class="filter-btn" href="#" onclick="filterByUser('timheuer');return false" title="Show only @timheuer">&#x1F50D;</a></span>, <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: review needed</td>
+  <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
+  <td class="disc heat-3">&#x1F525; 0/6t 9ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 6 review threads&#10;9 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">29d</td>
+  <td class="num heat-1">10d</td>
+  <td class="num heat-2" title="6 files, 740 lines (additions + deletions)">740</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/halter73.png?size=32" alt="halter73"><a href="https://github.com/halter73">@halter73</a><a class="filter-btn" href="#" onclick="filterByUser('halter73');return false" title="Show only @halter73">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
+</tr>
+<tr data-people="ViktorHofer,app,danmoseley" data-involved="copilot-pull-request-reviewer,copilot-swe-agent,danmoseley,github-actions,JanKrivanek,T-Gro,ViktorHofer" data-labels="">
+  <td class="score ready-high">8.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="unresolved feedback (+1.0)&#10;high interest: 7t 5ppl (+1.0)&#10;author slow 11d, ball in their court (-0.5)&#10;large change: 283 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author slow 11d, ball in their court (-0.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/406" title="Add F# support to migrate-dotnet* skills">#406</a></td>
+  <td class="title">Add F# support to migrate-dotnet* skills</td>
+  <td class="action" title="3 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danmoseley.png?size=32" alt="danmoseley"><a href="https://github.com/danmoseley">@danmoseley</a><a class="filter-btn" href="#" onclick="filterByUser('danmoseley');return false" title="Show only @danmoseley">&#x1F50D;</a></span></td>
+  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
+  <td class="disc heat-2">3/7t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="3 unresolved of 7 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">15d</td>
+  <td class="num">6d</td>
+  <td class="num heat-1" title="7 files, 283 lines (additions + deletions)">283</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via <span class="bot-icon" role="img" aria-label="Copilot">&#x1F916;</span></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="mrsharm,copilot-pull-request-reviewer" data-involved="BrennanConroy,copilot-pull-request-reviewer,danmoseley,dbreshears,ManishJayaswal,mrsharm,timheuer" data-labels="area-aspnet">
@@ -337,10 +322,10 @@
   <td class="ci" title="1 passed, 1 failed, 0 running">&#x274C; 1/1/0</td>
   <td class="disc heat-2">10/10t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="10 unresolved of 10 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num heat-1">9d</td>
+  <td class="num heat-1">10d</td>
   <td class="num heat-2" title="8 files, 679 lines (additions + deletions)">679</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="mrsharm" data-involved="copilot-pull-request-reviewer,dbreshears,DeagleGross,github-actions,ManishJayaswal,mrsharm,timheuer" data-labels="area-aspnet">
   <td class="score">4.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
@@ -352,39 +337,24 @@
   <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
   <td class="disc heat-2">9/9t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="9 unresolved of 9 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num heat-1">9d</td>
+  <td class="num heat-1">10d</td>
   <td class="num heat-1" title="7 files, 266 lines (additions + deletions)">266</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
-<tr data-people="sayedihashimi,haileymck" data-involved="copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,haileymck,sayedihashimi,timheuer" data-labels="area-aspnet">
-  <td class="score ready-high">6.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="unresolved feedback (+1.0)&#10;high interest: 29t 5ppl (+1.0)&#10;large change: 1550 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has approval (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/329" title="adding scaffolding skill and test">#329</a></td>
-  <td class="title">adding scaffolding skill and test</td>
-  <td class="action" title="1 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/haileymck.png?size=32" alt="haileymck"><a href="https://github.com/haileymck">@haileymck</a><a class="filter-btn" href="#" onclick="filterByUser('haileymck');return false" title="Show only @haileymck">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-3">&#x1F525; 1/29t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 29 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">22d</td>
-  <td class="num">2d</td>
-  <td class="num heat-2" title="54 files, 1550 lines (additions + deletions)">1550</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/sayedihashimi.png?size=32" alt="sayedihashimi"><a href="https://github.com/sayedihashimi">@sayedihashimi</a><a class="filter-btn" href="#" onclick="filterByUser('sayedihashimi');return false" title="Show only @sayedihashimi">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
-</tr>
-<tr data-people="ViktorHofer,app,danmoseley" data-involved="copilot-pull-request-reviewer,copilot-swe-agent,danmoseley,github-actions,JanKrivanek,T-Gro,ViktorHofer" data-labels="">
-  <td class="score ready-high">7.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="unresolved feedback (+1.0)&#10;high interest: 7t 5ppl (+1.0)&#10;author slow 10d, ball in their court (-0.5)&#10;large change: 283 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author slow 10d, ball in their court (-0.5)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/406" title="Add F# support to migrate-dotnet* skills">#406</a></td>
-  <td class="title">Add F# support to migrate-dotnet* skills</td>
-  <td class="action" title="3 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/danmoseley.png?size=32" alt="danmoseley"><a href="https://github.com/danmoseley">@danmoseley</a><a class="filter-btn" href="#" onclick="filterByUser('danmoseley');return false" title="Show only @danmoseley">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-2">3/7t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="3 unresolved of 7 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">14d</td>
-  <td class="num">5d</td>
-  <td class="num heat-1" title="7 files, 283 lines (additions + deletions)">283</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span> <span class="badge" title="authored by Copilot">via <span class="bot-icon" role="img" aria-label="Copilot">&#x1F916;</span></span></td>
+<tr data-people="javiercn,ViktorHofer" data-involved="dbreshears,github-actions,JanKrivanek,javiercn,timheuer,ViktorHofer" data-labels="">
+  <td class="score">5.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;author silent 15d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 381 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.2)&#10;author silent 15d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/376" title="Add skill validator CLI improvements and create-skill-evaluation meta-skill">#376</a></td>
+  <td class="title">Add skill validator CLI improvements and create-skill-evaluation meta-skill</td>
+  <td class="action" title="1 threads, No maintainer approval, Copilot review errored"><span class="user-ref"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a><a class="filter-btn" href="#" onclick="filterByUser('javiercn');return false" title="Show only @javiercn">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/ViktorHofer.png?size=32" alt="ViktorHofer"><a href="https://github.com/ViktorHofer">@ViktorHofer</a><a class="filter-btn" href="#" onclick="filterByUser('ViktorHofer');return false" title="Show only @ViktorHofer">&#x1F50D;</a></span>; rerequest Copilot review</td>
+  <td class="ci" title="11 passed, 0 failed, 0 running">&#x2705; 11/0/0</td>
+  <td class="disc">1/1t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 1 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">18d</td>
+  <td class="num heat-1">11d</td>
+  <td class="num heat-1" title="5 files, 381 lines (additions + deletions)">381</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/javiercn.png?size=32" alt="javiercn"><a href="https://github.com/javiercn">@javiercn</a><a class="filter-btn" href="#" onclick="filterByUser('javiercn');return false" title="Show only @javiercn">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="mrsharm,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,danmoseley,danroth27,dbreshears,github-actions,ManishJayaswal,mrsharm,timheuer,ViktorHofer" data-labels="area-aspnet">
@@ -397,25 +367,10 @@
   <td class="ci" title="1 passed, 1 failed, 0 running">&#x274C; 1/1/0</td>
   <td class="disc heat-3">&#x1F525; 8/8t 7ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="8 unresolved of 8 review threads&#10;7 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num heat-1">9d</td>
+  <td class="num heat-1">10d</td>
   <td class="num heat-1" title="2 files, 359 lines (additions + deletions)">359</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
-</tr>
-<tr data-people="davidortinau,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,davidortinau,dbreshears,github-actions,jfversluis,Redth,timheuer" data-labels="">
-  <td class="score">5.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="unresolved feedback (+1.0)&#10;high interest: 26t 3ppl (+1.0)&#10;large change: 4262 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/456" title="Add 7 core .NET MAUI development skills to dotnet-maui plugin">#456</a></td>
-  <td class="title">Add 7 core .NET MAUI development skills to dotnet-maui plugin</td>
-  <td class="action" title="5 threads, No maintainer approval, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/davidortinau.png?size=32" alt="davidortinau"><a href="https://github.com/davidortinau">@davidortinau</a><a class="filter-btn" href="#" onclick="filterByUser('davidortinau');return false" title="Show only @davidortinau">&#x1F50D;</a></span>: respond to 5 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-3">&#x1F525; 5/26t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="5 unresolved of 26 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num">6d</td>
-  <td class="num">0d</td>
-  <td class="num heat-2" title="25 files, 4262 lines (additions + deletions)">4262</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/davidortinau.png?size=32" alt="davidortinau"><a href="https://github.com/davidortinau">@davidortinau</a><a class="filter-btn" href="#" onclick="filterByUser('davidortinau');return false" title="Show only @davidortinau">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="caaavik-msft,ViktorHofer,JanKrivanek" data-involved="caaavik-msft,copilot-pull-request-reviewer,github-actions,JanKrivanek,ViktorHofer" data-labels="">
   <td class="score">4.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;team author (+1)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
@@ -432,21 +387,6 @@
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/caaavik-msft.png?size=32" alt="caaavik-msft"><a href="https://github.com/caaavik-msft">@caaavik-msft</a><a class="filter-btn" href="#" onclick="filterByUser('caaavik-msft');return false" title="Show only @caaavik-msft">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="MattKotsenas,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,JanKrivanek,MattKotsenas,ViktorHofer" data-labels="">
-  <td class="score">5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;author silent 23d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+2.2)&#10;mergeability unknown (+1.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;recently updated (+0.4)&#10;author silent 23d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/303" title="Add warnings and guidance against TargetFramework centralization">#303</a></td>
-  <td class="title">Add warnings and guidance against TargetFramework centralization</td>
-  <td class="action" title="4 threads, No review, Stale 23d"><span class="user-ref"><img class="avatar" src="https://github.com/MattKotsenas.png?size=32" alt="MattKotsenas"><a href="https://github.com/MattKotsenas">@MattKotsenas</a><a class="filter-btn" href="#" onclick="filterByUser('MattKotsenas');return false" title="Show only @MattKotsenas">&#x1F50D;</a></span>: respond to 4 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
-  <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
-  <td class="disc heat-1">4/5t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="4 unresolved of 5 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">23d</td>
-  <td class="num heat-2">23d</td>
-  <td class="num heat-1" title="9 files, 196 lines (additions + deletions)">196</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MattKotsenas.png?size=32" alt="MattKotsenas"><a href="https://github.com/MattKotsenas">@MattKotsenas</a><a class="filter-btn" href="#" onclick="filterByUser('MattKotsenas');return false" title="Show only @MattKotsenas">&#x1F50D;</a></span></td>
-  <td class="area-col"></td>
-</tr>
 <tr data-people="luisquintanilla" data-involved="copilot-pull-request-reviewer,dbreshears,jeffhandley,JeremyLikness,luisquintanilla,stephentoub,timheuer" data-labels="">
   <td class="score">4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">2.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;author silent 27d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 381 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
@@ -456,68 +396,68 @@
   <td class="action" title="Conflicts, 3 threads, No maintainer approval, Stale 24d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/luisquintanilla.png?size=32" alt="luisquintanilla"><a href="https://github.com/luisquintanilla">@luisquintanilla</a><a class="filter-btn" href="#" onclick="filterByUser('luisquintanilla');return false" title="Show only @luisquintanilla">&#x1F50D;</a></span>: resolve conflicts; respond to 3 thread(s)</td>
   <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
   <td class="disc">3/3t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="3 unresolved of 3 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">27d</td>
+  <td class="num heat-1">28d</td>
   <td class="num heat-2">24d</td>
   <td class="num heat-1" title="7 files, 381 lines (additions + deletions)">381</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/luisquintanilla.png?size=32" alt="luisquintanilla"><a href="https://github.com/luisquintanilla">@luisquintanilla</a><a class="filter-btn" href="#" onclick="filterByUser('luisquintanilla');return false" title="Show only @luisquintanilla">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
 <tr data-people="mrsharm,copilot-pull-request-reviewer" data-involved="agocke,artl93,copilot-pull-request-reviewer,danmoseley,dbreshears,github-actions,jaredpar,mrsharm,stephentoub,timheuer,ViktorHofer" data-labels="area-aspnet">
-  <td class="score ready-high">7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 22d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;high interest: 38t 6ppl (+1.0)&#10;large change: 607 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)&#10;author silent 22d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="score ready-high">7.5<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 23d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;high interest: 38t 6ppl (+1.0)&#10;large change: 607 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.5<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)&#10;author silent 23d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/269" title="Add refactoring-to-async skill">#269</a></td>
   <td class="title">Add refactoring-to-async skill</td>
   <td class="action" title="1 threads"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 1/38t 6ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 38 review threads&#10;6 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">27d</td>
-  <td class="num">3d</td>
+  <td class="num">4d</td>
   <td class="num heat-2" title="6 files, 607 lines (additions + deletions)">607</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
-  <td class="area-col"> <a class="badge area-label" href="#" onclick="filterByLabel('area-aspnet');return false" title="Show only area-aspnet">aspnet</a></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-aspnet')" title="Filter to area-aspnet (Ctrl+click to add)">aspnet</button></td>
 </tr>
 <tr data-people="mrsharm,eiriktsarpalis" data-involved="abpiskunov,artl93,copilot-pull-request-reviewer,danmoseley,dbreshears,eiriktsarpalis,github-actions,GrabYourPitchforks,JamesNK,jeffhandley,ManishJayaswal,mrsharm,PranavSenthilnathan,timheuer,ViktorHofer" data-labels="">
-  <td class="score ready-high">7.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score ready-high">7.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
   <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 27d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;high interest: 25t 11ppl (+1.0)&#10;large change: 335 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;good review momentum (+0.3)&#10;author silent 27d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;has approval (+1.2)&#10;team author (+1)&#10;high interest (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author silent 27d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/200" title="Add migrating-newtonsoft-to-system-text-json skill">#200</a></td>
   <td class="title">Add migrating-newtonsoft-to-system-text-json skill</td>
   <td class="action" title="3 threads, No maintainer approval"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span>: respond to 3 thread(s) from <span class="user-ref"><img class="avatar" src="https://github.com/eiriktsarpalis.png?size=32" alt="eiriktsarpalis"><a href="https://github.com/eiriktsarpalis">@eiriktsarpalis</a><a class="filter-btn" href="#" onclick="filterByUser('eiriktsarpalis');return false" title="Show only @eiriktsarpalis">&#x1F50D;</a></span></td>
   <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
   <td class="disc heat-3">&#x1F525; 3/25t 11ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="3 unresolved of 25 review threads&#10;11 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
   <td class="num heat-1">29d</td>
-  <td class="num">3d</td>
+  <td class="num">4d</td>
   <td class="num heat-1" title="3 files, 335 lines (additions + deletions)">335</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/mrsharm.png?size=32" alt="mrsharm"><a href="https://github.com/mrsharm">@mrsharm</a><a class="filter-btn" href="#" onclick="filterByUser('mrsharm');return false" title="Show only @mrsharm">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="jfversluis,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,danmoseley,github-actions,jfversluis,jonathanpeppers,Redth" data-labels="">
-  <td class="score">5.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">1.1<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 15d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;high interest: 29t 5ppl (+1.0)&#10;large change: 439 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">1.2<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;small, easy to review (+1)&#10;has maintainer review (+0.8)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author silent 15d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
-  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/379" title="Add maui-coding-guardrails and maui-current-apis skills">#379</a></td>
-  <td class="title">Add maui-coding-guardrails and maui-current-apis skills</td>
-  <td class="action" title="3 threads, No maintainer approval, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D;</a></span>: respond to 3 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
-  <td class="ci" title="6 passed, 0 failed, 0 running">&#x2705; 6/0/0</td>
-  <td class="disc heat-3">&#x1F525; 3/29t 5ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="3 unresolved of 29 review threads&#10;5 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">17d</td>
-  <td class="num">5d</td>
-  <td class="num heat-1" title="5 files, 439 lines (additions + deletions)">439</td>
-  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jfversluis.png?size=32" alt="jfversluis"><a href="https://github.com/jfversluis">@jfversluis</a><a class="filter-btn" href="#" onclick="filterByUser('jfversluis');return false" title="Show only @jfversluis">&#x1F50D;</a></span></td>
+<tr data-people="MattKotsenas" data-involved="copilot-pull-request-reviewer,JanKrivanek,MattKotsenas,ViktorHofer" data-labels="">
+  <td class="score">4.3<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;recently updated (+0.4)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">2.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no approval yet (+1.5)&#10;author silent 24d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+2.2)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;small, easy to review (+1)&#10;recently updated (+0.4)&#10;author silent 24d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/303" title="Add warnings and guidance against TargetFramework centralization">#303</a></td>
+  <td class="title">Add warnings and guidance against TargetFramework centralization</td>
+  <td class="action" title="Conflicts, 4 threads, No review, Stale 24d">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/MattKotsenas.png?size=32" alt="MattKotsenas"><a href="https://github.com/MattKotsenas">@MattKotsenas</a><a class="filter-btn" href="#" onclick="filterByUser('MattKotsenas');return false" title="Show only @MattKotsenas">&#x1F50D;</a></span>: resolve conflicts; respond to 4 thread(s)</td>
+  <td class="ci" title="2 passed, 0 failed, 0 running">&#x2705; 2/0/0</td>
+  <td class="disc heat-1">4/5t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="4 unresolved of 5 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">24d</td>
+  <td class="num heat-2">24d</td>
+  <td class="num heat-1" title="9 files, 196 lines (additions + deletions)">196</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/MattKotsenas.png?size=32" alt="MattKotsenas"><a href="https://github.com/MattKotsenas">@MattKotsenas</a><a class="filter-btn" href="#" onclick="filterByUser('MattKotsenas');return false" title="Show only @MattKotsenas">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
 </tr>
-<tr data-people="dbreshears,copilot-pull-request-reviewer" data-involved="copilot-pull-request-reviewer,copilot-swe-agent,danmoseley,dbreshears,timheuer,ViktorHofer" data-labels="">
-  <td class="score ready-high">6.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
-  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 22d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;active discussion: 6t, 1 unresolved (+0.5)" aria-label="Show Need score breakdown">?</button></td>
-  <td class="action-score">0.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;mergeability unknown (+1.5)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author silent 22d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
+<tr data-people="dbreshears" data-involved="copilot-pull-request-reviewer,copilot-swe-agent,danmoseley,dbreshears,timheuer,ViktorHofer" data-labels="">
+  <td class="score">5.8<button type="button" class="why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0<button type="button" class="why-btn" onclick="showWhy(this)" data-why="author silent 23d, ball in their court (-1.5)&#10;unresolved feedback (+1.0)&#10;active discussion: 6t, 1 unresolved (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">0.6<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;good review momentum (+0.3)&#10;author silent 23d, ball in their court (-1.5)" aria-label="Show Action score breakdown">?</button></td>
   <td class="pr-num"><a href="https://github.com/dotnet/skills/pull/323" title="Add Reviewer Teams">#323</a></td>
   <td class="title">Add Reviewer Teams</td>
-  <td class="action" title="1 threads, Approval not on latest commit"><span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: respond to 1 thread(s) from <span class="user-ref"><span class="bot-icon" role="img" aria-label="Copilot reviewer" title="Copilot reviewer">&#x1F916;</span><a class="filter-btn" href="#" onclick="filterByUser('copilot-pull-request-reviewer');return false" title="Show only @copilot-pull-request-reviewer">&#x1F50D;</a></span></td>
+  <td class="action" title="Conflicts, 1 threads, Approval not on latest commit">&#x1F6D1; <span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span>: resolve conflicts; respond to 1 thread(s)</td>
   <td class="ci" title="1 passed, 0 failed, 0 running">&#x2705; 1/0/0</td>
   <td class="disc heat-1">1/6t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="1 unresolved of 6 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
-  <td class="num heat-1">22d</td>
-  <td class="num">5d</td>
+  <td class="num heat-1">23d</td>
+  <td class="num">6d</td>
   <td class="num" title="1 file, 64 lines (additions + deletions)">&#x1F401; 64</td>
   <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/dbreshears.png?size=32" alt="dbreshears"><a href="https://github.com/dbreshears">@dbreshears</a><a class="filter-btn" href="#" onclick="filterByUser('dbreshears');return false" title="Show only @dbreshears">&#x1F50D;</a></span></td>
   <td class="area-col"></td>
@@ -528,111 +468,143 @@
 
 <script src="../shared-ui.js"></script>
 <script>
-var _filterKey = 'prFilter:' + location.pathname;
-function isEasyHidden(r) {
-  var toggle = document.getElementById('easy-action-toggle');
-  return toggle && toggle.checked && !r.getAttribute('data-easy');
+var activeAreas = [];
+var activeUser = '';
+var moreRowsExpanded = false;
+var ctrlHeld = false;
+var LS_EASY_KEY = 'pr-dashboard-easy-action';
+
+function escJs(s) {
+  return String(s == null ? '' : s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'\\x22');
 }
-function filterByLabel(label) {
-  var rows = document.querySelectorAll('tbody tr');
-  var count = 0;
+
+function applyTableFilter() {
+  var table = document.getElementById('pr-table');
+  if (!table) return;
+  var easyOn = !!(document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked);
+  // hasFilters controls "Show N more" button visibility; easyOn is a separate toggle, not a secondary filter
+  var hasFilters = activeAreas.length > 0 || !!activeUser;
+  var rows = table.querySelectorAll('tbody tr');
   rows.forEach(function(r) {
-    var labels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-    if (labels.indexOf(',' + label.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
-      r.style.display = '';
-      count++;
-    } else {
-      r.style.display = 'none';
+    var show = true;
+    if (activeAreas.length > 0) {
+      var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+      var match = activeAreas.some(function(a) {
+        return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
+      });
+      if (!match) show = false;
     }
-  });
-  var banner = document.getElementById('filter-banner');
-  document.getElementById('filter-name').textContent = label;
-  banner.style.display = 'block';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = 'none';
-  history.replaceState(null, '', location.pathname + '?label=' + encodeURIComponent(label));
-  try { localStorage.setItem(_filterKey, JSON.stringify({type:'label',value:label})); } catch(e) {}
-}
-function filterByUser(name) {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  var count = 0;
-  rows.forEach(function(r) {
-    var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
-    if (people.indexOf(',' + name.toLowerCase() + ',') >= 0 && !isEasyHidden(r)) {
-      r.style.display = '';
-      count++;
-    } else {
-      r.style.display = 'none';
+    if (activeUser && show) {
+      var people = (',' + (r.getAttribute('data-people') || '') + ',').toLowerCase();
+      if (people.indexOf(',' + activeUser.toLowerCase() + ',') < 0) show = false;
     }
+    if (easyOn && show && !r.getAttribute('data-easy')) show = false;
+    if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
+    r.style.display = show ? '' : 'none';
   });
+  var btn = document.getElementById('toggle-more');
+  if (btn) {
+    btn.style.display = hasFilters ? 'none' : '';
+    if (!hasFilters && !moreRowsExpanded) {
+      var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+      if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+    }
+  }
+  renderFilterBanner();
+  updateUrl();
+}
+function renderFilterBanner() {
   var banner = document.getElementById('filter-banner');
-  document.getElementById('filter-name').textContent = '@' + name;
-  banner.style.display = 'block';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = 'none';
-  history.replaceState(null, '', location.pathname + '?user=' + encodeURIComponent(name));
-  try { localStorage.setItem(_filterKey, JSON.stringify({type:'user',value:name})); } catch(e) {}
-}
-function clearFilter() {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  var easyOn = document.getElementById('easy-action-toggle') && document.getElementById('easy-action-toggle').checked;
-  rows.forEach(function(r) {
-    if (r.classList.contains('more-row')) { r.style.display = 'none'; }
-    else if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
-    else { r.style.display = ''; }
+  if (!banner) return;
+  var hasFilters = activeAreas.length > 0 || !!activeUser;
+  if (!hasFilters) { banner.style.display = 'none'; banner.innerHTML = ''; return; }
+  var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
+  if (activeUser) {
+    html += '<span class="filter-chip">@' + escHtml(activeUser) +
+      ' <a class="chip-remove" href="#" onclick="removeUserFilter();return false" title="Remove user filter" aria-label="Remove user filter">&#x2715;</a></span>';
+  }
+  activeAreas.forEach(function(a) {
+    var short = a.replace(/^area-/i, '');
+    html += '<span class="filter-chip">' + escHtml(short) +
+      ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escJs(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
   });
-  document.getElementById('filter-banner').style.display = 'none';
-  var btn = document.getElementById('toggle-more');
-  if (btn) btn.style.display = '';
-  history.replaceState(null, '', location.pathname);
-  try { localStorage.removeItem(_filterKey); } catch(e) {}
+  html += ' <a href="#" onclick="clearAllFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
+  banner.innerHTML = html;
+  banner.style.display = 'flex';
 }
-function applyEasyFilter(easyOn) {
-  var rows = document.querySelectorAll('#pr-table tbody tr');
-  rows.forEach(function(r) {
-    if (r.classList.contains('more-row')) { r.style.display = 'none'; return; }
-    if (easyOn && !r.getAttribute('data-easy')) { r.style.display = 'none'; }
-    else { r.style.display = ''; }
-  });
+function updateUrl() {
+  var p = new URLSearchParams();
+  if (activeUser) p.set('user', activeUser);
+  activeAreas.forEach(function(a) { p.append('area', a); });
+  var easyToggle = document.getElementById('easy-action-toggle');
+  if (easyToggle && easyToggle.checked) p.set('easyaction', 'true');
+  var qs = p.toString();
+  history.replaceState(null, '', location.pathname + (qs ? '?' + qs : ''));
 }
+function filterByArea(event, label) {
+  var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
+  var idx = activeAreas.indexOf(label);
+  if (ctrl) {
+    if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
+    renderFilterBanner();
+    updateUrl();
+  } else {
+    activeAreas = [label];
+    applyTableFilter();
+  }
+}
+document.addEventListener('keydown', function(e) {
+  if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
+    ctrlHeld = true;
+    if (activeAreas.length > 0) {
+      document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
+    }
+  }
+});
+document.addEventListener('keyup', function(e) {
+  if (e.key === 'Control' || e.key === 'Meta') {
+    ctrlHeld = false;
+    applyTableFilter();
+  }
+});
+function filterByUser(name) { activeUser = name; applyTableFilter(); }
+function removeAreaFilter(label) {
+  var idx = activeAreas.indexOf(label);
+  if (idx >= 0) activeAreas.splice(idx, 1);
+  applyTableFilter();
+}
+function removeUserFilter() { activeUser = ''; applyTableFilter(); }
+function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded = false; applyTableFilter(); }
+// Easy action toggle
 (function() {
-  var LS_EASY_KEY = 'pr-dashboard-easy-action';
   var toggle = document.getElementById('easy-action-toggle');
   if (!toggle) return;
-  // Restore state
   var params = new URLSearchParams(location.search);
   var urlEasy = params.get('easyaction');
   var easyOn = false;
   if (urlEasy !== null) { easyOn = urlEasy === 'true' || urlEasy === '1'; }
   else { try { easyOn = localStorage.getItem(LS_EASY_KEY) === 'true'; } catch(e) {} }
   toggle.checked = easyOn;
-  if (easyOn) { applyEasyFilter(true); }
   toggle.addEventListener('change', function() {
-    var on = this.checked;
-    try { localStorage.setItem(LS_EASY_KEY, on ? 'true' : 'false'); } catch(e) {}
-    // Re-apply: if a secondary filter is active, re-run it (it respects easy state); otherwise just filter rows
-    try {
-      var saved = JSON.parse(localStorage.getItem(_filterKey));
-      if (saved && saved.type === 'user') { applyEasyFilter(on); filterByUser(saved.value); return; }
-      if (saved && saved.type === 'label') { applyEasyFilter(on); filterByLabel(saved.value); return; }
-    } catch(e) {}
-    applyEasyFilter(on);
+    try { localStorage.setItem(LS_EASY_KEY, this.checked ? 'true' : 'false'); } catch(e) {}
+    applyTableFilter();
   });
 })();
-// Apply ?user=X or ?label=X filter on page load, or restore from localStorage
+// Init from URL params
 (function() {
   var params = new URLSearchParams(location.search);
-  var user = params.get('user');
-  var label = params.get('label');
-  if (user) filterByUser(user);
-  else if (label) filterByLabel(label);
-  else {
-    try {
-      var saved = JSON.parse(localStorage.getItem(_filterKey));
-      if (saved && saved.type === 'user') filterByUser(saved.value);
-      else if (saved && saved.type === 'label') filterByLabel(saved.value);
-    } catch(e) {}
-  }
+  var urlUser = params.get('user') || '';
+  try {
+    // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
+    // For backward compat, also accept the legacy comma-separated form (?area=a,b or ?label=a).
+    activeAreas = params.getAll('area').filter(Boolean);
+    if (activeAreas.length === 0) {
+      var legacyArea = params.get('area') || params.get('label') || '';
+      activeAreas = legacyArea ? legacyArea.split(',').filter(Boolean) : [];
+    }
+  } catch(e) {}
+  if (urlUser) activeUser = urlUser;
+  applyTableFilter();
 })();
 initTableSort('pr-table', 2);
 initResizableColumns('pr-table');
