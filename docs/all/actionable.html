@@ -179,12 +179,12 @@
     activeAreas = params.getAll('area').filter(Boolean);
     if (activeAreas.length === 0) {
       var legacyArea = params.get('area') || '';
-      activeAreas = legacyArea ? legacyArea.split(',').map(decodeURIComponent).filter(Boolean) : [];
+      activeAreas = legacyArea ? legacyArea.split(',').filter(Boolean) : [];
     }
     activeRepos = params.getAll('repo').filter(Boolean);
     if (activeRepos.length === 0) {
       var legacyRepo = params.get('repo') || '';
-      activeRepos = legacyRepo ? legacyRepo.split(',').map(decodeURIComponent).filter(Boolean) : [];
+      activeRepos = legacyRepo ? legacyRepo.split(',').filter(Boolean) : [];
     }
   } catch(e) {}
   var savedUser = '';

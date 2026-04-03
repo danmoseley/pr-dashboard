@@ -558,7 +558,7 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
     activeAreas = params.getAll('area').filter(Boolean);
     if (activeAreas.length === 0) {
       var legacyArea = params.get('area') || params.get('label') || '';
-      activeAreas = legacyArea ? legacyArea.split(',').map(decodeURIComponent).filter(Boolean) : [];
+      activeAreas = legacyArea ? legacyArea.split(',').filter(Boolean) : [];
     }
   } catch(e) {}
   if (urlUser) activeUser = urlUser;
