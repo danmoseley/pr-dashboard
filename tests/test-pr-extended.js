@@ -606,9 +606,9 @@ async function runTests() {
 
     log('\n── Group H: Multi-chip URL params ──');
 
-    // H1: ?area=area-foo,area-bar → two area chips on load
+    // H1: ?area=a&area=b (repeated params) → two area chips on load
     {
-      const p = await openPage(ALL + '?area=area-CodeGen-coreclr,area-GC', 1);
+      const p = await openPage(ALL + '?area=area-CodeGen-coreclr&area=area-GC', 1);
       await wait(500);
       const chips = await p.$$eval('.filter-chip', els => els.map(e => e.textContent.trim()));
       const areaChips = chips.filter(t => !t.startsWith('Repo:'));
