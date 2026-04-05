@@ -16,10 +16,10 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
 </style>
 </head>
-<body data-server-updated="2026-04-04T19:02:56.7364150Z">
+<body data-server-updated="2026-04-05T07:24:07.0249037Z">
 <nav><a href="../index.html">Home</a> | <a href="../all/actionable.html">All Repos</a> | <a href="community.html">Community PRs Awaiting Review</a> | <a href="consider-closing.html">Consider Closing</a> | <a href="actionable.html">Most Actionable PRs</a> | <a href="quick-wins.html">Quick Wins: Ready to Merge</a> | <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20dotnet/runtime/quick-wins.html" target="_blank">&#x1F4AC; Feedback</a></nav>
 <h1>Quick Wins: Ready to Merge — dotnet/runtime</h1>
-<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-04T19:02:56.7364150Z">at 2026-04-04 12:02 PDT</span> &middot; 0 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
+<p class="meta">Updated ~4x daily, last <span id="last-updated" data-updated="2026-04-05T07:24:07.0249037Z">at 2026-04-05 00:24 PDT</span> &middot; 5 PRs &middot; <a href="https://github.com/dotnet/runtime">dotnet/runtime</a></p>
 <p class="report-desc">PRs that appear ready to merge: CI is green, at least one approval, and all review threads resolved. A maintainer can likely merge these with minimal effort. <label style="font-size:0.85em; color:#8b949e; cursor:pointer; user-select:none; display:inline-flex; align-items:center; gap:4px; margin-left:1em; vertical-align:middle;"><input type="checkbox" id="easy-action-toggle"> Easy next actions only</label></p><!-- Description is trusted HTML from hardcoded report definitions -->
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -79,7 +79,106 @@
   <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
 </details>
 <div class="filter-banner" id="filter-banner"></div>
-<table><tbody><tr><td style="padding: 2em; text-align: center; color: #8b949e; font-style: italic;">No PRs currently match this filter.</td></tr></tbody></table>
+<table id="pr-table">
+<colgroup>
+  <col style="width:4.5%">
+  <col style="width:4%">
+  <col style="width:5%">
+  <col style="width:4%">
+  <col>
+  <col style="width:24%">
+  <col style="width:7%">
+  <col style="width:3%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:2.5%">
+  <col style="width:8%">
+  <col style="width:7%">
+</colgroup>
+<thead>
+<tr>
+  <th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th><th class="sortable" data-sort="num" title="Need: how much does this PR benefit from attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th><th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th><th class="sortable" data-sort="num" title="Pull request number">PR</th><th class="sortable" data-sort="alpha" title="PR title and labels">Title</th><th title="Who needs to act next and what they should do">Next Action</th>
+  <th title="CI status from Build Analysis (or latest check run)">CI</th><th class="sortable" data-sort="num" title="Discussion: sort by sum of all discussion numbers (unresolved + total threads + commenters)">Disc</th><th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th><th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th><th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th><th class="sortable" data-sort="alpha" title="PR author">Author</th><th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>
+</tr>
+</thead>
+<tbody>
+<tr data-people="davidwrighton,clamp03" data-involved="clamp03,davidwrighton,dotnet-policy-service,janvorli" data-labels="area-CodeGen-Interpreter-coreclr" data-easy="merge">
+  <td class="score ready-high">9.2<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;old but active: 55d age (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;small, easy to review (+2)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/124167" title="[clr-interp] Runtime async on armel">#124167</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> [clr-interp] Runtime async on armel</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/davidwrighton.png?size=32" alt="davidwrighton"><a href="https://github.com/davidwrighton">@davidwrighton</a><a class="filter-btn" href="#" onclick="filterByUser('davidwrighton');return false" title="Show only @davidwrighton">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="Build Analysis passed; 1 non-blocking check(s) failed&#10;94 passed, 1 failed, 0 running">&#x2705;<sup class="ci-warn">1</sup> 94/1/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-2">55d</td>
+  <td class="num">4d</td>
+  <td class="num" title="3 files, 185 lines (additions + deletions)">185</td>
+  <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/clamp03.png?size=32" alt="clamp03"><a href="https://github.com/clamp03">@clamp03</a><a class="filter-btn" href="#" onclick="filterByUser('clamp03');return false" title="Show only @clamp03">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-Interpreter-coreclr')" title="Filter to area-CodeGen-Interpreter-coreclr (Ctrl+click to add)">CodeGen-Interpreter-coreclr</button></td>
+</tr>
+<tr data-people="tannergooding,saucecontrol" data-involved="dotnet-policy-service,saucecontrol,tannergooding" data-labels="area-CodeGen-coreclr" data-easy="merge">
+  <td class="score ready-high">8.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;community author (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="community author (+1.0)&#10;large change: 245 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;community author (+1.5)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125821" title="JIT: Remove dead Vector2/3 lowering code">#125821</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> JIT: Remove dead Vector2/3 lowering code</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/tannergooding.png?size=32" alt="tannergooding"><a href="https://github.com/tannergooding">@tannergooding</a><a class="filter-btn" href="#" onclick="filterByUser('tannergooding');return false" title="Show only @tannergooding">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="120 passed, 0 failed, 0 running">&#x2705; 120/0/0</td>
+  <td class="disc">0/0t 2ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;2 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">16d</td>
+  <td class="num heat-1">13d</td>
+  <td class="num heat-1" title="4 files, 245 lines (additions + deletions)">245</td>
+  <td class="author"><span class="user-ref"><span class="badge community" title="community">C</span><img class="avatar" src="https://github.com/saucecontrol.png?size=32" alt="saucecontrol"><a href="https://github.com/saucecontrol">@saucecontrol</a><a class="filter-btn" href="#" onclick="filterByUser('saucecontrol');return false" title="Show only @saucecontrol">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+</tr>
+<tr data-people="davidwrighton,jtschuster" data-involved="azure-pipelines,copilot-pull-request-reviewer,davidwrighton,elinor-fung,jtschuster,MichalStrehovsky" data-labels="area-crossgen2-coreclr" data-easy="merge">
+  <td class="score ready-high">8.4<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">1.7<button type="button" class="why-btn" onclick="showWhy(this)" data-why="high interest: 6t 4ppl (+1.0)&#10;large change: 529 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">2.1<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;high interest (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125472" title="Remove async method inlining restrictions in crossgen2">#125472</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> Remove async method inlining restrictions in crossgen2</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/davidwrighton.png?size=32" alt="davidwrighton"><a href="https://github.com/davidwrighton">@davidwrighton</a><a class="filter-btn" href="#" onclick="filterByUser('davidwrighton');return false" title="Show only @davidwrighton">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="Build Analysis passed; 16 non-blocking check(s) failed&#10;109 passed, 16 failed, 1 running">&#x2705;<sup class="ci-warn">16</sup> 109/16/1</td>
+  <td class="disc heat-2">0/6t 4ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 6 review threads&#10;4 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">24d</td>
+  <td class="num">2d</td>
+  <td class="num heat-2" title="13 files, 529 lines (additions + deletions)">529</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/jtschuster.png?size=32" alt="jtschuster"><a href="https://github.com/jtschuster">@jtschuster</a><a class="filter-btn" href="#" onclick="filterByUser('jtschuster');return false" title="Show only @jtschuster">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-crossgen2-coreclr')" title="Filter to area-crossgen2-coreclr (Ctrl+click to add)">crossgen2-coreclr</button></td>
+</tr>
+<tr data-people="max-charlamb,hoyosjs" data-involved="dotnet-policy-service,hoyosjs,max-charlamb" data-labels="area-Diagnostics-coreclr" data-easy="merge">
+  <td class="score ready-high">9.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="trivial change, quick win (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.4<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;recently updated (+0.7)&#10;recently active (+0.5)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/125819" title="Guard stackwalking in IXClrDataStackWalk codepaths to account for underlying max size of context">#125819</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> Guard stackwalking in IXClrDataStackWalk codepaths to account for underlying max size of context</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/max-charlamb.png?size=32" alt="max-charlamb"><a href="https://github.com/max-charlamb">@max-charlamb</a><a class="filter-btn" href="#" onclick="filterByUser('max-charlamb');return false" title="Show only @max-charlamb">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="Build Analysis passed; 3 non-blocking check(s) failed&#10;90 passed, 3 failed, 0 running">&#x2705;<sup class="ci-warn">3</sup> 90/3/0</td>
+  <td class="disc">0/0t 1ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 0 review threads&#10;1 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num heat-1">16d</td>
+  <td class="num">5d</td>
+  <td class="num" title="1 file, 6 lines (additions + deletions)">6</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/hoyosjs.png?size=32" alt="hoyosjs"><a href="https://github.com/hoyosjs">@hoyosjs</a><a class="filter-btn" href="#" onclick="filterByUser('hoyosjs');return false" title="Show only @hoyosjs">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-Diagnostics-coreclr')" title="Filter to area-Diagnostics-coreclr (Ctrl+click to add)">Diagnostics-coreclr</button></td>
+</tr>
+<tr data-people="kg,AndyAyersMS" data-involved="AndyAyersMS,copilot-pull-request-reviewer,dotnet-policy-service,jakobbotsch,kg" data-labels="area-CodeGen-coreclr" data-easy="merge">
+  <td class="score ready-high">8.9<button type="button" class="why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;has approval (+1.9)&#10;discussion healthy (+1.9)&#10;has maintainer review (+1.5)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Ready score breakdown">?</button></td>
+  <td class="score">0.6<button type="button" class="why-btn" onclick="showWhy(this)" data-why="large change: 305 lines (+0.5)" aria-label="Show Need score breakdown">?</button></td>
+  <td class="action-score">1.3<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+1.9)&#10;has approval (+1.9)&#10;has maintainer review (+1.5)&#10;team author (+1)&#10;small, easy to review (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.3)" aria-label="Show Action score breakdown">?</button></td>
+  <td class="pr-num"><a href="https://github.com/dotnet/runtime/pull/126374" title="[Wasm RyuJit] transform multi-entry try regions">#126374</a></td>
+  <td class="title"><span class="easy-badge">&#x1F7E2;<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="Merge it: CI green, maintainer approved, no conflicts, no unresolved threads" aria-label="Easy action: Merge it — show criteria">?</button></span> [Wasm RyuJit] transform multi-entry try regions</td>
+  <td class="action" title="—">&#x1F7E2; <span class="user-ref"><img class="avatar" src="https://github.com/kg.png?size=32" alt="kg"><a href="https://github.com/kg">@kg</a><a class="filter-btn" href="#" onclick="filterByUser('kg');return false" title="Show only @kg">&#x1F50D;</a></span> or other maintainer: Ready to merge</td>
+  <td class="ci" title="Build Analysis passed; 2 non-blocking check(s) failed&#10;122 passed, 2 failed, 0 running">&#x2705;<sup class="ci-warn">2</sup> 122/2/0</td>
+  <td class="disc">0/4t 3ppl<button type="button" class="why-btn" onclick="showWhy(this)" data-why="0 unresolved of 4 review threads&#10;3 distinct commenters" aria-label="Show discussion breakdown">?</button></td>
+  <td class="num">4d</td>
+  <td class="num">3d</td>
+  <td class="num heat-1" title="4 files, 305 lines (additions + deletions)">305</td>
+  <td class="author"><span class="user-ref"><img class="avatar" src="https://github.com/AndyAyersMS.png?size=32" alt="AndyAyersMS"><a href="https://github.com/AndyAyersMS">@AndyAyersMS</a><a class="filter-btn" href="#" onclick="filterByUser('AndyAyersMS');return false" title="Show only @AndyAyersMS">&#x1F50D;</a></span></td>
+  <td class="area-col"> <button type="button" class="badge area-label" onclick="filterByArea(event,'area-CodeGen-coreclr')" title="Filter to area-CodeGen-coreclr (Ctrl+click to add)">CodeGen-coreclr</button></td>
+</tr>
+</tbody>
+</table>
 
 
 <script src="../shared-ui.js"></script>
@@ -222,7 +321,8 @@ function clearAllFilters() { activeAreas = []; activeUser = ''; moreRowsExpanded
   if (urlUser) activeUser = urlUser;
   applyTableFilter();
 })();
-
+initTableSort('pr-table', 2);
+initResizableColumns('pr-table');
 // Live relative timestamp for "last Xh ago"
 (function() {
   function timeAgo(iso) {
