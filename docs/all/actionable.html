@@ -27,6 +27,15 @@
   .easy-badge { font-size: 0.95em; white-space: nowrap; }
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
   table#pr-table { table-layout: fixed; }
+  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5em; }
+  .recent-tile {
+    background: var(--header-bg); color: #8b949e; border: 1px solid var(--border);
+    border-radius: 12px; padding: 2px 10px; font-size: 0.8em; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    user-select: none; white-space: nowrap;
+  }
+  .recent-tile:hover { border-color: #484f58; color: var(--fg); }
+  .recent-tile.active { background: rgba(56,139,253,0.12); border-color: rgba(56,139,253,0.35); color: var(--link); }
 </style>
 </head>
 <body>
@@ -54,6 +63,7 @@
     Easy next actions only
   </label>
 </div>
+<div class="recent-tiles" id="recent-tiles"></div>
 
 <details class="scoring">
   <summary>How are the scores calculated?</summary>
@@ -134,7 +144,7 @@
   // --- State ---
   var allPrs = [];        // merged from all repos, each with .slug and .repo
   var repoList = [];      // [{slug, repo}]
-  var currentUser = '';    // primary filter username
+  var activeUsers = [];    // filter usernames (multi-select via Ctrl-click tiles)
   var loaded = false;
   var involvesMode = false; // whether "Include all involved PRs" is checked
   var nextActionOnlyMode = false; // whether "Next action on me only" is checked
@@ -166,10 +176,16 @@
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
   var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
   var LS_EASY_ACTION_KEY = 'pr-dashboard-easy-action';
+  var LS_RECENT_USERS_KEY = 'pr-dashboard-recent-users';
+  var MAX_RECENT_USERS = 5;
 
   // --- Init ---
   var params = new URLSearchParams(location.search);
-  var urlUser = params.get('user') || '';
+  var urlUsers = params.getAll('user').filter(Boolean);
+  if (urlUsers.length === 0) {
+    var lu = params.get('user') || '';
+    if (lu) urlUsers = [lu];
+  }
   var urlInvolves = params.get('involves');
   var urlNextAction = params.get('nextaction');
   var urlEasyAction = params.get('easyaction');
@@ -204,16 +220,19 @@
   } else {
     try { easyActionMode = localStorage.getItem(LS_EASY_ACTION_KEY) === 'true'; } catch(e) {}
   }
-  var initialUser = urlUser || savedUser;
-  if (initialUser) {
-    document.getElementById('user-field').value = initialUser;
+  var initialUsers = urlUsers.length > 0 ? urlUsers : (savedUser ? [savedUser] : []);
+  if (initialUsers.length > 0) {
+    activeUsers = initialUsers.slice();
+    document.getElementById('user-field').value = initialUsers[0];
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
+    initialUsers.forEach(function(u) { addRecentUser(u); });
   }
   document.getElementById('involves-toggle').checked = involvesMode;
   document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
   document.getElementById('easy-action-toggle').checked = easyActionMode;
+  renderRecentTiles();
 
   // Enter key on input
   document.getElementById('user-field').addEventListener('keydown', function(e) {
@@ -228,8 +247,8 @@
     involvesToggle.addEventListener('change', function() {
       involvesMode = this.checked;
       try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
-      if (currentUser && loaded) renderFiltered(currentUser);
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
     });
   }
 
@@ -253,8 +272,8 @@
         involvesToggle.disabled = false;
       }
       try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
-      if (currentUser && loaded) renderFiltered(currentUser);
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
     });
   }
 
@@ -272,8 +291,8 @@
     easyActionToggle.addEventListener('change', function() {
       easyActionMode = this.checked;
       try { localStorage.setItem(LS_EASY_ACTION_KEY, easyActionMode ? 'true' : 'false'); } catch(e) {}
-      if (currentUser) history.replaceState(null, '', buildCurrentUrl());
-      if (currentUser && loaded) renderFiltered(currentUser);
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
     });
   }
 
@@ -340,10 +359,8 @@
           document.getElementById('meta-line').setAttribute('data-server-updated', timestamps[0].toISOString());
         }
 
-        if (initialUser) {
-          currentUser = initialUser;
-          saveUser(initialUser);
-          renderFiltered(initialUser);
+        if (activeUsers.length > 0) {
+          renderFiltered(activeUsers);
         } else {
           renderTable(allPrs);
         }
@@ -357,7 +374,7 @@
   // --- Actions (global) ---
   function buildCurrentUrl() {
     var p = new URLSearchParams();
-    if (currentUser) p.set('user', currentUser);
+    activeUsers.forEach(function(u) { p.append('user', u); });
     if (involvesMode) p.set('involves', 'true');
     if (nextActionOnlyMode) p.set('nextaction', 'true');
     if (easyActionMode) p.set('easyaction', 'true');
@@ -370,24 +387,22 @@
   window.applyUser = function() {
     var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
     if (!name) return;
-    currentUser = name;
-    saveUser(name);
-    document.getElementById('involves-label').style.display = '';
-    document.getElementById('next-action-label').style.display = '';
-    document.getElementById('easy-action-label').style.display = '';
+    activeUsers = [name];
+    addRecentUser(name);
+    renderRecentTiles();
+    showUserToggles();
     history.replaceState(null, '', buildCurrentUrl());
-    if (loaded) renderFiltered(name);
+    if (loaded) renderFiltered(activeUsers);
   };
 
   window.filterByUser = function(name) {
     document.getElementById('user-field').value = name;
-    currentUser = name;
-    saveUser(name);
-    document.getElementById('involves-label').style.display = '';
-    document.getElementById('next-action-label').style.display = '';
-    document.getElementById('easy-action-label').style.display = '';
+    activeUsers = [name];
+    addRecentUser(name);
+    renderRecentTiles();
+    showUserToggles();
     history.replaceState(null, '', buildCurrentUrl());
-    renderFiltered(name);
+    renderFiltered(activeUsers);
   };
 
   // --- Secondary filters ---
@@ -502,7 +517,7 @@
   };
 
   window.clearUser = function() {
-    currentUser = '';
+    activeUsers = [];
     activeAreas = [];
     activeRepos = [];
     moreRowsExpanded = false;
@@ -525,11 +540,79 @@
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
+    renderRecentTiles();
     if (loaded) renderTable(allPrs);
   };
 
-  function saveUser(name) {
+  function showUserToggles() {
+    document.getElementById('involves-label').style.display = '';
+    document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
+  }
+
+  // --- Recent Users ---
+  function loadRecentUsers() {
+    try {
+      var json = localStorage.getItem(LS_RECENT_USERS_KEY);
+      if (json) return JSON.parse(json);
+    } catch(e) {}
+    return [];
+  }
+
+  function addRecentUser(name) {
+    if (!name) return;
+    var lc = name.toLowerCase();
+    var recent = loadRecentUsers().filter(function(u) { return u.toLowerCase() !== lc; });
+    recent.unshift(name);
+    if (recent.length > MAX_RECENT_USERS) recent = recent.slice(0, MAX_RECENT_USERS);
+    try { localStorage.setItem(LS_RECENT_USERS_KEY, JSON.stringify(recent)); } catch(e) {}
     try { localStorage.setItem(LS_KEY, name); } catch(e) {}
+  }
+
+  function renderRecentTiles() {
+    var container = document.getElementById('recent-tiles');
+    if (!container) return;
+    var recent = loadRecentUsers();
+    if (recent.length === 0) { container.innerHTML = ''; return; }
+    var lcActive = activeUsers.map(function(u) { return u.toLowerCase(); });
+    var html = '';
+    recent.forEach(function(name) {
+      var isActive = lcActive.indexOf(name.toLowerCase()) >= 0;
+      html += '<button type="button" class="recent-tile' + (isActive ? ' active' : '') + '" data-user="' + escAttr(name) + '">' + escHtml(name) + '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  // Delegate clicks on recent tiles
+  var tilesContainer = document.getElementById('recent-tiles');
+  if (tilesContainer) {
+    tilesContainer.addEventListener('click', function(event) {
+      var tile = event.target.closest('.recent-tile');
+      if (!tile) return;
+      var name = tile.getAttribute('data-user');
+      if (!name) return;
+      var ctrl = event.ctrlKey || event.metaKey;
+      var lc = name.toLowerCase();
+      var idx = -1;
+      for (var i = 0; i < activeUsers.length; i++) {
+        if (activeUsers[i].toLowerCase() === lc) { idx = i; break; }
+      }
+      if (ctrl) {
+        if (idx >= 0) activeUsers.splice(idx, 1); else activeUsers.push(name);
+      } else {
+        if (idx >= 0) activeUsers.splice(idx, 1); else activeUsers = [name];
+      }
+      if (!ctrl) addRecentUser(name);
+      renderRecentTiles();
+      if (activeUsers.length > 0) {
+        document.getElementById('user-field').value = activeUsers[activeUsers.length - 1];
+        showUserToggles();
+        history.replaceState(null, '', buildCurrentUrl());
+        if (loaded) renderFiltered(activeUsers);
+      } else {
+        clearUser();
+      }
+    });
   }
 
   // --- Rendering ---
@@ -589,15 +672,17 @@
     return null;
   }
 
-  function renderFiltered(username) {
-    var lc = username.toLowerCase();
+  function renderFiltered(usernames) {
+    var lcUsers = usernames.map(function(u) { return u.toLowerCase(); });
     var filtered = allPrs.filter(function(pr) {
       var people = getPeople(pr);
-      if (people.indexOf(lc) >= 0) return true;
-      // In involves mode, also match reviewers/commenters from the involved field
-      if (involvesMode && pr.involved && pr.involved.length > 0) {
-        for (var i = 0; i < pr.involved.length; i++) {
-          if (pr.involved[i].toLowerCase() === lc) return true;
+      for (var j = 0; j < lcUsers.length; j++) {
+        if (people.indexOf(lcUsers[j]) >= 0) return true;
+        // In involves mode, also match reviewers/commenters from the involved field
+        if (involvesMode && pr.involved && pr.involved.length > 0) {
+          for (var i = 0; i < pr.involved.length; i++) {
+            if (pr.involved[i].toLowerCase() === lcUsers[j]) return true;
+          }
         }
       }
       return false;
@@ -605,7 +690,9 @@
 
     // Apply "next action on me only" filter
     if (nextActionOnlyMode) {
-      filtered = filtered.filter(function(pr) { return isUsersTurn(pr, username); });
+      filtered = filtered.filter(function(pr) {
+        return usernames.some(function(u) { return isUsersTurn(pr, u); });
+      });
     }
 
     // Apply "easy next actions only" filter using pre-computed categories
@@ -623,9 +710,10 @@
     var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
       .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
     var bar = document.getElementById('summary-bar');
+    var userDisplay = usernames.map(function(u) { return '@' + escHtml(u); }).join(', ');
     var modeNote = nextActionOnlyMode ? ' (next action on me only)' : involvesMode ? ' (includes all involved)' : '';
     if (easyActionMode) modeNote += ' (easy actions only)';
-    bar.innerHTML = 'Showing PRs for <strong>@' + escHtml(username) + '</strong>' + modeNote +
+    bar.innerHTML = 'Showing PRs for <strong>' + userDisplay + '</strong>' + modeNote +
       ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
       '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
       (breakdown ? ': ' + breakdown : '') + '</span>';
@@ -642,7 +730,7 @@
     if (prs.length === 0) {
       document.getElementById('content').innerHTML =
         '<p class="status" style="margin:2em 0">No PRs found' +
-        (currentUser ? ' for @' + escHtml(currentUser) : '') + '.</p>';
+        (activeUsers.length > 0 ? ' for ' + activeUsers.map(function(u) { return '@' + escHtml(u); }).join(', ') : '') + '.</p>';
       return;
     }
 
@@ -687,7 +775,7 @@
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
-      html += renderRow(prs[i], hasArea, i, smallPrThreshold, smallPrEnabled, currentUser);
+      html += renderRow(prs[i], hasArea, i, smallPrThreshold, smallPrEnabled, activeUsers);
     }
     html += '</tbody></table>';
 
@@ -719,14 +807,15 @@
     }
   }
 
-  function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUser) {
+  function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUsers) {
     var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
     var repoUrl = '../' + pr._slug + '/actionable.html';
     var safeSlug = escAttr(pr._slug);
     var safeSlugJs = escJs(pr._slug || '');
 
     // Detect if the filtered user is the one who should act next
-    var isYourTurn = isUsersTurn(pr, filterUser);
+    var userList = Array.isArray(filterUsers) ? filterUsers : (filterUsers ? [filterUsers] : []);
+    var isYourTurn = userList.some(function(u) { return isUsersTurn(pr, u); });
 
     var moreClass = idx >= 500 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
                                 : (isYourTurn ? ' class="your-turn"' : '');
@@ -857,7 +946,8 @@
 
   // Expose internals for pr-view-refresh.js
   window._prDashboard = {
-    get currentUser() { return currentUser; },
+    get currentUser() { return activeUsers[0] || ''; },
+    get activeUsers() { return activeUsers; },
     get repoList() { return repoList; },
     get allPrs() { return allPrs; },
     renderRow: renderRow
