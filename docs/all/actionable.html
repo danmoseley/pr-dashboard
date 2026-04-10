@@ -181,11 +181,22 @@
 
   // --- Init ---
   var params = new URLSearchParams(location.search);
-  var urlUsers = params.getAll('user').filter(Boolean);
-  if (urlUsers.length === 0) {
-    var lu = params.get('user') || '';
-    if (lu) urlUsers = [lu];
-  }
+  var urlUsers = (function() {
+    var raw = params.getAll('user').filter(Boolean);
+    if (raw.length === 0) {
+      var lu = params.get('user') || '';
+      if (lu) raw = [lu];
+    }
+    var seen = Object.create(null);
+    return raw.map(function(u) { return (u || '').trim().replace(/^@/, ''); })
+      .filter(function(u) {
+        if (!u) return false;
+        var key = u.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  })();
   var urlInvolves = params.get('involves');
   var urlNextAction = params.get('nextaction');
   var urlEasyAction = params.get('easyaction');
@@ -615,7 +626,12 @@
         history.replaceState(null, '', buildCurrentUrl());
         if (loaded) renderFiltered(activeUsers);
       } else {
-        clearUser();
+        // Only clear user-related state; preserve area/repo/other filters
+        document.getElementById('user-field').value = '';
+        try { localStorage.removeItem(LS_KEY); } catch(e) {}
+        history.replaceState(null, '', buildCurrentUrl());
+        renderRecentTiles();
+        if (loaded) renderTable(allPrs);
       }
     });
   }

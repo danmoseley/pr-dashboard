@@ -939,7 +939,7 @@ async function runTests() {
       await p.goto(ALL, { waitUntil: 'domcontentloaded' });
       try {
         await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 100, { timeout: 20000 });
-      } catch(e) { fail('J8: Reload persistence setup', 'table did not load'); await p.close(); await freshCtx.close(); }
+      } catch(e) { fail('J8: Reload persistence setup', 'table did not load'); await p.close(); await freshCtx.close(); return; }
 
       const author = await p.evaluate(() => {
         for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
