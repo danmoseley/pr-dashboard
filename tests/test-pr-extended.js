@@ -744,11 +744,14 @@ async function runTests() {
 
     // J2: Tile has .active class when it matches the current user
     {
-      const p = await openPage(ALL, 100);
-      await p.evaluate(() => {
+      // Use a separate context so we can seed localStorage before navigation
+      // without the shared context's addInitScript clearing it.
+      const j2ctx = await browser.newContext();
+      await j2ctx.addInitScript(() => {
         try { localStorage.setItem('pr-dashboard-recent-users', JSON.stringify(['testuser-j2'])); } catch(e) {}
       });
-      // Navigate with ?user= to activate the user
+      const p = await j2ctx.newPage();
+      p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
       await p.goto(ALL + '?user=testuser-j2', { waitUntil: 'domcontentloaded' });
       await wait(500);
       const activeTile = await p.$('.recent-tile.active');
@@ -759,6 +762,7 @@ async function runTests() {
         fail('J2: Active tile', 'no .recent-tile.active found');
       }
       await p.close();
+      await j2ctx.close();
     }
 
     // J3: Click an inactive tile → sets as only active user

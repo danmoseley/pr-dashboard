@@ -554,7 +554,11 @@
   function loadRecentUsers() {
     try {
       var json = localStorage.getItem(LS_RECENT_USERS_KEY);
-      if (json) return JSON.parse(json);
+      if (json) {
+        var parsed = JSON.parse(json);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(function(v) { return typeof v === 'string' && v.length > 0; }).slice(0, MAX_RECENT_USERS);
+      }
     } catch(e) {}
     return [];
   }
@@ -579,7 +583,7 @@
     var html = '';
     recent.forEach(function(name) {
       var isActive = lcActive.indexOf(name.toLowerCase()) >= 0;
-      html += '<button type="button" class="recent-tile' + (isActive ? ' active' : '') + '" data-user="' + escAttr(name) + '">' + escHtml(name) + '</button>';
+      html += '<button type="button" class="recent-tile' + (isActive ? ' active' : '') + '" data-user="' + escAttr(name) + '" aria-pressed="' + (isActive ? 'true' : 'false') + '">' + escHtml(name) + '</button>';
     });
     container.innerHTML = html;
   }
