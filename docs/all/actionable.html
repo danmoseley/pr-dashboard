@@ -566,6 +566,7 @@
     recent.unshift(name);
     if (recent.length > MAX_RECENT_USERS) recent = recent.slice(0, MAX_RECENT_USERS);
     try { localStorage.setItem(LS_RECENT_USERS_KEY, JSON.stringify(recent)); } catch(e) {}
+    // Also save to LS_KEY for page-reload restore (backward compat with single-user storage)
     try { localStorage.setItem(LS_KEY, name); } catch(e) {}
   }
 

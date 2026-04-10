@@ -883,7 +883,7 @@ async function runTests() {
       const p = await openPage(ALL, 100);
       // Add 6 users via applyUser calls (within the same page, no navigation)
       await p.evaluate(() => {
-        for (var i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 6; i++) {
           document.getElementById('user-field').value = 'testuser' + i;
           applyUser();
         }
