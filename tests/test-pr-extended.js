@@ -898,18 +898,86 @@ async function runTests() {
       await p.close();
     }
 
-    // J7: URL with multiple ?user= params restores multi-select
+    // J7: Selected names are persisted to localStorage after Go
+    {
+      const p = await openPage(ALL, 100);
+      await p.evaluate(() => { try { localStorage.removeItem('pr-dashboard-recent-users'); localStorage.removeItem('pr-dashboard-user'); } catch(e) {} });
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('J7: localStorage persistence after Go', 'no author found'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        const lsUser = await p.evaluate(() => localStorage.getItem('pr-dashboard-user'));
+        const lsRecent = await p.evaluate(() => localStorage.getItem('pr-dashboard-recent-users'));
+        const recentArr = lsRecent ? JSON.parse(lsRecent) : [];
+        if (lsUser === author && recentArr.includes(author)) {
+          pass('J7: localStorage persists selected name: pr-dashboard-user="' + lsUser + '", recent=' + JSON.stringify(recentArr));
+        } else {
+          fail('J7: localStorage persistence', 'user="' + lsUser + '", recent=' + lsRecent);
+        }
+      }
+      await p.close();
+    }
+
+    // J8: Selected names persist across page reload (restored from localStorage)
+    {
+      // Use a separate context without the localStorage.clear() addInitScript
+      const freshCtx = await browser.newContext();
+      const p = await freshCtx.newPage();
+      p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
+      await p.goto(ALL, { waitUntil: 'domcontentloaded' });
+      try {
+        await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 100, { timeout: 20000 });
+      } catch(e) { fail('J8: Reload persistence setup', 'table did not load'); await p.close(); await freshCtx.close(); }
+
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('J8: Reload persistence', 'no author'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        // Reload the page (no ?user= in URL — should restore from localStorage)
+        await p.goto(ALL, { waitUntil: 'domcontentloaded' });
+        await p.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 20000 }).catch(() => null);
+        await wait(500);
+        const userField = await p.$eval('#user-field', e => e.value).catch(() => '');
+        const activeTile = await p.$('.recent-tile.active');
+        const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+        if (userField === author && activeTile && summaryText.includes(author)) {
+          pass('J8: Selected name restored after reload: user-field="' + userField + '", summary includes "' + author + '"');
+        } else {
+          fail('J8: Reload persistence', 'user-field="' + userField + '", activeTile=' + !!activeTile + ', summary="' + summaryText.slice(0,50) + '"');
+        }
+      }
+      await p.close();
+      await freshCtx.close();
+    }
+
+    // J9: URL with multiple ?user= params restores multi-select
     {
       const p = await openPage(ALL + '?user=alice&user=bob', 0);
       await wait(1000);
       const url = p.url();
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       if (summaryText.includes('@alice') && summaryText.includes('@bob')) {
-        pass('J7: Multi-user URL restores both users in summary: "' + summaryText.trim().slice(0,60) + '"');
+        pass('J9: Multi-user URL restores both users in summary: "' + summaryText.trim().slice(0,60) + '"');
       } else if (url.includes('user=alice') && url.includes('user=bob')) {
-        pass('J7: Multi-user URL preserved in address bar');
+        pass('J9: Multi-user URL preserved in address bar');
       } else {
-        fail('J7: Multi-user URL', 'summary="' + summaryText.trim().slice(0,60) + '", url=' + url);
+        fail('J9: Multi-user URL', 'summary="' + summaryText.trim().slice(0,60) + '", url=' + url);
       }
       await p.close();
     }
