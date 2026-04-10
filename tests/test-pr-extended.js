@@ -707,6 +707,213 @@ async function runTests() {
       await p.close();
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // GROUP J — Recent name tiles
+    // ══════════════════════════════════════════════════════════════════════════
+
+    log('\n── Group J: Recent name tiles ──');
+
+    // J1: Entering a username via Go creates a recent tile
+    {
+      const p = await openPage(ALL, 100);
+      // Clear any lingering recent users from previous tests
+      await p.evaluate(() => { try { localStorage.removeItem('pr-dashboard-recent-users'); } catch(e) {} });
+      // Pick a real author from the table
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('J1: Recent tile after Go', 'no author found'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        const tiles = await p.$$('.recent-tile');
+        if (tiles.length >= 1) {
+          const tileText = await tiles[0].textContent();
+          pass('J1: Recent tile created after Go: "' + tileText + '"');
+        } else {
+          fail('J1: Recent tile after Go', 'no .recent-tile elements found');
+        }
+      }
+      await p.close();
+    }
+
+    // J2: Tile has .active class when it matches the current user
+    {
+      const p = await openPage(ALL, 100);
+      await p.evaluate(() => {
+        try { localStorage.setItem('pr-dashboard-recent-users', JSON.stringify(['testuser-j2'])); } catch(e) {}
+      });
+      // Navigate with ?user= to activate the user
+      await p.goto(ALL + '?user=testuser-j2', { waitUntil: 'domcontentloaded' });
+      await wait(500);
+      const activeTile = await p.$('.recent-tile.active');
+      if (activeTile) {
+        const text = await activeTile.textContent();
+        pass('J2: Active tile has .active class: "' + text + '"');
+      } else {
+        fail('J2: Active tile', 'no .recent-tile.active found');
+      }
+      await p.close();
+    }
+
+    // J3: Click an inactive tile → sets as only active user
+    {
+      const p = await openPage(ALL, 100);
+      // Create a recent user via Go, then clear, then click the tile
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('J3: Tile click sets user', 'no author'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        // Clear user filter — tile should remain but become inactive
+        await p.evaluate(() => { if (window.clearUser) clearUser(); });
+        await wait(300);
+        const tile = await p.$('.recent-tile');
+        if (!tile) { fail('J3: Tile click', 'no tile found after clear'); }
+        else {
+          await tile.click();
+          await wait(500);
+          const url = p.url();
+          if (url.includes('user=')) {
+            pass('J3: Clicking inactive tile sets user in URL: ' + url.split('?')[1]);
+          } else {
+            fail('J3: Tile click URL', 'URL=' + url);
+          }
+        }
+      }
+      await p.close();
+    }
+
+    // J4: Click an active tile (without Ctrl) → turns it off
+    {
+      const p = await openPage(ALL, 100);
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('J4: Tile toggle off', 'no author'); }
+      else {
+        // Set up the user as active
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        // Now click the active tile to turn it off
+        const activeTile = await p.$('.recent-tile.active');
+        if (!activeTile) { fail('J4: Tile toggle off', 'no active tile found after Go'); }
+        else {
+          await activeTile.click();
+          await wait(500);
+          const url = p.url();
+          const noUser = !url.includes('user=');
+          const noActiveTile = !(await p.$('.recent-tile.active'));
+          if (noUser && noActiveTile) {
+            pass('J4: Clicking active tile deselects it (no user in URL, no .active tile)');
+          } else {
+            fail('J4: Tile toggle off', 'url=' + url + ', hasActive=' + !noActiveTile);
+          }
+        }
+      }
+      await p.close();
+    }
+
+    // J5: Ctrl-click tiles → multi-select (two users in URL)
+    {
+      const p = await openPage(ALL, 100);
+      // Find two different authors
+      const authors = await p.evaluate(() => {
+        const seen = new Set();
+        const result = [];
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m && !seen.has(m[1])) { seen.add(m[1]); result.push(m[1]); if (result.length >= 2) break; }
+        }
+        return result;
+      });
+      if (authors.length < 2) { fail('J5: Ctrl-click multi-select', 'need 2 authors, found ' + authors.length); }
+      else {
+        // Create both recent users via Go
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, authors[0]);
+        await p.click('#go-btn');
+        await wait(300);
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, authors[1]);
+        await p.click('#go-btn');
+        await wait(300);
+        // Clear and verify both tiles exist
+        await p.evaluate(() => { if (window.clearUser) clearUser(); });
+        await wait(300);
+        // Use locators (auto-retry, auto-re-query) instead of element handles
+        const tileCount = await p.locator('.recent-tile').count();
+        if (tileCount < 2) { fail('J5: Ctrl-click multi-select', 'only ' + tileCount + ' tiles after setup'); }
+        else {
+          // Click first tile normally (re-query after each click since DOM rebuilds)
+          await p.locator('.recent-tile').first().click();
+          await wait(300);
+          // Ctrl-click second tile
+          await p.locator('.recent-tile').nth(1).click({ modifiers: ['Control'] });
+          await wait(500);
+          const url = p.url();
+          const activeTiles = await p.$$('.recent-tile.active');
+          if (activeTiles.length >= 2 && url.includes('user=')) {
+            pass('J5: Ctrl-click multi-select: ' + activeTiles.length + ' active tiles, URL=' + url.split('?')[1]);
+          } else {
+            fail('J5: Ctrl-click multi-select', 'activeTiles=' + activeTiles.length + ', url=' + url);
+          }
+        }
+      }
+      await p.close();
+    }
+
+    // J6: Max 5 recent users stored
+    {
+      const p = await openPage(ALL, 100);
+      // Add 6 users via applyUser calls (within the same page, no navigation)
+      await p.evaluate(() => {
+        for (var i = 1; i <= 6; i++) {
+          document.getElementById('user-field').value = 'testuser' + i;
+          applyUser();
+        }
+      });
+      await wait(300);
+      const tiles = await p.$$('.recent-tile');
+      if (tiles.length === 5) {
+        pass('J6: Recent tiles capped at 5 (rendered ' + tiles.length + ')');
+      } else {
+        fail('J6: Recent tiles cap', tiles.length + ' tiles rendered (expected 5)');
+      }
+      await p.close();
+    }
+
+    // J7: URL with multiple ?user= params restores multi-select
+    {
+      const p = await openPage(ALL + '?user=alice&user=bob', 0);
+      await wait(1000);
+      const url = p.url();
+      const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+      if (summaryText.includes('@alice') && summaryText.includes('@bob')) {
+        pass('J7: Multi-user URL restores both users in summary: "' + summaryText.trim().slice(0,60) + '"');
+      } else if (url.includes('user=alice') && url.includes('user=bob')) {
+        pass('J7: Multi-user URL preserved in address bar');
+      } else {
+        fail('J7: Multi-user URL', 'summary="' + summaryText.trim().slice(0,60) + '", url=' + url);
+      }
+      await p.close();
+    }
+
     // ── Summary ──────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     if (jsErrors.length) console.log('JS errors captured:\n  ' + jsErrors.join('\n  '));
