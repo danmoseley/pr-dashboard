@@ -55,7 +55,6 @@ function Import-PreviousScan {
         # If prevScan.repo is absent (legacy scans pre-dating the repo field), allow
         # incremental mode rather than forcing a full scan for existing deployments.
         if ($Repo -and $prevScan.repo -and $prevScan.repo -ne $Repo) {
-            Write-Warning "Previous scan repo '$($prevScan.repo)' does not match current repo '$Repo' — disabling incremental mode"
             $result.DisableReason = "repo mismatch ($($prevScan.repo) vs $Repo)"
             return $result
         }
@@ -125,21 +124,20 @@ function Get-IncrementalPartition {
             } elseif ($prevEntry.mergeable -eq 'UNKNOWN') {
                 $mustRefresh = $true
             } else {
-                # Per-PR TTL: use _refreshed_at (when this PR was last fully analyzed)
-                # Falls back to PreviousTimestamp for entries from before _refreshed_at was added
+                # Per-PR TTL: require a valid _refreshed_at (when this PR was last fully analyzed).
+                # Missing or malformed values indicate a legacy/corrupt cache entry — force refresh
+                # rather than relying on scan-level timestamp which advances every run.
                 $refreshedAt = $null
                 if ($prevEntry._refreshed_at) {
                     try { $refreshedAt = [datetime]$prevEntry._refreshed_at } catch { }
                 }
-                if (-not $refreshedAt -and $PreviousTimestamp) {
-                    $refreshedAt = $PreviousTimestamp
-                }
                 if (-not $refreshedAt) {
-                    $refreshedAt = [datetime]::MinValue
-                }
-                $prAgeSec = ($now - $refreshedAt).TotalSeconds
-                if ($prAgeSec -gt $MaxReuseSeconds) {
                     $mustRefresh = $true
+                } else {
+                    $prAgeSec = ($now - $refreshedAt).TotalSeconds
+                    if ($prAgeSec -gt $MaxReuseSeconds) {
+                        $mustRefresh = $true
+                    }
                 }
             }
 

@@ -37,6 +37,10 @@ BeforeAll {
             [string]$NextAction = 'needs-review',
             [string]$RefreshedAt = ''
         )
+        if (-not $RefreshedAt) {
+            # Default to recent timestamp so TTL doesn't force refresh in most tests
+            $RefreshedAt = (Get-Date).AddHours(-1).ToString('o')
+        }
         $entry = [PSCustomObject]@{
             number       = $Number
             ci           = $CI
@@ -46,9 +50,7 @@ BeforeAll {
             _fingerprint = $Fingerprint
             age_days     = 14
             days_since_update = 2
-        }
-        if ($RefreshedAt) {
-            $entry | Add-Member -NotePropertyName '_refreshed_at' -NotePropertyValue $RefreshedAt
+            _refreshed_at = $RefreshedAt
         }
         $entry
     }
@@ -324,8 +326,13 @@ Describe 'Get-IncrementalPartition' {
         $partition.ReusedEntries.Count | Should -Be 1
     }
 
-    It 'Force-refreshes when no _refreshed_at and no PreviousTimestamp (legacy entry)' {
-        $lookup = @{ '10' = $entry1 }
+    It 'Force-refreshes when _refreshed_at is absent (legacy entry, no PreviousTimestamp)' {
+        $legacyEntry = [PSCustomObject]@{
+            number = 10; ci = 'SUCCESS'; mergeable = 'MERGEABLE'
+            score = 80; next_action = 'needs-review'; _fingerprint = $fp1
+            age_days = 14; days_since_update = 2
+        }
+        $lookup = @{ '10' = $legacyEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
@@ -333,22 +340,25 @@ Describe 'Get-IncrementalPartition' {
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
-    It 'Falls back to PreviousTimestamp when _refreshed_at is absent' {
-        # entry1 has no _refreshed_at; PreviousTimestamp is recent, so reuse
-        $lookup = @{ '10' = $entry1 }
+    It 'Force-refreshes when _refreshed_at is absent (legacy entry, even with recent PreviousTimestamp)' {
+        $legacyEntry = [PSCustomObject]@{
+            number = 10; ci = 'SUCCESS'; mergeable = 'MERGEABLE'
+            score = 80; next_action = 'needs-review'; _fingerprint = $fp1
+            age_days = 14; days_since_update = 2
+        }
+        $lookup = @{ '10' = $legacyEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
             -PreviousTimestamp (Get-Date).AddMinutes(-5)
-        $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 1
     }
 
     It 'Force-refreshes when _refreshed_at is malformed (non-parseable)' {
         $badEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -RefreshedAt 'not-a-date'
         $lookup = @{ '10' = $badEntry }
         $fpMap = @{ '10' = $fp1 }
-        # Malformed _refreshed_at should cause [datetime] cast to fail;
-        # fallback to PreviousTimestamp=null -> MinValue -> TTL expired -> refresh
+        # Malformed _refreshed_at should cause [datetime] cast to fail -> force refresh
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
             -PreviousTimestamp $null
