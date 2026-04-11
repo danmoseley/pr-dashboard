@@ -739,12 +739,16 @@
     return re.test(who);
   }
 
+  function getNormalizedMentions(text) {
+    var matches = (text || '').match(/@[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*/g) || [];
+    return matches.map(function(m) { return m.slice(1).toLowerCase(); });
+  }
+
   // Check whether the next action is on a maintainer (someone other than the PR author)
   function isMaintainersTurn(pr) {
     var authorLc = (pr.author || '').toLowerCase();
-    var who = pr.who || '';
-    var mentions = who.match(/@([\w-]+)/g) || [];
-    return mentions.some(function(m) { return m.slice(1).toLowerCase() !== authorLc; });
+    var mentions = getNormalizedMentions(pr.who);
+    return mentions.some(function(m) { return m && m !== authorLc; });
   }
 
   // Filter and render all PRs using the maintainer-context filters (no user set)
