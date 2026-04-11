@@ -55,7 +55,7 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
-  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUser()" title="Clear user filter" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
+  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUser()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
   <label class="involves-label" id="involves-label" style="display:none">
     <input type="checkbox" id="involves-toggle">
     Include all involved PRs
@@ -387,20 +387,24 @@
         savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
         try { localStorage.setItem(LS_NM_BEFORE_EASY_KEY, savedNextMaintainerBeforeEasy ? 'true' : 'false'); } catch(e) {}
         applyEasyMaintainerImpliedState();
+        // Persist the forced NM=true state
+        try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, 'true'); } catch(e) {}
       } else {
         // Restore next-maintainer to its previous state
         nextActionMaintainerMode = savedNextMaintainerBeforeEasy;
         nextActionMaintainerToggle.checked = nextActionMaintainerMode;
         nextActionMaintainerToggle.disabled = false;
         try { localStorage.removeItem(LS_NM_BEFORE_EASY_KEY); } catch(e) {}
+        try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
       }
-      try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
       history.replaceState(null, '', buildCurrentUrl());
       if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
     });
   }
 
-  // Apply initial disabled state if easy-action-maintainer was persisted
+  // Apply initial disabled state if easy-action-maintainer was persisted.
+  // showMaintainerToggles() will also call applyEasyMaintainerImpliedState() if easy is active
+  // when switching from user to maintainer context — this is intentional and harmless.
   if (easyActionMaintainerMode) {
     applyEasyMaintainerImpliedState();
   }
