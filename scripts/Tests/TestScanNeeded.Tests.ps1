@@ -3,10 +3,16 @@ Describe 'Test-ScanNeeded.ps1' {
         $scriptPath = Join-Path $PSScriptRoot '..' 'Test-ScanNeeded.ps1'
 
         # Helper: compute probe hash (same algorithm as Get-PrTriageData and Test-ScanNeeded)
+        # Canonicalizes updatedAt to UTC ISO 8601 to match production code
         function Get-ProbeHash {
             param([array]$Prs, [int]$TotalCount = -1)
             if ($TotalCount -lt 0) { $TotalCount = $Prs.Count }
-            $pairs = @($Prs | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+            $jsonRoundTripped = ($Prs | ConvertTo-Json -Depth 5 | ConvertFrom-Json)
+            if ($Prs.Count -eq 1) { $jsonRoundTripped = @($jsonRoundTripped) }
+            $pairs = @($jsonRoundTripped | ForEach-Object {
+                $ts = if ($_.updatedAt -is [datetime]) { $_.updatedAt.ToUniversalTime().ToString('o') } else { "$($_.updatedAt)" }
+                "$($_.number):$ts"
+            } | Sort-Object)
             $input = "total=$TotalCount|" + ($pairs -join '|')
             $sha = [System.Security.Cryptography.SHA256]::Create()
             $bytes = [System.Text.Encoding]::UTF8.GetBytes($input)
@@ -156,6 +162,101 @@ Describe 'Test-ScanNeeded.ps1' {
                 $result = pwsh -NoProfile -Command "& '$scriptPath' -Repo 'owner/repo' -PreviousScanFile '$tmp' 2>`$null"
                 $result | Should -Be 'true'
             } finally { Remove-Item $tmp -ErrorAction SilentlyContinue }
+        }
+    }
+
+    Context 'GraphQL probe path (gh shim)' {
+        BeforeAll {
+            # Create a directory for the gh shim
+            $script:shimDir = Join-Path ([System.IO.Path]::GetTempPath()) "gh-shim-$([guid]::NewGuid())"
+            New-Item -ItemType Directory -Path $script:shimDir -Force | Out-Null
+        }
+        AfterAll {
+            Remove-Item $script:shimDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+
+        It 'returns false when probe hash matches (skip scan)' {
+            # Build a scan.json with matching probe hash for 2 known PRs
+            $prs = @(
+                @{ number = 10; updatedAt = '2025-06-01T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' },
+                @{ number = 20; updatedAt = '2025-06-02T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' }
+            )
+            $hash = Get-ProbeHash -Prs $prs -TotalCount 2
+            $f = New-ScanFile @{
+                timestamp = (Get-Date).AddMinutes(-5).ToString('o')
+                prs = $prs
+                _probe_hash = $hash
+            }
+
+            # gh shim that returns matching GraphQL response
+            $json = '{"data":{"repository":{"pullRequests":{"totalCount":2,"nodes":[{"number":10,"updatedAt":"2025-06-01T00:00:00Z"},{"number":20,"updatedAt":"2025-06-02T00:00:00Z"}],"pageInfo":{"hasNextPage":false,"endCursor":"abc"}}}}}'
+            if ($IsWindows) {
+                $ghShim = Join-Path $script:shimDir 'gh.cmd'
+                "@echo off`necho $json" | Set-Content $ghShim
+            } else {
+                $ghShim = Join-Path $script:shimDir 'gh'
+                "#!/bin/bash`necho '$json'" | Set-Content $ghShim -NoNewline
+                chmod +x $ghShim
+            }
+
+            try {
+                $result = pwsh -NoProfile -Command "`$env:PATH = '$($script:shimDir)' + [IO.Path]::PathSeparator + `$env:PATH; & '$scriptPath' -Repo 'owner/repo' -PreviousScanFile '$f' 2>`$null"
+                $result | Should -Be 'false'
+            } finally { Remove-Item $f -ErrorAction SilentlyContinue }
+        }
+
+        It 'returns true when probe hash differs (scan needed)' {
+            $f = New-ScanFile @{
+                timestamp = (Get-Date).AddMinutes(-5).ToString('o')
+                prs = @(
+                    @{ number = 10; updatedAt = '2025-06-01T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' }
+                )
+                _probe_hash = 'oldstalehashabcde'
+            }
+
+            # gh shim returns different data (PR 20 added)
+            $json = '{"data":{"repository":{"pullRequests":{"totalCount":2,"nodes":[{"number":10,"updatedAt":"2025-06-01T00:00:00Z"},{"number":20,"updatedAt":"2025-06-02T00:00:00Z"}],"pageInfo":{"hasNextPage":false,"endCursor":"abc"}}}}}'
+            if ($IsWindows) {
+                $ghShim = Join-Path $script:shimDir 'gh.cmd'
+                "@echo off`necho $json" | Set-Content $ghShim
+            } else {
+                $ghShim = Join-Path $script:shimDir 'gh'
+                "#!/bin/bash`necho '$json'" | Set-Content $ghShim -NoNewline
+                chmod +x $ghShim
+            }
+
+            try {
+                $result = pwsh -NoProfile -Command "`$env:PATH = '$($script:shimDir)' + [IO.Path]::PathSeparator + `$env:PATH; & '$scriptPath' -Repo 'owner/repo' -PreviousScanFile '$f' 2>`$null"
+                $result | Should -Be 'true'
+            } finally { Remove-Item $f -ErrorAction SilentlyContinue }
+        }
+
+        It 'returns true when hasNextPage is true (>100 PRs)' {
+            $prs = @(
+                @{ number = 10; updatedAt = '2025-06-01T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' }
+            )
+            $hash = Get-ProbeHash -Prs $prs -TotalCount 1
+            $f = New-ScanFile @{
+                timestamp = (Get-Date).AddMinutes(-5).ToString('o')
+                prs = $prs
+                _probe_hash = $hash
+            }
+
+            # gh shim returns hasNextPage=true
+            $json = '{"data":{"repository":{"pullRequests":{"totalCount":150,"nodes":[{"number":10,"updatedAt":"2025-06-01T00:00:00Z"}],"pageInfo":{"hasNextPage":true,"endCursor":"abc"}}}}}'
+            if ($IsWindows) {
+                $ghShim = Join-Path $script:shimDir 'gh.cmd'
+                "@echo off`necho $json" | Set-Content $ghShim
+            } else {
+                $ghShim = Join-Path $script:shimDir 'gh'
+                "#!/bin/bash`necho '$json'" | Set-Content $ghShim -NoNewline
+                chmod +x $ghShim
+            }
+
+            try {
+                $result = pwsh -NoProfile -Command "`$env:PATH = '$($script:shimDir)' + [IO.Path]::PathSeparator + `$env:PATH; & '$scriptPath' -Repo 'owner/repo' -PreviousScanFile '$f' 2>`$null"
+                $result | Should -Be 'true'
+            } finally { Remove-Item $f -ErrorAction SilentlyContinue }
         }
     }
 }

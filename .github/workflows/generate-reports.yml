@@ -119,7 +119,13 @@ jobs:
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
 
               # Lightweight probe: skip scan entirely if nothing changed and previous scan is stable
-              scan_needed=$(pwsh ./scripts/Test-ScanNeeded.ps1 -Repo "$repo" -PreviousScanFile "docs/${slug}/scan.json" 2>/dev/null || echo "true")
+              # MaxSkipSeconds must exceed the longest schedule interval for this tier
+              if [ "$tier" = "priority" ]; then
+                max_skip=46800   # 13h (priority runs every ~6h weekdays, ~12h weekends)
+              else
+                max_skip=90000   # 25h (standard runs ~daily)
+              fi
+              scan_needed=$(pwsh ./scripts/Test-ScanNeeded.ps1 -Repo "$repo" -PreviousScanFile "docs/${slug}/scan.json" -MaxSkipSeconds $max_skip 2>/dev/null || echo "true")
               if [ "$scan_needed" = "false" ]; then
                 echo "::notice::${repo} — probe says unchanged, skipping scan"
                 scanned_slugs+=("$slug")

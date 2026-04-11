@@ -425,8 +425,24 @@
         }
 
         // Show API rate limit in footer (subtle, for admins)
-        var rateLimits = results
-          .filter(function(r) { return r._rate_limit; })
+        // Only use _rate_limit from the most recent scan run to avoid mixing stale data
+        // Use 1h tolerance since repos in the same run finish within minutes of each other
+        var rateLimitResults = results.filter(function(r) { return r._rate_limit; });
+        var newestUpdatedMs = null;
+        rateLimitResults.forEach(function(r) {
+          if (!r.updated) return;
+          var ms = new Date(r.updated).getTime();
+          if (!isNaN(ms) && (newestUpdatedMs === null || ms > newestUpdatedMs)) newestUpdatedMs = ms;
+        });
+        if (newestUpdatedMs !== null) {
+          var ONE_HOUR_MS = 3600000;
+          rateLimitResults = rateLimitResults.filter(function(r) {
+            if (!r.updated) return false;
+            var ms = new Date(r.updated).getTime();
+            return !isNaN(ms) && (newestUpdatedMs - ms) < ONE_HOUR_MS;
+          });
+        }
+        var rateLimits = rateLimitResults
           .map(function(r) { return { repo: r.repo, rest_remaining: r._rate_limit.rest_remaining, graphql_remaining: r._rate_limit.graphql_remaining, reset: r._rate_limit.reset, total_used: r._rate_limit.total_used }; });
         if (window.showRateLimit) window.showRateLimit(rateLimits);
 

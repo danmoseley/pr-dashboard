@@ -89,7 +89,11 @@ query {
         exit 0
     }
 
-    $pairs = @($prData.nodes | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+    $pairs = @($prData.nodes | ForEach-Object {
+        # Canonicalize updatedAt to UTC ISO 8601 to avoid locale-dependent DateTime formatting
+        $ts = if ($_.updatedAt -is [datetime]) { $_.updatedAt.ToUniversalTime().ToString('o') } else { "$($_.updatedAt)" }
+        "$($_.number):$ts"
+    } | Sort-Object)
     $hashInput = "total=$($prData.totalCount)|" + ($pairs -join '|')
 
     # Hash the probe data

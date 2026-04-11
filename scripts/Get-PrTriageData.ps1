@@ -277,7 +277,10 @@ Write-Verbose "Scanned $($prsRaw.Count) -> $($candidates.Count) candidates ($exc
 if ($candidates.Count -eq 0) {
     Write-Verbose "No candidates to analyze."
     # Compute probe hash even for empty results
-    $probePairs = @($prsRaw | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+    $probePairs = @($prsRaw | ForEach-Object {
+        $ts = if ($_.updatedAt -is [datetime]) { $_.updatedAt.ToUniversalTime().ToString('o') } else { "$($_.updatedAt)" }
+        "$($_.number):$ts"
+    } | Sort-Object)
     $probeInput = "total=$($prsRaw.Count)|" + ($probePairs -join '|')
     $sha0 = [System.Security.Cryptography.SHA256]::Create()
     $probeHash0 = [BitConverter]::ToString($sha0.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($probeInput))).Replace('-', '').Substring(0, 16).ToLower()
@@ -1125,7 +1128,10 @@ if ($Top -gt 0) {
 
 # --- Output JSON ---
 # Compute probe hash for lightweight skip-scan detection (matches Test-ScanNeeded.ps1)
-$probePairs = @($prsRaw | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+$probePairs = @($prsRaw | ForEach-Object {
+    $ts = if ($_.updatedAt -is [datetime]) { $_.updatedAt.ToUniversalTime().ToString('o') } else { "$($_.updatedAt)" }
+    "$($_.number):$ts"
+} | Sort-Object)
 $probeInput = "total=$($prsRaw.Count)|" + ($probePairs -join '|')
 $sha = [System.Security.Cryptography.SHA256]::Create()
 $probeBytes = [System.Text.Encoding]::UTF8.GetBytes($probeInput)

@@ -35,14 +35,18 @@
     });
     if (minRestRemaining === Infinity && minGraphqlRemaining === Infinity) return;
     var resetDate = new Date(resetEpoch * 1000);
-    var resetStr = resetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    var hasValidReset = resetEpoch > 0 && !isNaN(resetDate.getTime());
+    var resetStr = hasValidReset ? resetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
     var parts = [];
     if (minRestRemaining !== Infinity) parts.push('REST ' + minRestRemaining);
     if (minGraphqlRemaining !== Infinity) parts.push('GraphQL ' + minGraphqlRemaining);
     var span = document.createElement('span');
     span.style.cssText = 'margin-left:1.5em;opacity:0.6;';
-    span.title = 'GitHub API quota remaining after last pipeline run. Resets at ' + resetStr + '.';
-    span.textContent = 'API: ' + parts.join(', ') + ' remaining (used ~' + totalUsed + ' REST, resets ' + resetStr + ')';
+    span.title = hasValidReset
+      ? 'GitHub API quota remaining after last pipeline run. Resets at ' + resetStr + '.'
+      : 'GitHub API quota remaining after last pipeline run.';
+    span.textContent = 'API: ' + parts.join(', ') + ' remaining (used ~' + totalUsed + ' REST' +
+      (hasValidReset ? ', resets ' + resetStr : '') + ')';
     footer.appendChild(span);
   };
 })();
