@@ -415,6 +415,39 @@ async function runTests() {
       await p15.close();
     }
 
+    // ── Test 16: Repo magnifying glass filter-btn present in repo column ─────
+    {
+      const repoFilterBtns = await page.$$('td.repo-col a.filter-btn');
+      if (repoFilterBtns.length > 0) pass('Test 16: Repo magnifying glass (filter-btn) present in repo-col: ' + repoFilterBtns.length);
+      else fail('Test 16: Repo magnifying glass', 'no a.filter-btn inside td.repo-col');
+    }
+
+    // ── Test 17: Repo nav icon (↗) is not present ────────────────────────────
+    {
+      const navIcons = await page.$$('.repo-nav-icon');
+      if (navIcons.length === 0) pass('Test 17: Repo nav icon (↗) correctly absent');
+      else fail('Test 17: Repo nav icon absent', navIcons.length + ' .repo-nav-icon element(s) found');
+    }
+
+    // ── Test 18: Click repo magnifying glass → repo chip appears ─────────────
+    {
+      const p18 = await browser.newPage();
+      await p18.goto(PAGE, { waitUntil: 'domcontentloaded' });
+      await p18.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT });
+      const repoGlass = p18.locator('td.repo-col a.filter-btn').first();
+      if (await repoGlass.count() > 0) {
+        // Use evaluate click to avoid Playwright synthetic-event hit-testing quirk with CSS filter elements
+        await p18.evaluate(() => { document.querySelector('td.repo-col a.filter-btn').click(); });
+        await p18.waitForFunction(() => [...document.querySelectorAll('.filter-chip')].some(c => c.textContent.includes('Repo:')), { timeout: 5000 });
+        const chips = await p18.$$eval('.filter-chip', els => els.map(e => e.textContent.trim()));
+        if (chips.some(t => t.includes('Repo:'))) pass('Test 18: Clicking repo magnifying glass creates Repo chip: ' + chips.join(', '));
+        else fail('Test 18: Repo magnifying glass click', 'no Repo: chip — chips: ' + chips.join(', '));
+      } else {
+        fail('Test 18: Repo magnifying glass', 'no a.filter-btn in td.repo-col');
+      }
+      await p18.close();
+    }
+
     // ── Summary ─────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     // Separate real JS exceptions (pageerror) from expected resource-load failures (console errors)
