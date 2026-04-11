@@ -231,6 +231,56 @@ Describe 'Test-ScanNeeded.ps1' {
             } finally { Remove-Item $f -ErrorAction SilentlyContinue }
         }
 
+        It 'returns false with multi-line (pretty-printed) gh output' {
+            # Ensures -join handles array-of-lines from gh CLI
+            $prs = @(
+                @{ number = 10; updatedAt = '2025-06-01T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' },
+                @{ number = 20; updatedAt = '2025-06-02T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' }
+            )
+            $hash = Get-ProbeHash -Prs $prs -TotalCount 2
+            $f = New-ScanFile @{
+                timestamp = (Get-Date).AddMinutes(-5).ToString('o')
+                prs = $prs
+                _probe_hash = $hash
+            }
+
+            # gh shim that returns pretty-printed multi-line JSON
+            $multiLineJson = @'
+{
+  "data": {
+    "repository": {
+      "pullRequests": {
+        "totalCount": 2,
+        "nodes": [
+          { "number": 10, "updatedAt": "2025-06-01T00:00:00Z" },
+          { "number": 20, "updatedAt": "2025-06-02T00:00:00Z" }
+        ],
+        "pageInfo": { "hasNextPage": false, "endCursor": "abc" }
+      }
+    }
+  }
+}
+'@
+            if ($IsWindows) {
+                $ghShim = Join-Path $script:shimDir 'gh.cmd'
+                # Write multi-line JSON via a temp file so echo preserves newlines
+                $jsonFile = Join-Path $script:shimDir 'response.json'
+                $multiLineJson | Set-Content $jsonFile
+                "@echo off`ntype `"$jsonFile`"" | Set-Content $ghShim
+            } else {
+                $ghShim = Join-Path $script:shimDir 'gh'
+                $jsonFile = Join-Path $script:shimDir 'response.json'
+                $multiLineJson | Set-Content $jsonFile
+                "#!/bin/bash`ncat '$jsonFile'" | Set-Content $ghShim -NoNewline
+                chmod +x $ghShim
+            }
+
+            try {
+                $result = pwsh -NoProfile -Command "`$env:PATH = '$($script:shimDir)' + [IO.Path]::PathSeparator + `$env:PATH; & '$scriptPath' -Repo 'owner/repo' -PreviousScanFile '$f' 2>`$null"
+                $result | Should -Be 'false'
+            } finally { Remove-Item $f -ErrorAction SilentlyContinue }
+        }
+
         It 'returns true when hasNextPage is true (>100 PRs)' {
             $prs = @(
                 @{ number = 10; updatedAt = '2025-06-01T00:00:00Z'; ci = 'SUCCESS'; mergeable = 'MERGEABLE' }

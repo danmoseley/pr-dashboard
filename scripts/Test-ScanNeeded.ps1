@@ -73,13 +73,25 @@ query {
   }
 }
 "@
-    $result = gh api graphql -f query="$query" 2>&1
+    $stderrFile = [System.IO.Path]::GetTempFileName()
+    try {
+        $result = gh api graphql -f query="$query" 2> $stderrFile
+        $stderr = if (Test-Path $stderrFile) { Get-Content -Raw -Path $stderrFile } else { '' }
+    } finally {
+        if (Test-Path $stderrFile) { Remove-Item -Path $stderrFile -Force -ErrorAction SilentlyContinue }
+    }
     if ($LASTEXITCODE -ne 0) {
-        Write-Verbose "GraphQL probe failed — scan needed"
+        Write-Verbose "GraphQL probe failed: $stderr — scan needed"
         Write-Host "true"
         exit 0
     }
-    $data = $result | ConvertFrom-Json
+    $resultJson = ($result -join "`n")
+    if ([string]::IsNullOrWhiteSpace($resultJson)) {
+        Write-Verbose "GraphQL probe returned empty output — scan needed"
+        Write-Host "true"
+        exit 0
+    }
+    $data = $resultJson | ConvertFrom-Json
     $prData = $data.data.repository.pullRequests
 
     # If more than 100 open PRs, probe hash can't match full scan hash — must scan
