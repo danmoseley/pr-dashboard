@@ -14,6 +14,7 @@
     Default: 10800 (3 hours). Callers may increase this to match workflow cadence
     and the maximum freshness window they are willing to tolerate.
 #>
+[CmdletBinding()]
 param(
     [Parameter(Mandatory)][string]$Repo,
     [Parameter(Mandatory)][string]$PreviousScanFile,

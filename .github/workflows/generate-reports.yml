@@ -88,7 +88,8 @@ jobs:
           rate_start=$(gh api rate_limit 2>/dev/null || echo "")
           rest_start=$(echo "$rate_start" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
           graphql_start=$(echo "$rate_start" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
-          scanned_slugs=()  # Track repos that were actually scanned or probed this run
+          scanned_slugs=()  # Track repos that were processed this run (scanned or probe-skipped)
+          freshly_scanned=()  # Track repos that were actually rescanned (for rate-limit injection)
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug tier <<< "$entry"
 
@@ -176,6 +177,7 @@ jobs:
               fi
             fi
             scanned_slugs+=("$slug")
+            freshly_scanned+=("$slug")
             if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
@@ -207,7 +209,7 @@ jobs:
             total_rest_used=0
             [ -n "$rest_start" ] && [ -n "$rest_end" ] && total_rest_used=$((rest_start - rest_end))
             [ "$total_rest_used" -lt 0 ] && total_rest_used=0
-            for slug in "${scanned_slugs[@]}"; do
+            for slug in "${freshly_scanned[@]}"; do
               if [ -f "docs/${slug}/scan.json" ]; then
                 pwsh -Command "
                   \$j = Get-Content 'docs/${slug}/scan.json' -Raw | ConvertFrom-Json
