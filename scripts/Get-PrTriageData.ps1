@@ -56,6 +56,7 @@ param(
     [string[]]$Maintainers = @(),
     [string]$PreviousScanFile,
     [string]$OutputFile,
+    [string]$ActivityFile,
     [switch]$OutputCsv
 )
 
@@ -101,6 +102,20 @@ try {
 }
 $CacheVersion = Get-IncrementalCacheVersion
 
+# Import activity-based fallback reviewer selection helpers
+$activityModule = Join-Path $PSScriptRoot 'MaintainerActivity.psm1'
+try {
+    if (Test-Path $activityModule) {
+        Import-Module $activityModule -Force
+    } else { throw "Module file not found" }
+} catch {
+    Write-Verbose "MaintainerActivity module unavailable ($_) — using inline fallback"
+    function Select-FallbackReviewers {
+        param([string[]]$Maintainers, [string]$ExcludeLogin, [string]$Repo, $ActivityData, [string[]]$ChangedFilePaths, [string[]]$AreaLabels)
+        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin })
+    }
+}
+
 # Compute a lightweight probe hash from PR numbers + updatedAt timestamps.
 # Used by Test-ScanNeeded.ps1 to skip unchanged repos without a full scan.
 # Must stay in sync with the hash logic in Test-ScanNeeded.ps1.
@@ -140,6 +155,18 @@ function Invoke-GhRetry {
 if ($Maintainers.Count -eq 1 -and $Maintainers[0] -match ',') {
     $Maintainers = $Maintainers[0] -split ','
 }
+
+# Load maintainer activity data for smarter fallback reviewer selection
+$maintainerActivityData = $null
+if ($ActivityFile -and (Test-Path $ActivityFile)) {
+    try {
+        $maintainerActivityData = Get-Content $ActivityFile -Raw | ConvertFrom-Json
+        Write-Verbose "Loaded maintainer activity data from $ActivityFile"
+    } catch {
+        Write-Warning "Could not load maintainer activity file '$ActivityFile': $_"
+    }
+}
+
 $scriptStart = Get-Date
 
 try {   # Top-level catch ensures stdout is always valid JSON
@@ -523,7 +550,20 @@ foreach ($pr in $refreshCandidates) {
     # Merge: codeowners first (higher authority), then area-label owners
     $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
-    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
+    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
+        # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
+        # Falls back to alphabetical if no activity data is available.
+        $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
+        $authorExclude = if ($pr.author) { $pr.author.login } else { '' }
+        $prOwners = @(Select-FallbackReviewers `
+            -Maintainers $Maintainers `
+            -ExcludeLogin $authorExclude `
+            -Repo $Repo `
+            -ActivityData $maintainerActivityData `
+            -ChangedFilePaths $changedFilePaths `
+            -AreaLabels $prAreaLabels)
+        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Select-Object -First 2) }
+    }
     # Any maintainer's approval satisfies the merge gate; $prOwners is used to
     # suggest reviewers, not to gate merging. Compute once for reuse below.
     # Only $Maintainers (from maintainers.json) counts for gating; $prOwners

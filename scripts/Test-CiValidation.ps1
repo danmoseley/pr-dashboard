@@ -93,6 +93,46 @@ try {
 }
 Write-Check -Name "JSON: maintainers.json" -Ok $maintainersOk -Detail $maintainersDetail
 
+# maintainer-activity.json (optional — only validated if it exists)
+$activityFile = Join-Path $root "config/maintainer-activity.json"
+if (Test-Path $activityFile) {
+    $activityOk = $false
+    $activityDetail = ""
+    try {
+        $a = Get-Content $activityFile -Raw | ConvertFrom-Json
+        $repoKeys = @($a.PSObject.Properties.Name)
+        if ($repoKeys.Count -eq 0) {
+            $activityDetail = "No repo entries found"
+        } else {
+            $badRepoKeys = @($repoKeys | Where-Object { $_ -notmatch '^[\w.-]+/[\w.-]+$' })
+            if ($badRepoKeys.Count -gt 0) {
+                $activityDetail = "Invalid repo keys: $($badRepoKeys -join ', ')"
+            } else {
+                $badEntries = @()
+                foreach ($repo in $repoKeys) {
+                    $maintainers = $a.$repo
+                    foreach ($mp in $maintainers.PSObject.Properties) {
+                        $entry = $mp.Value
+                        if ($null -eq $entry.merge_count -or
+                            $null -eq $entry.top_paths -or
+                            $null -eq $entry.top_area_labels) {
+                            $badEntries += "$repo/$($mp.Name)"
+                        }
+                    }
+                }
+                if ($badEntries.Count -gt 0) {
+                    $activityDetail = "Entries missing required fields: $($badEntries -join ', ')"
+                } else {
+                    $activityOk = $true
+                }
+            }
+        }
+    } catch {
+        $activityDetail = "Parse error: $_"
+    }
+    Write-Check -Name "JSON: maintainer-activity.json" -Ok $activityOk -Detail $activityDetail
+}
+
 # repos.json
 $reposJsonFile = Join-Path $root "docs/repos.json"
 $reposJsonOk = $false
