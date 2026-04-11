@@ -63,6 +63,14 @@
     <input type="checkbox" id="easy-action-toggle">
     Easy next actions only
   </label>
+  <label class="involves-label" id="next-action-maintainer-label" style="display:none">
+    <input type="checkbox" id="next-action-maintainer-toggle">
+    Next action on maintainer
+  </label>
+  <label class="involves-label" id="easy-action-maintainer-label" style="display:none">
+    <input type="checkbox" id="easy-action-maintainer-toggle">
+    Easy next action on maintainer
+  </label>
 </div>
 <div class="recent-tiles" id="recent-tiles"></div>
 
@@ -150,7 +158,9 @@
   var involvesMode = false; // whether "Include all involved PRs" is checked
   var nextActionOnlyMode = false; // whether "Next action on me only" is checked
 
-  var easyActionMode = false;    // whether "Easy next actions only" is checked
+  var easyActionMode = false;         // whether "Easy next actions only" is checked (user-filter context)
+  var nextActionMaintainerMode = false; // whether "Next action on maintainer" is checked (no-user context)
+  var easyActionMaintainerMode = false; // whether "Easy next action on maintainer" is checked (no-user context)
   var activeAreas = [];   // area labels currently filtered (multi-select)
   var activeRepos = [];   // repo slugs currently filtered (multi-select)
   var moreRowsExpanded = false; // track whether "Show N more" rows are visible
@@ -177,6 +187,8 @@
   var LS_INVOLVES_KEY = 'pr-dashboard-involves';
   var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
   var LS_EASY_ACTION_KEY = 'pr-dashboard-easy-action';
+  var LS_NEXT_MAINTAINER_KEY = 'pr-dashboard-next-maintainer';
+  var LS_EASY_MAINTAINER_KEY = 'pr-dashboard-easy-maintainer';
   var LS_RECENT_USERS_KEY = 'pr-dashboard-recent-users';
   var MAX_RECENT_USERS = 5;
 
@@ -201,6 +213,8 @@
   var urlInvolves = params.get('involves');
   var urlNextAction = params.get('nextaction');
   var urlEasyAction = params.get('easyaction');
+  var urlNextMaintainer = params.get('nextmaintainer');
+  var urlEasyMaintainer = params.get('easymaintainer');
   try {
     // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
     // For backward compat, also accept the legacy comma-separated form (?area=a,b).
@@ -232,6 +246,16 @@
   } else {
     try { easyActionMode = localStorage.getItem(LS_EASY_ACTION_KEY) === 'true'; } catch(e) {}
   }
+  if (urlNextMaintainer !== null) {
+    nextActionMaintainerMode = urlNextMaintainer === 'true' || urlNextMaintainer === '1';
+  } else {
+    try { nextActionMaintainerMode = localStorage.getItem(LS_NEXT_MAINTAINER_KEY) === 'true'; } catch(e) {}
+  }
+  if (urlEasyMaintainer !== null) {
+    easyActionMaintainerMode = urlEasyMaintainer === 'true' || urlEasyMaintainer === '1';
+  } else {
+    try { easyActionMaintainerMode = localStorage.getItem(LS_EASY_MAINTAINER_KEY) === 'true'; } catch(e) {}
+  }
   var initialUsers = urlUsers.length > 0 ? urlUsers : (savedUser ? [savedUser] : []);
   if (initialUsers.length > 0) {
     activeUsers = initialUsers.slice();
@@ -242,10 +266,15 @@
     initialUsers.forEach(function(u) { addRecentUser(u); });
     // Ensure LS_KEY matches the displayed user (addRecentUser writes LS_KEY on each call)
     try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
+  } else {
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
   }
   document.getElementById('involves-toggle').checked = involvesMode;
   document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
   document.getElementById('easy-action-toggle').checked = easyActionMode;
+  document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
+  document.getElementById('easy-action-maintainer-toggle').checked = easyActionMaintainerMode;
   renderRecentTiles();
 
   // Enter key on input
@@ -307,6 +336,28 @@
       try { localStorage.setItem(LS_EASY_ACTION_KEY, easyActionMode ? 'true' : 'false'); } catch(e) {}
       if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
       if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
+    });
+  }
+
+  // Next action on maintainer toggle handler (no-user context)
+  var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
+  if (nextActionMaintainerToggle) {
+    nextActionMaintainerToggle.addEventListener('change', function() {
+      nextActionMaintainerMode = this.checked;
+      try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
+    });
+  }
+
+  // Easy next action on maintainer toggle handler (no-user context)
+  var easyActionMaintainerToggle = document.getElementById('easy-action-maintainer-toggle');
+  if (easyActionMaintainerToggle) {
+    easyActionMaintainerToggle.addEventListener('change', function() {
+      easyActionMaintainerMode = this.checked;
+      try { localStorage.setItem(LS_EASY_MAINTAINER_KEY, easyActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
     });
   }
 
@@ -376,7 +427,7 @@
         if (activeUsers.length > 0) {
           renderFiltered(activeUsers);
         } else {
-          renderTable(allPrs);
+          renderFilteredMaintainer();
         }
       })
       .catch(function(err) {
@@ -392,6 +443,8 @@
     if (involvesMode) p.set('involves', 'true');
     if (nextActionOnlyMode) p.set('nextaction', 'true');
     if (easyActionMode) p.set('easyaction', 'true');
+    if (nextActionMaintainerMode) p.set('nextmaintainer', 'true');
+    if (easyActionMaintainerMode) p.set('easymaintainer', 'true');
     activeAreas.forEach(function(a) { p.append('area', a); });
     activeRepos.forEach(function(r) { p.append('repo', r); });
     var qs = p.toString();
@@ -539,13 +592,19 @@
     involvesMode = false;
     nextActionOnlyMode = false;
     easyActionMode = false;
+    nextActionMaintainerMode = false;
+    easyActionMaintainerMode = false;
     document.getElementById('involves-toggle').checked = false;
     document.getElementById('involves-toggle').disabled = false;
     document.getElementById('next-action-toggle').checked = false;
     document.getElementById('easy-action-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('easy-action-maintainer-toggle').checked = false;
     document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
     history.replaceState(null, '', location.pathname);
     document.getElementById('summary-bar').style.display = 'none';
     var banner = document.getElementById('filter-banner');
@@ -554,6 +613,8 @@
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NEXT_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_MAINTAINER_KEY); } catch(e) {}
     renderRecentTiles();
     if (loaded) renderTable(allPrs);
   };
@@ -562,6 +623,16 @@
     document.getElementById('involves-label').style.display = '';
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
+    document.getElementById('next-action-maintainer-label').style.display = 'none';
+    document.getElementById('easy-action-maintainer-label').style.display = 'none';
+  }
+
+  function showMaintainerToggles() {
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
+    document.getElementById('involves-label').style.display = 'none';
+    document.getElementById('next-action-label').style.display = 'none';
+    document.getElementById('easy-action-label').style.display = 'none';
   }
 
   // --- Recent Users ---
@@ -632,14 +703,12 @@
         // Only clear user-related state; preserve area/repo/other filters
         document.getElementById('user-field').value = '';
         try { localStorage.removeItem(LS_KEY); } catch(e) {}
-        document.getElementById('involves-label').style.display = 'none';
-        document.getElementById('next-action-label').style.display = 'none';
-        document.getElementById('easy-action-label').style.display = 'none';
+        showMaintainerToggles();
         history.replaceState(null, '', buildCurrentUrl());
         renderRecentTiles();
         var summaryBar = document.getElementById('summary-bar');
         if (summaryBar) { summaryBar.textContent = ''; summaryBar.style.display = 'none'; }
-        if (loaded) renderTable(allPrs);
+        if (loaded) renderFilteredMaintainer();
       }
     });
   }
@@ -669,6 +738,80 @@
     }
     return re.test(who);
   }
+
+  function getNormalizedMentions(text) {
+    var matches = (text || '').match(/@[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*/g) || [];
+    return matches.map(function(m) { return m.slice(1).toLowerCase(); });
+  }
+
+  // Check whether the next action is on a maintainer (someone other than the PR author)
+  function isMaintainersTurn(pr) {
+    var authorLc = (pr.author || '').toLowerCase();
+    var mentions = getNormalizedMentions(pr.who);
+    return mentions.some(function(m) { return m && m !== authorLc; });
+  }
+
+  // Filter and render all PRs using the maintainer-context filters (no user set)
+  function renderFilteredMaintainer() {
+    var hasMaintainerFilter = nextActionMaintainerMode || easyActionMaintainerMode;
+    var filtered = allPrs;
+    if (hasMaintainerFilter) {
+      filtered = filtered.filter(isMaintainersTurn);
+    }
+    if (easyActionMaintainerMode) {
+      filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
+    }
+
+    var bar = document.getElementById('summary-bar');
+    if (hasMaintainerFilter) {
+      filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+      var repoCounts = {};
+      filtered.forEach(function(pr) { repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1; });
+      var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
+        .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
+      var modeDesc = easyActionMaintainerMode ? 'Easy next action on maintainer' : 'Next action on maintainer';
+      while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+      var strong = document.createElement('strong');
+      strong.textContent = modeDesc;
+      bar.appendChild(strong);
+
+      bar.appendChild(document.createTextNode(' '));
+
+      var clearLink = document.createElement('a');
+      clearLink.href = '#';
+      clearLink.textContent = '\u2715 Clear';
+      clearLink.onclick = function() {
+        window.clearMaintainerFilters();
+        return false;
+      };
+      bar.appendChild(clearLink);
+
+      var breakdownSpan = document.createElement('span');
+      breakdownSpan.className = 'repo-breakdown';
+      breakdownSpan.textContent = ' \u2014 ' + filtered.length + ' PRs' +
+        (breakdown ? ': ' + breakdown : '');
+      bar.appendChild(breakdownSpan);
+      bar.style.display = 'block';
+      document.getElementById('filter-banner').style.display = 'none';
+    } else {
+      if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
+    }
+    renderTable(filtered);
+  }
+
+  window.clearMaintainerFilters = function() {
+    nextActionMaintainerMode = false;
+    easyActionMaintainerMode = false;
+    document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('easy-action-maintainer-toggle').checked = false;
+    try { localStorage.removeItem(LS_NEXT_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_MAINTAINER_KEY); } catch(e) {}
+    history.replaceState(null, '', buildCurrentUrl());
+    var bar = document.getElementById('summary-bar');
+    if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
+    if (loaded) renderTable(allPrs);
+  };
 
   // Classify a PR into an "easy next action" category, or null if it doesn't qualify
   function getEasyActionCategory(pr) {
@@ -960,13 +1103,12 @@
     // From next_action, only extract the actor (first @mention before the colon),
     // not people mentioned in the description (e.g., "respond to threads from @X")
     if (pr.next_action) {
-      var actorMatch = pr.next_action.match(/^@([\w-]+)/);
-      if (actorMatch) text += ' @' + actorMatch[1];
+      var actorMatch = pr.next_action.match(/^@[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*/);
+      if (actorMatch) text += ' ' + actorMatch[0];
     }
     if (pr.copilot_trigger) text += ' @' + pr.copilot_trigger;
-    var matches = text.match(/@([\w-]+)/g) || [];
     var seen = {};
-    return matches.map(function(m) { return m.slice(1).toLowerCase(); })
+    return getNormalizedMentions(text)
       .filter(function(u) { if (seen[u]) return false; seen[u] = true; return true; });
   }
 
