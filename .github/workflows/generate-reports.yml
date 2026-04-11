@@ -157,14 +157,21 @@ jobs:
               echo "::notice::${repo} ${incremental_info}"
             fi
             # Validate the output is parseable JSON with a prs array
-            if $scan_ok && pwsh -Command "(\$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json) -and \$j.prs -ne \$null" > /dev/null 2>&1; then
+            # Note: pwsh -Command "expr" always exits 0 regardless of expr's boolean value;
+            # only exceptions cause non-zero exit. Use explicit exit 0/1 for reliable checks.
+            if $scan_ok && pwsh -NoProfile -Command "
+              try {
+                \$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json
+                if (\$null -ne \$j.prs) { exit 0 } else { Write-Host 'No prs property found'; exit 1 }
+              } catch { Write-Host \"Parse error: \$_\"; exit 1 }
+            "; then
               mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
             else
               echo "::warning::Invalid or empty scan output for $repo — keeping previous data"
               rm -f "docs/${slug}/scan.json.tmp"
+              failed+=("$repo")
               if [ ! -f "docs/${slug}/scan.json" ]; then
                 echo "::warning::No previous scan.json for $repo — skipping reports"
-                failed+=("$repo")
                 continue
               fi
             fi
