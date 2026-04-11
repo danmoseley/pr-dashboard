@@ -113,11 +113,27 @@ jobs:
             if [ -f "docs/${slug}/scan.json" ]; then
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
             fi
+            # Track API quota usage before scan
+            rate_before=$(gh api rate_limit --jq '.rate.remaining' 2>/dev/null || echo "")
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
             if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args > "docs/${slug}/scan.json.tmp"; then
               echo "::warning::Scan failed for $repo"
               scan_ok=false
+            fi
+            # Log API quota consumed for this repo
+            if [ -n "$rate_before" ]; then
+              rate_after=$(gh api rate_limit --jq '.rate.remaining' 2>/dev/null || echo "")
+              if [ -n "$rate_after" ]; then
+                calls_used=$((rate_before - rate_after))
+                incremental_info=""
+                if $scan_ok && [ -f "docs/${slug}/scan.json.tmp" ]; then
+                  refreshed=$(pwsh -Command "(Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json).incremental.refreshed" 2>/dev/null || echo "?")
+                  reused=$(pwsh -Command "(Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json).incremental.reused" 2>/dev/null || echo "?")
+                  incremental_info=" (refreshed ${refreshed}, reused ${reused})"
+                fi
+                echo "::notice::${repo} used ${calls_used} API calls${incremental_info} — ${rate_after} remaining"
+              fi
             fi
             # Validate the output is parseable JSON with a prs array
             if $scan_ok && pwsh -Command "(\$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json) -and \$j.prs -ne \$null" > /dev/null 2>&1; then
