@@ -33,13 +33,24 @@ function Import-PreviousScan {
     #>
     param(
         [string]$Path,
-        [int]$RequiredCacheVersion
+        [int]$RequiredCacheVersion,
+        [string]$Repo = ''
     )
     $result = @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null }
     if (-not $Path -or -not (Test-Path $Path)) { return $result }
     try {
         $prevScan = Get-Content $Path -Raw | ConvertFrom-Json
         if ($prevScan._cache_version -eq $RequiredCacheVersion -and $prevScan.prs) {
+            # Validate repo matches to prevent cross-repo PR number collisions.
+            # If prevScan.repo is absent (legacy scans pre-dating the repo field), allow
+            # incremental mode rather than forcing a full scan for existing deployments.
+            if ($Repo -and $prevScan.repo -and $prevScan.repo -ne $Repo) {
+                Write-Warning "Previous scan repo '$($prevScan.repo)' does not match current repo '$Repo' — disabling incremental mode"
+                return $result
+            }
+            if ($Repo -and -not $prevScan.repo) {
+                Write-Verbose "Previous scan has no repo field (legacy) — proceeding with incremental mode for '$Repo'"
+            }
             foreach ($p in $prevScan.prs) {
                 $key = [string]$p.number
                 $result.PrLookup[$key] = $p
@@ -132,15 +143,15 @@ function Get-IncrementalPartition {
 function Merge-ReusedEntries {
     <#
     .SYNOPSIS
-        Merge carried-forward PR entries into the results array, updating time fields.
+        Merge carried-forward PR entries into the results array, updating fingerprints.
     .PARAMETER ReusedEntries
         Hashtable of {string key -> previous scan entry} from Get-IncrementalPartition.
     .PARAMETER PrListData
-        Array of raw PR objects from gh pr list (used to recalculate time fields).
+        Array of raw PR objects from gh pr list (used to refresh fingerprints).
     .PARAMETER Results
         Array of freshly-scored PR result objects to merge into.
     .OUTPUTS
-        Combined array of results + reused entries with updated time fields.
+        Combined array of results + reused entries with updated fingerprints.
     #>
     param(
         [hashtable]$ReusedEntries,
@@ -149,7 +160,6 @@ function Merge-ReusedEntries {
     )
     if ($ReusedEntries.Count -eq 0) { return $Results }
 
-    $now = Get-Date
     $byNumber = @{}
     foreach ($p in $PrListData) { $byNumber[[string]$p.number] = $p }
 
@@ -157,8 +167,12 @@ function Merge-ReusedEntries {
     foreach ($entry in $ReusedEntries.Values) {
         $listPr = $byNumber[[string]$entry.number]
         if ($listPr) {
-            $entry.age_days = [int]($now - [DateTime]::Parse($listPr.createdAt)).TotalDays
-            $entry.days_since_update = [int]($now - [DateTime]::Parse($listPr.updatedAt)).TotalDays
+            # Only update _fingerprint for next-run comparison.
+            # age_days/days_since_update are intentionally NOT recalculated here:
+            # updating them without recomputing score/next_action would make scan.json
+            # internally inconsistent (e.g., days_since_update crosses a threshold but
+            # the score still reflects the older value). PRs near thresholds are
+            # expected to get a full re-fetch on the next run once the fingerprint changes.
             $entry._fingerprint = Get-PrFingerprint $listPr
         }
         [void]$merged.Add($entry)

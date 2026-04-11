@@ -13,6 +13,12 @@
 .PARAMETER Maintainers
     Optional list of usernames to treat as area owners (fallback when
     area-owners.md is missing or has no match for a PR's labels).
+.PARAMETER PreviousScanFile
+    Path to a previous scan.json from a prior run. When provided and valid,
+    enables incremental mode: only PRs whose fingerprint has changed since the
+    last scan are re-fetched via expensive GraphQL calls. Falls back silently
+    to a full scan if the file is missing, corrupt, or from a different repo
+    or cache version.
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 #>
@@ -61,7 +67,7 @@ try {
         return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles)|$($pr.additions)|$($pr.deletions)"
     }
     function Get-IncrementalCacheVersion { 2 }
-    function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null } }
+    function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion, [string]$Repo = ''); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null } }
     function Get-IncrementalPartition { param([array]$Candidates, [hashtable]$PreviousPrLookup, [hashtable]$PreviousFingerprints, $PreviousTimestamp, [int]$MaxReuseSeconds = 43200); @{ RefreshCandidates = $Candidates; ReusedEntries = @{}; Fallback = $true } }
     function Merge-ReusedEntries { param([hashtable]$ReusedEntries, [array]$PrListData, [array]$Results); $Results }
 }
@@ -189,7 +195,7 @@ if ($codeownersModuleLoaded) {
 $communityTriagers = @()  # Community triagers cannot merge or sign off; treat as regular reviewers
 
 # --- Load previous scan for incremental mode ---
-$prevScanResult = Import-PreviousScan -Path $PreviousScanFile -RequiredCacheVersion $CacheVersion
+$prevScanResult = Import-PreviousScan -Path $PreviousScanFile -RequiredCacheVersion $CacheVersion -Repo $Repo
 $previousPrLookup = $prevScanResult.PrLookup
 $previousFingerprints = $prevScanResult.Fingerprints
 $previousTimestamp = $prevScanResult.Timestamp

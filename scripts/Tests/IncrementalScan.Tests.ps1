@@ -146,18 +146,42 @@ Describe 'Import-PreviousScan' {
         $file = "$testDir/valid.json"
         @{
             _cache_version = 2
+            repo = 'dotnet/runtime'
             timestamp = '2025-01-15T12:00:00Z'
             prs = @(
                 @{ number = 42; _fingerprint = 'fp42'; score = 50; next_action = 'review' }
                 @{ number = 99; _fingerprint = 'fp99'; score = 30; next_action = 'merge' }
             )
         } | ConvertTo-Json -Depth 5 | Set-Content $file
-        $r = Import-PreviousScan -Path $file -RequiredCacheVersion 2
+        $r = Import-PreviousScan -Path $file -RequiredCacheVersion 2 -Repo 'dotnet/runtime'
         $r.Enabled | Should -BeTrue
         $r.PrLookup.Count | Should -Be 2
         $r.PrLookup['42'].score | Should -Be 50
         $r.Fingerprints['99'] | Should -Be 'fp99'
         $r.Timestamp | Should -BeOfType [DateTime]
+    }
+
+    It 'Returns disabled when repo does not match' {
+        $file = "$testDir/wrong-repo.json"
+        @{
+            _cache_version = 2
+            repo = 'dotnet/aspnetcore'
+            timestamp = '2025-01-15T12:00:00Z'
+            prs = @(@{ number = 1; _fingerprint = 'fp'; score = 10; next_action = 'x' })
+        } | ConvertTo-Json -Depth 5 | Set-Content $file
+        $r = Import-PreviousScan -Path $file -RequiredCacheVersion 2 -Repo 'dotnet/runtime'
+        $r.Enabled | Should -BeFalse
+    }
+
+    It 'Enables incremental when scan has no repo field (legacy scans)' {
+        $file = "$testDir/no-repo.json"
+        @{
+            _cache_version = 2
+            timestamp = '2025-01-15T12:00:00Z'
+            prs = @(@{ number = 1; _fingerprint = 'fp'; score = 10; next_action = 'x' })
+        } | ConvertTo-Json -Depth 5 | Set-Content $file
+        $r = Import-PreviousScan -Path $file -RequiredCacheVersion 2 -Repo 'dotnet/runtime'
+        $r.Enabled | Should -BeTrue
     }
 
     It 'Uses string keys (not Int64)' {
@@ -317,7 +341,7 @@ Describe 'Merge-ReusedEntries' {
         $merged.Count | Should -Be 1
     }
 
-    It 'Merges reused entries and recalculates time fields' {
+    It 'Preserves time fields on reused entries (score consistency)' {
         $entry = [PSCustomObject]@{
             number = 42; score = 50; _fingerprint = 'old'
             age_days = 999; days_since_update = 999
@@ -326,8 +350,10 @@ Describe 'Merge-ReusedEntries' {
         $merged = Merge-ReusedEntries -ReusedEntries @{ '42' = $entry } `
             -PrListData @($listPr) -Results @()
         $merged.Count | Should -Be 1
-        $merged[0].age_days | Should -Not -Be 999
-        $merged[0].days_since_update | Should -Not -Be 999
+        # Time fields must not be recalculated — updating them without recomputing
+        # score/next_action would create internal inconsistency in scan.json.
+        $merged[0].age_days | Should -Be 999
+        $merged[0].days_since_update | Should -Be 999
     }
 
     It 'Updates fingerprint on reused entries' {
