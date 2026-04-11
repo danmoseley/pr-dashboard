@@ -986,6 +986,149 @@ async function runTests() {
       await p.close();
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    // GROUP K — Maintainer filter checkboxes (no-user context)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    log('\n── Group K: Maintainer filter (no user) ──');
+
+    // K1: Maintainer toggles are visible when no user is set
+    {
+      const p = await openPage(ALL, 100);
+      const nextMaintainerVisible = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      const easyMaintainerVisible = await p.$eval('#easy-action-maintainer-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      const userTogglesHidden = await p.$eval('#involves-label', e => getComputedStyle(e).display === 'none').catch(() => false);
+      if (nextMaintainerVisible && easyMaintainerVisible) pass('K1: Maintainer toggles visible when no user set');
+      else fail('K1: Maintainer toggles visible', 'next=' + nextMaintainerVisible + ', easy=' + easyMaintainerVisible);
+      if (userTogglesHidden) pass('K1: User-specific involves toggle hidden when no user set');
+      else fail('K1: User-specific involves toggle hidden', 'visible when it should be hidden');
+      await p.close();
+    }
+
+    // K2: Maintainer toggles are hidden when a user is set; user toggles appear
+    {
+      const p = await openPage(ALL, 100);
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('K2: Maintainer toggles hide on user set', 'no author in table'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        const nextMaintainerHidden = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
+        const easyMaintainerHidden = await p.$eval('#easy-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
+        const involvesVisible = await p.$eval('#involves-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
+        if (nextMaintainerHidden && easyMaintainerHidden) pass('K2: Maintainer toggles hidden after user set (user=' + author + ')');
+        else fail('K2: Maintainer toggles hidden', 'next hidden=' + nextMaintainerHidden + ', easy hidden=' + easyMaintainerHidden);
+        if (involvesVisible) pass('K2: User involves toggle visible after user set');
+        else fail('K2: User involves toggle visible', 'display not shown');
+      }
+      await p.close();
+    }
+
+    // K3: Next action on maintainer filter reduces row count
+    {
+      const p = await openPage(ALL, 100);
+      const totalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
+      await p.click('#next-action-maintainer-toggle');
+      await wait(600);
+      const filteredRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+      const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      if (filteredRows < totalRows && summaryVisible && summaryText.includes('Next action on maintainer')) {
+        pass('K3: Maintainer filter reduces rows: ' + totalRows + ' → ' + filteredRows + ' and shows summary bar');
+      } else {
+        fail('K3: Maintainer filter', 'rows=' + filteredRows + '/' + totalRows + ', summaryVisible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
+      }
+      await p.close();
+    }
+
+    // K4: Easy next action on maintainer filter further reduces count
+    {
+      const p = await openPage(ALL, 100);
+      await p.click('#next-action-maintainer-toggle');
+      await wait(600);
+      const afterNextAction = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      await p.click('#easy-action-maintainer-toggle');
+      await wait(600);
+      const afterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+      if (afterEasy <= afterNextAction && summaryText.includes('Easy next action on maintainer')) {
+        pass('K4: Easy maintainer filter reduces further: ' + afterNextAction + ' → ' + afterEasy + ' rows, summary: "Easy next action on maintainer"');
+      } else {
+        fail('K4: Easy maintainer filter', 'rows=' + afterNextAction + ' → ' + afterEasy + ', summary="' + summaryText.trim().slice(0,60) + '"');
+      }
+      await p.close();
+    }
+
+    // K5: ?nextmaintainer=true URL param pre-checks the toggle and filters on load
+    {
+      const p = await openPage(ALL + '?nextmaintainer=true', 1);
+      await wait(600);
+      const checked = await p.$eval('#next-action-maintainer-toggle', e => e.checked).catch(() => null);
+      const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+      if (checked === true) pass('K5: ?nextmaintainer=true pre-checks toggle');
+      else fail('K5: ?nextmaintainer=true pre-checks toggle', 'checked=' + checked);
+      if (summaryVisible && summaryText.includes('Next action on maintainer')) pass('K5: ?nextmaintainer=true shows summary bar');
+      else fail('K5: ?nextmaintainer=true shows summary bar', 'visible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
+      await p.close();
+    }
+
+    // K6: Clear link removes maintainer filter and restores all PRs
+    {
+      const p = await openPage(ALL + '?nextmaintainer=true', 1);
+      await wait(600);
+      const clearLink = await p.$('#summary-bar a');
+      if (!clearLink) { fail('K6: Maintainer filter Clear link', 'no clear link in summary bar'); }
+      else {
+        await clearLink.click();
+        await wait(500);
+        const summaryHidden = await p.$eval('#summary-bar', e => getComputedStyle(e).display === 'none').catch(() => false);
+        const unchecked = await p.$eval('#next-action-maintainer-toggle', e => !e.checked).catch(() => false);
+        const url = p.url();
+        if (summaryHidden && unchecked && !url.includes('nextmaintainer')) {
+          pass('K6: Clear link removes maintainer filter (summary hidden, toggle unchecked, param gone)');
+        } else {
+          fail('K6: Clear link removes filter', 'summaryHidden=' + summaryHidden + ', unchecked=' + unchecked + ', url=' + url);
+        }
+      }
+      await p.close();
+    }
+
+    // K7: Setting a user after maintainer filter switches to user context
+    {
+      const p = await openPage(ALL + '?nextmaintainer=true', 1);
+      await wait(600);
+      const author = await p.evaluate(() => {
+        for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+          const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+          if (m) return m[1];
+        }
+        return null;
+      });
+      if (!author) { fail('K7: User switch after maintainer filter', 'no author in table'); }
+      else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        await wait(500);
+        const maintainerHidden = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
+        const involvesVisible = await p.$eval('#involves-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
+        const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
+        if (maintainerHidden && involvesVisible && summaryText.includes('@' + author)) {
+          pass('K7: After setting user, maintainer toggles hidden, user toggles shown, summary for user');
+        } else {
+          fail('K7: Switch to user context', 'maintainerHidden=' + maintainerHidden + ', involvesVisible=' + involvesVisible + ', summary="' + summaryText.slice(0,60) + '"');
+        }
+      }
+      await p.close();
+    }
+
     // ── Summary ──────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
     if (jsErrors.length) console.log('JS errors captured:\n  ' + jsErrors.join('\n  '));
