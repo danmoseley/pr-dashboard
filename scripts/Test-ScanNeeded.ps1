@@ -22,7 +22,7 @@ param(
 # Fail-safe wrapper: any unhandled error → scan needed
 try {
     if (-not (Test-Path $PreviousScanFile)) {
-        Write-Host "true"  # No previous scan — must scan
+        Write-Output "true"  # No previous scan — must scan
         exit 0
     }
 
@@ -33,11 +33,11 @@ try {
         $age = ((Get-Date) - [DateTime]::Parse($prevScan.timestamp)).TotalSeconds
         if ($age -gt $MaxSkipSeconds) {
             Write-Verbose "Previous scan is $([int]($age/60))m old (max $([int]($MaxSkipSeconds/60))m) — scan needed"
-            Write-Host "true"
+            Write-Output "true"
             exit 0
         }
     } else {
-        Write-Host "true"  # No timestamp — must scan
+        Write-Output "true"  # No timestamp — must scan
         exit 0
     }
 
@@ -49,14 +49,14 @@ try {
         })
         if ($unstable.Count -gt 0) {
             Write-Verbose "$($unstable.Count) unstable PRs in previous scan — scan needed"
-            Write-Host "true"
+            Write-Output "true"
             exit 0
         }
     }
 
     # Check for previous probe hash
     if (-not $prevScan._probe_hash) {
-        Write-Host "true"  # No probe hash stored — must scan
+        Write-Output "true"  # No probe hash stored — must scan
         exit 0
     }
 
@@ -82,13 +82,13 @@ query {
     }
     if ($LASTEXITCODE -ne 0) {
         Write-Verbose "GraphQL probe failed: $stderr — scan needed"
-        Write-Host "true"
+        Write-Output "true"
         exit 0
     }
     $resultJson = ($result -join "`n")
     if ([string]::IsNullOrWhiteSpace($resultJson)) {
         Write-Verbose "GraphQL probe returned empty output — scan needed"
-        Write-Host "true"
+        Write-Output "true"
         exit 0
     }
     $data = $resultJson | ConvertFrom-Json
@@ -97,7 +97,7 @@ query {
     # If more than 100 open PRs, probe hash can't match full scan hash — must scan
     if ($prData.pageInfo.hasNextPage) {
         Write-Verbose "More than 100 open PRs ($($prData.totalCount)) — scan needed"
-        Write-Host "true"
+        Write-Output "true"
         exit 0
     }
 
@@ -115,12 +115,12 @@ query {
 
     if ($probeHash -eq $prevScan._probe_hash) {
         Write-Verbose "Probe hash unchanged ($probeHash) — skip scan"
-        Write-Host "false"
+        Write-Output "false"
     } else {
         Write-Verbose "Probe hash changed (was $($prevScan._probe_hash), now $probeHash) — scan needed"
-        Write-Host "true"
+        Write-Output "true"
     }
 } catch {
     Write-Verbose "Probe error: $_ — scan needed (fail-safe)"
-    Write-Host "true"
+    Write-Output "true"
 }
