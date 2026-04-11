@@ -11,6 +11,11 @@ const RUNTIME = BASE + '/runtime/actionable.html';
 
 async function log(msg) { console.log('[' + new Date().toISOString().slice(11,19) + '] ' + msg); }
 
+// If ONLY_GROUPS is set (comma-separated, e.g. "F" or "A,B,C"), only those groups run.
+// Used by the parallel runner to split work evenly. Unset = run all groups.
+const onlyGroups = process.env.ONLY_GROUPS ? new Set(process.env.ONLY_GROUPS.split(',')) : null;
+function shouldRun(g) { return !onlyGroups || onlyGroups.has(g); }
+
 async function runTests() {
   const browser = await chromium.launch({ headless: true });
   const jsErrors = [];
@@ -50,7 +55,7 @@ async function runTests() {
     // GROUP A — User filter
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group A: User filter ──');
+    if (shouldRun('A')) { log('\n── Group A: User filter ──');
 
     // A1: Enter username → Go → summary bar appears with a count
     {
@@ -190,11 +195,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP A
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP B — URL param round-trips
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group B: URL param round-trips ──');
+    if (shouldRun('B')) { log('\n── Group B: URL param round-trips ──');
 
     // B1: ?involves=true restores involves checkbox as checked
     {
@@ -240,11 +247,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP B
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP C — Easy action filter
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group C: Easy action filter ──');
+    if (shouldRun('C')) { log('\n── Group C: Easy action filter ──');
 
     // C1: Easy action toggle (no user) filters the table to a smaller set
     {
@@ -312,11 +321,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP C
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP D — Column sorting
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group D: Column sorting ──');
+    if (shouldRun('D')) { log('\n── Group D: Column sorting ──');
 
     // D1: Click a sortable column header → sort arrow appears
     {
@@ -451,11 +462,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP D
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP E — [?] score popup
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group E: [?] score popup ──');
+    if (shouldRun('E')) { log('\n── Group E: [?] score popup ──');
 
     // E1: Click [?] button → .why-popup appears
     // Use JS click to bypass the parent <td> intercepting pointer events.
@@ -520,11 +533,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP E
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP F — Per-repo pages
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group F: Per-repo pages ──');
+    if (shouldRun('F')) { log('\n── Group F: Per-repo pages ──');
 
     // F1: runtime/actionable.html loads with PR data
     {
@@ -585,11 +600,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP F
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP G — "Show N more" expand
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group G: Show more / show less ──');
+    if (shouldRun('G')) { log('\n── Group G: Show more / show less ──');
 
     // G1: "Show N more" button is present after data loads
     {
@@ -637,11 +654,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP G
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP H — Multi-chip URL params
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group H: Multi-chip URL params ──');
+    if (shouldRun('H')) { log('\n── Group H: Multi-chip URL params ──');
 
     // H1: ?area=a&area=b (repeated params) → two area chips on load
     {
@@ -668,11 +687,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP H
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP I — Smoke tests (other pages)
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group I: Page smoke tests ──');
+    if (shouldRun('I')) { log('\n── Group I: Page smoke tests ──');
 
     // I1: index.html loads, has expected title and repo links
     {
@@ -716,11 +737,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP I
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP J — Recent name tiles
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group J: Recent name tiles ──');
+    if (shouldRun('J')) { log('\n── Group J: Recent name tiles ──');
 
     // J1: Entering a username via Go creates a recent tile
     {
@@ -995,11 +1018,13 @@ async function runTests() {
       await p.close();
     }
 
+    } // end GROUP J
+
     // ══════════════════════════════════════════════════════════════════════════
     // GROUP K — Maintainer filter checkboxes (no-user context)
     // ══════════════════════════════════════════════════════════════════════════
 
-    log('\n── Group K: Maintainer filter (no user) ──');
+    if (shouldRun('K')) { log('\n── Group K: Maintainer filter (no user) ──');
 
     // K1: Maintainer toggles are visible when no user is set
     {
@@ -1140,6 +1165,8 @@ async function runTests() {
       }
       await p.close();
     }
+
+    } // end GROUP K
 
     // ── Summary ──────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
