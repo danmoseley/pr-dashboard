@@ -55,7 +55,7 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
-  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUser()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
+  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUserOnly()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
   <label class="involves-label" id="involves-label" style="display:none">
     <input type="checkbox" id="involves-toggle">
     Include all involved PRs
@@ -359,13 +359,11 @@
   // Next action on maintainer toggle handler (no-user context)
   var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
   // Tracks the next-maintainer state that was active before easy-maintainer was enabled.
-  // Persisted to localStorage so the state is preserved across page reloads.
+  // Only read from localStorage; written when easy-maintainer is toggled on.
   var savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
   try {
     var savedNextMaintainerBeforeEasyValue = localStorage.getItem(LS_NM_BEFORE_EASY_KEY);
-    if (savedNextMaintainerBeforeEasyValue === null) {
-      localStorage.setItem(LS_NM_BEFORE_EASY_KEY, savedNextMaintainerBeforeEasy ? 'true' : 'false');
-    } else {
+    if (savedNextMaintainerBeforeEasyValue !== null) {
       savedNextMaintainerBeforeEasy = savedNextMaintainerBeforeEasyValue === 'true';
     }
   } catch(e) {}
@@ -532,10 +530,25 @@
     return location.pathname + (qs ? '?' + qs : '');
   }
 
+  // Clears only the user filter, preserving area/repo filters and sort order.
+  // Used by the ✕ button and empty-Go; full reset lives in clearUser().
+  window.clearUserOnly = function() {
+    activeUsers = [];
+    document.getElementById('user-field').value = '';
+    document.getElementById('clear-user-btn').style.display = 'none';
+    try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    showMaintainerToggles();
+    history.replaceState(null, '', buildCurrentUrl());
+    renderRecentTiles();
+    var summaryBar = document.getElementById('summary-bar');
+    if (summaryBar) { summaryBar.textContent = ''; summaryBar.style.display = 'none'; }
+    if (loaded) renderFilteredMaintainer();
+  }
+
   window.applyUser = function() {
     var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
     if (!name) {
-      clearUser(); // clear filter when user empties the field and hits Go
+      clearUserOnly();
       return;
     }
     activeUsers = [name];
