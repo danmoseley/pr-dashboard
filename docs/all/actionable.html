@@ -51,6 +51,7 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
+  <button id="clear-user-btn" onclick="clearUser()" title="Clear user filter" aria-label="Clear user filter" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;color:#8b949e;font-size:0.9em;cursor:pointer;padding:4px 8px;line-height:1" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='#8b949e'">&#x2715;</button>
   <label class="involves-label" id="involves-label" style="display:none">
     <input type="checkbox" id="involves-toggle">
     Include all involved PRs
@@ -266,6 +267,7 @@
     initialUsers.forEach(function(u) { addRecentUser(u); });
     // Ensure LS_KEY matches the displayed user (addRecentUser writes LS_KEY on each call)
     try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
+    document.getElementById('clear-user-btn').style.display = '';
   } else {
     document.getElementById('next-action-maintainer-label').style.display = '';
     document.getElementById('easy-action-maintainer-label').style.display = '';
@@ -276,6 +278,12 @@
   document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
   document.getElementById('easy-action-maintainer-toggle').checked = easyActionMaintainerMode;
   renderRecentTiles();
+
+  // Clean up URL: remove user-context params (involves/nextaction/easyaction) if no user is set.
+  // This prevents ?involves=true from appearing in the URL when there is no user filter.
+  if (activeUsers.length === 0 && location.search) {
+    history.replaceState(null, '', buildCurrentUrl());
+  }
 
   // Enter key on input
   document.getElementById('user-field').addEventListener('keydown', function(e) {
@@ -341,6 +349,7 @@
 
   // Next action on maintainer toggle handler (no-user context)
   var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
+  var savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
   if (nextActionMaintainerToggle) {
     nextActionMaintainerToggle.addEventListener('change', function() {
       nextActionMaintainerMode = this.checked;
@@ -356,9 +365,30 @@
     easyActionMaintainerToggle.addEventListener('change', function() {
       easyActionMaintainerMode = this.checked;
       try { localStorage.setItem(LS_EASY_MAINTAINER_KEY, easyActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      if (easyActionMaintainerMode) {
+        // Save next-maintainer state, then check and disable it (easy implies next-maintainer)
+        savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+        nextActionMaintainerToggle.checked = true;
+        nextActionMaintainerToggle.disabled = true;
+        nextActionMaintainerMode = true;
+      } else {
+        // Restore next-maintainer to its previous state
+        nextActionMaintainerMode = savedNextMaintainerBeforeEasy;
+        nextActionMaintainerToggle.checked = nextActionMaintainerMode;
+        nextActionMaintainerToggle.disabled = false;
+      }
+      try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
       history.replaceState(null, '', buildCurrentUrl());
       if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
     });
+  }
+
+  // Apply initial disabled state if easy-action-maintainer was persisted
+  if (easyActionMaintainerMode) {
+    savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+    nextActionMaintainerToggle.checked = true;
+    nextActionMaintainerToggle.disabled = true;
+    nextActionMaintainerMode = true;
   }
 
   // Start fetching
@@ -440,9 +470,9 @@
   function buildCurrentUrl() {
     var p = new URLSearchParams();
     activeUsers.forEach(function(u) { p.append('user', u); });
-    if (involvesMode) p.set('involves', 'true');
-    if (nextActionOnlyMode) p.set('nextaction', 'true');
-    if (easyActionMode) p.set('easyaction', 'true');
+    if (activeUsers.length > 0 && involvesMode) p.set('involves', 'true');
+    if (activeUsers.length > 0 && nextActionOnlyMode) p.set('nextaction', 'true');
+    if (activeUsers.length > 0 && easyActionMode) p.set('easyaction', 'true');
     if (nextActionMaintainerMode) p.set('nextmaintainer', 'true');
     if (easyActionMaintainerMode) p.set('easymaintainer', 'true');
     activeAreas.forEach(function(a) { p.append('area', a); });
@@ -453,7 +483,7 @@
 
   window.applyUser = function() {
     var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
-    if (!name) return;
+    if (!name) { clearUser(); return; }
     activeUsers = [name];
     addRecentUser(name);
     renderRecentTiles();
@@ -599,7 +629,9 @@
     document.getElementById('next-action-toggle').checked = false;
     document.getElementById('easy-action-toggle').checked = false;
     document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').disabled = false;
     document.getElementById('easy-action-maintainer-toggle').checked = false;
+    document.getElementById('clear-user-btn').style.display = 'none';
     document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
@@ -625,6 +657,7 @@
     document.getElementById('easy-action-label').style.display = '';
     document.getElementById('next-action-maintainer-label').style.display = 'none';
     document.getElementById('easy-action-maintainer-label').style.display = 'none';
+    document.getElementById('clear-user-btn').style.display = '';
   }
 
   function showMaintainerToggles() {
@@ -633,6 +666,13 @@
     document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
+    document.getElementById('clear-user-btn').style.display = 'none';
+    // Apply disabled state based on persisted easyActionMaintainerMode
+    if (easyActionMaintainerMode && nextActionMaintainerToggle) {
+      nextActionMaintainerToggle.checked = true;
+      nextActionMaintainerToggle.disabled = true;
+      nextActionMaintainerMode = true;
+    }
   }
 
   // --- Recent Users ---
@@ -804,6 +844,7 @@
     nextActionMaintainerMode = false;
     easyActionMaintainerMode = false;
     document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').disabled = false;
     document.getElementById('easy-action-maintainer-toggle').checked = false;
     try { localStorage.removeItem(LS_NEXT_MAINTAINER_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_EASY_MAINTAINER_KEY); } catch(e) {}
