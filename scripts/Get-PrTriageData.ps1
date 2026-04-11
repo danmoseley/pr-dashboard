@@ -76,6 +76,19 @@ try {
 }
 $CacheVersion = Get-IncrementalCacheVersion
 
+# Compute a lightweight probe hash from PR numbers + updatedAt timestamps.
+# Used by Test-ScanNeeded.ps1 to skip unchanged repos without a full scan.
+# Must stay in sync with the hash logic in Test-ScanNeeded.ps1.
+function Get-ProbeHash([array]$PrListData) {
+    $pairs = @($PrListData | ForEach-Object {
+        $ts = if ($_.updatedAt -is [datetime]) { $_.updatedAt.ToUniversalTime().ToString('o') } else { "$($_.updatedAt)" }
+        "$($_.number):$ts"
+    } | Sort-Object)
+    $input = "total=$($PrListData.Count)|" + ($pairs -join '|')
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    [BitConverter]::ToString($sha.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($input))).Replace('-', '').Substring(0, 16).ToLower()
+}
+
 # Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
 function Invoke-GhRetry {
     param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(60, 300, 1200))
@@ -283,6 +296,7 @@ if ($candidates.Count -eq 0) {
         analyzed = 0
         prs = @()
         _cache_version = $CacheVersion
+        _probe_hash = (Get-ProbeHash $prsRaw)
     } | ConvertTo-Json -Depth 5
     return
 }
@@ -1118,9 +1132,12 @@ if ($Top -gt 0) {
 }
 
 # --- Output JSON ---
+$probeHash = Get-ProbeHash $prsRaw
+
 $output = @{
     timestamp = $now.ToString("o")
     repo = $Repo
+    _probe_hash = $probeHash
     filters = @{
         label = if ($Label) { $Label } else { $null }
         author = if ($Author) { $Author } else { $null }
