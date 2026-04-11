@@ -40,10 +40,32 @@ param(
     [int]$Limit = 500,
     [string]$Repo = "dotnet/runtime",
     [string[]]$Maintainers = @(),
+    [string]$PreviousScanFile,
     [switch]$OutputCsv
 )
 
 $ErrorActionPreference = "Stop"
+
+# Import incremental scan helpers (fingerprint, partitioning, cache loading)
+$incrementalModule = Join-Path $PSScriptRoot 'IncrementalScan.psm1'
+try {
+    if (Test-Path $incrementalModule) {
+        Import-Module $incrementalModule -Force
+    } else { throw "Module file not found" }
+} catch {
+    # Full fallback shims — script works standalone but incremental mode effectively disabled
+    Write-Verbose "IncrementalScan module unavailable ($_) — using inline fallbacks"
+    function Get-PrFingerprint($pr) {
+        $labelsSorted = ($pr.labels | ForEach-Object { $_.name } | Sort-Object) -join ','
+        $assigneesSorted = ($pr.assignees | ForEach-Object { $_.login } | Sort-Object) -join ','
+        return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles)|$($pr.additions)|$($pr.deletions)"
+    }
+    function Get-IncrementalCacheVersion { 2 }
+    function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null } }
+    function Get-IncrementalPartition { param([array]$Candidates, [hashtable]$PreviousPrLookup, [hashtable]$PreviousFingerprints, $PreviousTimestamp, [int]$MaxReuseSeconds = 43200); @{ RefreshCandidates = $Candidates; ReusedEntries = @{}; Fallback = $true } }
+    function Merge-ReusedEntries { param([hashtable]$ReusedEntries, [array]$PrListData, [array]$Results); $Results }
+}
+$CacheVersion = Get-IncrementalCacheVersion
 
 # Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
 function Invoke-GhRetry {
@@ -166,6 +188,18 @@ if ($codeownersModuleLoaded) {
 
 $communityTriagers = @()  # Community triagers cannot merge or sign off; treat as regular reviewers
 
+# --- Load previous scan for incremental mode ---
+$prevScanResult = Import-PreviousScan -Path $PreviousScanFile -RequiredCacheVersion $CacheVersion
+$previousPrLookup = $prevScanResult.PrLookup
+$previousFingerprints = $prevScanResult.Fingerprints
+$previousTimestamp = $prevScanResult.Timestamp
+$incrementalEnabled = $prevScanResult.Enabled
+if ($incrementalEnabled) {
+    Write-Verbose "Incremental mode: loaded $($previousPrLookup.Count) PRs from previous scan (cache v$CacheVersion)"
+} elseif ($PreviousScanFile) {
+    Write-Verbose "Incremental mode disabled — will do full scan"
+}
+
 # --- Step 1: List PRs ---
 Write-Verbose "Fetching PR list..."
 $listArgs = @("pr","list","--repo",$Repo,"--state","open","--limit",$Limit,
@@ -228,17 +262,41 @@ Write-Verbose "Scanned $($prsRaw.Count) -> $($candidates.Count) candidates ($exc
 
 if ($candidates.Count -eq 0) {
     Write-Verbose "No candidates to analyze."
-    @{ scanned = $prsRaw.Count; analyzed = 0; prs = @() } | ConvertTo-Json -Depth 5
+    @{ scanned = $prsRaw.Count; analyzed = 0; prs = @(); _cache_version = $CacheVersion } | ConvertTo-Json -Depth 5
     return
 }
 
+# --- Step 2b: Incremental partitioning (skip GraphQL for unchanged PRs) ---
+$reusedPrEntries = @{}
+$refreshCandidates = $candidates
+$reusedCount = 0
+$incrementalFallback = $false
+if ($incrementalEnabled) {
+    $partition = Get-IncrementalPartition `
+        -Candidates $candidates `
+        -PreviousPrLookup $previousPrLookup `
+        -PreviousFingerprints $previousFingerprints `
+        -PreviousTimestamp $previousTimestamp
+    $refreshCandidates = $partition.RefreshCandidates
+    $reusedPrEntries = $partition.ReusedEntries
+    $reusedCount = $reusedPrEntries.Count
+    $incrementalFallback = $partition.Fallback
+    if ($incrementalFallback) {
+        Write-Warning "Incremental partitioning failed — falling back to full scan"
+        if ($env:GITHUB_ACTIONS) { Write-Host "::warning::Incremental scan failed for $Repo — fell back to full scan" }
+    } else {
+        Write-Verbose "Incremental: $($refreshCandidates.Count) to refresh, $reusedCount reused from cache"
+    }
+}
+
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors, changed files) ---
+# Only fetch details for PRs that need refreshing (all of them if incremental is disabled)
 $fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}} files(first:100){nodes{path}}'
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
 $batch = [System.Collections.ArrayList]@()
-foreach ($pr in $candidates) {
+foreach ($pr in $refreshCandidates) {
     [void]$batch.Add($pr.number)
     if ($batch.Count -eq 10) {
         [void]$batches.Add([long[]]$batch.ToArray())
@@ -346,7 +404,7 @@ if ($prsWithCopilotReview.Count -gt 0) {
 
 # --- Step 4c: Detect who triggered Copilot-authored PRs (isolated query to avoid breaking main batch) ---
 $copilotTriggers = @{}
-$copilotAuthoredPRs = @($candidates | Where-Object { $_.author.login -match "^(app/)?copilot-swe-agent$" })
+$copilotAuthoredPRs = @($refreshCandidates | Where-Object { $_.author.login -match "^(app/)?copilot-swe-agent$" })
 if ($copilotAuthoredPRs.Count -gt 0) {
     $triggerBatches = [System.Collections.ArrayList]@()
     $tb = [System.Collections.ArrayList]@()
@@ -377,11 +435,11 @@ if ($copilotAuthoredPRs.Count -gt 0) {
     Write-Verbose "Found trigger user for $($copilotTriggers.Count) of $($copilotAuthoredPRs.Count) Copilot PR(s)"
 }
 
-# --- Step 5: Score each PR ---
+# --- Step 5: Score each PR (only refresh candidates; reused PRs are carried forward) ---
 $now = Get-Date
 $results = @()
 
-foreach ($pr in $candidates) {
+foreach ($pr in $refreshCandidates) {
     $n = $pr.number
     $gql = $graphqlData[$n]
     $labelNames = @($pr.labels | ForEach-Object { $_.name })
@@ -994,7 +1052,14 @@ foreach ($pr in $candidates) {
         involved = $involvedList
         blockers = $blockersStr
         why = $whyStr
+        _fingerprint = (Get-PrFingerprint $pr)
     }
+}
+
+# --- Step 5b: Merge carried-forward PRs from incremental cache ---
+$results = Merge-ReusedEntries -ReusedEntries $reusedPrEntries -PrListData $prsRaw -Results $results
+if ($reusedPrEntries.Count -gt 0) {
+    Write-Verbose "Merged $($reusedPrEntries.Count) carried-forward PR(s) into results"
 }
 
 # Sort by action_score descending (combined merge readiness + value)
@@ -1048,6 +1113,13 @@ $output = @{
         next_action = if ($NextAction) { $NextAction } else { $null }
         my_actions = if ($MyActions) { $MyActions } else { $null }
         top = $Top
+    }
+    _cache_version = $CacheVersion
+    incremental = @{
+        refreshed = $refreshCandidates.Count
+        reused = $reusedPrEntries.Count
+        full_scan = (-not $incrementalEnabled -or $incrementalFallback)
+        fallback = $incrementalFallback
     }
     owners = $owners
     scanned = $prsRaw.Count

@@ -108,9 +108,14 @@ jobs:
             if [ -n "$maintainers" ]; then
               maintainer_args="-Maintainers $maintainers"
             fi
+            # Pass previous scan for incremental mode (reuse cached data for unchanged PRs)
+            prev_scan_args=""
+            if [ -f "docs/${slug}/scan.json" ]; then
+              prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
+            fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
-            if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args > "docs/${slug}/scan.json.tmp"; then
+            if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args > "docs/${slug}/scan.json.tmp"; then
               echo "::warning::Scan failed for $repo"
               scan_ok=false
             fi
