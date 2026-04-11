@@ -427,7 +427,7 @@
         // Show API rate limit in footer (subtle, for admins)
         var rateLimits = results
           .filter(function(r) { return r._rate_limit; })
-          .map(function(r) { return { repo: r.repo, rest_remaining: r._rate_limit.rest_remaining, graphql_remaining: r._rate_limit.graphql_remaining, reset: r._rate_limit.reset, used_this_repo: r._rate_limit.used_this_repo }; });
+          .map(function(r) { return { repo: r.repo, rest_remaining: r._rate_limit.rest_remaining, graphql_remaining: r._rate_limit.graphql_remaining, reset: r._rate_limit.reset, total_used: r._rate_limit.total_used }; });
         if (window.showRateLimit) window.showRateLimit(rateLimits);
 
         if (activeUsers.length > 0) {

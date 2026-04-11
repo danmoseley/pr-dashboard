@@ -20,7 +20,7 @@
   document.body.appendChild(footer);
 
   // Expose helper so pages can show API rate-limit info once scan data is loaded.
-  // rateLimits: array of { repo, remaining, reset, used_this_repo }
+  // rateLimits: array of { rest_remaining, graphql_remaining, reset, total_used }
   window.showRateLimit = function (rateLimits) {
     if (!rateLimits || rateLimits.length === 0) return;
     var minRestRemaining = Infinity;
@@ -31,7 +31,7 @@
       if (rl.rest_remaining != null && rl.rest_remaining < minRestRemaining) minRestRemaining = rl.rest_remaining;
       if (rl.graphql_remaining != null && rl.graphql_remaining < minGraphqlRemaining) minGraphqlRemaining = rl.graphql_remaining;
       if (rl.reset && rl.reset > resetEpoch) resetEpoch = rl.reset;
-      if (rl.used_this_repo) totalUsed += rl.used_this_repo;
+      if (rl.total_used != null && rl.total_used > totalUsed) totalUsed = rl.total_used;
     });
     if (minRestRemaining === Infinity && minGraphqlRemaining === Infinity) return;
     var resetDate = new Date(resetEpoch * 1000);
