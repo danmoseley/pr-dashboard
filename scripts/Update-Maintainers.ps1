@@ -40,6 +40,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
     $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -149,21 +151,37 @@ foreach ($entry in $repos) {
     }
 }
 
-if (-not $DryRun) {
-    # Build ordered output matching docs/repos.json order
-    $orderedObj = [ordered]@{}
-    foreach ($entry in $repos) {
-        $repo = $entry.repo
-        $orderedObj[$repo] = @($updated[$repo])
+# Build ordered output matching docs/repos.json order, preserving repos not in repos.json
+$orderedObj = [ordered]@{}
+foreach ($entry in $repos) {
+    $repo = $entry.repo
+    $orderedObj[$repo] = @($updated[$repo])
+}
+# Preserve existing repos not present in repos.json (e.g., newly added repos awaiting first scan)
+foreach ($repo in $existing.Keys | Sort-Object) {
+    if (-not $orderedObj.Contains($repo)) {
+        $orderedObj[$repo] = @($existing[$repo])
+        Write-Host "  ${repo}: preserved (not in repos.json)" -ForegroundColor Yellow
     }
+}
 
+# Safety checks (key preservation + count non-decrease)
+$safetyResult = Test-MaintainerSafety -Existing $existing -Proposed $orderedObj
+if (-not $safetyResult.Safe) {
+    throw "SAFETY ABORT: $($safetyResult.Reason)"
+}
+
+$oldTotal = $safetyResult.OldTotal
+$newTotal = $safetyResult.NewTotal
+
+if (-not $DryRun) {
     $json = $orderedObj | ConvertTo-Json -Depth 3
     Set-Content -Path $maintainersJsonPath -Value $json -Encoding utf8NoBOM
     Write-Host ""
-    Write-Host "Updated $maintainersJsonPath" -ForegroundColor Cyan
+    Write-Host "Updated $maintainersJsonPath ($oldTotal -> $newTotal maintainers)" -ForegroundColor Cyan
 } else {
     Write-Host ""
-    Write-Host "[DryRun] No files written." -ForegroundColor Yellow
+    Write-Host "[DryRun] No files written. ($oldTotal -> $newTotal maintainers)" -ForegroundColor Yellow
     foreach ($repo in ($updated.Keys | Sort-Object)) {
         $existingForRepo = @($existing[$repo] ?? @())
         $added = @($updated[$repo] | Where-Object { $_ -notin $existingForRepo })

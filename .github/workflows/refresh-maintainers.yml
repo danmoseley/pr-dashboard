@@ -1,0 +1,70 @@
+name: Refresh maintainers
+
+on:
+  schedule:
+    - cron: '37 3 * * 1'  # Monday 03:37 UTC (off-peak, avoids round numbers)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-maintainers
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Run Update-Maintainers
+        id: update
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pwsh ./scripts/Update-Maintainers.ps1 -Days 90 -MinMerges 3
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet config/maintainers.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No maintainer changes detected."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Maintainer changes detected:"
+            git diff --stat config/maintainers.json
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          pushed=false
+          nothing_to_push=false
+          for attempt in 1 2 3; do
+            git add config/maintainers.json
+            if git diff --cached --quiet; then
+              echo "No changes to commit"
+              nothing_to_push=true
+              break
+            fi
+            git commit -m "Auto-refresh maintainers list"
+            if git push; then
+              pushed=true
+              break
+            fi
+            echo "Push failed (attempt $attempt), retrying..."
+            git reset HEAD~1
+            git pull --rebase --autostash origin main
+            sleep 5
+          done
+          if [ "$pushed" != "true" ] && [ "$nothing_to_push" != "true" ]; then
+            echo "All push attempts failed."
+            exit 1
+          fi
