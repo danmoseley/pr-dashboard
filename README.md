@@ -21,6 +21,9 @@ All repos are updated with Most Actionable, Community, Quick Wins, and Consider 
 [roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/actionable.html) ·
 [aspire](https://danmoseley.github.io/pr-dashboard/aspire/actionable.html) ·
 [extensions](https://danmoseley.github.io/pr-dashboard/extensions/actionable.html) ·
+[machinelearning](https://danmoseley.github.io/pr-dashboard/machinelearning/actionable.html) ·
+[maui](https://danmoseley.github.io/pr-dashboard/maui/actionable.html) ·
+[skills](https://danmoseley.github.io/pr-dashboard/skills/actionable.html) ·
 [arcade](https://danmoseley.github.io/pr-dashboard/arcade/actionable.html) ·
 [core](https://danmoseley.github.io/pr-dashboard/core/actionable.html) ·
 [csharplang](https://danmoseley.github.io/pr-dashboard/csharplang/actionable.html) ·
