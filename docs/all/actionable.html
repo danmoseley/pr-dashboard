@@ -28,6 +28,7 @@
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
   table#pr-table { table-layout: fixed; }
   .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5em; }
+  .recent-tiles:empty { display: none; margin: 0; }
   .recent-tile {
     background: var(--header-bg); color: #8b949e; border: 1px solid var(--border);
     border-radius: 12px; padding: 2px 10px; font-size: 0.8em; cursor: pointer;
@@ -631,6 +632,9 @@
         // Only clear user-related state; preserve area/repo/other filters
         document.getElementById('user-field').value = '';
         try { localStorage.removeItem(LS_KEY); } catch(e) {}
+        document.getElementById('involves-label').style.display = 'none';
+        document.getElementById('next-action-label').style.display = 'none';
+        document.getElementById('easy-action-label').style.display = 'none';
         history.replaceState(null, '', buildCurrentUrl());
         renderRecentTiles();
         var summaryBar = document.getElementById('summary-bar');
