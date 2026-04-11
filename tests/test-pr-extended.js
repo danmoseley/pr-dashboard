@@ -1034,16 +1034,16 @@ async function runTests() {
     // K3: Next action on maintainer filter reduces row count
     {
       const p = await openPage(ALL, 100);
-      const totalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
+      const initialVisibleRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
       await p.click('#next-action-maintainer-toggle');
       await wait(600);
       const filteredRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
-      if (filteredRows < totalRows && summaryVisible && summaryText.includes('Next action on maintainer')) {
-        pass('K3: Maintainer filter reduces rows: ' + totalRows + ' → ' + filteredRows + ' and shows summary bar');
+      if (filteredRows < initialVisibleRows && summaryVisible && summaryText.includes('Next action on maintainer')) {
+        pass('K3: Maintainer filter reduces visible rows: ' + initialVisibleRows + ' → ' + filteredRows + ' and shows summary bar');
       } else {
-        fail('K3: Maintainer filter', 'rows=' + filteredRows + '/' + totalRows + ', summaryVisible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
+        fail('K3: Maintainer filter', 'visibleRows=' + initialVisibleRows + ' → ' + filteredRows + ', summaryVisible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
       }
       await p.close();
     }
