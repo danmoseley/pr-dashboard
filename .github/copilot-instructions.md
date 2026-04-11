@@ -53,3 +53,31 @@ To regenerate scan.json locally for a single repo (uses live API calls):
 $m = (Get-Content config/maintainers.json | ConvertFrom-Json).'dotnet/runtime' -join ','
 pwsh ./scripts/Get-PrTriageData.ps1 -Repo "dotnet/runtime" -Limit 500 -Maintainers $m > docs/runtime/scan.json
 ```
+
+## Pre-Push Quality Checklist
+
+**Always run rubber-duck review before pushing.** Online code review is slow and iterative — catch issues locally first. Run rubber-duck review twice: once after planning (design critique) and once after implementing (implementation critique).
+
+Before pushing any PR, verify:
+
+### Config & Schedule Alignment
+- Do hardcoded values (timeouts, intervals, thresholds) work across **all** schedule variants (weekday, weekend, manual dispatch)?
+- If a value must exceed a schedule interval, does it exceed the **longest** interval across all tiers?
+
+### Cross-Repo / Cross-Run Data Mixing
+- When aggregating data from multiple `scan.json` files, can stale data from a previous pipeline run mix with fresh data? Filter by recency if so.
+- When injecting metadata (e.g., `_rate_limit`), does it only touch repos that were actually processed this run?
+
+### Test Coverage
+- Is there a test for both the "true" and "false" return paths of any new decision logic?
+- Are test helpers computing values the same way production code does? (e.g., JSON round-trip for dates, same hash algorithm)
+
+### Edge Cases & Defaults
+- What happens when a value is 0, null, empty string, or missing? (e.g., epoch 0 → 1970 date display)
+- What happens when an API call fails? Does the code degrade gracefully?
+
+### PowerShell Gotchas
+- `-not @()` is `$true` — use `$null -eq` for array emptiness checks
+- `-and`/`-or` have same precedence (left-to-right) — parenthesize compound conditions
+- `ConvertFrom-Json` produces DateTime for date strings — string interpolation is locale-dependent. Canonicalize with `.ToUniversalTime().ToString('o')` before hashing or comparing.
+- `ConvertFrom-Json` produces Int64 for numbers — hashtable lookup is type-sensitive (cast with `[string]`)
