@@ -766,10 +766,28 @@
       var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
         .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
       var modeDesc = easyActionMaintainerMode ? 'Easy next action on maintainer' : 'Next action on maintainer';
-      bar.innerHTML = '<strong>' + modeDesc + '</strong>' +
-        ' <a href="#" onclick="clearMaintainerFilters();return false">&#x2715; Clear</a>' +
-        '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
-        (breakdown ? ': ' + breakdown : '') + '</span>';
+      while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+      var strong = document.createElement('strong');
+      strong.textContent = modeDesc;
+      bar.appendChild(strong);
+
+      bar.appendChild(document.createTextNode(' '));
+
+      var clearLink = document.createElement('a');
+      clearLink.href = '#';
+      clearLink.textContent = '\u2715 Clear';
+      clearLink.onclick = function() {
+        clearMaintainerFilters();
+        return false;
+      };
+      bar.appendChild(clearLink);
+
+      var breakdownSpan = document.createElement('span');
+      breakdownSpan.className = 'repo-breakdown';
+      breakdownSpan.textContent = ' \u2014 ' + filtered.length + ' PRs' +
+        (breakdown ? ': ' + breakdown : '');
+      bar.appendChild(breakdownSpan);
       bar.style.display = 'block';
       document.getElementById('filter-banner').style.display = 'none';
     } else {
