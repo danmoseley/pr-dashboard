@@ -237,17 +237,21 @@
   } catch(e) {}
   var savedUser = '';
   try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
-  if (urlInvolves !== null) {
+  // User-context URL params (involves/nextaction/easyaction) are only meaningful when a
+  // user filter is active. Ignore them when no user is set so stale URLs like
+  // ?involves=true don't silently flip filter state.
+  var hasUser = urlUsers.length > 0 || !!savedUser;
+  if (hasUser && urlInvolves !== null) {
     involvesMode = urlInvolves === 'true' || urlInvolves === '1';
   } else {
     try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
   }
-  if (urlNextAction !== null) {
+  if (hasUser && urlNextAction !== null) {
     nextActionOnlyMode = urlNextAction === 'true' || urlNextAction === '1';
   } else {
     try { nextActionOnlyMode = localStorage.getItem(LS_NEXT_ACTION_KEY) === 'true'; } catch(e) {}
   }
-  if (urlEasyAction !== null) {
+  if (hasUser && urlEasyAction !== null) {
     easyActionMode = urlEasyAction === 'true' || urlEasyAction === '1';
   } else {
     try { easyActionMode = localStorage.getItem(LS_EASY_ACTION_KEY) === 'true'; } catch(e) {}
@@ -356,8 +360,15 @@
   var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
   // Tracks the next-maintainer state that was active before easy-maintainer was enabled.
   // Persisted to localStorage so the state is preserved across page reloads.
-  var savedNextMaintainerBeforeEasy = false;
-  try { savedNextMaintainerBeforeEasy = localStorage.getItem(LS_NM_BEFORE_EASY_KEY) === 'true'; } catch(e) {}
+  var savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+  try {
+    var savedNextMaintainerBeforeEasyValue = localStorage.getItem(LS_NM_BEFORE_EASY_KEY);
+    if (savedNextMaintainerBeforeEasyValue === null) {
+      localStorage.setItem(LS_NM_BEFORE_EASY_KEY, savedNextMaintainerBeforeEasy ? 'true' : 'false');
+    } else {
+      savedNextMaintainerBeforeEasy = savedNextMaintainerBeforeEasyValue === 'true';
+    }
+  } catch(e) {}
   if (nextActionMaintainerToggle) {
     nextActionMaintainerToggle.addEventListener('change', function() {
       nextActionMaintainerMode = this.checked;
