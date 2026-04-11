@@ -94,7 +94,6 @@ function Get-IncrementalPartition {
         [array]$Candidates,
         [hashtable]$PreviousPrLookup,
         [hashtable]$PreviousFingerprints,
-        [AllowNull()][Nullable[DateTime]]$PreviousTimestamp = $null,
         [int]$MaxReuseSeconds = $script:MaxReuseSec
     )
     $result = @{

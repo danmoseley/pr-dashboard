@@ -232,8 +232,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $entry1; '20' = $entry2 }
         $fpMap = @{ '10' = $fp1; '20' = $fp2 }
         $partition = Get-IncrementalPartition -Candidates @($pr1, $pr2) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 0
         $partition.ReusedEntries.Count | Should -Be 2
         $partition.Fallback | Should -BeFalse
@@ -244,8 +243,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $entry1 }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1, $newPr) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
         $partition.RefreshCandidates[0].number | Should -Be 30
         $partition.ReusedEntries.Count | Should -Be 1
@@ -256,8 +254,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $entry1 }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($modifiedPr) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -266,8 +263,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $failEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -276,8 +272,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $inProgressEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -286,8 +281,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $absentEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -296,8 +290,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $unknownEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -308,8 +301,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $staleEntry1; '20' = $staleEntry2 }
         $fpMap = @{ '10' = $fp1; '20' = $fp2 }
         $partition = Get-IncrementalPartition -Candidates @($pr1, $pr2) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5) -MaxReuseSeconds 43200
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 2
         $partition.ReusedEntries.Count | Should -Be 0
     }
@@ -320,13 +312,12 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $freshEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddHours(-13) -MaxReuseSeconds 43200
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 0
         $partition.ReusedEntries.Count | Should -Be 1
     }
 
-    It 'Force-refreshes when _refreshed_at is absent (legacy entry, no PreviousTimestamp)' {
+    It 'Force-refreshes when _refreshed_at is absent (legacy entry)' {
         $legacyEntry = [PSCustomObject]@{
             number = 10; ci = 'SUCCESS'; mergeable = 'MERGEABLE'
             score = 80; next_action = 'needs-review'; _fingerprint = $fp1
@@ -335,12 +326,11 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $legacyEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp $null
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
-    It 'Force-refreshes when _refreshed_at is absent (legacy entry, even with recent PreviousTimestamp)' {
+    It 'Force-refreshes when _refreshed_at is absent (legacy entry, second variant)' {
         $legacyEntry = [PSCustomObject]@{
             number = 10; ci = 'SUCCESS'; mergeable = 'MERGEABLE'
             score = 80; next_action = 'needs-review'; _fingerprint = $fp1
@@ -349,8 +339,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $legacyEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -360,8 +349,7 @@ Describe 'Get-IncrementalPartition' {
         $fpMap = @{ '10' = $fp1 }
         # Malformed _refreshed_at should cause [datetime] cast to fail -> force refresh
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp $null
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -373,8 +361,7 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $corruptEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
@@ -386,15 +373,13 @@ Describe 'Get-IncrementalPartition' {
         $lookup = @{ '10' = $corruptEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
     It 'Returns all candidates on empty previous state' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
-            -PreviousPrLookup @{} -PreviousFingerprints @{} `
-            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+            -PreviousPrLookup @{} -PreviousFingerprints @{}
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 }
@@ -457,3 +442,4 @@ Describe 'Merge-ReusedEntries' {
         $merged[0]._refreshed_at | Should -Be $oldTime
     }
 }
+
