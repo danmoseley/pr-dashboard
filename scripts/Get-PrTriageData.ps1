@@ -210,7 +210,7 @@ if ($incrementalEnabled) {
     $msg = "Incremental mode disabled — full scan. Reason: $reason"
     Write-Warning $msg
     if ($env:GITHUB_ACTIONS) {
-        Write-Output "::warning::$msg"
+        Write-Host "::warning::$msg"
     }
 }
 
