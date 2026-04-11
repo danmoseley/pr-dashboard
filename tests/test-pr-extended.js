@@ -1032,18 +1032,21 @@ async function runTests() {
     }
 
     // K3: Next action on maintainer filter reduces row count
+    // Use total DOM row count (rows.length), not visible-row count, because renderTable()
+    // rebuilds the table with only the filtered PRs. Both unfiltered and filtered sets can
+    // exceed the 500-row "show more" cap, so visible-row counts would both equal 500.
     {
       const p = await openPage(ALL, 100);
-      const initialVisibleRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const initialTotalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       await p.click('#next-action-maintainer-toggle');
       await wait(600);
-      const filteredRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const filteredTotalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
-      if (filteredRows < initialVisibleRows && summaryVisible && summaryText.includes('Next action on maintainer')) {
-        pass('K3: Maintainer filter reduces visible rows: ' + initialVisibleRows + ' → ' + filteredRows + ' and shows summary bar');
+      if (filteredTotalRows < initialTotalRows && summaryVisible && summaryText.includes('Next action on maintainer')) {
+        pass('K3: Maintainer filter reduces total rows: ' + initialTotalRows + ' → ' + filteredTotalRows + ' and shows summary bar');
       } else {
-        fail('K3: Maintainer filter', 'visibleRows=' + initialVisibleRows + ' → ' + filteredRows + ', summaryVisible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
+        fail('K3: Maintainer filter', 'totalRows=' + initialTotalRows + ' → ' + filteredTotalRows + ', summaryVisible=' + summaryVisible + ', summary="' + summaryText.trim().slice(0,60) + '"');
       }
       await p.close();
     }
@@ -1053,10 +1056,10 @@ async function runTests() {
       const p = await openPage(ALL, 100);
       await p.click('#next-action-maintainer-toggle');
       await wait(600);
-      const afterNextAction = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const afterNextAction = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       await p.click('#easy-action-maintainer-toggle');
       await wait(600);
-      const afterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
+      const afterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       if (afterEasy <= afterNextAction && summaryText.includes('Easy next action on maintainer')) {
         pass('K4: Easy maintainer filter reduces further: ' + afterNextAction + ' → ' + afterEasy + ' rows, summary: "Easy next action on maintainer"');
