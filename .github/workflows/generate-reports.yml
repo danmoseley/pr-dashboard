@@ -158,13 +158,19 @@ jobs:
             fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
-            if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args > "docs/${slug}/scan.json.tmp"; then
-              echo "::warning::Scan failed for $repo"
+            scan_stderr="docs/${slug}/scan.stderr.tmp"
+            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args > "docs/${slug}/scan.json.tmp" 2>"$scan_stderr"
+            scan_exit=$?
+            if [ $scan_exit -ne 0 ]; then
+              echo "::warning::Scan failed for $repo (exit $scan_exit)"
+              if [ -s "$scan_stderr" ]; then
+                echo "::warning::Scan stderr for $repo: $(head -c 500 "$scan_stderr")"
+              fi
               scan_ok=false
             fi
             # Log incremental scan stats (no extra API calls)
             if $scan_ok && [ -f "docs/${slug}/scan.json.tmp" ]; then
-              incremental_info=$(pwsh -Command "
+              incremental_info=$(pwsh -NoProfile -Command "
                 \$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json
                 if (\$j.incremental) { \"(refreshed \$(\$j.incremental.refreshed), reused \$(\$j.incremental.reused))\" }
                 else { '(full scan)' }
@@ -181,7 +187,20 @@ jobs:
               } catch { Write-Host \"Parse error: \$_\"; exit 1 }
             "; then
               mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+              rm -f "$scan_stderr"
             else
+              # Log diagnostic info before removing the tmp file
+              if [ -f "docs/${slug}/scan.json.tmp" ]; then
+                tmp_size=$(wc -c < "docs/${slug}/scan.json.tmp")
+                tmp_head=$(head -c 200 "docs/${slug}/scan.json.tmp" | cat -v)
+                echo "::warning::Invalid scan output for $repo — file size: ${tmp_size} bytes, starts with: ${tmp_head}"
+              else
+                echo "::warning::Scan output file missing for $repo"
+              fi
+              if [ -s "$scan_stderr" ]; then
+                echo "::warning::Scan stderr for $repo: $(head -c 500 "$scan_stderr")"
+              fi
+              rm -f "$scan_stderr"
               echo "::warning::Invalid or empty scan output for $repo — keeping previous data"
               rm -f "docs/${slug}/scan.json.tmp"
               failed+=("$repo")
