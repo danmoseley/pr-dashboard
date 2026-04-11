@@ -95,6 +95,16 @@ jobs:
             "dotnet/razor:razor:standard"
             "dotnet/vscode-csharp:vscode-csharp:standard"
           )
+          mkdir -p docs
+          repos_tmp=$(mktemp)
+          printf '%s\n' "${repos[@]}" \
+            | jq -R -s '
+                split("\n")
+                | map(select(length > 0))
+                | map(split(":"))
+                | map({ repo: .[0], slug: .[1] })
+              ' > "$repos_tmp"
+          mv "$repos_tmp" docs/repos.json
           # Log API quota at job start (single call, no per-repo overhead)
           rate_start=$(gh api rate_limit 2>/dev/null || echo "")
           rest_start=$(echo "$rate_start" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
