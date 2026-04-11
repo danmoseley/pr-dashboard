@@ -264,7 +264,6 @@
 
   // --- Main refresh logic ---
   function doViewRefresh(currentUser, repoList, renderRowFn, allPrs) {
-    if (!currentUser) return;
 
     var btn = document.getElementById('view-refresh-btn');
     var statusEl = document.getElementById('view-refresh-status');
@@ -391,6 +390,8 @@
     phase1
       .then(function() {
         // Phase 2: Discover new PRs (uses search rate limit — separate from core)
+        // Requires a user filter; skip if no user is active.
+        if (!currentUser) return { prs: [], truncated: false, failed: false };
         if (statusEl) statusEl.textContent = 'Searching for new PRs\u2026';
         return searchNewPrs(currentUser, existingKeys, repoList)
           .catch(function(err) {
@@ -589,7 +590,7 @@
         var repos = window._prDashboard && window._prDashboard.repoList;
         var renderRow = window._prDashboard && window._prDashboard.renderRow;
         var allPrs = window._prDashboard && window._prDashboard.allPrs;
-        if (!user || !repos) return;
+        if (!repos) return;
         doViewRefresh(user, repos, renderRow, allPrs);
       });
 
