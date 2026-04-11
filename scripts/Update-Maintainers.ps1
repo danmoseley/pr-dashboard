@@ -149,21 +149,43 @@ foreach ($entry in $repos) {
     }
 }
 
-if (-not $DryRun) {
-    # Build ordered output matching docs/repos.json order
-    $orderedObj = [ordered]@{}
-    foreach ($entry in $repos) {
-        $repo = $entry.repo
-        $orderedObj[$repo] = @($updated[$repo])
+# Build ordered output matching docs/repos.json order, preserving repos not in repos.json
+$orderedObj = [ordered]@{}
+foreach ($entry in $repos) {
+    $repo = $entry.repo
+    $orderedObj[$repo] = @($updated[$repo])
+}
+# Preserve existing repos not present in repos.json (e.g., newly added repos awaiting first scan)
+foreach ($repo in $existing.Keys | Sort-Object) {
+    if (-not $orderedObj.Contains($repo)) {
+        $orderedObj[$repo] = @($existing[$repo])
+        Write-Host "  ${repo}: preserved (not in repos.json)" -ForegroundColor Yellow
     }
+}
 
+# Safety check: never lose repo keys
+$missingKeys = @($existing.Keys | Where-Object { -not $orderedObj.Contains($_) })
+if ($missingKeys.Count -gt 0) {
+    Write-Error "SAFETY ABORT: would lose repo keys: $($missingKeys -join ', ')"
+    exit 1
+}
+
+# Safety check: total maintainer count must not decrease
+$oldTotal = ($existing.Values | ForEach-Object { $_.Count } | Measure-Object -Sum).Sum
+$newTotal = ($orderedObj.Values | ForEach-Object { $_.Count } | Measure-Object -Sum).Sum
+if ($newTotal -lt $oldTotal) {
+    Write-Error "SAFETY ABORT: total maintainer count would decrease from $oldTotal to $newTotal"
+    exit 1
+}
+
+if (-not $DryRun) {
     $json = $orderedObj | ConvertTo-Json -Depth 3
     Set-Content -Path $maintainersJsonPath -Value $json -Encoding utf8NoBOM
     Write-Host ""
-    Write-Host "Updated $maintainersJsonPath" -ForegroundColor Cyan
+    Write-Host "Updated $maintainersJsonPath ($oldTotal -> $newTotal maintainers)" -ForegroundColor Cyan
 } else {
     Write-Host ""
-    Write-Host "[DryRun] No files written." -ForegroundColor Yellow
+    Write-Host "[DryRun] No files written. ($oldTotal -> $newTotal maintainers)" -ForegroundColor Yellow
     foreach ($repo in ($updated.Keys | Sort-Object)) {
         $existingForRepo = @($existing[$repo] ?? @())
         $added = @($updated[$repo] | Where-Object { $_ -notin $existingForRepo })
