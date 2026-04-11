@@ -164,12 +164,12 @@ jobs:
                 continue
               fi
             fi
+            scanned_slugs+=("$slug")
             if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
               continue
             fi
-            scanned_slugs+=("$slug")
           done
           # Log total API quota consumed across all repos (2 calls total, not per-repo)
           rate_end=$(gh api rate_limit 2>/dev/null || echo "")
