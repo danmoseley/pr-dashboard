@@ -211,7 +211,13 @@ jobs:
                     total_used = $total_rest_used
                   } -Force
                   \$j | ConvertTo-Json -Depth 10
-                " > "docs/${slug}/scan.json.tmp" && mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+                " > "docs/${slug}/scan.json.tmp"
+                if pwsh -Command "Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json | Out-Null"; then
+                  mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+                else
+                  echo "::warning::_rate_limit injection produced invalid JSON for ${slug}, keeping original"
+                  rm -f "docs/${slug}/scan.json.tmp"
+                fi
               fi
             done
           fi

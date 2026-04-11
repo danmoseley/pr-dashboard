@@ -31,7 +31,18 @@ try {
 
     # Check previous scan timestamp — don't skip if too old
     if ($prevScan.timestamp) {
-        $age = ((Get-Date) - [DateTime]::Parse($prevScan.timestamp)).TotalSeconds
+        $prevTimestamp = if ($prevScan.timestamp -is [System.DateTimeOffset]) {
+            $prevScan.timestamp
+        } elseif ($prevScan.timestamp -is [System.DateTime]) {
+            [System.DateTimeOffset]$prevScan.timestamp
+        } else {
+            [System.DateTimeOffset]::Parse(
+                [string]$prevScan.timestamp,
+                [System.Globalization.CultureInfo]::InvariantCulture,
+                [System.Globalization.DateTimeStyles]::RoundtripKind
+            )
+        }
+        $age = ([System.DateTimeOffset]::UtcNow - $prevTimestamp.ToUniversalTime()).TotalSeconds
         if ($age -gt $MaxSkipSeconds) {
             Write-Verbose "Previous scan is $([int]($age/60))m old (max $([int]($MaxSkipSeconds/60))m) — scan needed"
             Write-Output "true"
