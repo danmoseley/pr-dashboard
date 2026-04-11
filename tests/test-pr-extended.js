@@ -1136,15 +1136,15 @@ async function runTests() {
     {
       const p = await openPage(ALL, 100);
       await wait(400);
-      const beforeDisabled = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
+      const isDisabledBeforeEasy = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
       await p.click('#easy-action-maintainer-toggle');
       await wait(400);
       const afterChecked = await p.$eval('#next-action-maintainer-toggle', e => e.checked).catch(() => null);
       const afterDisabled = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
-      if (!beforeDisabled && afterChecked === true && afterDisabled === true) {
+      if (!isDisabledBeforeEasy && afterChecked === true && afterDisabled === true) {
         pass('K8: Easy maintainer toggle checks and disables next-action-maintainer toggle');
       } else {
-        fail('K8: Easy maintainer disables next-action-maintainer', 'beforeDisabled=' + beforeDisabled + ', afterChecked=' + afterChecked + ', afterDisabled=' + afterDisabled);
+        fail('K8: Easy maintainer disables next-action-maintainer', 'isDisabledBeforeEasy=' + isDisabledBeforeEasy + ', afterChecked=' + afterChecked + ', afterDisabled=' + afterDisabled);
       }
       // Unchecking easy restores next-action-maintainer state
       await p.click('#easy-action-maintainer-toggle');
@@ -1162,16 +1162,16 @@ async function runTests() {
     {
       const p = await openPage(ALL, 100);
       await wait(400);
-      const btnHiddenBefore = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display === 'none').catch(() => true);
+      const clearBtnHiddenBeforeUser = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display === 'none').catch(() => true);
       await p.$eval('#user-field', el => { el.value = 'danmoseley'; });
       await p.click('#go-btn');
       await wait(500);
       const btnVisible = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display !== 'none').catch(() => false);
       const url = p.url();
-      if (btnHiddenBefore && btnVisible && url.includes('user=danmoseley')) {
+      if (clearBtnHiddenBeforeUser && btnVisible && url.includes('user=danmoseley')) {
         pass('K9: Clear user button (✕) hidden initially, visible after user set');
       } else {
-        fail('K9: Clear user button visibility', 'hiddenBefore=' + btnHiddenBefore + ', visible=' + btnVisible + ', url=' + url);
+        fail('K9: Clear user button visibility', 'hiddenBefore=' + clearBtnHiddenBeforeUser + ', visible=' + btnVisible + ', url=' + url);
       }
       await p.click('#clear-user-btn');
       await wait(500);

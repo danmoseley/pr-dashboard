@@ -497,7 +497,10 @@
 
   window.applyUser = function() {
     var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
-    if (!name) { clearUser(); return; }
+    if (!name) {
+      clearUser(); // clear filter when user empties the field and hits Go
+      return;
+    }
     activeUsers = [name];
     addRecentUser(name);
     renderRecentTiles();
