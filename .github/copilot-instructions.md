@@ -73,6 +73,7 @@ These rules address the most common issues found during code review. Follow them
 - Icon-only elements (e.g., `.bot-icon`, filter buttons, emoji badges) need `role` and `aria-label` attributes.
 - Maintain sufficient color contrast (WCAG AA: 4.5:1 for text, 3:1 for large text/icons), especially in dark mode.
 - Footnote/superscript links must be keyboard-navigable and have descriptive `aria-label` text.
+- When changing visible labels (eg button name) also change any `aria-label` text to match.
 
 ### GitHub API Usage
 
