@@ -90,10 +90,10 @@ async function runTests() {
     // A2: Clicking 🔍 (filter-btn) in a table row fills user-field and filters rows
     {
       const p = await openPage(ALL, 100);
-      const filterBtns = await p.$$('#pr-table tbody tr .filter-btn');
-      if (filterBtns.length === 0) { fail('A2: Avatar filter button click', 'no .filter-btn elements found'); }
+      const filterBtns = await p.$$('#pr-table tbody tr .user-ref .filter-btn');
+      if (filterBtns.length === 0) { fail('A2: Avatar filter button click', 'no .user-ref .filter-btn elements found'); }
       else {
-        const firstBtn = p.locator('#pr-table tbody tr .filter-btn').first();
+        const firstBtn = p.locator('#pr-table tbody tr .user-ref .filter-btn').first();
         await firstBtn.scrollIntoViewIfNeeded();
         await firstBtn.click();
         await p.waitForFunction(
