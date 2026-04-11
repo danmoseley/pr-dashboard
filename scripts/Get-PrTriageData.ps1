@@ -102,10 +102,10 @@ function Invoke-GhRetry {
         }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
-            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
+            Write-Host "WARNING: gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            Write-Warning "gh failed after $MaxAttempts attempts: $errText"
+            Write-Host "WARNING: gh failed after $MaxAttempts attempts: $errText"
             return ($out -join "`n")
         }
     }
@@ -221,7 +221,7 @@ if ($incrementalEnabled) {
 } elseif ($PreviousScanFile) {
     $reason = if ($prevScanResult.DisableReason) { $prevScanResult.DisableReason } else { 'unknown' }
     $msg = "Incremental mode disabled — full scan. Reason: $reason"
-    Write-Warning $msg
+    Write-Host "WARNING: $msg"
     if ($env:GITHUB_ACTIONS) {
         Write-Host "::warning::$msg"
     }
@@ -316,7 +316,7 @@ if ($incrementalEnabled) {
     $reusedCount = $reusedPrEntries.Count
     $incrementalFallback = $partition.Fallback
     if ($incrementalFallback) {
-        Write-Warning "Incremental partitioning failed — falling back to full scan"
+        Write-Host "WARNING: Incremental partitioning failed — falling back to full scan"
         if ($env:GITHUB_ACTIONS) { Write-Host "::warning::Incremental scan failed for $Repo — fell back to full scan" }
     } else {
         Write-Verbose "Incremental: $($refreshCandidates.Count) to refresh, $reusedCount reused from cache"
@@ -370,7 +370,7 @@ foreach ($prNum in @($graphqlData.Keys)) {
         $q = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { pullRequest(number:$prNum) { commits(last:1) { nodes { commit { statusCheckRollup { contexts(first:100, after:`"$cursor`") { pageInfo { hasNextPage endCursor } nodes { ...on CheckRun { name conclusion status } } } } } } } } } }"
         $res = (Invoke-GhRetry @("api","graphql","-f","query=$q")) | ConvertFrom-Json
         if (-not $res -or -not $res.data -or $res.errors) {
-            Write-Warning "Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
+            Write-Host "WARNING: Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
             break
         }
         $ctx = $res.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts
@@ -1200,7 +1200,7 @@ if ($OutputCsv) {
 
 } catch {
     # Ensure stdout is always valid JSON so downstream scripts don't crash
-    Write-Warning "Get-PrTriageData failed for ${Repo}: $_"
+    Write-Host "WARNING: Get-PrTriageData failed for ${Repo}: $_"
     @{
         repo = $Repo
         scanned = 0
