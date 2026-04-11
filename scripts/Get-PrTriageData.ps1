@@ -110,6 +110,8 @@ try {
     } else { throw "Module file not found" }
 } catch {
     Write-Verbose "MaintainerActivity module unavailable ($_) — using inline fallback"
+    # Full signature preserved for drop-in replacement compatibility with the real module function.
+    # Only $Maintainers and $ExcludeLogin are used in this stub.
     function Select-FallbackReviewers {
         param([string[]]$Maintainers, [string]$ExcludeLogin, [string]$Repo, $ActivityData, [string[]]$ChangedFilePaths, [string[]]$AreaLabels)
         return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin } | Select-Object -First 2)

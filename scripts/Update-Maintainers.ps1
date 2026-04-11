@@ -190,8 +190,9 @@ foreach ($entry in $repos) {
 
     if (-not $SkipActivity) {
         # Add merge_count from mergerCounts into each activity entry before storing.
-        # Invariant: all logins in $mergerCounts already have a $repoActivity entry —
-        # both are populated in the same inner loop (lines above), so they stay in sync.
+        # Invariant (holds because this block only runs when -SkipActivity is false): all logins
+        # in $mergerCounts also have a $repoActivity entry — both are populated in the inner loop
+        # above under the same `-not $SkipActivity` guard, so they stay in sync.
         foreach ($login in @($mergerCounts.Keys)) {
             if ($repoActivity.ContainsKey($login)) {
                 $repoActivity[$login].count = $mergerCounts[$login]
