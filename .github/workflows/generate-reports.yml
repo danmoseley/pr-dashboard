@@ -118,8 +118,12 @@ jobs:
             if [ -f "docs/${slug}/scan.json" ]; then
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
 
-              # Lightweight probe: skip scan entirely if nothing changed and previous scan is stable
-              # MaxSkipSeconds must exceed the longest schedule interval for this tier
+              # Lightweight probe: skip scan entirely if nothing changed and previous scan is stable.
+              # MaxSkipSeconds exceeds the longest schedule interval for this tier so that the probe
+              # age check doesn't prevent skipping on the very next run after a scan. Tradeoff: a
+              # quiet repo can stay unscanned for up to one extra run interval beyond max_skip before
+              # the age check forces a rescan. This staleness is acceptable because the probe also
+              # checks for unstable PRs and only skips when the PR set is provably unchanged.
               if [ "$tier" = "priority" ]; then
                 max_skip=46800   # 13h (priority runs every ~6h weekdays, ~12h weekends)
               else

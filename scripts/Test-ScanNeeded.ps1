@@ -11,7 +11,8 @@
     Path to the previous scan.json for this repo.
 .PARAMETER MaxSkipSeconds
     Maximum age of previous scan before forcing a rescan regardless of probe result.
-    Default: 10800 (3 hours). Should be well under the incremental TTL (12h).
+    Default: 10800 (3 hours). Callers may increase this to match workflow cadence
+    and the maximum freshness window they are willing to tolerate.
 #>
 param(
     [Parameter(Mandatory)][string]$Repo,
