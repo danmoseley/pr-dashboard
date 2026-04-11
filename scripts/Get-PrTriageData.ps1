@@ -276,6 +276,11 @@ Write-Verbose "Scanned $($prsRaw.Count) -> $($candidates.Count) candidates ($exc
 
 if ($candidates.Count -eq 0) {
     Write-Verbose "No candidates to analyze."
+    # Compute probe hash even for empty results
+    $probePairs = @($prsRaw | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+    $probeInput = "total=$($prsRaw.Count)|" + ($probePairs -join '|')
+    $sha0 = [System.Security.Cryptography.SHA256]::Create()
+    $probeHash0 = [BitConverter]::ToString($sha0.ComputeHash([System.Text.Encoding]::UTF8.GetBytes($probeInput))).Replace('-', '').Substring(0, 16).ToLower()
     @{
         repo = $Repo
         timestamp = $now.ToString("o")
@@ -283,6 +288,7 @@ if ($candidates.Count -eq 0) {
         analyzed = 0
         prs = @()
         _cache_version = $CacheVersion
+        _probe_hash = $probeHash0
     } | ConvertTo-Json -Depth 5
     return
 }
@@ -1118,9 +1124,17 @@ if ($Top -gt 0) {
 }
 
 # --- Output JSON ---
+# Compute probe hash for lightweight skip-scan detection (matches Test-ScanNeeded.ps1)
+$probePairs = @($prsRaw | ForEach-Object { "$($_.number):$($_.updatedAt)" } | Sort-Object)
+$probeInput = "total=$($prsRaw.Count)|" + ($probePairs -join '|')
+$sha = [System.Security.Cryptography.SHA256]::Create()
+$probeBytes = [System.Text.Encoding]::UTF8.GetBytes($probeInput)
+$probeHash = [BitConverter]::ToString($sha.ComputeHash($probeBytes)).Replace('-', '').Substring(0, 16).ToLower()
+
 $output = @{
     timestamp = $now.ToString("o")
     repo = $Repo
+    _probe_hash = $probeHash
     filters = @{
         label = if ($Label) { $Label } else { $null }
         author = if ($Author) { $Author } else { $null }

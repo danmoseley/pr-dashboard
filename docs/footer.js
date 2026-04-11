@@ -18,4 +18,31 @@
     '<img src="https://github.com/danmoseley/pr-dashboard/actions/workflows/generate-reports.yml/badge.svg" alt="Pipeline status" style="height:20px;vertical-align:middle"></a>';
 
   document.body.appendChild(footer);
+
+  // Expose helper so pages can show API rate-limit info once scan data is loaded.
+  // rateLimits: array of { repo, remaining, reset, used_this_repo }
+  window.showRateLimit = function (rateLimits) {
+    if (!rateLimits || rateLimits.length === 0) return;
+    var minRestRemaining = Infinity;
+    var minGraphqlRemaining = Infinity;
+    var resetEpoch = 0;
+    var totalUsed = 0;
+    rateLimits.forEach(function (rl) {
+      if (rl.rest_remaining != null && rl.rest_remaining < minRestRemaining) minRestRemaining = rl.rest_remaining;
+      if (rl.graphql_remaining != null && rl.graphql_remaining < minGraphqlRemaining) minGraphqlRemaining = rl.graphql_remaining;
+      if (rl.reset && rl.reset > resetEpoch) resetEpoch = rl.reset;
+      if (rl.used_this_repo) totalUsed += rl.used_this_repo;
+    });
+    if (minRestRemaining === Infinity && minGraphqlRemaining === Infinity) return;
+    var resetDate = new Date(resetEpoch * 1000);
+    var resetStr = resetDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    var parts = [];
+    if (minRestRemaining !== Infinity) parts.push('REST ' + minRestRemaining);
+    if (minGraphqlRemaining !== Infinity) parts.push('GraphQL ' + minGraphqlRemaining);
+    var span = document.createElement('span');
+    span.style.cssText = 'margin-left:1.5em;opacity:0.6;';
+    span.title = 'GitHub API quota remaining after last pipeline run. Resets at ' + resetStr + '.';
+    span.textContent = 'API: ' + parts.join(', ') + ' remaining (used ~' + totalUsed + ' REST, resets ' + resetStr + ')';
+    footer.appendChild(span);
+  };
 })();

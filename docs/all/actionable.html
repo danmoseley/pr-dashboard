@@ -385,7 +385,7 @@
               pr._slug = slug;
               pr._repo = repoName;
             });
-            return { slug: slug, repo: repoName, prs: data.prs || [], updated: meta.updated || null, schedule_desc: meta.schedule_desc || null };
+            return { slug: slug, repo: repoName, prs: data.prs || [], updated: meta.updated || null, schedule_desc: meta.schedule_desc || null, _rate_limit: data._rate_limit || null };
           });
         });
         return Promise.all(fetches);
@@ -423,6 +423,12 @@
           // Expose oldest scan timestamp so pr-view-refresh.js can filter new-PR discovery
           document.getElementById('meta-line').setAttribute('data-server-updated', timestamps[0].toISOString());
         }
+
+        // Show API rate limit in footer (subtle, for admins)
+        var rateLimits = results
+          .filter(function(r) { return r._rate_limit; })
+          .map(function(r) { return { repo: r.repo, rest_remaining: r._rate_limit.rest_remaining, graphql_remaining: r._rate_limit.graphql_remaining, reset: r._rate_limit.reset, used_this_repo: r._rate_limit.used_this_repo }; });
+        if (window.showRateLimit) window.showRateLimit(rateLimits);
 
         if (activeUsers.length > 0) {
           renderFiltered(activeUsers);

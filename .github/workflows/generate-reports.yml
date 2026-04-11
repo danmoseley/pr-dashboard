@@ -116,6 +116,18 @@ jobs:
             prev_scan_args=""
             if [ -f "docs/${slug}/scan.json" ]; then
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
+
+              # Lightweight probe: skip scan entirely if nothing changed and previous scan is stable
+              scan_needed=$(pwsh ./scripts/Test-ScanNeeded.ps1 -Repo "$repo" -PreviousScanFile "docs/${slug}/scan.json" 2>/dev/null || echo "true")
+              if [ "$scan_needed" = "false" ]; then
+                echo "::notice::${repo} — probe says unchanged, skipping scan"
+                # Still run Build-Reports in case templates changed
+                if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
+                  echo "::warning::Report generation failed for $repo"
+                  failed+=("$repo")
+                fi
+                continue
+              fi
             fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
@@ -168,6 +180,28 @@ jobs:
           fi
           if [ -n "$quota_summary" ]; then
             echo "::notice::Total API usage — ${quota_summary}"
+          fi
+          # Inject rate-limit snapshot into each scan.json for footer display (0 extra API calls)
+          if [ -n "$rest_end" ] || [ -n "$graphql_end" ]; then
+            rate_reset=$(echo "$rate_end" | jq -r '.resources.core.reset // empty' 2>/dev/null || echo "")
+            total_rest_used=0
+            [ -n "$rest_start" ] && [ -n "$rest_end" ] && total_rest_used=$((rest_start - rest_end))
+            [ "$total_rest_used" -lt 0 ] && total_rest_used=0
+            for entry in "${repos[@]}"; do
+              IFS=':' read -r repo slug tier <<< "$entry"
+              if [ -f "docs/${slug}/scan.json" ]; then
+                pwsh -Command "
+                  \$j = Get-Content 'docs/${slug}/scan.json' -Raw | ConvertFrom-Json
+                  \$j | Add-Member -NotePropertyName '_rate_limit' -NotePropertyValue @{
+                    rest_remaining = ${rest_end:-0}
+                    graphql_remaining = ${graphql_end:-0}
+                    reset = ${rate_reset:-0}
+                    total_used = $total_rest_used
+                  } -Force
+                  \$j | ConvertTo-Json -Depth 10
+                " > "docs/${slug}/scan.json.tmp" && mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+              fi
+            done
           fi
           if [ ${#failed[@]} -gt 0 ]; then
             echo "::warning::Failed repos: ${failed[*]}"
