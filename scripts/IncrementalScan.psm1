@@ -7,7 +7,7 @@
 # Cache version — bump when scoring logic or output schema changes.
 $script:CacheVersion = 2
 
-# Max age in seconds before cache is considered stale and all PRs are refreshed.
+# Max age in seconds before a cached entry is considered stale (used as default for Get-IncrementalPartition).
 $script:MaxReuseSec = 12 * 3600
 
 function Get-IncrementalCacheVersion { $script:CacheVersion }
@@ -75,7 +75,7 @@ function Get-IncrementalPartition {
         [hashtable]$PreviousPrLookup,
         [hashtable]$PreviousFingerprints,
         [AllowNull()][Nullable[DateTime]]$PreviousTimestamp = $null,
-        [int]$MaxReuseSeconds = 43200  # 12h default
+        [int]$MaxReuseSeconds = $script:MaxReuseSec
     )
     $result = @{
         RefreshCandidates = $Candidates
@@ -153,6 +153,7 @@ function Merge-ReusedEntries {
     $byNumber = @{}
     foreach ($p in $PrListData) { $byNumber[[string]$p.number] = $p }
 
+    $merged = [System.Collections.ArrayList]@($Results)
     foreach ($entry in $ReusedEntries.Values) {
         $listPr = $byNumber[[string]$entry.number]
         if ($listPr) {
@@ -160,9 +161,9 @@ function Merge-ReusedEntries {
             $entry.days_since_update = [int]($now - [DateTime]::Parse($listPr.updatedAt)).TotalDays
             $entry._fingerprint = Get-PrFingerprint $listPr
         }
-        $Results += $entry
+        [void]$merged.Add($entry)
     }
-    return $Results
+    return @($merged)
 }
 
 Export-ModuleMember -Function Get-PrFingerprint, Import-PreviousScan, Get-IncrementalPartition, Get-IncrementalCacheVersion, Merge-ReusedEntries
