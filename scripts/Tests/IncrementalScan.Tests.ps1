@@ -147,6 +147,19 @@ Describe 'Import-PreviousScan' {
         $r.Enabled | Should -BeFalse
     }
 
+    It 'Keeps incremental enabled when prs array is empty' {
+        $file = "$testDir/empty-prs.json"
+        @{
+            _cache_version = 2
+            timestamp = '2025-01-15T12:00:00Z'
+            prs = @()
+        } | ConvertTo-Json -Depth 5 | Set-Content $file
+        $r = Import-PreviousScan -Path $file -RequiredCacheVersion 2
+        $r.Enabled | Should -BeTrue
+        $r.PrLookup.Count | Should -Be 0
+        $r.Fingerprints.Count | Should -Be 0
+    }
+
     It 'Loads valid previous scan and builds lookups' {
         $file = "$testDir/valid.json"
         @{

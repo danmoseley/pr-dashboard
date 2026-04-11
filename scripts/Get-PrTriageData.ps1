@@ -16,9 +16,10 @@
 .PARAMETER PreviousScanFile
     Path to a previous scan.json from a prior run. When provided and valid,
     enables incremental mode: only PRs whose fingerprint has changed since the
-    last scan are re-fetched via expensive GraphQL calls. Falls back silently
-    to a full scan if the file is missing, corrupt, or from a different repo
-    or cache version.
+    last scan are re-fetched via expensive GraphQL calls. Falls back to a
+    full scan if the file is missing, corrupt, or from a different repo or
+    cache version; when a previous scan file was explicitly provided, a
+    warning is emitted to explain why incremental mode was not used.
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 #>

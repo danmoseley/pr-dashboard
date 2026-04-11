@@ -47,7 +47,7 @@ function Import-PreviousScan {
             $result.DisableReason = "cache version mismatch (got $($prevScan._cache_version), need $RequiredCacheVersion)"
             return $result
         }
-        if (-not $prevScan.prs) {
+        if ($null -eq $prevScan.prs) {
             $result.DisableReason = 'no prs array in previous scan'
             return $result
         }
