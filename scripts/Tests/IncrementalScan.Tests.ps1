@@ -330,6 +330,18 @@ Describe 'Get-IncrementalPartition' {
         $partition.ReusedEntries.Count | Should -Be 1
     }
 
+    It 'Force-refreshes when _refreshed_at is malformed (non-parseable)' {
+        $badEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -RefreshedAt 'not-a-date'
+        $lookup = @{ '10' = $badEntry }
+        $fpMap = @{ '10' = $fp1 }
+        # Malformed _refreshed_at should cause [datetime] cast to fail;
+        # fallback to PreviousTimestamp=null -> MinValue -> TTL expired -> refresh
+        $partition = Get-IncrementalPartition -Candidates @($pr1) `
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
+            -PreviousTimestamp $null
+        $partition.RefreshCandidates.Count | Should -Be 1
+    }
+
     It 'Refreshes entries with missing score (corrupt cache)' {
         $corruptEntry = [PSCustomObject]@{
             number = 10; ci = 'SUCCESS'; mergeable = 'MERGEABLE'
@@ -408,5 +420,17 @@ Describe 'Merge-ReusedEntries' {
         $merged = Merge-ReusedEntries -ReusedEntries @{ '2' = $entry } `
             -PrListData @($listPr) -Results $existing
         $merged.Count | Should -Be 2
+    }
+
+    It 'Preserves _refreshed_at on reused entries (TTL correctness)' {
+        $oldTime = (Get-Date).AddHours(-6).ToString("o")
+        $entry = [PSCustomObject]@{
+            number = 42; score = 50; _fingerprint = 'old'
+            age_days = 5; days_since_update = 1; _refreshed_at = $oldTime
+        }
+        $listPr = New-FakePr -Number 42
+        $merged = Merge-ReusedEntries -ReusedEntries @{ '42' = $entry } `
+            -PrListData @($listPr) -Results @()
+        $merged[0]._refreshed_at | Should -Be $oldTime
     }
 }

@@ -117,12 +117,15 @@ function Get-IncrementalPartition {
             } else {
                 # Per-PR TTL: use _refreshed_at (when this PR was last fully analyzed)
                 # Falls back to PreviousTimestamp for entries from before _refreshed_at was added
-                $refreshedAt = if ($prevEntry._refreshed_at) {
-                    [datetime]$prevEntry._refreshed_at
-                } elseif ($PreviousTimestamp) {
-                    $PreviousTimestamp
-                } else {
-                    [datetime]::MinValue
+                $refreshedAt = $null
+                if ($prevEntry._refreshed_at) {
+                    try { $refreshedAt = [datetime]$prevEntry._refreshed_at } catch { }
+                }
+                if (-not $refreshedAt -and $PreviousTimestamp) {
+                    $refreshedAt = $PreviousTimestamp
+                }
+                if (-not $refreshedAt) {
+                    $refreshedAt = [datetime]::MinValue
                 }
                 $prAgeSec = ($now - $refreshedAt).TotalSeconds
                 if ($prAgeSec -gt $MaxReuseSeconds) {
