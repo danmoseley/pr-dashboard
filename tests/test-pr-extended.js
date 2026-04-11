@@ -1168,6 +1168,88 @@ async function runTests() {
       await p.close();
     }
 
+    // K8: Easy maintainer toggle checks and disables next-action-maintainer toggle
+    {
+      const p = await openPage(ALL, 100);
+      const isDisabledBeforeEasy = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
+      await p.click('#easy-action-maintainer-toggle');
+      await p.waitForFunction(() => document.getElementById('next-action-maintainer-toggle')?.disabled === true, null, { timeout: 3000 }).catch(() => null);
+      const afterChecked = await p.$eval('#next-action-maintainer-toggle', e => e.checked).catch(() => null);
+      const afterDisabled = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
+      if (!isDisabledBeforeEasy && afterChecked === true && afterDisabled === true) {
+        pass('K8: Easy maintainer toggle checks and disables next-action-maintainer toggle');
+      } else {
+        fail('K8: Easy maintainer disables next-action-maintainer', 'isDisabledBeforeEasy=' + isDisabledBeforeEasy + ', afterChecked=' + afterChecked + ', afterDisabled=' + afterDisabled);
+      }
+      // Unchecking easy restores next-action-maintainer state
+      await p.click('#easy-action-maintainer-toggle');
+      await p.waitForFunction(() => document.getElementById('next-action-maintainer-toggle')?.disabled === false, null, { timeout: 3000 }).catch(() => null);
+      const restoredDisabled = await p.$eval('#next-action-maintainer-toggle', e => e.disabled).catch(() => null);
+      if (restoredDisabled === false) {
+        pass('K8b: Unchecking easy re-enables next-action-maintainer toggle');
+      } else {
+        fail('K8b: Unchecking easy re-enables next-action-maintainer toggle', 'disabled=' + restoredDisabled);
+      }
+      await p.close();
+    }
+
+    // K9: Clear user button (✕) appears when user is set and clears user when clicked
+    {
+      const p = await openPage(ALL, 100);
+      const clearBtnHiddenBeforeUser = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display === 'none').catch(() => true);
+      await p.$eval('#user-field', el => { el.value = 'danmoseley'; });
+      await p.click('#go-btn');
+      await p.waitForFunction(() => window.location.search.includes('user=danmoseley'), null, { timeout: 5000 }).catch(() => null);
+      const btnVisible = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      const url = p.url();
+      if (clearBtnHiddenBeforeUser && btnVisible && url.includes('user=danmoseley')) {
+        pass('K9: Clear user button (✕) hidden initially, visible after user set');
+      } else {
+        fail('K9: Clear user button visibility', 'hiddenBefore=' + clearBtnHiddenBeforeUser + ', visible=' + btnVisible + ', url=' + url);
+      }
+      await p.click('#clear-user-btn');
+      await p.waitForFunction(() => !window.location.search.includes('user='), null, { timeout: 5000 }).catch(() => null);
+      const btnHiddenAfter = await p.$eval('#clear-user-btn', e => getComputedStyle(e).display === 'none').catch(() => false);
+      const clearedUrl = p.url();
+      const userFieldEmpty = await p.$eval('#user-field', e => e.value).catch(() => '?');
+      if (btnHiddenAfter && !clearedUrl.includes('user=') && userFieldEmpty === '') {
+        pass('K9b: Clicking ✕ clears user, hides button, removes user from URL');
+      } else {
+        fail('K9b: Clicking ✕ clears user', 'hidden=' + btnHiddenAfter + ', url=' + clearedUrl + ', field="' + userFieldEmpty + '"');
+      }
+      await p.close();
+    }
+
+    // K10: Clearing the username input and clicking Go removes user filter
+    {
+      const p = await openPage(ALL + '?user=danmoseley', 0);
+      await p.waitForFunction(() => document.getElementById('user-field')?.value === 'danmoseley', null, { timeout: 5000 }).catch(() => null);
+      await p.$eval('#user-field', el => { el.value = ''; });
+      await p.click('#go-btn');
+      await p.waitForFunction(() => !window.location.search.includes('user='), null, { timeout: 5000 }).catch(() => null);
+      const url = p.url();
+      const maintainerVisible = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
+      if (!url.includes('user=') && maintainerVisible) {
+        pass('K10: Empty Go clears user filter, shows maintainer toggles');
+      } else {
+        fail('K10: Empty Go clears user filter', 'url=' + url + ', maintainerVisible=' + maintainerVisible);
+      }
+      await p.close();
+    }
+
+    // K11: ?involves=true without a user gets cleaned up from URL on load
+    {
+      const p = await openPage(ALL + '?involves=true', 100);
+      await p.waitForFunction(() => !window.location.search.includes('involves='), null, { timeout: 3000 }).catch(() => null);
+      const url = p.url();
+      if (!url.includes('involves=')) {
+        pass('K11: ?involves=true (no user) cleaned from URL on load');
+      } else {
+        fail('K11: ?involves=true (no user) cleaned from URL', 'url=' + url);
+      }
+      await p.close();
+    }
+
     } // end GROUP K
 
     // ── Summary ──────────────────────────────────────────────────────────────
