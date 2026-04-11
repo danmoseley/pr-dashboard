@@ -168,8 +168,7 @@ foreach ($repo in $existing.Keys | Sort-Object) {
 # Safety checks (key preservation + count non-decrease)
 $safetyResult = Test-MaintainerSafety -Existing $existing -Proposed $orderedObj
 if (-not $safetyResult.Safe) {
-    Write-Error "SAFETY ABORT: $($safetyResult.Reason)"
-    exit 1
+    throw "SAFETY ABORT: $($safetyResult.Reason)"
 }
 
 $oldTotal = $safetyResult.OldTotal
