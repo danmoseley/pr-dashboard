@@ -42,14 +42,18 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          pushed=false
+          nothing_to_push=false
           for attempt in 1 2 3; do
             git add config/maintainers.json
             if git diff --cached --quiet; then
               echo "No changes to commit"
+              nothing_to_push=true
               break
             fi
             git commit -m "Auto-refresh maintainers list"
             if git push; then
+              pushed=true
               break
             fi
             echo "Push failed (attempt $attempt), retrying..."
@@ -57,3 +61,7 @@ jobs:
             git pull --rebase origin main
             sleep 5
           done
+          if [ "$pushed" != "true" ] && [ "$nothing_to_push" != "true" ]; then
+            echo "All push attempts failed."
+            exit 1
+          fi
