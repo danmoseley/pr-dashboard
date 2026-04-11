@@ -239,6 +239,8 @@
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
     initialUsers.forEach(function(u) { addRecentUser(u); });
+    // Ensure LS_KEY matches the displayed user (addRecentUser writes LS_KEY on each call)
+    try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
   }
   document.getElementById('involves-toggle').checked = involvesMode;
   document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
@@ -568,7 +570,7 @@
       if (json) {
         var parsed = JSON.parse(json);
         if (!Array.isArray(parsed)) return [];
-        return parsed.filter(function(v) { return typeof v === 'string' && v.length > 0; }).slice(0, MAX_RECENT_USERS);
+        return parsed.filter(function(v) { return typeof v === 'string' && v.length > 0; }).map(function(v) { return v.trim().replace(/^@/, ''); }).filter(Boolean).slice(0, MAX_RECENT_USERS);
       }
     } catch(e) {}
     return [];
@@ -631,6 +633,8 @@
         try { localStorage.removeItem(LS_KEY); } catch(e) {}
         history.replaceState(null, '', buildCurrentUrl());
         renderRecentTiles();
+        var summaryBar = document.getElementById('summary-bar');
+        if (summaryBar) { summaryBar.textContent = ''; summaryBar.style.display = 'none'; }
         if (loaded) renderTable(allPrs);
       }
     });
