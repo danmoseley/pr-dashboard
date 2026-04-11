@@ -219,7 +219,7 @@ jobs:
                   } -Force
                   \$j | ConvertTo-Json -Depth 10
                 " > "docs/${slug}/scan.json.tmp"
-                if pwsh -Command "Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json | Out-Null"; then
+                if pwsh -NoProfile -Command "try { Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json | Out-Null; exit 0 } catch { exit 1 }"; then
                   mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
                 else
                   echo "::warning::_rate_limit injection produced invalid JSON for ${slug}, keeping original"
