@@ -1,5 +1,6 @@
-// Runs test-pr-filters.js and test-pr-extended.js (in three parallel slices) concurrently,
-// printing each script's buffered output sequentially once all finish.
+// Runs four workers concurrently: test-pr-filters.js plus three parallel
+// test-pr-extended.js slices, printing each script's buffered output
+// sequentially once all finish.
 // Groups F and I each load large pages (~30 s each) so they run as dedicated workers;
 // the remaining fast groups run together as a fourth worker.
 // Usage: node run-parallel.js  (from the tests/ directory)
