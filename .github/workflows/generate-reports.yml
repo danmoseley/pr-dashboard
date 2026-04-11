@@ -102,6 +102,8 @@ jobs:
           rate_start=$(gh api rate_limit 2>/dev/null || echo "")
           rest_start=$(echo "$rate_start" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
           graphql_start=$(echo "$rate_start" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
+          scanned_slugs=()  # Track repos that were processed this run (scanned or probe-skipped)
+          freshly_scanned=()  # Track repos that were actually rescanned (for rate-limit injection)
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug tier <<< "$entry"
 
@@ -130,6 +132,29 @@ jobs:
             prev_scan_args=""
             if [ -f "docs/${slug}/scan.json" ]; then
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
+
+              # Lightweight probe: skip scan entirely if nothing changed and previous scan is stable.
+              # MaxSkipSeconds exceeds the longest schedule interval for this tier so that the probe
+              # age check doesn't prevent skipping on the very next run after a scan. Tradeoff: a
+              # quiet repo can stay unscanned for up to one extra run interval beyond max_skip before
+              # the age check forces a rescan. This staleness is acceptable because the probe also
+              # checks for unstable PRs and only skips when the PR set is provably unchanged.
+              if [ "$tier" = "priority" ]; then
+                max_skip=46800   # 13h (priority runs every ~6h weekdays, ~12h weekends)
+              else
+                max_skip=90000   # 25h (standard runs ~daily)
+              fi
+              scan_needed=$(pwsh ./scripts/Test-ScanNeeded.ps1 -Repo "$repo" -PreviousScanFile "docs/${slug}/scan.json" -MaxSkipSeconds $max_skip 2>/dev/null || echo "true")
+              if [ "$scan_needed" = "false" ]; then
+                echo "::notice::${repo} — probe says unchanged, skipping scan"
+                scanned_slugs+=("$slug")
+                # Still run Build-Reports in case templates changed
+                if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
+                  echo "::warning::Report generation failed for $repo"
+                  failed+=("$repo")
+                fi
+                continue
+              fi
             fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
@@ -147,17 +172,26 @@ jobs:
               echo "::notice::${repo} ${incremental_info}"
             fi
             # Validate the output is parseable JSON with a prs array
-            if $scan_ok && pwsh -Command "(\$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json) -and \$j.prs -ne \$null" > /dev/null 2>&1; then
+            # Note: pwsh -Command "expr" always exits 0 regardless of expr's boolean value;
+            # only exceptions cause non-zero exit. Use explicit exit 0/1 for reliable checks.
+            if $scan_ok && pwsh -NoProfile -Command "
+              try {
+                \$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json
+                if (\$null -ne \$j.prs) { exit 0 } else { Write-Host 'No prs property found'; exit 1 }
+              } catch { Write-Host \"Parse error: \$_\"; exit 1 }
+            "; then
               mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
             else
               echo "::warning::Invalid or empty scan output for $repo — keeping previous data"
               rm -f "docs/${slug}/scan.json.tmp"
+              failed+=("$repo")
               if [ ! -f "docs/${slug}/scan.json" ]; then
                 echo "::warning::No previous scan.json for $repo — skipping reports"
-                failed+=("$repo")
                 continue
               fi
             fi
+            scanned_slugs+=("$slug")
+            freshly_scanned+=("$slug")
             if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
               failed+=("$repo")
@@ -182,6 +216,33 @@ jobs:
           fi
           if [ -n "$quota_summary" ]; then
             echo "::notice::Total API usage — ${quota_summary}"
+          fi
+          # Inject rate-limit snapshot into scan.json for repos processed this run (0 extra API calls)
+          if [ -n "$rest_end" ] || [ -n "$graphql_end" ]; then
+            rate_reset=$(echo "$rate_end" | jq -r '.resources.core.reset // empty' 2>/dev/null || echo "")
+            total_rest_used=0
+            [ -n "$rest_start" ] && [ -n "$rest_end" ] && total_rest_used=$((rest_start - rest_end))
+            [ "$total_rest_used" -lt 0 ] && total_rest_used=0
+            for slug in "${freshly_scanned[@]}"; do
+              if [ -f "docs/${slug}/scan.json" ]; then
+                pwsh -Command "
+                  \$j = Get-Content 'docs/${slug}/scan.json' -Raw | ConvertFrom-Json
+                  \$j | Add-Member -NotePropertyName '_rate_limit' -NotePropertyValue @{
+                    rest_remaining = ${rest_end:-0}
+                    graphql_remaining = ${graphql_end:-0}
+                    reset = ${rate_reset:-0}
+                    total_used = $total_rest_used
+                  } -Force
+                  \$j | ConvertTo-Json -Depth 10
+                " > "docs/${slug}/scan.json.tmp"
+                if pwsh -NoProfile -Command "try { Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json | Out-Null; exit 0 } catch { exit 1 }"; then
+                  mv "docs/${slug}/scan.json.tmp" "docs/${slug}/scan.json"
+                else
+                  echo "::warning::_rate_limit injection produced invalid JSON for ${slug}, keeping original"
+                  rm -f "docs/${slug}/scan.json.tmp"
+                fi
+              fi
+            done
           fi
           if [ ${#failed[@]} -gt 0 ]; then
             echo "::warning::Failed repos: ${failed[*]}"
