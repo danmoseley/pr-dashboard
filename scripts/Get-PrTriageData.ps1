@@ -552,7 +552,9 @@ foreach ($pr in $refreshCandidates) {
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
         # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
-        # Falls back to alphabetical if no activity data is available.
+        # Scoring: path match (+3) > label match (+2) > merge_count bonus (capped +1).
+        # Tie-breaks: score desc → merge_count desc → login alphabetical.
+        # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
         $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
         $authorExclude = if ($pr.author) { $pr.author.login } else { '' }
         $prOwners = @(Select-FallbackReviewers `

@@ -169,16 +169,9 @@ Describe 'Select-FallbackReviewers' {
     }
 
     It 'Caps merge_count activity bonus at 1.0' {
-        # Maintainer with 100 merges should not score higher than merge_count/10 capped at 1
+        # Verify that alice (100 merges) and bob (10 merges) both get the same path-match score
+        # (capped at +3 + 1.0 = 4.0) but alice wins the merge_count tiebreaker.
         $activity = New-ActivityData @{
-            'test/repo' = @{
-                'alice' = @{ merge_count = 100; top_paths = @('src/other'); top_area_labels = @() }
-                'bob'   = @{ merge_count = 10;  top_paths = @('src/other'); top_area_labels = @() }
-            }
-        }
-        # No path/label matches → all scores = 0 (cap doesn't affect 0-base case)
-        # With path match, alice should still beat bob via merge_count bonus (both capped at 1.0)
-        $activity2 = New-ActivityData @{
             'test/repo' = @{
                 'alice' = @{ merge_count = 100; top_paths = @('src/foo'); top_area_labels = @() }
                 'bob'   = @{ merge_count = 10;  top_paths = @('src/foo'); top_area_labels = @() }
@@ -188,7 +181,7 @@ Describe 'Select-FallbackReviewers' {
             -Maintainers @('alice', 'bob') `
             -ExcludeLogin '' `
             -Repo 'test/repo' `
-            -ActivityData $activity2 `
+            -ActivityData $activity `
             -ChangedFilePaths @('src/foo/bar.cs') `
             -AreaLabels @()
 

@@ -114,6 +114,8 @@ foreach ($entry in $repos) {
         if ($SkipActivity) {
             $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
         } else {
+            # files(first:100) and labels(first:20) are best-effort limits: PRs with more files or
+            # labels get partial data, which is acceptable for activity signal collection.
             $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
         }
 
@@ -177,17 +179,12 @@ foreach ($entry in $repos) {
     }
 
     if (-not $SkipActivity) {
-        # Add merge_count from mergerCounts into each activity entry before storing
+        # Add merge_count from mergerCounts into each activity entry before storing.
+        # All logins in $mergerCounts are guaranteed to have a $repoActivity entry already
+        # (created in the inner loop when the login was first seen), so no fallback is needed.
         foreach ($login in @($mergerCounts.Keys)) {
             if ($repoActivity.ContainsKey($login)) {
                 $repoActivity[$login].count = $mergerCounts[$login]
-            } elseif ($login -notin $botLogins) {
-                # Maintainer with merges but no files/labels (shouldn't happen, but guard defensively)
-                $repoActivity[$login] = @{
-                    paths  = [System.Collections.Generic.List[string]]@()
-                    labels = [System.Collections.Generic.List[string]]@()
-                    count  = $mergerCounts[$login]
-                }
             }
         }
         $activityAccum[$repo] = $repoActivity
