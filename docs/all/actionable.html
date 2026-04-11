@@ -158,7 +158,7 @@
   var involvesMode = false; // whether "Include all involved PRs" is checked
   var nextActionOnlyMode = false; // whether "Next action on me only" is checked
 
-  var easyActionMode = false;    // whether "Easy next actions only" is checked (user-filter context)
+  var easyActionMode = false;         // whether "Easy next actions only" is checked (user-filter context)
   var nextActionMaintainerMode = false; // whether "Next action on maintainer" is checked (no-user context)
   var easyActionMaintainerMode = false; // whether "Easy next action on maintainer" is checked (no-user context)
   var activeAreas = [];   // area labels currently filtered (multi-select)
@@ -749,9 +749,9 @@
 
   // Filter and render all PRs using the maintainer-context filters (no user set)
   function renderFilteredMaintainer() {
-    var maintainerFilter = nextActionMaintainerMode || easyActionMaintainerMode;
+    var hasMaintainerFilter = nextActionMaintainerMode || easyActionMaintainerMode;
     var filtered = allPrs;
-    if (maintainerFilter) {
+    if (hasMaintainerFilter) {
       filtered = filtered.filter(isMaintainersTurn);
     }
     if (easyActionMaintainerMode) {
@@ -759,7 +759,7 @@
     }
 
     var bar = document.getElementById('summary-bar');
-    if (maintainerFilter) {
+    if (hasMaintainerFilter) {
       filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
       var repoCounts = {};
       filtered.forEach(function(pr) { repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1; });
