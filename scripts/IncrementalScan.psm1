@@ -37,30 +37,40 @@ function Import-PreviousScan {
         [string]$Repo = ''
     )
     $result = @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null }
-    if (-not $Path -or -not (Test-Path $Path)) { return $result }
+    if (-not $Path -or -not (Test-Path $Path)) {
+        $result.DisableReason = 'no previous scan file'
+        return $result
+    }
     try {
         $prevScan = Get-Content $Path -Raw | ConvertFrom-Json
-        if ($prevScan._cache_version -eq $RequiredCacheVersion -and $prevScan.prs) {
-            # Validate repo matches to prevent cross-repo PR number collisions.
-            # If prevScan.repo is absent (legacy scans pre-dating the repo field), allow
-            # incremental mode rather than forcing a full scan for existing deployments.
-            if ($Repo -and $prevScan.repo -and $prevScan.repo -ne $Repo) {
-                Write-Warning "Previous scan repo '$($prevScan.repo)' does not match current repo '$Repo' — disabling incremental mode"
-                return $result
-            }
-            if ($Repo -and -not $prevScan.repo) {
-                Write-Verbose "Previous scan has no repo field (legacy) — proceeding with incremental mode for '$Repo'"
-            }
-            foreach ($p in $prevScan.prs) {
-                $key = [string]$p.number
-                $result.PrLookup[$key] = $p
-                if ($p._fingerprint) { $result.Fingerprints[$key] = $p._fingerprint }
-            }
-            $result.Timestamp = if ($prevScan.timestamp) { [DateTime]::Parse($prevScan.timestamp) } else { $null }
-            $result.Enabled = $true
+        if ($prevScan._cache_version -ne $RequiredCacheVersion) {
+            $result.DisableReason = "cache version mismatch (got $($prevScan._cache_version), need $RequiredCacheVersion)"
+            return $result
         }
+        if (-not $prevScan.prs) {
+            $result.DisableReason = 'no prs array in previous scan'
+            return $result
+        }
+        # Validate repo matches to prevent cross-repo PR number collisions.
+        # If prevScan.repo is absent (legacy scans pre-dating the repo field), allow
+        # incremental mode rather than forcing a full scan for existing deployments.
+        if ($Repo -and $prevScan.repo -and $prevScan.repo -ne $Repo) {
+            Write-Warning "Previous scan repo '$($prevScan.repo)' does not match current repo '$Repo' — disabling incremental mode"
+            $result.DisableReason = "repo mismatch ($($prevScan.repo) vs $Repo)"
+            return $result
+        }
+        if ($Repo -and -not $prevScan.repo) {
+            Write-Verbose "Previous scan has no repo field (legacy) — proceeding with incremental mode for '$Repo'"
+        }
+        foreach ($p in $prevScan.prs) {
+            $key = [string]$p.number
+            $result.PrLookup[$key] = $p
+            if ($p._fingerprint) { $result.Fingerprints[$key] = $p._fingerprint }
+        }
+        $result.Timestamp = if ($prevScan.timestamp) { [DateTime]::Parse($prevScan.timestamp) } else { $null }
+        $result.Enabled = $true
     } catch {
-        # Fail safe: return disabled — caller will do a full scan
+        $result.DisableReason = "parse error: $_"
     }
     return $result
 }

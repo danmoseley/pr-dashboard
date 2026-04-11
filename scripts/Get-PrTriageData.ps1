@@ -66,8 +66,10 @@ try {
         $assigneesSorted = ($pr.assignees | ForEach-Object { $_.login } | Sort-Object) -join ','
         return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles)|$($pr.additions)|$($pr.deletions)"
     }
-    function Get-IncrementalCacheVersion { 2 }
-    function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion, [string]$Repo = ''); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null } }
+    # Fallback shims — script works standalone but incremental mode is explicitly disabled.
+    # Return sentinel cache version 0 so it never matches a real cache, ensuring all-refresh.
+    function Get-IncrementalCacheVersion { 0 }
+    function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion, [string]$Repo = ''); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null; DisableReason = 'module unavailable' } }
     function Get-IncrementalPartition { param([array]$Candidates, [hashtable]$PreviousPrLookup, [hashtable]$PreviousFingerprints, $PreviousTimestamp, [int]$MaxReuseSeconds = 43200); @{ RefreshCandidates = $Candidates; ReusedEntries = @{}; Fallback = $true } }
     function Merge-ReusedEntries { param([hashtable]$ReusedEntries, [array]$PrListData, [array]$Results); $Results }
 }
@@ -203,7 +205,12 @@ $incrementalEnabled = $prevScanResult.Enabled
 if ($incrementalEnabled) {
     Write-Verbose "Incremental mode: loaded $($previousPrLookup.Count) PRs from previous scan (cache v$CacheVersion)"
 } elseif ($PreviousScanFile) {
-    Write-Verbose "Incremental mode disabled — will do full scan"
+    $reason = if ($prevScanResult.DisableReason) { $prevScanResult.DisableReason } else { 'unknown' }
+    $msg = "Incremental mode disabled — full scan. Reason: $reason"
+    Write-Warning $msg
+    if ($env:GITHUB_ACTIONS) {
+        Write-Output "::warning::$msg"
+    }
 }
 
 # --- Step 1: List PRs ---
