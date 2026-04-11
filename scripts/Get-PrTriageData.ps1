@@ -1066,6 +1066,7 @@ foreach ($pr in $refreshCandidates) {
         blockers = $blockersStr
         why = $whyStr
         _fingerprint = (Get-PrFingerprint $pr)
+        _refreshed_at = $now.ToString("o")
     }
 }
 

@@ -34,9 +34,10 @@ BeforeAll {
             [string]$CI = 'SUCCESS',
             [string]$Mergeable = 'MERGEABLE',
             [int]$Score = 50,
-            [string]$NextAction = 'needs-review'
+            [string]$NextAction = 'needs-review',
+            [string]$RefreshedAt = ''
         )
-        [PSCustomObject]@{
+        $entry = [PSCustomObject]@{
             number       = $Number
             ci           = $CI
             mergeable    = $Mergeable
@@ -46,6 +47,10 @@ BeforeAll {
             age_days     = 14
             days_since_update = 2
         }
+        if ($RefreshedAt) {
+            $entry | Add-Member -NotePropertyName '_refreshed_at' -NotePropertyValue $RefreshedAt
+        }
+        $entry
     }
 }
 
@@ -281,23 +286,48 @@ Describe 'Get-IncrementalPartition' {
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
-    It 'Force-refreshes all when TTL expired' {
-        $lookup = @{ '10' = $entry1; '20' = $entry2 }
+    It 'Force-refreshes when per-PR _refreshed_at exceeds TTL' {
+        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $staleEntry1 = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -RefreshedAt $staleAt
+        $staleEntry2 = New-FakeScanEntry -Number 20 -Fingerprint $fp2 -RefreshedAt $staleAt
+        $lookup = @{ '10' = $staleEntry1; '20' = $staleEntry2 }
         $fpMap = @{ '10' = $fp1; '20' = $fp2 }
         $partition = Get-IncrementalPartition -Candidates @($pr1, $pr2) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
-            -PreviousTimestamp (Get-Date).AddHours(-13) -MaxReuseSeconds 43200
+            -PreviousTimestamp (Get-Date).AddMinutes(-5) -MaxReuseSeconds 43200
         $partition.RefreshCandidates.Count | Should -Be 2
         $partition.ReusedEntries.Count | Should -Be 0
     }
 
-    It 'Force-refreshes all when no timestamp' {
+    It 'Reuses PR with recent _refreshed_at even if scan timestamp is old' {
+        $freshAt = (Get-Date).AddMinutes(-30).ToString("o")
+        $freshEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -RefreshedAt $freshAt
+        $lookup = @{ '10' = $freshEntry }
+        $fpMap = @{ '10' = $fp1 }
+        $partition = Get-IncrementalPartition -Candidates @($pr1) `
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
+            -PreviousTimestamp (Get-Date).AddHours(-13) -MaxReuseSeconds 43200
+        $partition.RefreshCandidates.Count | Should -Be 0
+        $partition.ReusedEntries.Count | Should -Be 1
+    }
+
+    It 'Force-refreshes when no _refreshed_at and no PreviousTimestamp (legacy entry)' {
         $lookup = @{ '10' = $entry1 }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
             -PreviousTimestamp $null
         $partition.RefreshCandidates.Count | Should -Be 1
+    }
+
+    It 'Falls back to PreviousTimestamp when _refreshed_at is absent' {
+        # entry1 has no _refreshed_at; PreviousTimestamp is recent, so reuse
+        $lookup = @{ '10' = $entry1 }
+        $fpMap = @{ '10' = $fp1 }
+        $partition = Get-IncrementalPartition -Candidates @($pr1) `
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap `
+            -PreviousTimestamp (Get-Date).AddMinutes(-5)
+        $partition.ReusedEntries.Count | Should -Be 1
     }
 
     It 'Refreshes entries with missing score (corrupt cache)' {

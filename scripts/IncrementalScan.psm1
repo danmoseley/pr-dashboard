@@ -97,8 +97,7 @@ function Get-IncrementalPartition {
     try {
         $refresh = [System.Collections.ArrayList]@()
         $reused = @{}
-        $cacheAgeSec = if ($PreviousTimestamp) { ((Get-Date) - $PreviousTimestamp).TotalSeconds } else { [double]::MaxValue }
-        $cacheExpired = $cacheAgeSec -gt $MaxReuseSeconds
+        $now = Get-Date
 
         foreach ($pr in $Candidates) {
             $key = [string]$pr.number
@@ -107,9 +106,7 @@ function Get-IncrementalPartition {
             $prevFp = $PreviousFingerprints[$key]
             $mustRefresh = $false
 
-            if ($cacheExpired) {
-                $mustRefresh = $true
-            } elseif (-not $prevEntry -or -not $prevFp) {
+            if (-not $prevEntry -or -not $prevFp) {
                 $mustRefresh = $true
             } elseif ($currentFp -ne $prevFp) {
                 $mustRefresh = $true
@@ -117,6 +114,20 @@ function Get-IncrementalPartition {
                 $mustRefresh = $true  # non-success CI can change via rerun without PR fields changing
             } elseif ($prevEntry.mergeable -eq 'UNKNOWN') {
                 $mustRefresh = $true
+            } else {
+                # Per-PR TTL: use _refreshed_at (when this PR was last fully analyzed)
+                # Falls back to PreviousTimestamp for entries from before _refreshed_at was added
+                $refreshedAt = if ($prevEntry._refreshed_at) {
+                    [datetime]$prevEntry._refreshed_at
+                } elseif ($PreviousTimestamp) {
+                    $PreviousTimestamp
+                } else {
+                    [datetime]::MinValue
+                }
+                $prAgeSec = ($now - $refreshedAt).TotalSeconds
+                if ($prAgeSec -gt $MaxReuseSeconds) {
+                    $mustRefresh = $true
+                }
             }
 
             if ($mustRefresh) {
@@ -168,11 +179,10 @@ function Merge-ReusedEntries {
         $listPr = $byNumber[[string]$entry.number]
         if ($listPr) {
             # Only update _fingerprint for next-run comparison.
-            # age_days/days_since_update are intentionally NOT recalculated here:
-            # updating them without recomputing score/next_action would make scan.json
-            # internally inconsistent (e.g., days_since_update crosses a threshold but
-            # the score still reflects the older value). PRs near thresholds are
-            # expected to get a full re-fetch on the next run once the fingerprint changes.
+            # age_days/days_since_update and _refreshed_at are intentionally NOT updated:
+            # updating age without recomputing score/next_action would make scan.json
+            # internally inconsistent. _refreshed_at must reflect when the PR was last
+            # fully analyzed, so the per-PR TTL can eventually force a re-fetch.
             $entry._fingerprint = Get-PrFingerprint $listPr
         }
         [void]$merged.Add($entry)

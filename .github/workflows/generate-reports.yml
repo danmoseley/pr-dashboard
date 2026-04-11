@@ -84,6 +84,10 @@ jobs:
             "dotnet/skills:skills:standard"
             "dotnet/maui:maui:standard"
           )
+          # Log API quota at job start (single call, no per-repo overhead)
+          rate_start=$(gh api rate_limit 2>/dev/null || echo "")
+          rest_start=$(echo "$rate_start" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
+          graphql_start=$(echo "$rate_start" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
           for entry in "${repos[@]}"; do
             IFS=':' read -r repo slug tier <<< "$entry"
 
@@ -113,41 +117,20 @@ jobs:
             if [ -f "docs/${slug}/scan.json" ]; then
               prev_scan_args="-PreviousScanFile docs/${slug}/scan.json"
             fi
-            # Track API quota usage before scan (REST core + GraphQL in one call)
-            rate_json_before=$(gh api rate_limit 2>/dev/null || echo "")
-            rest_before=$(echo "$rate_json_before" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
-            graphql_before=$(echo "$rate_json_before" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
             if ! pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args > "docs/${slug}/scan.json.tmp"; then
               echo "::warning::Scan failed for $repo"
               scan_ok=false
             fi
-            # Log API quota consumed for this repo (REST and GraphQL)
-            if [ -n "$rest_before" ] || [ -n "$graphql_before" ]; then
-              rate_json_after=$(gh api rate_limit 2>/dev/null || echo "")
-              rest_after=$(echo "$rate_json_after" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
-              graphql_after=$(echo "$rate_json_after" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
-              if [ -n "$rest_after" ] || [ -n "$graphql_after" ]; then
-                incremental_info=""
-                if $scan_ok && [ -f "docs/${slug}/scan.json.tmp" ]; then
-                  refreshed=$(pwsh -Command "(Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json).incremental.refreshed" 2>/dev/null || echo "?")
-                  reused=$(pwsh -Command "(Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json).incremental.reused" 2>/dev/null || echo "?")
-                  incremental_info=" (refreshed ${refreshed}, reused ${reused})"
-                fi
-                quota_parts=""
-                if [ -n "$rest_before" ] && [ -n "$rest_after" ]; then
-                  rest_used=$((rest_before - rest_after))
-                  # Guard against negative delta if the rate-limit window reset between calls
-                  [ "$rest_used" -lt 0 ] && rest_used=0
-                  quota_parts="REST: ~${rest_used} used, ${rest_after} remaining"
-                fi
-                if [ -n "$graphql_after" ]; then
-                  [ -n "$quota_parts" ] && quota_parts="${quota_parts}; "
-                  quota_parts="${quota_parts}GraphQL: ${graphql_after} remaining"
-                fi
-                echo "::notice::${repo}${incremental_info} — ${quota_parts}"
-              fi
+            # Log incremental scan stats (no extra API calls)
+            if $scan_ok && [ -f "docs/${slug}/scan.json.tmp" ]; then
+              incremental_info=$(pwsh -Command "
+                \$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json
+                if (\$j.incremental) { \"(refreshed \$(\$j.incremental.refreshed), reused \$(\$j.incremental.reused))\" }
+                else { '(full scan)' }
+              " 2>/dev/null || echo "")
+              echo "::notice::${repo} ${incremental_info}"
             fi
             # Validate the output is parseable JSON with a prs array
             if $scan_ok && pwsh -Command "(\$j = Get-Content 'docs/${slug}/scan.json.tmp' -Raw | ConvertFrom-Json) -and \$j.prs -ne \$null" > /dev/null 2>&1; then
@@ -167,6 +150,25 @@ jobs:
               continue
             fi
           done
+          # Log total API quota consumed across all repos (2 calls total, not per-repo)
+          rate_end=$(gh api rate_limit 2>/dev/null || echo "")
+          rest_end=$(echo "$rate_end" | jq -r '.resources.core.remaining // empty' 2>/dev/null || echo "")
+          graphql_end=$(echo "$rate_end" | jq -r '.resources.graphql.remaining // empty' 2>/dev/null || echo "")
+          quota_summary=""
+          if [ -n "$rest_start" ] && [ -n "$rest_end" ]; then
+            rest_used=$((rest_start - rest_end))
+            [ "$rest_used" -lt 0 ] && rest_used=0
+            quota_summary="REST: ~${rest_used} used, ${rest_end} remaining"
+          fi
+          if [ -n "$graphql_start" ] && [ -n "$graphql_end" ]; then
+            graphql_used=$((graphql_start - graphql_end))
+            [ "$graphql_used" -lt 0 ] && graphql_used=0
+            [ -n "$quota_summary" ] && quota_summary="${quota_summary}; "
+            quota_summary="${quota_summary}GraphQL: ~${graphql_used} used, ${graphql_end} remaining"
+          fi
+          if [ -n "$quota_summary" ]; then
+            echo "::notice::Total API usage — ${quota_summary}"
+          fi
           if [ ${#failed[@]} -gt 0 ]; then
             echo "::warning::Failed repos: ${failed[*]}"
             echo "FAILED_REPOS=${failed[*]}" >> "$GITHUB_ENV"
