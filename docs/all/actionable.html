@@ -15,6 +15,10 @@
   .user-input button { background: #238636; color: #fff; border: none; border-radius: 6px;
     padding: 6px 16px; font-size: 0.9em; cursor: pointer; font-weight: 500; }
   .user-input button:hover { background: #2ea043; }
+  .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
+    color: #8b949e !important; padding: 4px 8px !important; font-size: 0.9em !important;
+    font-weight: normal !important; line-height: 1; }
+  .clear-user-btn:hover { color: var(--fg) !important; background: none !important; }
   .involves-label { font-size: 0.85em; color: #8b949e; cursor: pointer; user-select: none;
     display: flex; align-items: center; gap: 4px; margin-left: 4px; }
   .summary-bar { background: var(--header-bg); border: 1px solid var(--border); border-radius: 6px;
@@ -51,7 +55,7 @@
 <div class="user-input">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
-  <button id="clear-user-btn" onclick="clearUser()" title="Clear user filter" aria-label="Clear user filter" style="display:none;background:none;border:1px solid var(--border);border-radius:6px;color:#8b949e;font-size:0.9em;cursor:pointer;padding:4px 8px;line-height:1" onmouseover="this.style.color='var(--fg)'" onmouseout="this.style.color='#8b949e'">&#x2715;</button>
+  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUser()" title="Clear user filter" aria-label="Clear user filter" style="display:none">&#x2715;</button>
   <label class="involves-label" id="involves-label" style="display:none">
     <input type="checkbox" id="involves-toggle">
     Include all involved PRs
@@ -349,7 +353,10 @@
 
   // Next action on maintainer toggle handler (no-user context)
   var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
-  var savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+  // Tracks the next-maintainer state that was active before easy-maintainer was enabled.
+  // Initialized to false: on page load we can't recover what this was before easy was enabled,
+  // so we default to off (same pattern as the existing involves/next-action pair).
+  var savedNextMaintainerBeforeEasy = false;
   if (nextActionMaintainerToggle) {
     nextActionMaintainerToggle.addEventListener('change', function() {
       nextActionMaintainerMode = this.checked;
@@ -357,6 +364,15 @@
       history.replaceState(null, '', buildCurrentUrl());
       if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
     });
+  }
+
+  // Applies the grayed-out/disabled state to the next-maintainer toggle when easy-maintainer
+  // is enabled. Mirrors the pattern used by nextActionOnlyMode → involvesToggle.
+  function applyEasyMaintainerImpliedState() {
+    if (!nextActionMaintainerToggle) return;
+    nextActionMaintainerToggle.checked = true;
+    nextActionMaintainerToggle.disabled = true;
+    nextActionMaintainerMode = true;
   }
 
   // Easy next action on maintainer toggle handler (no-user context)
@@ -368,9 +384,7 @@
       if (easyActionMaintainerMode) {
         // Save next-maintainer state, then check and disable it (easy implies next-maintainer)
         savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
-        nextActionMaintainerToggle.checked = true;
-        nextActionMaintainerToggle.disabled = true;
-        nextActionMaintainerMode = true;
+        applyEasyMaintainerImpliedState();
       } else {
         // Restore next-maintainer to its previous state
         nextActionMaintainerMode = savedNextMaintainerBeforeEasy;
@@ -385,10 +399,7 @@
 
   // Apply initial disabled state if easy-action-maintainer was persisted
   if (easyActionMaintainerMode) {
-    savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
-    nextActionMaintainerToggle.checked = true;
-    nextActionMaintainerToggle.disabled = true;
-    nextActionMaintainerMode = true;
+    applyEasyMaintainerImpliedState();
   }
 
   // Start fetching
@@ -667,12 +678,8 @@
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
     document.getElementById('clear-user-btn').style.display = 'none';
-    // Apply disabled state based on persisted easyActionMaintainerMode
-    if (easyActionMaintainerMode && nextActionMaintainerToggle) {
-      nextActionMaintainerToggle.checked = true;
-      nextActionMaintainerToggle.disabled = true;
-      nextActionMaintainerMode = true;
-    }
+    // Re-apply disabled state based on persisted easyActionMaintainerMode
+    if (easyActionMaintainerMode) applyEasyMaintainerImpliedState();
   }
 
   // --- Recent Users ---
