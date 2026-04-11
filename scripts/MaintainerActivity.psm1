@@ -50,7 +50,9 @@ function Select-FallbackReviewers {
         [string[]]$AreaLabels
     )
 
-    # Compute first-2-segment path prefixes for the PR's changed files
+    # Compute first-2-segment path prefixes for the PR's changed files.
+    # NOTE: This bucketing logic must stay in sync with Update-Maintainers.ps1,
+    # which applies the same 2-segment prefix when collecting activity data.
     $prFilePrefixes = @($ChangedFilePaths | Where-Object { $_ } | ForEach-Object {
         $parts = $_ -split '/'
         if ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" } else { $parts[0] }

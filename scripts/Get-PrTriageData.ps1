@@ -112,7 +112,7 @@ try {
     Write-Verbose "MaintainerActivity module unavailable ($_) — using inline fallback"
     function Select-FallbackReviewers {
         param([string[]]$Maintainers, [string]$ExcludeLogin, [string]$Repo, $ActivityData, [string[]]$ChangedFilePaths, [string[]]$AreaLabels)
-        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin })
+        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin } | Select-Object -First 2)
     }
 }
 
@@ -564,7 +564,7 @@ foreach ($pr in $refreshCandidates) {
             -ActivityData $maintainerActivityData `
             -ChangedFilePaths $changedFilePaths `
             -AreaLabels $prAreaLabels)
-        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Select-Object -First 2) }
+        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Where-Object { $_ -ne $authorExclude } | Select-Object -First 2) }
     }
     # Any maintainer's approval satisfies the merge gate; $prOwners is used to
     # suggest reviewers, not to gate merging. Compute once for reuse below.

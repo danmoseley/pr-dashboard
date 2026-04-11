@@ -7,6 +7,14 @@
     in the last N days. Users who merged at least -MinMerges PRs (excluding bots) are considered
     maintainers. The results are unioned with the existing config/maintainers.json and written back.
 
+    Also collects per-maintainer activity signals (file paths and area labels from merged PRs) and
+    writes them to config/maintainer-activity.json. These signals are used by Get-PrTriageData.ps1
+    to rank maintainers when no CODEOWNERS or area-label owner matches a PR.
+
+    Activity signals use best-effort limits (files(first:100), labels(first:20)) because full
+    pagination of files per PR would significantly increase API usage. Large PRs touching more than
+    100 files will be underrepresented in top_paths, but this is acceptable for signal collection.
+
     Requires: PowerShell 7+ (pwsh) and gh CLI authenticated with appropriate permissions.
 
     Note: Uses GitHub's search API which caps at ~1000 results. For very active repos this may
@@ -144,7 +152,9 @@ foreach ($entry in $repos) {
                                 count  = 0
                             }
                         }
-                        # Collect file path prefixes (first 2 segments)
+                        # Collect file path prefixes (first 2 segments).
+                        # NOTE: This bucketing logic must stay in sync with MaintainerActivity.psm1
+                        # (Select-FallbackReviewers), which applies the same 2-segment prefix when scoring.
                         if ($node.files -and $node.files.nodes) {
                             foreach ($f in $node.files.nodes) {
                                 if ($f.path) {
@@ -180,8 +190,8 @@ foreach ($entry in $repos) {
 
     if (-not $SkipActivity) {
         # Add merge_count from mergerCounts into each activity entry before storing.
-        # All logins in $mergerCounts are guaranteed to have a $repoActivity entry already
-        # (created in the inner loop when the login was first seen), so no fallback is needed.
+        # Invariant: all logins in $mergerCounts already have a $repoActivity entry —
+        # both are populated in the same inner loop (lines above), so they stay in sync.
         foreach ($login in @($mergerCounts.Keys)) {
             if ($repoActivity.ContainsKey($login)) {
                 $repoActivity[$login].count = $mergerCounts[$login]
