@@ -1044,14 +1044,17 @@ foreach ($pr in $refreshCandidates) {
     })
     $whyStr = $mergeWhy -join "&#10;"
 
-    # Build the "involved" list — all people connected to this PR (for involves: filtering)
+    # Build the "involved" list — people who explicitly participated in this PR.
+    # Deliberately excludes $who (the suggested next-action owner) because that is
+    # an *inferred* suggestion, not evidence of actual involvement.  Including it
+    # caused maintainers with write access but no real engagement to see every
+    # unowned PR in the repo on their "involves" view.
     $involvedSet = @{}
     if ($authorLogin) { $involvedSet[$authorLogin] = $true }
     if ($botTrigger) { $involvedSet[$botTrigger] = $true }
     foreach ($r in $reviewerLogins) { if ($r) { $involvedSet[$r] = $true } }
     foreach ($c in $allCommenters) { if ($c) { $involvedSet[$c] = $true } }
     foreach ($rr in $requestedReviewerLogins) { if ($rr) { $involvedSet[$rr] = $true } }
-    foreach ($w in $who) { if ($w -and $w -ne 'area owner') { $involvedSet[$w] = $true } }
     $involvedList = @($involvedSet.Keys | Sort-Object)
 
     $results += [PSCustomObject]@{
