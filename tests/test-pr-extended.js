@@ -147,7 +147,7 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(800);
+        await p.waitForFunction(() => { const el = document.getElementById('involves-label'); return el && getComputedStyle(el).display !== 'none'; }, { timeout: 5000 }).catch(() => null);
         const involvesDisplay = await p.$eval('#involves-label', e => getComputedStyle(e).display).catch(() => 'missing');
         if (involvesDisplay !== 'none' && involvesDisplay !== 'missing') pass('A4: Involves label visible after user filter');
         else fail('A4: Involves toggle', 'involves-label display=' + involvesDisplay);
@@ -155,7 +155,7 @@ async function runTests() {
         const beforeChecked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
         const beforeRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         await p.click('#involves-toggle');
-        await wait(600);
+        await p.waitForFunction((prev) => { const t = document.getElementById('involves-toggle'); return t && t.checked !== prev; }, beforeChecked, { timeout: 3000 }).catch(() => null);
         const afterChecked = await p.$eval('#involves-toggle', e => e.checked).catch(() => null);
         const afterRows = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         if (beforeChecked !== null && afterChecked !== null && beforeChecked !== afterChecked) {
@@ -181,9 +181,9 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(800);
+        await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null);
         await p.click('#next-action-toggle');
-        await wait(400);
+        await p.waitForFunction(() => document.getElementById('involves-toggle')?.disabled === true, { timeout: 3000 }).catch(() => null);
         const involvesDisabled = await p.$eval('#involves-toggle', e => e.disabled).catch(() => null);
         if (involvesDisabled === true) pass('A5: Next-action-only toggle disables involves checkbox');
         else fail('A5: Next-action-only toggle', 'involves-toggle.disabled=' + involvesDisabled);
@@ -230,7 +230,7 @@ async function runTests() {
     // B4: Combined ?area=Y&repo=Z restores both filters at once
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr&repo=runtime', 1);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 2, { timeout: 10000 }).catch(() => null);
       const chips = await p.$$eval('.filter-chip', els => els.map(e => e.textContent.trim()));
       const hasArea = chips.some(t => t.includes('CodeGen') || t.includes('coreclr'));
       const hasRepo = chips.some(t => t.includes('Repo:') && t.includes('runtime'));
@@ -262,10 +262,10 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(800);
+        await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null);
         const rowsAfterUser = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         await p.click('#easy-action-toggle');
-        await wait(500);
+        await p.waitForFunction(() => document.getElementById('easy-action-toggle')?.checked === true, { timeout: 3000 }).catch(() => null);
         const rowsAfterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.filter(r => r.style.display !== 'none').length);
         const eaChecked = await p.$eval('#easy-action-toggle', e => e.checked).catch(() => null);
         if (eaChecked === true) pass('C1: Easy action filter: toggle checked, rows=' + rowsAfterUser + ' → ' + rowsAfterEasy);
@@ -292,7 +292,7 @@ async function runTests() {
         if (author) {
           await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
           await p.click('#go-btn');
-          await wait(800);
+          await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null);
           const bc2 = await p.$$eval('.easy-badge', els => els.length);
           if (bc2 > 0) pass('C2: Easy badge elements present after user filter: ' + bc2);
           else fail('C2: Easy badge elements', '0 .easy-badge found even with user filter');
@@ -364,9 +364,10 @@ async function runTests() {
       if (!numHeader) { fail('D3: Numeric sort order', 'no th[data-sort=num] found'); }
       else {
         // Ensure desc
-        await numHeader.click(); await wait(200);
+        await numHeader.click();
+        await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
         const isDesc = await numHeader.evaluate(e => e.classList.contains('desc'));
-        if (!isDesc) { await numHeader.click(); await wait(200); }
+        if (!isDesc) { await numHeader.click(); await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted.desc'), { timeout: 2000 }).catch(() => null); }
         const colIdx = await numHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
         const scores = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
           rows.filter(r => r.style.display !== 'none')
@@ -387,7 +388,7 @@ async function runTests() {
     // Guards against sort implementations that skip hidden rows, causing unsorted reveals.
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr', 1);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, { timeout: 10000 }).catch(() => null);
       const numHeader = await p.$('#pr-table thead th.sortable[data-sort="num"]');
       if (!numHeader) {
         pass('D5: Sort+filter+clear — skipped (no numeric sort column)');
@@ -400,7 +401,7 @@ async function runTests() {
         const colIdx = await numHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
         // Clear the area filter to reveal previously hidden rows
         await p.evaluate(() => { if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters(); });
-        await wait(300);
+        await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, { timeout: 3000 }).catch(() => null);
         // Check all visible rows are still in sorted (desc) order
         const allScores = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
           rows.filter(r => r.style.display !== 'none')
@@ -427,10 +428,11 @@ async function runTests() {
       const alphaHeader = await p.$('#pr-table thead th.sortable[data-sort="alpha"]');
       if (!alphaHeader) { pass('D4: Alpha sort — skipped (no alpha column)'); }
       else {
-        await alphaHeader.click(); await wait(200);
+        await alphaHeader.click();
+        await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
         // Ensure asc
         const isDesc = await alphaHeader.evaluate(e => e.classList.contains('desc'));
-        if (isDesc) { await alphaHeader.click(); await wait(200); }
+        if (isDesc) { await alphaHeader.click(); await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted:not(.desc)'), { timeout: 2000 }).catch(() => null); }
         const colIdx = await alphaHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
         const texts = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
           rows.filter(r => r.style.display !== 'none')
@@ -458,7 +460,7 @@ async function runTests() {
       if (!hasWhyBtn) { fail('E1: [?] popup appears', 'no [data-why] elements found'); }
       else {
         await p.evaluate(() => document.querySelector('[data-why]').click());
-        await wait(300);
+        await p.waitForFunction(() => !!document.querySelector('.why-popup'), { timeout: 2000 }).catch(() => null);
         const popup = await p.$('.why-popup');
         if (popup) {
           const popupText = await popup.textContent();
@@ -477,13 +479,13 @@ async function runTests() {
       if (!hasWhyBtn) { fail('E2: Click outside dismisses popup', 'no [data-why] elements'); }
       else {
         await p.evaluate(() => document.querySelector('[data-why]').click());
-        await wait(200);
+        await p.waitForFunction(() => !!document.querySelector('.why-popup'), { timeout: 2000 }).catch(() => null);
         const popup = await p.$('.why-popup');
         if (!popup) { fail('E2: Click outside', 'popup did not open'); }
         else {
           // Click the page header (safe area away from popup and table)
           await p.mouse.click(10, 10);
-          await wait(300);
+          await p.waitForFunction(() => !document.querySelector('.why-popup'), { timeout: 2000 }).catch(() => null);
           const popupAfter = await p.$('.why-popup');
           if (!popupAfter) pass('E2: Click outside dismisses popup');
           else fail('E2: Click outside', 'popup still visible after click at (10,10)');
@@ -499,12 +501,12 @@ async function runTests() {
       if (!hasWhyBtn) { fail('E3: [?] toggle close', 'no [data-why] elements'); }
       else {
         await p.evaluate(() => document.querySelector('[data-why]').click());
-        await wait(200);
+        await p.waitForFunction(() => !!document.querySelector('.why-popup'), { timeout: 2000 }).catch(() => null);
         const openPopup = await p.$('.why-popup');
         if (!openPopup) { fail('E3: [?] toggle close', 'popup did not open on first click'); }
         else {
           await p.evaluate(() => document.querySelector('[data-why]').click());
-          await wait(200);
+          await p.waitForFunction(() => !document.querySelector('.why-popup'), { timeout: 2000 }).catch(() => null);
           const closedPopup = await p.$('.why-popup');
           if (!closedPopup) pass('E3: [?] button toggle: second click closes popup');
           else fail('E3: [?] toggle close', 'popup still visible after second click');
@@ -539,7 +541,8 @@ async function runTests() {
       if (await areaBtn.count() === 0) { fail('F2: Per-repo area filter', 'no button.area-label elements found'); }
       else {
         const labelText = await areaBtn.textContent();
-        await areaBtn.click(); await wait(400);
+        await areaBtn.click();
+        await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length > 0, { timeout: 5000 }).catch(() => null);
         const chipCount = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
         if (chipCount > 0) pass('F2: Per-repo area filter: chip appears after click on "' + labelText.trim() + '"');
         else fail('F2: Per-repo area filter', 'no .filter-chip in banner after click');
@@ -550,7 +553,7 @@ async function runTests() {
     // F3: Per-repo ?area= URL round-trip (same as all/actionable.html)
     {
       const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length > 0, { timeout: 10000 }).catch(() => null);
       const chipCount = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
       if (chipCount > 0) pass('F3: Per-repo ?area= URL restores filter chip (' + chipCount + ' chip(s))');
       else fail('F3: Per-repo ?area= URL', 'no .filter-chip in banner after load with ?area= param');
@@ -560,7 +563,7 @@ async function runTests() {
     // F4: Per-repo clear all filters → banner empties
     {
       const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length > 0, { timeout: 10000 }).catch(() => null);
       const chipsBefore = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
       if (chipsBefore === 0) { fail('F4: Per-repo clear filter', 'no chips to clear (check F3)'); }
       else {
@@ -569,7 +572,7 @@ async function runTests() {
           if (typeof clearAllFilters === 'function') clearAllFilters();
           else if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters();
         });
-        await wait(300);
+        await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length === 0, { timeout: 3000 }).catch(() => null);
         const chipsAfter = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
         if (chipsAfter === 0) pass('F4: Per-repo clear all filters: banner chips gone');
         else fail('F4: Per-repo clear filter', chipsAfter + ' chip(s) still present after clear');
@@ -610,7 +613,8 @@ async function runTests() {
         if (hiddenBefore === 0) {
           pass('G2: Show-more click — skipped (no hidden .more-row rows)');
         } else {
-          await toggleBtn.click(); await wait(400);
+          await toggleBtn.click();
+          await p.waitForFunction(() => Array.from(document.querySelectorAll('#pr-table tbody tr.more-row')).every(r => r.style.display !== 'none'), { timeout: 3000 }).catch(() => null);
           const hiddenAfter = await p.$$eval('#pr-table tbody tr.more-row', rows =>
             rows.filter(r => r.style.display === 'none').length);
           if (hiddenAfter === 0) pass('G2: Show more: ' + hiddenBefore + ' hidden rows now visible');
@@ -637,7 +641,7 @@ async function runTests() {
     // H1: ?area=a&area=b (repeated params) → two area chips on load
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr&area=area-GC', 1);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 2, { timeout: 10000 }).catch(() => null);
       const chips = await p.$$eval('.filter-chip', els => els.map(e => e.textContent.trim()));
       const areaChips = chips.filter(t => !t.startsWith('Repo:'));
       if (areaChips.length >= 2) pass('H1: Two area chips loaded from ?area=X,Y: ' + areaChips.join(', '));
@@ -648,7 +652,7 @@ async function runTests() {
     // H2: ?area=X&repo=Y → one area chip + one repo chip
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr&repo=runtime', 1);
-      await wait(500);
+      await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length >= 2, { timeout: 10000 }).catch(() => null);
       const chips = await p.$$eval('.filter-chip', els => els.map(e => e.textContent.trim()));
       const areaChips = chips.filter(t => !t.startsWith('Repo:'));
       const repoChips = chips.filter(t => t.startsWith('Repo:'));
@@ -730,7 +734,7 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction(() => document.querySelectorAll('.recent-tile').length > 0, { timeout: 5000 }).catch(() => null);
         const tiles = await p.$$('.recent-tile');
         if (tiles.length >= 1) {
           const tileText = await tiles[0].textContent();
@@ -753,7 +757,7 @@ async function runTests() {
       const p = await j2ctx.newPage();
       p.on('pageerror', err => jsErrors.push('PAGE ERROR: ' + err.message));
       await p.goto(ALL + '?user=testuser-j2', { waitUntil: 'domcontentloaded' });
-      await wait(500);
+      await p.waitForFunction(() => !!document.querySelector('.recent-tile'), { timeout: 5000 }).catch(() => null);
       const activeTile = await p.$('.recent-tile.active');
       if (activeTile) {
         const text = await activeTile.textContent();
@@ -780,15 +784,15 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction(() => document.querySelectorAll('.recent-tile').length > 0, { timeout: 5000 }).catch(() => null);
         // Clear user filter — tile should remain but become inactive
         await p.evaluate(() => { if (window.clearUser) clearUser(); });
-        await wait(300);
+        await p.waitForFunction(() => !window.location.search.includes('user='), { timeout: 3000 }).catch(() => null);
         const tile = await p.$('.recent-tile');
         if (!tile) { fail('J3: Tile click', 'no tile found after clear'); }
         else {
           await tile.click();
-          await wait(500);
+          await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 3000 }).catch(() => null);
           const url = p.url();
           if (url.includes('user=')) {
             pass('J3: Clicking inactive tile sets user in URL: ' + url.split('?')[1]);
@@ -815,13 +819,13 @@ async function runTests() {
         // Set up the user as active
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction(() => document.querySelectorAll('.recent-tile.active').length > 0, { timeout: 5000 }).catch(() => null);
         // Now click the active tile to turn it off
         const activeTile = await p.$('.recent-tile.active');
         if (!activeTile) { fail('J4: Tile toggle off', 'no active tile found after Go'); }
         else {
           await activeTile.click();
-          await wait(500);
+          await p.waitForFunction(() => !window.location.search.includes('user='), { timeout: 3000 }).catch(() => null);
           const url = p.url();
           const noUser = !url.includes('user=');
           const noActiveTile = !(await p.$('.recent-tile.active'));
@@ -853,23 +857,23 @@ async function runTests() {
         // Create both recent users via Go
         await p.$eval('#user-field', (el, u) => { el.value = u; }, authors[0]);
         await p.click('#go-btn');
-        await wait(300);
+        await p.waitForFunction((u) => window.location.search.includes('user=' + encodeURIComponent(u)), authors[0], { timeout: 5000 }).catch(() => null);
         await p.$eval('#user-field', (el, u) => { el.value = u; }, authors[1]);
         await p.click('#go-btn');
-        await wait(300);
+        await p.waitForFunction((u) => window.location.search.includes('user=' + encodeURIComponent(u)), authors[1], { timeout: 5000 }).catch(() => null);
         // Clear and verify both tiles exist
         await p.evaluate(() => { if (window.clearUser) clearUser(); });
-        await wait(300);
+        await p.waitForFunction(() => !window.location.search.includes('user='), { timeout: 3000 }).catch(() => null);
         // Use locators (auto-retry, auto-re-query) instead of element handles
         const tileCount = await p.locator('.recent-tile').count();
         if (tileCount < 2) { fail('J5: Ctrl-click multi-select', 'only ' + tileCount + ' tiles after setup'); }
         else {
           // Click first tile normally (re-query after each click since DOM rebuilds)
           await p.locator('.recent-tile').first().click();
-          await wait(300);
+          await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 3000 }).catch(() => null);
           // Ctrl-click second tile
           await p.locator('.recent-tile').nth(1).click({ modifiers: ['Control'] });
-          await wait(500);
+          await p.waitForFunction(() => document.querySelectorAll('.recent-tile.active').length >= 2, { timeout: 3000 }).catch(() => null);
           const url = p.url();
           const activeTiles = await p.$$('.recent-tile.active');
           if (activeTiles.length >= 2 && url.includes('user=')) {
@@ -892,7 +896,7 @@ async function runTests() {
           applyUser();
         }
       });
-      await wait(300);
+      await p.waitForFunction(() => document.querySelectorAll('.recent-tile').length === 5, { timeout: 3000 }).catch(() => null);
       const tiles = await p.$$('.recent-tile');
       if (tiles.length === 5) {
         pass('J6: Recent tiles capped at 5 (rendered ' + tiles.length + ')');
@@ -917,7 +921,7 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction((u) => localStorage.getItem('pr-dashboard-user') === u, author, { timeout: 5000 }).catch(() => null);
         const lsUser = await p.evaluate(() => localStorage.getItem('pr-dashboard-user'));
         const lsRecent = await p.evaluate(() => localStorage.getItem('pr-dashboard-recent-users'));
         const recentArr = lsRecent ? JSON.parse(lsRecent) : [];
@@ -952,11 +956,11 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction((u) => localStorage.getItem('pr-dashboard-user') === u, author, { timeout: 5000 }).catch(() => null);
         // Reload the page (no ?user= in URL — should restore from localStorage)
         await p.goto(ALL, { waitUntil: 'domcontentloaded' });
         await p.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: 20000 }).catch(() => null);
-        await wait(500);
+        await p.waitForFunction(() => !!document.querySelector('.recent-tile'), { timeout: 5000 }).catch(() => null);
         const userField = await p.$eval('#user-field', e => e.value).catch(() => '');
         const activeTile = await p.$('.recent-tile.active');
         const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
@@ -973,7 +977,7 @@ async function runTests() {
     // J9: URL with multiple ?user= params restores multi-select
     {
       const p = await openPage(ALL + '?user=alice&user=bob', 0);
-      await wait(1000);
+      await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return sb && getComputedStyle(sb).display !== 'none' && sb.textContent.trim().length > 0; }, { timeout: 5000 }).catch(() => null);
       const url = p.url();
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       if (summaryText.includes('@alice') && summaryText.includes('@bob')) {
@@ -1019,7 +1023,7 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null);
         const nextMaintainerHidden = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
         const easyMaintainerHidden = await p.$eval('#easy-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
         const involvesVisible = await p.$eval('#involves-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
@@ -1039,7 +1043,7 @@ async function runTests() {
       const p = await openPage(ALL, 100);
       const initialTotalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       await p.click('#next-action-maintainer-toggle');
-      await wait(600);
+      await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return sb && getComputedStyle(sb).display !== 'none'; }, { timeout: 5000 }).catch(() => null);
       const filteredTotalRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
@@ -1055,10 +1059,10 @@ async function runTests() {
     {
       const p = await openPage(ALL, 100);
       await p.click('#next-action-maintainer-toggle');
-      await wait(600);
+      await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return sb && getComputedStyle(sb).display !== 'none'; }, { timeout: 5000 }).catch(() => null);
       const afterNextAction = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       await p.click('#easy-action-maintainer-toggle');
-      await wait(600);
+      await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return sb && sb.textContent.includes('Easy next action on maintainer'); }, { timeout: 5000 }).catch(() => null);
       const afterEasy = await p.$$eval('#pr-table tbody tr', rows => rows.length);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
       if (afterEasy <= afterNextAction && summaryText.includes('Easy next action on maintainer')) {
@@ -1072,7 +1076,7 @@ async function runTests() {
     // K5: ?nextmaintainer=true URL param pre-checks the toggle and filters on load
     {
       const p = await openPage(ALL + '?nextmaintainer=true', 1);
-      await wait(600);
+      await p.waitForFunction(() => document.getElementById('next-action-maintainer-toggle')?.checked === true, { timeout: 5000 }).catch(() => null);
       const checked = await p.$eval('#next-action-maintainer-toggle', e => e.checked).catch(() => null);
       const summaryVisible = await p.$eval('#summary-bar', e => getComputedStyle(e).display !== 'none').catch(() => false);
       const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
@@ -1086,12 +1090,12 @@ async function runTests() {
     // K6: Clear link removes maintainer filter and restores all PRs
     {
       const p = await openPage(ALL + '?nextmaintainer=true', 1);
-      await wait(600);
+      await p.waitForFunction(() => document.getElementById('next-action-maintainer-toggle')?.checked === true, { timeout: 5000 }).catch(() => null);
       const clearLink = await p.$('#summary-bar a');
       if (!clearLink) { fail('K6: Maintainer filter Clear link', 'no clear link in summary bar'); }
       else {
         await clearLink.click();
-        await wait(500);
+        await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return !sb || getComputedStyle(sb).display === 'none'; }, { timeout: 3000 }).catch(() => null);
         const summaryHidden = await p.$eval('#summary-bar', e => getComputedStyle(e).display === 'none').catch(() => false);
         const unchecked = await p.$eval('#next-action-maintainer-toggle', e => !e.checked).catch(() => false);
         const url = p.url();
@@ -1107,7 +1111,7 @@ async function runTests() {
     // K7: Setting a user after maintainer filter switches to user context
     {
       const p = await openPage(ALL + '?nextmaintainer=true', 1);
-      await wait(600);
+      await p.waitForFunction(() => document.getElementById('next-action-maintainer-toggle')?.checked === true, { timeout: 5000 }).catch(() => null);
       const author = await p.evaluate(() => {
         for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
           const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
@@ -1119,7 +1123,7 @@ async function runTests() {
       else {
         await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
         await p.click('#go-btn');
-        await wait(500);
+        await p.waitForFunction(() => window.location.search.includes('user='), { timeout: 5000 }).catch(() => null);
         const maintainerHidden = await p.$eval('#next-action-maintainer-label', e => getComputedStyle(e).display === 'none').catch(() => false);
         const involvesVisible = await p.$eval('#involves-label', e => getComputedStyle(e).display !== 'none').catch(() => false);
         const summaryText = await p.$eval('#summary-bar', e => e.textContent).catch(() => '');
