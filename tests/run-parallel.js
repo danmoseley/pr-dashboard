@@ -12,9 +12,27 @@ function runScript(script) {
     const child = spawn(process.execPath, [path.join(__dirname, script)], {
       cwd: __dirname,
     });
+    let settled = false;
     child.stdout.on('data', d => chunks.push(d));
     child.stderr.on('data', d => chunks.push(d));
-    child.on('close', code => resolve({ code: code ?? 0, output: Buffer.concat(chunks).toString(), script }));
+    child.on('error', err => {
+      if (settled) return;
+      settled = true;
+      chunks.push(Buffer.from(`Failed to start ${script}: ${err.message}\n`));
+      resolve({ code: 1, output: Buffer.concat(chunks).toString(), script });
+    });
+    child.on('close', (code, signal) => {
+      if (settled) return;
+      settled = true;
+      if (signal) {
+        chunks.push(Buffer.from(`Process terminated by signal: ${signal}\n`));
+      }
+      resolve({
+        code: code === null ? 1 : code,
+        output: Buffer.concat(chunks).toString(),
+        script,
+      });
+    });
   });
 }
 

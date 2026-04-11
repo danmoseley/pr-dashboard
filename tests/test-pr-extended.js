@@ -10,7 +10,6 @@ const ALL  = BASE + '/all/actionable.html';
 const RUNTIME = BASE + '/runtime/actionable.html';
 
 async function log(msg) { console.log('[' + new Date().toISOString().slice(11,19) + '] ' + msg); }
-async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 async function runTests() {
   const browser = await chromium.launch({ headless: true });
