@@ -367,7 +367,10 @@ async function runTests() {
         await numHeader.click();
         await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
         const isDesc = await numHeader.evaluate(e => e.classList.contains('desc'));
-        if (!isDesc) { await numHeader.click(); await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted.desc'), { timeout: 2000 }).catch(() => null); }
+        if (!isDesc) {
+          await numHeader.click();
+          await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted.desc'), { timeout: 2000 }).catch(() => null);
+        }
         const colIdx = await numHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
         const scores = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
           rows.filter(r => r.style.display !== 'none')
@@ -432,7 +435,10 @@ async function runTests() {
         await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted'), { timeout: 2000 }).catch(() => null);
         // Ensure asc
         const isDesc = await alphaHeader.evaluate(e => e.classList.contains('desc'));
-        if (isDesc) { await alphaHeader.click(); await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted:not(.desc)'), { timeout: 2000 }).catch(() => null); }
+        if (isDesc) {
+          await alphaHeader.click();
+          await p.waitForFunction(() => !!document.querySelector('#pr-table thead th.sorted:not(.desc)'), { timeout: 2000 }).catch(() => null);
+        }
         const colIdx = await alphaHeader.evaluate(th => Array.from(th.parentNode.children).indexOf(th));
         const texts = await p.$$eval('#pr-table tbody tr', (rows, ci) =>
           rows.filter(r => r.style.display !== 'none')
@@ -614,7 +620,7 @@ async function runTests() {
           pass('G2: Show-more click — skipped (no hidden .more-row rows)');
         } else {
           await toggleBtn.click();
-          await p.waitForFunction(() => Array.from(document.querySelectorAll('#pr-table tbody tr.more-row')).every(r => r.style.display !== 'none'), { timeout: 3000 }).catch(() => null);
+          await p.waitForFunction(() => { const rows = document.querySelectorAll('#pr-table tbody tr.more-row'); return rows.length > 0 && Array.from(rows).every(r => r.style.display !== 'none'); }, { timeout: 3000 }).catch(() => null);
           const hiddenAfter = await p.$$eval('#pr-table tbody tr.more-row', rows =>
             rows.filter(r => r.style.display === 'none').length);
           if (hiddenAfter === 0) pass('G2: Show more: ' + hiddenBefore + ' hidden rows now visible');
