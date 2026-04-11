@@ -268,7 +268,14 @@ Write-Verbose "Scanned $($prsRaw.Count) -> $($candidates.Count) candidates ($exc
 
 if ($candidates.Count -eq 0) {
     Write-Verbose "No candidates to analyze."
-    @{ scanned = $prsRaw.Count; analyzed = 0; prs = @(); _cache_version = $CacheVersion } | ConvertTo-Json -Depth 5
+    @{
+        repo = $Repo
+        timestamp = $now.ToString("o")
+        scanned = $prsRaw.Count
+        analyzed = 0
+        prs = @()
+        _cache_version = $CacheVersion
+    } | ConvertTo-Json -Depth 5
     return
 }
 
