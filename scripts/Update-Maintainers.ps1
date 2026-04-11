@@ -40,6 +40,8 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
     $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -163,20 +165,15 @@ foreach ($repo in $existing.Keys | Sort-Object) {
     }
 }
 
-# Safety check: never lose repo keys
-$missingKeys = @($existing.Keys | Where-Object { -not $orderedObj.Contains($_) })
-if ($missingKeys.Count -gt 0) {
-    Write-Error "SAFETY ABORT: would lose repo keys: $($missingKeys -join ', ')"
+# Safety checks (key preservation + count non-decrease)
+$safetyResult = Test-MaintainerSafety -Existing $existing -Proposed $orderedObj
+if (-not $safetyResult.Safe) {
+    Write-Error "SAFETY ABORT: $($safetyResult.Reason)"
     exit 1
 }
 
-# Safety check: total maintainer count must not decrease
-$oldTotal = ($existing.Values | ForEach-Object { $_.Count } | Measure-Object -Sum).Sum
-$newTotal = ($orderedObj.Values | ForEach-Object { $_.Count } | Measure-Object -Sum).Sum
-if ($newTotal -lt $oldTotal) {
-    Write-Error "SAFETY ABORT: total maintainer count would decrease from $oldTotal to $newTotal"
-    exit 1
-}
+$oldTotal = $safetyResult.OldTotal
+$newTotal = $safetyResult.NewTotal
 
 if (-not $DryRun) {
     $json = $orderedObj | ConvertTo-Json -Depth 3

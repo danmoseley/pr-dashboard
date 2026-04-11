@@ -60,7 +60,7 @@ jobs:
             fi
             echo "Push failed (attempt $attempt), retrying..."
             git reset HEAD~1
-            git pull --rebase origin main
+            git pull --rebase --autostash origin main
             sleep 5
           done
           if [ "$pushed" != "true" ] && [ "$nothing_to_push" != "true" ]; then
