@@ -20,7 +20,18 @@ All repos are updated with Most Actionable, Community, Quick Wins, and Consider 
 [wpf](https://danmoseley.github.io/pr-dashboard/wpf/actionable.html) ·
 [roslyn](https://danmoseley.github.io/pr-dashboard/roslyn/actionable.html) ·
 [aspire](https://danmoseley.github.io/pr-dashboard/aspire/actionable.html) ·
-[extensions](https://danmoseley.github.io/pr-dashboard/extensions/actionable.html)
+[extensions](https://danmoseley.github.io/pr-dashboard/extensions/actionable.html) ·
+[arcade](https://danmoseley.github.io/pr-dashboard/arcade/actionable.html) ·
+[core](https://danmoseley.github.io/pr-dashboard/core/actionable.html) ·
+[csharplang](https://danmoseley.github.io/pr-dashboard/csharplang/actionable.html) ·
+[diagnostics](https://danmoseley.github.io/pr-dashboard/diagnostics/actionable.html) ·
+[docs](https://danmoseley.github.io/pr-dashboard/docs/actionable.html) ·
+[dotnet](https://danmoseley.github.io/pr-dashboard/dotnet/actionable.html) ·
+[dotnet-api-docs](https://danmoseley.github.io/pr-dashboard/dotnet-api-docs/actionable.html) ·
+[efcore](https://danmoseley.github.io/pr-dashboard/efcore/actionable.html) ·
+[performance](https://danmoseley.github.io/pr-dashboard/performance/actionable.html) ·
+[razor](https://danmoseley.github.io/pr-dashboard/razor/actionable.html) ·
+[vscode-csharp](https://danmoseley.github.io/pr-dashboard/vscode-csharp/actionable.html)
 
 ### Per-person view
 
