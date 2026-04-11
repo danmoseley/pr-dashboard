@@ -29,14 +29,6 @@ Append `?user=USERNAME` to any report URL to filter to a specific person's PRs, 
 
 You can also hover any @username in a report and click "only" to filter interactively.
 
-## How it works
-
-1. A single scheduled GitHub Actions workflow runs on a tiered schedule: priority repos (runtime, aspire) refresh ~4x daily, others ~daily
-2. Each run executes `scripts/Get-PrTriageData.ps1` which scores all open PRs using batched GraphQL queries across 12 dimensions
-3. Results are filtered into reports and formatted as full-width HTML tables
-4. AI-generated observations are added via [GitHub Models](https://docs.github.com/en/github-models) (GPT-4o)
-5. Reports are published via GitHub Pages
-
 ## Local regeneration
 
 After the workflows have run at least once, you can regenerate HTML reports locally from
