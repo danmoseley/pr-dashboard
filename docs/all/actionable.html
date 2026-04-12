@@ -12,9 +12,9 @@
     border-radius: 6px; padding: 3px 10px; font-size: 0.85em; width: 220px; }
   .user-input input[type="text"]::placeholder { color: #484f58; }
   .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
-  .user-input button { background: #238636; color: #fff; border: none; border-radius: 6px;
+  .user-input > button { background: #238636; color: #fff; border: none; border-radius: 6px;
     padding: 3px 12px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
-  .user-input button:hover { background: #2ea043; }
+  .user-input > button:hover { background: #2ea043; }
   .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
     color: #8b949e !important; padding: 3px 8px !important; font-size: 0.85em !important;
     font-weight: normal !important; line-height: 1; }
@@ -643,35 +643,36 @@
 
   function applyTableFilter() {
     var table = document.getElementById('pr-table');
-    if (!table) return;
-    var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
-    var rows = table.querySelectorAll('tbody tr');
-    rows.forEach(function(r) {
-      var show = true;
-      if (activeAreas.length > 0) {
-        var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
-        var match = activeAreas.some(function(a) {
-          return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
-        });
-        if (!match) show = false;
-      }
-      if (activeRepos.length > 0 && show) {
-        var rowRepo = r.getAttribute('data-repo') || '';
-        if (activeRepos.indexOf(rowRepo) < 0) show = false;
-      }
-      // When filters are active, show ALL matching rows (including more-rows).
-      // When no filters, respect moreRowsExpanded state.
-      if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
-      r.style.display = show ? '' : 'none';
-    });
-    // Hide the show-more toggle when filters are active (all matching rows are already shown)
-    var btn = document.getElementById('toggle-more');
-    if (btn) {
-      btn.style.display = hasFilters ? 'none' : '';
-      // Reset button text when filters cleared and rows are collapsed again
-      if (!hasFilters && !moreRowsExpanded) {
-        var moreCount = table.querySelectorAll('tbody tr.more-row').length;
-        if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+    if (table) {
+      var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
+      var rows = table.querySelectorAll('tbody tr');
+      rows.forEach(function(r) {
+        var show = true;
+        if (activeAreas.length > 0) {
+          var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+          var match = activeAreas.some(function(a) {
+            return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
+          });
+          if (!match) show = false;
+        }
+        if (activeRepos.length > 0 && show) {
+          var rowRepo = r.getAttribute('data-repo') || '';
+          if (activeRepos.indexOf(rowRepo) < 0) show = false;
+        }
+        // When filters are active, show ALL matching rows (including more-rows).
+        // When no filters, respect moreRowsExpanded state.
+        if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
+        r.style.display = show ? '' : 'none';
+      });
+      // Hide the show-more toggle when filters are active (all matching rows are already shown)
+      var btn = document.getElementById('toggle-more');
+      if (btn) {
+        btn.style.display = hasFilters ? 'none' : '';
+        // Reset button text when filters cleared and rows are collapsed again
+        if (!hasFilters && !moreRowsExpanded) {
+          var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+          if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+        }
       }
     }
     renderFilterBanner();
@@ -734,20 +735,26 @@
   window.removeAreaFilter = function(label) {
     var idx = activeAreas.indexOf(label);
     if (idx >= 0) activeAreas.splice(idx, 1);
-    applyTableFilter();
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
   };
 
   window.removeRepoFilter = function(slug) {
     var idx = activeRepos.indexOf(slug);
     if (idx >= 0) activeRepos.splice(idx, 1);
-    applyTableFilter();
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
   };
 
   window.clearAllSecondaryFilters = function() {
     activeAreas = [];
     activeRepos = [];
     moreRowsExpanded = false;
-    applyTableFilter();
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
   };
 
   window.clearUser = function() {
