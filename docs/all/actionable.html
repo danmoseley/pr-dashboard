@@ -260,7 +260,13 @@
     }
   } catch(e) {}
   var savedUser = '';
-  try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
+  // When report-mode params are present without a user param, don't restore savedUser
+  // from localStorage. This prevents shared links like ?stale=true from silently
+  // becoming user-scoped views.
+  var hasReportModeParam = urlCommunity !== null || urlQuickWins !== null || urlStale !== null;
+  if (!hasReportModeParam || urlUsers.length > 0) {
+    try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
+  }
   // User-context URL params (involves/nextaction/easyaction) are only meaningful when a
   // user filter is active. Ignore them when no user is set so stale URLs like
   // ?involves=true don't silently flip filter state.
@@ -1055,7 +1061,7 @@
     }
     if (quickWinsMode) {
       prs = prs.filter(function(pr) {
-        return /Ready to merge/.test(pr.next_action || '');
+        return /Ready to merge/i.test(pr.next_action || '');
       });
     }
     if (staleMode) {

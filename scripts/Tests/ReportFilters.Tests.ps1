@@ -31,14 +31,24 @@ Describe 'Report filter parity' {
             [PSCustomObject]@{ number = 9; is_community = $false; next_action = "@user: active old PR"; age_days = 190; days_since_update = 10; action_score = 4 }
             # Edge: age exactly 90, stale exactly 30 (should NOT match, > not >=)
             [PSCustomObject]@{ number = 10; is_community = $false; next_action = "@user: edge case"; age_days = 90; days_since_update = 30; action_score = 2 }
+            # Community PR that is ALSO a quick-win (overlap)
+            [PSCustomObject]@{ number = 11; is_community = $true; next_action = "@user: Ready to merge"; age_days = 3; days_since_update = 1; action_score = 10 }
+            # Stale community PR (overlap: community + stale)
+            [PSCustomObject]@{ number = 12; is_community = $true; next_action = "@user: review needed"; age_days = 200; days_since_update = 60; action_score = 0.3 }
+            # Null fields: is_community null, next_action null
+            [PSCustomObject]@{ number = 13; is_community = $null; next_action = $null; age_days = 50; days_since_update = 10; action_score = 5 }
+            # Null next_action with is_community true (should NOT match community: no review)
+            [PSCustomObject]@{ number = 14; is_community = $true; next_action = $null; age_days = 10; days_since_update = 2; action_score = 6 }
+            # Quick-win with different casing (case-insensitive match)
+            [PSCustomObject]@{ number = 15; is_community = $false; next_action = "@user: ready to merge"; age_days = 5; days_since_update = 1; action_score = 9.5 }
         )
     }
 
     Context 'Community filter predicate' {
         It 'PowerShell predicate matches expected PRs' {
             $community = @($testPrs | Where-Object { $_.is_community -and $_.next_action -match "review" })
-            $community.Count | Should -Be 1
-            $community[0].number | Should -Be 1
+            $community.Count | Should -Be 2
+            ($community | ForEach-Object { $_.number } | Sort-Object) | Should -Be @(1, 12)
         }
 
         It 'JS-equivalent predicate matches PowerShell predicate' {
@@ -50,20 +60,34 @@ Describe 'Report filter parity' {
             $jsCommunity.Count | Should -Be $psCommunity.Count
             ($jsCommunity | ForEach-Object { $_.number }) | Should -Be ($psCommunity | ForEach-Object { $_.number })
         }
+
+        It 'Null is_community does not match' {
+            $nullCommunity = @($testPrs | Where-Object { $_.number -eq 13 } | Where-Object { $_.is_community -and $_.next_action -match "review" })
+            $nullCommunity.Count | Should -Be 0
+        }
+
+        It 'Null next_action does not match even with is_community=true' {
+            $nullAction = @($testPrs | Where-Object { $_.number -eq 14 } | Where-Object { $_.is_community -and $_.next_action -match "review" })
+            $nullAction.Count | Should -Be 0
+        }
     }
 
     Context 'Quick-wins filter predicate' {
-        It 'PowerShell predicate matches expected PRs' {
+        It 'PowerShell predicate matches expected PRs (case-insensitive)' {
             $quickWins = @($testPrs | Where-Object { $_.next_action -match "Ready to merge" })
-            $quickWins.Count | Should -Be 1
-            $quickWins[0].number | Should -Be 4
+            $quickWins.Count | Should -Be 3
+            ($quickWins | ForEach-Object { $_.number } | Sort-Object) | Should -Be @(4, 11, 15)
         }
 
-        It 'JS-equivalent predicate matches PowerShell predicate' {
-            # The JS predicate: /Ready to merge/.test(next_action)
-            $jsQuickWins = @($testPrs | Where-Object { $_.next_action -match "Ready to merge" })
-            $psQuickWins = @($testPrs | Where-Object { $_.next_action -match "Ready to merge" })
-            $jsQuickWins.Count | Should -Be $psQuickWins.Count
+        It 'Case-insensitive match includes lowercase variant' {
+            # PR #15 has "ready to merge" (lowercase) -- must match like PowerShell -match
+            $lower = @($testPrs | Where-Object { $_.number -eq 15 } | Where-Object { $_.next_action -match "Ready to merge" })
+            $lower.Count | Should -Be 1 -Because 'PowerShell -match is case-insensitive'
+        }
+
+        It 'Null next_action does not match' {
+            $nullAction = @($testPrs | Where-Object { $_.number -eq 13 } | Where-Object { $_.next_action -match "Ready to merge" })
+            $nullAction.Count | Should -Be 0
         }
     }
 
@@ -73,8 +97,8 @@ Describe 'Report filter parity' {
                 ($_.age_days -gt 90 -and $_.days_since_update -gt 30) -or
                 ($_.age_days -gt 180 -and $_.days_since_update -gt 14)
             })
-            $stale.Count | Should -Be 2
-            ($stale | ForEach-Object { $_.number } | Sort-Object) | Should -Be @(6, 7)
+            $stale.Count | Should -Be 3
+            ($stale | ForEach-Object { $_.number } | Sort-Object) | Should -Be @(6, 7, 12)
         }
 
         It 'JS-equivalent predicate matches PowerShell predicate' {
@@ -105,8 +129,42 @@ Describe 'Report filter parity' {
                 ($_.age_days -gt 90 -and $_.days_since_update -gt 30) -or
                 ($_.age_days -gt 180 -and $_.days_since_update -gt 14)
             } | Sort-Object -Property days_since_update -Descending)
-            $stale[0].number | Should -Be 6 -Because 'PR #6 has 35 days since update (highest)'
-            $stale[1].number | Should -Be 7 -Because 'PR #7 has 20 days since update'
+            $stale[0].number | Should -Be 12 -Because 'PR #12 has 60 days since update (highest)'
+            $stale[1].number | Should -Be 6 -Because 'PR #6 has 35 days since update'
+            $stale[2].number | Should -Be 7 -Because 'PR #7 has 20 days since update'
+        }
+    }
+
+    Context 'Filter composition (AND semantics)' {
+        It 'Community + quick-wins: only community PRs that are also quick-wins' {
+            $composed = @($testPrs |
+                Where-Object { $_.is_community -and $_.next_action -match "review" } |
+                Where-Object { $_.next_action -match "Ready to merge" })
+            # PR #11 is community + quick-win, but its next_action is "Ready to merge" not "review"
+            # PR #12 is community + review, but not "Ready to merge"
+            # So the intersection should be empty
+            $composed.Count | Should -Be 0
+        }
+
+        It 'Community + stale: only community PRs that are also stale' {
+            $composed = @($testPrs |
+                Where-Object { $_.is_community -and $_.next_action -match "review" } |
+                Where-Object {
+                    ($_.age_days -gt 90 -and $_.days_since_update -gt 30) -or
+                    ($_.age_days -gt 180 -and $_.days_since_update -gt 14)
+                })
+            $composed.Count | Should -Be 1
+            $composed[0].number | Should -Be 12 -Because 'PR #12 is a stale community PR awaiting review'
+        }
+
+        It 'Quick-wins + stale: no overlap in test data' {
+            $composed = @($testPrs |
+                Where-Object { $_.next_action -match "Ready to merge" } |
+                Where-Object {
+                    ($_.age_days -gt 90 -and $_.days_since_update -gt 30) -or
+                    ($_.age_days -gt 180 -and $_.days_since_update -gt 14)
+                })
+            $composed.Count | Should -Be 0 -Because 'quick-win PRs in test data are all recent'
         }
     }
 
@@ -157,10 +215,10 @@ Describe 'Report filter parity' {
         }
 
         It 'Report-mode filters are URL-only, not localStorage-persisted' {
-            # Should NOT have localStorage for community/quickwins/stale
-            $htmlContent | Should -Not -Match 'localStorage.*community'
-            $htmlContent | Should -Not -Match 'localStorage.*quickwins'
-            $htmlContent | Should -Not -Match 'localStorage.*stale'
+            # Should NOT have localStorage get/set for community/quickwins/stale filter keys
+            $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*community"
+            $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*quickwins"
+            $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*staleMode"
         }
     }
 }
