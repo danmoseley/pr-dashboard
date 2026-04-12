@@ -58,6 +58,7 @@ $ErrorActionPreference = 'Stop'
 
 Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
 Import-Module "$PSScriptRoot/MaintainerActivity.psm1" -Force
+Import-Module "$PSScriptRoot/GraphQLHelper.psm1" -Force
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
@@ -141,21 +142,11 @@ foreach ($entry in $repos) {
                     $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
                 } else {
                     # gh can return exit 0 with GraphQL-level errors in the body
-                    try {
-                        $parsed = $result | ConvertFrom-Json
-                    } catch {
+                    $validation = Test-GraphQLResponse -RawJson $result
+                    $parsed = $validation.Parsed
+                    if (-not $validation.Success) {
                         $exitCode = 1
-                        $errText = "Failed to parse response: $($_.Exception.Message)"
-                        $parsed = $null
-                    }
-                    if ($parsed) {
-                        if ($parsed.PSObject.Properties['errors']) {
-                            $exitCode = 1
-                            $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
-                        } elseif (-not $parsed.PSObject.Properties['data'] -or -not $parsed.data.PSObject.Properties['search']) {
-                            $exitCode = 1
-                            $errText = 'Response missing data.search'
-                        }
+                        $errText = $validation.Error
                     }
                 }
                 if ($exitCode -eq 0) {
