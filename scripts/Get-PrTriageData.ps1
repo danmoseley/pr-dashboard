@@ -549,31 +549,6 @@ foreach ($pr in $refreshCandidates) {
             catch { Write-Verbose "Warning: could not expand CODEOWNERS team handle @$o - $_"; @() }
         } else { @($o) }
     }
-    # Merge: codeowners first (higher authority), then area-label owners
-    $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
-    if ($prOwners.Count -eq 0) { $prOwners = $owners }
-    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
-        # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
-        # Scoring: path match (+3) > label match (+2) > merge_count bonus (capped +1).
-        # Tie-breaks: score desc → merge_count desc → login alphabetical.
-        # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
-        $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
-        $authorExclude = if ($pr.author) { $pr.author.login } else { '' }
-        $prOwners = @(Select-FallbackReviewers `
-            -Maintainers $Maintainers `
-            -ExcludeLogin $authorExclude `
-            -Repo $Repo `
-            -ActivityData $maintainerActivityData `
-            -ChangedFilePaths $changedFilePaths `
-            -AreaLabels $prAreaLabels)
-        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Where-Object { $_ -ne $authorExclude } | Select-Object -First 2) }
-    }
-    # Any maintainer's approval satisfies the merge gate; $prOwners is used to
-    # suggest reviewers, not to gate merging. Compute once for reuse below.
-    # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
-    # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
-    $allMaintainerPool = @($Maintainers | Select-Object -Unique)
-
     # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null
     if ($pr.author.login -match "^(app/)?copilot-swe-agent$") {
@@ -586,7 +561,35 @@ foreach ($pr in $refreshCandidates) {
         }
     }
 
-    # Resolve effective author early (needed for $prioritizedOwners exclusion and scoring)
+    # Merge: codeowners first (higher authority), then area-label owners
+    $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
+    if ($prOwners.Count -eq 0) { $prOwners = $owners }
+    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
+        # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
+        # Scoring: path match (+3) > label match (+2) > merge_count bonus (capped +1).
+        # Tie-breaks: score desc → merge_count desc → login alphabetical.
+        # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
+        $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
+        $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
+        if ($authorLogin -match '\[bot\]$' -and $botTrigger) {
+            $authorLogin = $botTrigger
+        }
+        $prOwners = @(Select-FallbackReviewers `
+            -Maintainers $Maintainers `
+            -ExcludeLogin $authorLogin `
+            -Repo $Repo `
+            -ActivityData $maintainerActivityData `
+            -ChangedFilePaths $changedFilePaths `
+            -AreaLabels $prAreaLabels)
+        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Where-Object { $_ -ne $authorLogin } | Select-Object -First 2) }
+    }
+    # Any maintainer's approval satisfies the merge gate; $prOwners is used to
+    # suggest reviewers, not to gate merging. Compute once for reuse below.
+    # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
+    # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
+    $allMaintainerPool = @($Maintainers | Select-Object -Unique)
+
+    # Resolve effective author (needed for $prioritizedOwners exclusion and scoring)
     $authorLogin = $pr.author.login
     if ($botTrigger) { $authorLogin = $botTrigger }
 

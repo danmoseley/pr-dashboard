@@ -33,10 +33,9 @@ jobs:
         run: |
           changed_files=()
           for f in config/maintainers.json config/maintainer-activity.json; do
-            # Explicitly check file existence: maintainer-activity.json may not exist on the first
-            # run (before Update-Maintainers.ps1 has ever written it). git diff on a non-existent
-            # untracked file exits 0 (no change), so this guard is for clarity more than safety.
-            if [ -f "$f" ] && ! git diff --quiet "$f"; then
+            # Detect both modified tracked files and newly created untracked files.
+            # git diff --quiet misses untracked files (exits 0 for new files not yet staged).
+            if [ -f "$f" ] && [ -n "$(git status --porcelain "$f")" ]; then
               changed_files+=("$f")
             fi
           done

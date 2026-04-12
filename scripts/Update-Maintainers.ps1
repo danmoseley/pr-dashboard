@@ -288,17 +288,17 @@ if (-not $SkipActivity) {
                 $acc = $repoAcc[$m]
                 $mergeCount = if ($acc.count) { [int]$acc.count } else { 0 }
 
-                # Top 10 path prefixes by frequency
+                # Top 5 path prefixes by frequency, with Name as a stable tie-breaker
                 $topPaths = @($acc.paths |
                     Group-Object |
-                    Sort-Object -Property Count -Descending |
-                    Select-Object -First 10 |
+                    Sort-Object -Property @{ Expression = 'Count'; Descending = $true }, @{ Expression = 'Name'; Descending = $false } |
+                    Select-Object -First 5 |
                     ForEach-Object { $_.Name })
 
-                # Top 5 area-* labels by frequency
+                # Top 5 area-* labels by frequency, with Name as a stable tie-breaker
                 $topLabels = @($acc.labels |
                     Group-Object |
-                    Sort-Object -Property Count -Descending |
+                    Sort-Object -Property @{ Expression = 'Count'; Descending = $true }, @{ Expression = 'Name'; Descending = $false } |
                     Select-Object -First 5 |
                     ForEach-Object { $_.Name })
             }

@@ -58,7 +58,7 @@ function Select-FallbackReviewers {
         if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
         elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
         else { $parts[0] }
-    } | Select-Object -Unique)
+    } | Sort-Object -Unique)
 
     # Locate the per-repo activity map (supports both hashtable and PSCustomObject from ConvertFrom-Json)
     $repoActivity = $null
