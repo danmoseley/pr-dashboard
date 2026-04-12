@@ -1,11 +1,43 @@
 [
   {
+    "day": "2026-04-12",
+    "date_utc": "2026-04-12T16:27:53.0000000Z",
+    "display": "April 12, 2026",
+    "bullets": [
+      {
+        "text": "Added auto-refresh functionality for the maintainers list to keep it updated in real-time.",
+        "tier": "feature"
+      },
+      {
+        "text": "Adjusted PR refresh logic to avoid force-refreshing PRs with non-success CI or UNKNOWN mergeability statuses.",
+        "tier": "normal"
+      },
+      {
+        "text": "Implemented adaptive sub-chunking for handling failed API queries more efficiently.",
+        "tier": "normal"
+      }
+    ],
+    "commit_range": "60feab4f79a913f0302a87cf71ce41457faf9f07..ded55d9561e64a4dcd069a88bb4948f661eaf587"
+  },
+  {
     "day": "2026-04-11",
-    "date_utc": "2026-04-12T04:34:08.0000000Z",
+    "date_utc": "2026-04-12T06:16:44.0000000Z",
     "display": "April 11, 2026",
     "bullets": [
       {
-        "text": "Added incremental PR scanning to reduce API quota usage.",
+        "text": "Added \"Next Action\" tooltip explaining why each person appears in the list.",
+        "tier": "feature"
+      },
+      {
+        "text": "Introduced chunked date-range retry logic for large repos, improving handling of 502 errors.",
+        "tier": "feature"
+      },
+      {
+        "text": "Implemented activity-based fallback reviewer selection, limited to the top 2 reviewers.",
+        "tier": "feature"
+      },
+      {
+        "text": "Added incremental PR scanning to optimize API quota usage.",
         "tier": "feature"
       },
       {
@@ -13,79 +45,71 @@
         "tier": "feature"
       },
       {
-        "text": "Added activity-based fallback to automatically select up to two reviewers when necessary.",
+        "text": "Enabled a lightweight probe to skip unchanged repos, paired with an API quota footer display.",
         "tier": "feature"
       },
       {
-        "text": "Enabled retry with backoff and error logging for GraphQL queries for better error handling.",
+        "text": "Added a repo filter magnifying glass and removed the external navigation icon.",
         "tier": "feature"
       },
       {
-        "text": "Implemented a lightweight repository probe to skip unchanged repositories along with an API quota footer.",
-        "tier": "feature"
-      },
-      {
-        "text": "Added weekly auto-refresh workflow for maintainers.",
-        "tier": "feature"
-      },
-      {
-        "text": "Added a magnifying glass for the repo filter while removing the ↗ navigation icon.",
-        "tier": "feature"
-      },
-      {
-        "text": "Onboarded 11 new .NET repositories (standard tier, updated daily).",
-        "tier": "feature"
-      },
-      {
-        "text": "Fixed display issue for missing cache version in incremental scan warning.",
+        "text": "Reduced chunk size for scanning to 7 days and fixed duplicate log entries for retries.",
         "tier": "normal"
       },
       {
-        "text": "Resolved crash caused by StrictMode by safely accessing PSObject.Properties.",
+        "text": "Fixed StrictMode crash by using safe property access for PSObject.Properties.",
         "tier": "normal"
       },
       {
-        "text": "Fixed PowerShell stream leakage in stdout during scan by using `-OutputFile`.",
+        "text": "Fixed scan JSON corruption from Write-Output interfering with stdout during scans.",
         "tier": "normal"
       },
       {
-        "text": "Addressed scan failures caused by Write-Warning leaking ANSI text to stdout in CI.",
+        "text": "Fixed scan failures caused by PowerShell warnings and stream leakage into CI stdout.",
         "tier": "normal"
       },
       {
-        "text": "Fixed corrupt JSON output caused by Write-Output during scans.",
+        "text": "Improved missing cache version display in incremental scan warnings.",
         "tier": "normal"
       },
       {
-        "text": "Enhanced best-effort refresh behavior when no user filter is applied.",
+        "text": "Addressed scan failures and validation failure cases by adding diagnostic logging and a second-pass retry mechanism for GraphQL queries.",
         "tier": "normal"
       },
       {
-        "text": "Corrected waitForFunction argument order, whitespace handling in ONLY_GROUPS, and a comment in run-parallel.js.",
+        "text": "Enhanced fallback behavior in scans when no user filter is applied.",
         "tier": "normal"
       },
       {
-        "text": "Removed inferred 'who' from the \"involves\" list.",
+        "text": "Prevented inferred users in \"involves\" lists.",
         "tier": "normal"
       },
       {
-        "text": "Made \"easy-maintainer\" imply \"next-maintainer,\" added a clear button, and fixed issues with URL parameter handling.",
+        "text": "Refined \"who\" logic for multiple retries with added backoff and error logging.",
         "tier": "normal"
       },
       {
-        "text": "Added diagnostic logging for scan validation failures.",
+        "text": "Added 11 standard-tier .NET repositories for daily scans.",
         "tier": "trivial"
       },
       {
-        "text": "Updated `README.md` with new information.",
+        "text": "Updated README and copilot-instructions.md with coding standards, a pre-push quality checklist, and clarified guidance.",
         "tier": "trivial"
       },
       {
-        "text": "Revised `copilot-instructions.md` with coding standards and added a pre-push checklist.",
+        "text": "Fixed minor bugs including `waitForFunction` parameter order, whitespace handling in ONLY_GROUPS, and comments in run-parallel.js.",
+        "tier": "trivial"
+      },
+      {
+        "text": "Scheduled a weekly auto-refresh workflow for the maintainers list.",
+        "tier": "trivial"
+      },
+      {
+        "text": "Implemented auto-refresh functionality for the maintainers list.",
         "tier": "trivial"
       }
     ],
-    "commit_range": "39f9cfe172671487d1d84a2ba32345d9cbfefa73..d4b981d408e735e90cb145e3d608bca3b6f840b4"
+    "commit_range": "39f9cfe172671487d1d84a2ba32345d9cbfefa73..cf97c5d4b46e063f84326680594482831fffc711"
   },
   {
     "day": "2026-04-10",
