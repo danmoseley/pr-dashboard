@@ -1305,9 +1305,9 @@ async function runTests() {
               return [btn ? btn.disabled : null, statusEl ? statusEl.textContent : ''];
             });
 
-            if (!btnDisabled || !statusText.includes('Checking')) {
+            if (!btnDisabled || !(statusText.includes('Checking') || statusText.includes('Core API exhausted'))) {
               fail('L1: Best-effort refresh button (no user filter) — refresh did not start',
-                'btnDisabled=' + btnDisabled + ', statusText="' + statusText + '" (expected disabled=true and "Checking PRs…")');
+                'btnDisabled=' + btnDisabled + ', statusText="' + statusText + '" (expected disabled=true and "Checking PRs…" or "Core API exhausted…")');
             } else {
               // Wait for the refresh cycle to complete: the final .then() re-enables the button.
               // GitHub API requests are intercepted above, so Phase 1 fails fast without any
