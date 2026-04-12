@@ -91,7 +91,7 @@ Describe 'Select-FallbackReviewers' {
         $result[1] | Should -Be 'alice'
     }
 
-    It 'Falls back to merge_count order when all scores are 0' {
+    It 'Ranks by merge bonus when there are no path or label matches' {
         $activity = New-ActivityData @{
             'test/repo' = @{
                 'alice' = @{ merge_count = 2;  top_paths = @('src/libraries/System.IO'); top_area_labels = @() }
@@ -107,7 +107,7 @@ Describe 'Select-FallbackReviewers' {
             -ChangedFilePaths @('completely/different/path.cs') `
             -AreaLabels @()
 
-        # No path or label matches → all scores = 0 → fall back to merge_count desc
+        # No path or label matches → only merge_count bonus contributes → order by merge_count desc
         $result[0] | Should -Be 'bob'
         $result[1] | Should -Be 'carol'
     }

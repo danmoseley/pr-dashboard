@@ -567,6 +567,11 @@ foreach ($pr in $refreshCandidates) {
         }
     }
 
+    # Resolve effective author (needed for $prioritizedOwners exclusion, fallback scoring, and output).
+    # For bot-authored PRs, the human who triggered it is the effective author.
+    $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
+    if ($botTrigger) { $authorLogin = $botTrigger }
+
     # Merge: codeowners first (higher authority), then area-label owners
     $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
@@ -576,10 +581,6 @@ foreach ($pr in $refreshCandidates) {
         # Tie-breaks: score desc → merge_count desc → login alphabetical.
         # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
         $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
-        $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
-        if ($botTrigger) {
-            $authorLogin = $botTrigger
-        }
         $prOwners = @(Select-FallbackReviewers `
             -Maintainers $Maintainers `
             -ExcludeLogin $authorLogin `
@@ -594,10 +595,6 @@ foreach ($pr in $refreshCandidates) {
     # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
     # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
     $allMaintainerPool = @($Maintainers | Select-Object -Unique)
-
-    # Resolve effective author (needed for $prioritizedOwners exclusion and scoring)
-    $authorLogin = $pr.author.login
-    if ($botTrigger) { $authorLogin = $botTrigger }
 
     # Extract Build Analysis
     $checks = @()

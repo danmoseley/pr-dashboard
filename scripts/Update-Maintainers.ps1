@@ -57,6 +57,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
+Import-Module "$PSScriptRoot/MaintainerActivity.psm1" -Force
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
@@ -153,15 +154,10 @@ foreach ($entry in $repos) {
                             }
                         }
                         # Collect file path prefixes (first 3 segments, e.g. src/libraries/System.IO).
-                        # NOTE: This bucketing logic must stay in sync with MaintainerActivity.psm1
-                        # (Select-FallbackReviewers), which applies the same 3-segment prefix when scoring.
                         if ($node.files -and $node.files.nodes) {
                             foreach ($f in $node.files.nodes) {
                                 if ($f.path) {
-                                    $parts = $f.path -split '/'
-                                    $prefix = if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
-                                              elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
-                                              else { $parts[0] }
+                                    $prefix = Get-PathPrefix $f.path
                                     $repoActivity[$login].paths.Add($prefix)
                                 }
                             }

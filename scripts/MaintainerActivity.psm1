@@ -5,6 +5,22 @@
 
 <#
 .SYNOPSIS
+    Computes the first-3-segment path prefix for a file path (e.g. src/libraries/System.IO).
+.DESCRIPTION
+    Used by both activity data collection (Update-Maintainers.ps1) and scoring
+    (Select-FallbackReviewers) to ensure consistent bucketing.
+#>
+function Get-PathPrefix {
+    [CmdletBinding()]
+    param([string]$Path)
+    $parts = $Path -split '/'
+    if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
+    elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
+    else { $parts[0] }
+}
+
+<#
+.SYNOPSIS
     Scores maintainers by their activity signals and selects the top 2 as fallback reviewers.
 .DESCRIPTION
     When a PR has no CODEOWNERS or area-label owners, this function selects the top 2 maintainers
@@ -51,13 +67,8 @@ function Select-FallbackReviewers {
     )
 
     # Compute first-3-segment path prefixes for the PR's changed files (e.g. src/libraries/System.IO).
-    # NOTE: This bucketing logic must stay in sync with Update-Maintainers.ps1,
-    # which applies the same 3-segment prefix when collecting activity data.
     $prFilePrefixes = @($ChangedFilePaths | Where-Object { $_ } | ForEach-Object {
-        $parts = $_ -split '/'
-        if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
-        elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
-        else { $parts[0] }
+        Get-PathPrefix $_
     } | Sort-Object -Unique)
 
     # Locate the per-repo activity map (supports both hashtable and PSCustomObject from ConvertFrom-Json)
@@ -126,4 +137,4 @@ function Select-FallbackReviewers {
         ForEach-Object { $_.Login })
 }
 
-Export-ModuleMember -Function Select-FallbackReviewers
+Export-ModuleMember -Function Select-FallbackReviewers, Get-PathPrefix
