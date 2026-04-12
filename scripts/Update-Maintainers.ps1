@@ -69,6 +69,7 @@ function Invoke-RepoMaintainerScan {
         [Parameter(Mandatory)][string]$Repo,
         [Parameter(Mandatory)][string]$CutoffDate,
         [Parameter(Mandatory)][string[]]$BotLogins,
+        [string]$EndDate,
         [switch]$SkipActivity,
         [string]$DisplayPrefix = '  ',
         [int]$MaxRetries = 5
@@ -79,12 +80,16 @@ function Invoke-RepoMaintainerScan {
     $cursor = $null
     $totalFetched = 0
 
+    # Build the merged: filter — use a date range when EndDate is provided,
+    # otherwise use the open-ended >CutoffDate syntax.
+    $mergedFilter = if ($EndDate) { "merged:$CutoffDate..$EndDate" } else { "merged:>$CutoffDate" }
+
     do {
         $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
         if ($SkipActivity) {
-            $q = "{ search(query: `"repo:$Repo is:pr is:merged merged:>$CutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
+            $q = "{ search(query: `"repo:$Repo is:pr is:merged $mergedFilter`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
         } else {
-            $q = "{ search(query: `"repo:$Repo is:pr is:merged merged:>$CutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
+            $q = "{ search(query: `"repo:$Repo is:pr is:merged $mergedFilter`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
         }
 
         $result = $null
@@ -196,6 +201,115 @@ function Invoke-RepoMaintainerScan {
     }
 }
 
+# ─── Invoke-ChunkedRepoScan ──────────────────────────────────────────────────
+# Retries a failed repo by splitting the date range into smaller chunks.
+# Returns the same shape as Invoke-RepoMaintainerScan, with partial results
+# merged across successful chunks. FailedChunks lists any ranges that failed.
+function Invoke-ChunkedRepoScan {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo,
+        [Parameter(Mandatory)][string]$CutoffDate,
+        [Parameter(Mandatory)][string[]]$BotLogins,
+        [switch]$SkipActivity,
+        [string]$DisplayPrefix = '  ',
+        [int]$MaxRetries = 5,
+        [ValidateRange(1, 365)][int]$ChunkDays = 30
+    )
+
+    # Compute non-overlapping date ranges from (CutoffDate + 1 day) to today.
+    # The original query uses merged:>CutoffDate (exclusive), so chunks start
+    # the day after CutoffDate to preserve semantics.
+    $startDate = ([datetime]::Parse($CutoffDate)).AddDays(1)
+    $scanEnd = (Get-Date).Date
+    if ($startDate -gt $scanEnd) {
+        return [PSCustomObject]@{
+            Success      = $true
+            MergerCounts = @{}
+            Activity     = @{}
+            TotalFetched = 0
+            FailedChunks = @()
+            Error        = ''
+        }
+    }
+
+    $chunks = @()
+    $chunkStart = $startDate
+    while ($chunkStart -le $scanEnd) {
+        $chunkEnd = $chunkStart.AddDays($ChunkDays - 1)
+        if ($chunkEnd -gt $scanEnd) { $chunkEnd = $scanEnd }
+        $chunks += @{
+            Start = $chunkStart.ToString('yyyy-MM-dd')
+            End   = $chunkEnd.ToString('yyyy-MM-dd')
+        }
+        $chunkStart = $chunkEnd.AddDays(1)
+    }
+
+    Write-Host ""
+    Write-Host "${DisplayPrefix}Splitting into $($chunks.Count) chunk(s) of up to $ChunkDays days" -ForegroundColor Cyan
+
+    $mergedCounts = @{}
+    $mergedActivity = @{}
+    $totalFetched = 0
+    $failedChunks = @()
+
+    foreach ($chunk in $chunks) {
+        Write-Host "${DisplayPrefix}  $Repo [$($chunk.Start)..$($chunk.End)] ... " -NoNewline
+
+        $scanResult = Invoke-RepoMaintainerScan -Repo $Repo -CutoffDate $chunk.Start -EndDate $chunk.End `
+            -BotLogins $BotLogins -SkipActivity:$SkipActivity -DisplayPrefix "${DisplayPrefix}  " -MaxRetries $MaxRetries
+
+        if (-not $scanResult.Success) {
+            Write-Host "FAILED ($($scanResult.Error))" -ForegroundColor Red
+            $failedChunks += "$($chunk.Start)..$($chunk.End)"
+            continue
+        }
+
+        $totalFetched += $scanResult.TotalFetched
+        Write-Host "$($scanResult.TotalFetched) PRs" -ForegroundColor Green
+
+        # Merge MergerCounts (sum by login)
+        if ($scanResult.MergerCounts) {
+            foreach ($kv in $scanResult.MergerCounts.GetEnumerator()) {
+                $mergedCounts[$kv.Key] = ($mergedCounts[$kv.Key] ?? 0) + $kv.Value
+            }
+        }
+
+        # Merge Activity (concatenate paths/labels lists, sum counts)
+        if (-not $SkipActivity -and $scanResult.Activity) {
+            foreach ($kv in $scanResult.Activity.GetEnumerator()) {
+                $login = $kv.Key
+                $acc = $kv.Value
+                if (-not $mergedActivity.ContainsKey($login)) {
+                    $mergedActivity[$login] = @{
+                        paths  = [System.Collections.Generic.List[string]]@()
+                        labels = [System.Collections.Generic.List[string]]@()
+                        count  = 0
+                    }
+                }
+                $mergedActivity[$login].count += $acc.count
+                foreach ($p in $acc.paths)  { $mergedActivity[$login].paths.Add($p) }
+                foreach ($l in $acc.labels) { $mergedActivity[$login].labels.Add($l) }
+            }
+        }
+    }
+
+    $anySuccess = ($failedChunks.Count -lt $chunks.Count)
+    $errorMsg = ''
+    if ($failedChunks.Count -gt 0) {
+        $errorMsg = "Failed chunks: $($failedChunks -join ', ')"
+    }
+
+    return [PSCustomObject]@{
+        Success      = $anySuccess
+        MergerCounts = $mergedCounts
+        Activity     = $mergedActivity
+        TotalFetched = $totalFetched
+        FailedChunks = $failedChunks
+        Error        = $errorMsg
+    }
+}
+
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
     $repoRoot = Split-Path -Parent $PSScriptRoot
@@ -286,24 +400,32 @@ foreach ($entry in $repos) {
     }
 }
 
-# ─── Second pass: retry repos that failed in the first pass ───────────────────
-# By the time we reach here, minutes have elapsed processing other repos, giving
-# GitHub's API time to recover from transient 502/504 errors.
+# ─── Second pass: retry failed repos using chunked date ranges ────────────────
+# When a repo fails all retries (typically persistent 502 for large repos),
+# splitting the date range into smaller chunks often succeeds because each
+# chunk queries fewer results. A 60s cooldown gives the API time to recover.
 if ($failedRepos.Count -gt 0) {
     $retryDelay = 60
     Write-Host ""
-    Write-Host "Retrying $($failedRepos.Count) failed repo(s) after ${retryDelay}s cooldown..." -ForegroundColor Yellow
+    Write-Host "Retrying $($failedRepos.Count) failed repo(s) with chunked date ranges after ${retryDelay}s cooldown..." -ForegroundColor Yellow
     Start-Sleep -Seconds $retryDelay
 
     foreach ($entry in $failedRepos) {
         $repo = $entry.repo
-        Write-Host "  $repo (retry) ... " -NoNewline
+        Write-Host "  $repo (chunked retry) ... " -NoNewline
 
-        $scanResult = Invoke-RepoMaintainerScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity -DisplayPrefix '  '
+        $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity -DisplayPrefix '  '
 
         if (-not $scanResult.Success) {
-            Write-Host "  ERROR querying $repo on second pass (giving up)" -ForegroundColor Red
+            Write-Host "  ERROR querying $repo on chunked retry (giving up)" -ForegroundColor Red
+            if ($scanResult.FailedChunks -and $scanResult.FailedChunks.Count -gt 0) {
+                Write-Host "    Failed chunks: $($scanResult.FailedChunks -join ', ')" -ForegroundColor DarkGray
+            }
             continue
+        }
+
+        if ($scanResult.PSObject.Properties['FailedChunks'] -and $scanResult.FailedChunks.Count -gt 0) {
+            Write-Host "    Partial success — failed chunks: $($scanResult.FailedChunks -join ', ')" -ForegroundColor Yellow
         }
 
         $mergerCounts = $scanResult.MergerCounts
