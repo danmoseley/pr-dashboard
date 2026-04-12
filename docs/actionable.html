@@ -212,6 +212,7 @@
   var LS_NEXT_MAINTAINER_KEY = 'pr-dashboard-next-maintainer';
   var LS_EASY_MAINTAINER_KEY = 'pr-dashboard-easy-maintainer';
   var LS_NM_BEFORE_EASY_KEY = 'pr-dashboard-nm-before-easy';
+  var LS_ACTIVE_USERS_KEY = 'pr-dashboard-active-users';
   var LS_RECENT_USERS_KEY = 'pr-dashboard-recent-users';
   var MAX_RECENT_USERS = 5;
 
@@ -259,18 +260,26 @@
       activeRepos = legacyRepo ? legacyRepo.split(',').filter(Boolean) : [];
     }
   } catch(e) {}
-  var savedUser = '';
-  // When report-mode params are present without a user param, don't restore savedUser
+  var savedUsers = [];
+  // When report-mode params are present without a user param, don't restore savedUsers
   // from localStorage. This prevents shared links like ?stale=true from silently
   // becoming user-scoped views.
   var hasReportModeParam = urlCommunity !== null || urlQuickWins !== null || urlStale !== null;
   if (!hasReportModeParam || urlUsers.length > 0) {
-    try { savedUser = localStorage.getItem(LS_KEY) || ''; } catch(e) {}
+    try {
+      var raw = localStorage.getItem(LS_ACTIVE_USERS_KEY);
+      if (raw) { savedUsers = JSON.parse(raw); }
+      // Backward compat: fall back to single-user key
+      if (savedUsers.length === 0) {
+        var single = localStorage.getItem(LS_KEY) || '';
+        if (single) savedUsers = [single];
+      }
+    } catch(e) {}
   }
   // User-context URL params (involves/nextaction/easyaction) are only meaningful when a
   // user filter is active. Ignore them when no user is set so stale URLs like
   // ?involves=true don't silently flip filter state.
-  var hasUser = urlUsers.length > 0 || !!savedUser;
+  var hasUser = urlUsers.length > 0 || savedUsers.length > 0;
   if (hasUser && urlInvolves !== null) {
     involvesMode = urlInvolves === 'true' || urlInvolves === '1';
   } else {
@@ -296,7 +305,7 @@
   } else {
     try { easyActionMaintainerMode = localStorage.getItem(LS_EASY_MAINTAINER_KEY) === 'true'; } catch(e) {}
   }
-  var initialUsers = urlUsers.length > 0 ? urlUsers : (savedUser ? [savedUser] : []);
+  var initialUsers = urlUsers.length > 0 ? urlUsers : savedUsers;
   if (initialUsers.length > 0) {
     activeUsers = initialUsers.slice();
     document.getElementById('user-field').value = initialUsers[0];
@@ -306,6 +315,7 @@
     initialUsers.forEach(function(u) { addRecentUser(u); });
     // Ensure LS_KEY matches the displayed user (addRecentUser writes LS_KEY on each call)
     try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(initialUsers)); } catch(e) {}
     document.getElementById('clear-user-btn').style.display = '';
   } else {
     // No user filter: involves is forced checked+disabled (already set in HTML)
@@ -609,11 +619,11 @@
     document.getElementById('user-field').value = '';
     document.getElementById('clear-user-btn').style.display = 'none';
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
     showMaintainerToggles();
     history.replaceState(null, '', buildCurrentUrl());
     renderRecentTiles();
     var summaryBar = document.getElementById('summary-bar');
-    if (summaryBar) { summaryBar.textContent = ''; summaryBar.style.display = 'none'; }
     if (loaded) renderFilteredMaintainer();
   }
 
@@ -625,6 +635,7 @@
     }
     activeUsers = [name];
     addRecentUser(name);
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
     renderRecentTiles();
     showUserToggles();
     history.replaceState(null, '', buildCurrentUrl());
@@ -635,6 +646,7 @@
     document.getElementById('user-field').value = name;
     activeUsers = [name];
     addRecentUser(name);
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
     renderRecentTiles();
     showUserToggles();
     history.replaceState(null, '', buildCurrentUrl());
@@ -793,6 +805,7 @@
     var banner = document.getElementById('filter-banner');
     if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
@@ -883,6 +896,7 @@
         if (idx >= 0) activeUsers.splice(idx, 1); else activeUsers = [name];
       }
       if (!ctrl) addRecentUser(name);
+      try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
       renderRecentTiles();
       if (activeUsers.length > 0) {
         document.getElementById('user-field').value = activeUsers[activeUsers.length - 1];
@@ -893,6 +907,7 @@
         // Only clear user-related state; preserve area/repo/other filters
         document.getElementById('user-field').value = '';
         try { localStorage.removeItem(LS_KEY); } catch(e) {}
+        try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
         showMaintainerToggles();
         history.replaceState(null, '', buildCurrentUrl());
         renderRecentTiles();
