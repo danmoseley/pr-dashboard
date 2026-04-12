@@ -203,6 +203,40 @@ function Invoke-RepoMaintainerScan {
     }
 }
 
+# ─── Merge-ScanResult ────────────────────────────────────────────────────────
+# Merges MergerCounts and Activity from a scan result into running accumulators.
+function Merge-ScanResult {
+    param(
+        [Parameter(Mandatory)][PSCustomObject]$Result,
+        [Parameter(Mandatory)][hashtable]$MergedCounts,
+        [Parameter(Mandatory)][hashtable]$MergedActivity,
+        [bool]$IncludeActivity,
+        [Parameter(Mandatory)][ref]$TotalFetched
+    )
+    $TotalFetched.Value += $Result.TotalFetched
+    if ($Result.MergerCounts) {
+        foreach ($kv in $Result.MergerCounts.GetEnumerator()) {
+            $MergedCounts[$kv.Key] = ($MergedCounts[$kv.Key] ?? 0) + $kv.Value
+        }
+    }
+    if ($IncludeActivity -and $Result.Activity) {
+        foreach ($kv in $Result.Activity.GetEnumerator()) {
+            $login = $kv.Key
+            $acc = $kv.Value
+            if (-not $MergedActivity.ContainsKey($login)) {
+                $MergedActivity[$login] = @{
+                    paths  = [System.Collections.Generic.List[string]]@()
+                    labels = [System.Collections.Generic.List[string]]@()
+                    count  = 0
+                }
+            }
+            $MergedActivity[$login].count += $acc.count
+            foreach ($p in $acc.paths)  { $MergedActivity[$login].paths.Add($p) }
+            foreach ($l in $acc.labels) { $MergedActivity[$login].labels.Add($l) }
+        }
+    }
+}
+
 # ─── Invoke-ChunkedRepoScan ──────────────────────────────────────────────────
 # Retries a failed repo by splitting the date range into smaller chunks.
 # Returns the same shape as Invoke-RepoMaintainerScan, with partial results
@@ -216,14 +250,19 @@ function Invoke-ChunkedRepoScan {
         [switch]$SkipActivity,
         [string]$DisplayPrefix = '  ',
         [int]$MaxRetries = 5,
-        [ValidateRange(1, 365)][int]$ChunkDays = 7
+        [ValidateRange(1, 365)][int]$ChunkDays = 7,
+        [ValidateRange(1, 365)][int]$MinChunkDays = 1,
+        [string]$EndDate   # optional: limit scan to this date instead of today
     )
 
-    # Compute non-overlapping date ranges from (CutoffDate + 1 day) to today.
+    # Clamp MinChunkDays to ChunkDays if misconfigured
+    if ($MinChunkDays -gt $ChunkDays) { $MinChunkDays = $ChunkDays }
+
+    # Compute non-overlapping date ranges from (CutoffDate + 1 day) to EndDate (or today).
     # The original query uses merged:>CutoffDate (exclusive), so chunks start
     # the day after CutoffDate to preserve semantics.
     $startDate = ([datetime]::Parse($CutoffDate)).AddDays(1)
-    $scanEnd = (Get-Date).Date
+    $scanEnd = if ($EndDate) { ([datetime]::Parse($EndDate)).Date } else { (Get-Date).Date }
     if ($startDate -gt $scanEnd) {
         return [PSCustomObject]@{
             Success      = $true
@@ -253,6 +292,7 @@ function Invoke-ChunkedRepoScan {
     $mergedCounts = @{}
     $mergedActivity = @{}
     $totalFetched = 0
+    $anyChunkSucceeded = $false
     $failedChunks = [System.Collections.Generic.List[string]]::new()
 
     foreach ($chunk in $chunks) {
@@ -262,41 +302,39 @@ function Invoke-ChunkedRepoScan {
             -BotLogins $BotLogins -SkipActivity:$SkipActivity -DisplayPrefix "${DisplayPrefix}  " -MaxRetries $MaxRetries
 
         if (-not $scanResult.Success) {
+            # Check the chunk's actual span, not configured ChunkDays, to avoid
+            # redundant recursion on short tail chunks (e.g., a 1-day tail when ChunkDays=7).
+            $actualSpanDays = (([datetime]::Parse($chunk.End)) - ([datetime]::Parse($chunk.Start))).Days + 1
+            if ($actualSpanDays -gt $MinChunkDays) {
+                $subChunkDays = [Math]::Max($MinChunkDays, [Math]::Floor($actualSpanDays / 2))
+                Write-Host "FAILED — sub-chunking to ${subChunkDays}-day ranges" -ForegroundColor Yellow
+                # CutoffDate is chunk.Start minus 1 day because the function adds 1 day back
+                $subCutoff = ([datetime]::Parse($chunk.Start)).AddDays(-1).ToString('yyyy-MM-dd')
+                $subResult = Invoke-ChunkedRepoScan -Repo $Repo -CutoffDate $subCutoff -EndDate $chunk.End `
+                    -BotLogins $BotLogins -SkipActivity:$SkipActivity -DisplayPrefix "${DisplayPrefix}  " `
+                    -MaxRetries $MaxRetries -ChunkDays $subChunkDays -MinChunkDays $MinChunkDays
+
+                # Merge successful sub-chunk results
+                Merge-ScanResult -Result $subResult -MergedCounts $mergedCounts -MergedActivity $mergedActivity -IncludeActivity (-not $SkipActivity) -TotalFetched ([ref]$totalFetched)
+                # Propagate any sub-chunk failures
+                if ($subResult.FailedChunks) {
+                    foreach ($fc in $subResult.FailedChunks) { $failedChunks.Add($fc) }
+                }
+                if ($subResult.Success) { $anyChunkSucceeded = $true }
+                continue
+            }
+
             Write-Host "FAILED ($($scanResult.Error))" -ForegroundColor Red
             $failedChunks.Add("$($chunk.Start)..$($chunk.End)")
             continue
         }
 
-        $totalFetched += $scanResult.TotalFetched
+        $anyChunkSucceeded = $true
         Write-Host "$($scanResult.TotalFetched) PRs" -ForegroundColor Green
-
-        # Merge MergerCounts (sum by login)
-        if ($scanResult.MergerCounts) {
-            foreach ($kv in $scanResult.MergerCounts.GetEnumerator()) {
-                $mergedCounts[$kv.Key] = ($mergedCounts[$kv.Key] ?? 0) + $kv.Value
-            }
-        }
-
-        # Merge Activity (concatenate paths/labels lists, sum counts)
-        if (-not $SkipActivity -and $scanResult.Activity) {
-            foreach ($kv in $scanResult.Activity.GetEnumerator()) {
-                $login = $kv.Key
-                $acc = $kv.Value
-                if (-not $mergedActivity.ContainsKey($login)) {
-                    $mergedActivity[$login] = @{
-                        paths  = [System.Collections.Generic.List[string]]@()
-                        labels = [System.Collections.Generic.List[string]]@()
-                        count  = 0
-                    }
-                }
-                $mergedActivity[$login].count += $acc.count
-                foreach ($p in $acc.paths)  { $mergedActivity[$login].paths.Add($p) }
-                foreach ($l in $acc.labels) { $mergedActivity[$login].labels.Add($l) }
-            }
-        }
+        Merge-ScanResult -Result $scanResult -MergedCounts $mergedCounts -MergedActivity $mergedActivity -IncludeActivity (-not $SkipActivity) -TotalFetched ([ref]$totalFetched)
     }
 
-    $anySuccess = ($failedChunks.Count -lt $chunks.Count)
+    $anySuccess = $anyChunkSucceeded
     $errorMsg = ''
     if ($failedChunks.Count -gt 0) {
         $errorMsg = "Failed chunks: $($failedChunks -join ', ')"
