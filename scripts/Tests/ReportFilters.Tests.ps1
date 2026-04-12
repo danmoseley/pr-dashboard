@@ -260,7 +260,7 @@ Describe 'Report filter parity' {
             # Should NOT have localStorage get/set for community/quickwins/stale filter keys
             $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*community"
             $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*quickwins"
-            $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*staleMode"
+            $htmlContent | Should -Not -Match "localStorage\.\w+Item\([^)]*'[^']*stale"
         }
     }
 }

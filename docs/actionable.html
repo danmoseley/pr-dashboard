@@ -614,7 +614,7 @@
     activeAreas.forEach(function(a) { p.append('area', a); });
     activeRepos.forEach(function(r) { p.append('repo', r); });
     var qs = p.toString();
-    return location.pathname + (qs ? '?' + qs : '');
+    return location.pathname + (qs ? '?' + qs : '') + (location.hash || '');
   }
 
   // Clears only the user filter, preserving area/repo filters and sort order.
