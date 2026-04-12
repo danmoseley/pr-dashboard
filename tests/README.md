@@ -56,5 +56,6 @@ This avoids interleaved output while still saving the time of running them in se
 - Page smoke tests (I)
 - Recent name tiles (J)
 - Maintainer filter checkboxes (K)
+- Best-effort refresh button (L)
 
 Tests expect the server to be running on `http://localhost:8080`.
