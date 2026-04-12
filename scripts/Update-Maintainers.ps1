@@ -272,7 +272,7 @@ foreach ($entry in $repos) {
 
     # Union with existing
     $existingForRepo = @($existing[$repo] ?? @())
-    $merged = @($existingForRepo + $discovered | Select-Object -Unique | Sort-Object)
+    $merged = @($existingForRepo + $discovered | Sort-Object -Unique)
 
     $added = @($merged | Where-Object { $_ -notin $existingForRepo })
 
@@ -317,7 +317,7 @@ if ($failedRepos.Count -gt 0) {
             ForEach-Object { $_.Key })
 
         $existingForRepo = @($existing[$repo] ?? @())
-        $merged = @($existingForRepo + $discovered | Select-Object -Unique | Sort-Object)
+        $merged = @($existingForRepo + $discovered | Sort-Object -Unique)
         $added = @($merged | Where-Object { $_ -notin $existingForRepo })
         $updated[$repo] = $merged
 
