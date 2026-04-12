@@ -48,8 +48,8 @@ Describe 'Select-FallbackReviewers' {
 
         # alice and carol both match path (+3), alice has higher merge_count so comes first
         $result | Should -HaveCount 2
-        $result[0] | Should -Be 'alice'
-        $result[1] | Should -Be 'carol'
+        $result[0].Login | Should -Be 'alice'
+        $result[1].Login | Should -Be 'carol'
     }
 
     It 'Returns label-matching maintainer above non-matching' {
@@ -68,7 +68,7 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @('area-networking')
 
         # alice matches label (+2), bob does not — alice should come first despite fewer merges
-        $result[0] | Should -Be 'alice'
+        $result[0].Login | Should -Be 'alice'
     }
 
     It 'Uses merge_count as tiebreaker when scores are equal' {
@@ -87,8 +87,8 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @()
 
         # Both match path (+3); bob has higher merge_count, so comes first
-        $result[0] | Should -Be 'bob'
-        $result[1] | Should -Be 'alice'
+        $result[0].Login | Should -Be 'bob'
+        $result[1].Login | Should -Be 'alice'
     }
 
     It 'Ranks by merge bonus when there are no path or label matches' {
@@ -108,8 +108,8 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @()
 
         # No path or label matches → only merge_count bonus contributes → order by merge_count desc
-        $result[0] | Should -Be 'bob'
-        $result[1] | Should -Be 'carol'
+        $result[0].Login | Should -Be 'bob'
+        $result[1].Login | Should -Be 'carol'
     }
 
     It 'Uses alphabetical tiebreaker when scores and merge_counts are equal' {
@@ -129,8 +129,8 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @()
 
         # All match path (+3) and have same merge_count → alphabetical
-        $result[0] | Should -Be 'alice'
-        $result[1] | Should -Be 'mike'
+        $result[0].Login | Should -Be 'alice'
+        $result[1].Login | Should -Be 'mike'
     }
 
     It 'Excludes the PR author from candidates' {
@@ -149,7 +149,7 @@ Describe 'Select-FallbackReviewers' {
             -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
-        $result | Should -Not -Contain 'author'
+        $result.Login | Should -Not -Contain 'author'
         $result | Should -HaveCount 2
     }
 
@@ -164,8 +164,8 @@ Describe 'Select-FallbackReviewers' {
 
         # No data → all scores 0, all merge_counts 0 → alphabetical
         $result | Should -HaveCount 2
-        $result[0] | Should -Be 'alice'
-        $result[1] | Should -Be 'bob'
+        $result[0].Login | Should -Be 'alice'
+        $result[1].Login | Should -Be 'bob'
     }
 
     It 'Caps merge_count activity bonus at 1.0' {
@@ -186,7 +186,7 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @()
 
         # Both get +3 (path) + 1.0 (capped) = 4.0 → tie → merge_count desc → alice first
-        $result[0] | Should -Be 'alice'
+        $result[0].Login | Should -Be 'alice'
     }
 
     It 'Returns at most 2 reviewers even with many maintainers' {
@@ -236,8 +236,8 @@ Describe 'Select-FallbackReviewers' {
             -AreaLabels @()
 
         # No data for this repo → all scores 0, merge_counts 0 → alphabetical
-        $result[0] | Should -Be 'alice'
-        $result[1] | Should -Be 'bob'
+        $result[0].Login | Should -Be 'alice'
+        $result[1].Login | Should -Be 'bob'
     }
 
     It 'Combines path and label bonuses correctly' {
@@ -257,7 +257,90 @@ Describe 'Select-FallbackReviewers' {
 
         # alice: +3 (path) + 2 (label) + 0.5 (merge_count/10) = 5.5
         # bob:   +3 (path) + 0 (no label) + 0.5 = 3.5
-        $result[0] | Should -Be 'alice'
-        $result[1] | Should -Be 'bob'
+        $result[0].Login | Should -Be 'alice'
+        $result[1].Login | Should -Be 'bob'
+    }
+
+    # --- Reason text tests ---
+
+    It 'Returns path-match reason with matched path prefix' {
+        $activity = New-ActivityData @{
+            'test/repo' = @{
+                'alice' = @{ merge_count = 10; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+            }
+        }
+        $result = Select-FallbackReviewers `
+            -Maintainers @('alice') `
+            -ExcludeLogin '' `
+            -Repo 'test/repo' `
+            -ActivityData $activity `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
+            -AreaLabels @()
+
+        $result[0].Reason | Should -BeLike 'often merges PRs with files in src/libraries/System.Net*'
+    }
+
+    It 'Returns label-match reason with label name' {
+        $activity = New-ActivityData @{
+            'test/repo' = @{
+                'alice' = @{ merge_count = 10; top_paths = @(); top_area_labels = @('area-networking') }
+            }
+        }
+        $result = Select-FallbackReviewers `
+            -Maintainers @('alice') `
+            -ExcludeLogin '' `
+            -Repo 'test/repo' `
+            -ActivityData $activity `
+            -ChangedFilePaths @('completely/unrelated/path.cs') `
+            -AreaLabels @('area-networking')
+
+        $result[0].Reason | Should -BeLike '*often merges PRs labeled area-networking*'
+    }
+
+    It 'Returns combined path+label reason' {
+        $activity = New-ActivityData @{
+            'test/repo' = @{
+                'alice' = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @('area-net') }
+            }
+        }
+        $result = Select-FallbackReviewers `
+            -Maintainers @('alice') `
+            -ExcludeLogin '' `
+            -Repo 'test/repo' `
+            -ActivityData $activity `
+            -ChangedFilePaths @('src/libraries/System.Net/Socket.cs') `
+            -AreaLabels @('area-net')
+
+        $result[0].Reason | Should -BeLike '*files in src/libraries/System.Net*'
+        $result[0].Reason | Should -BeLike '*labeled area-net*'
+    }
+
+    It 'Returns merge-count-only reason when no path or label matches' {
+        $activity = New-ActivityData @{
+            'test/repo' = @{
+                'alice' = @{ merge_count = 20; top_paths = @('src/libraries/System.IO'); top_area_labels = @('area-other') }
+            }
+        }
+        $result = Select-FallbackReviewers `
+            -Maintainers @('alice') `
+            -ExcludeLogin '' `
+            -Repo 'test/repo' `
+            -ActivityData $activity `
+            -ChangedFilePaths @('completely/different/path.cs') `
+            -AreaLabels @('area-networking')
+
+        $result[0].Reason | Should -Be 'merges many PRs in this repo'
+    }
+
+    It 'Returns maintainer-fallback reason when no activity data' {
+        $result = Select-FallbackReviewers `
+            -Maintainers @('alice') `
+            -ExcludeLogin '' `
+            -Repo 'test/repo' `
+            -ActivityData $null `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
+            -AreaLabels @()
+
+        $result[0].Reason | Should -Be 'maintainer in this repo'
     }
 }

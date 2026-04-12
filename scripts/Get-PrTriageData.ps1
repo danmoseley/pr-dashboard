@@ -120,7 +120,9 @@ try {
     # Only $Maintainers and $ExcludeLogin are used in this stub.
     function Select-FallbackReviewers {
         param([string[]]$Maintainers, [string]$ExcludeLogin, [string]$Repo, $ActivityData, [string[]]$ChangedFilePaths, [string[]]$AreaLabels)
-        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin } | Select-Object -First 2)
+        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin } | Select-Object -First 2 | ForEach-Object {
+            [PSCustomObject]@{ Login = $_; Reason = "maintainer in this repo" }
+        })
     }
 }
 
@@ -453,9 +455,11 @@ if ($Label -and $areaOwners.ContainsKey($Label)) {
 # Also try matching each PR's area labels
 function Get-OwnersForPr($labelNames) {
     foreach ($lbl in $labelNames) {
-        if ($areaOwners.ContainsKey($lbl)) { return $areaOwners[$lbl] }
+        if ($areaOwners.ContainsKey($lbl)) {
+            return [PSCustomObject]@{ Owners = @($areaOwners[$lbl]); Label = $lbl }
+        }
     }
-    return @()
+    return [PSCustomObject]@{ Owners = @(); Label = $null }
 }
 
 # --- Step 4b: Detect Copilot review errors (targeted query, avoids fetching body for all reviews) ---
@@ -541,7 +545,9 @@ foreach ($pr in $refreshCandidates) {
     $labelNames = @($pr.labels | ForEach-Object { $_.name })
 
     # Per-PR owners (codeowners > area-label owners > filter-level > -Maintainers)
-    $labelOwners = Get-OwnersForPr $labelNames
+    $labelMatchResult = Get-OwnersForPr $labelNames
+    $labelOwners = $labelMatchResult.Owners
+    $matchedAreaLabel = $labelMatchResult.Label
     # Resolve changed file paths from GraphQL to find CODEOWNERS for this PR.
     # Limited to first 100 files per the fragment; PRs with more files get best-effort matching.
     $changedFilePaths = @()
@@ -583,19 +589,22 @@ foreach ($pr in $refreshCandidates) {
         }
     )
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
+    $fallbackReasons = @{}
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
         # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
         # Scoring: path match (+3) > label match (+2) > merge_count bonus (capped +1).
         # Tie-breaks: score desc → merge_count desc → login alphabetical.
         # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
         $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
-        $prOwners = @(Select-FallbackReviewers `
+        $fallbackResults = @(Select-FallbackReviewers `
             -Maintainers $Maintainers `
             -ExcludeLogin $authorLogin `
             -Repo $Repo `
             -ActivityData $maintainerActivityData `
             -ChangedFilePaths $changedFilePaths `
             -AreaLabels $prAreaLabels)
+        $prOwners = @($fallbackResults | ForEach-Object { $_.Login })
+        foreach ($fb in $fallbackResults) { $fallbackReasons[$fb.Login] = $fb.Reason }
         if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Where-Object { $_ -ne $authorLogin } | Select-Object -First 2) }
     }
     # Any maintainer's approval satisfies the merge gate; $prOwners is used to
@@ -741,37 +750,60 @@ foreach ($pr in $refreshCandidates) {
     # Priority: (1) assigned reviewers, (2) CODEOWNERS for changed files,
     #           (3) area-label owners, (4) engaged maintainers, (5) remaining.
     $prioritizedOwners = [System.Collections.ArrayList]@()
+    $ownerTier = @{}
     # Tier 1: Requested reviewers who are maintainers
     foreach ($r in $requestedReviewerLogins) {
         if ($r -ne $authorLogin -and $allMaintainerPool -contains $r -and $prioritizedOwners -notcontains $r) {
             [void]$prioritizedOwners.Add($r)
+            if (-not $ownerTier.ContainsKey($r)) { $ownerTier[$r] = "requested reviewer" }
         }
     }
     # Tier 2: CODEOWNERS for changed files (code-path ownership is more authoritative than labels)
     foreach ($o in $codeownersForPr) {
         if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
             [void]$prioritizedOwners.Add($o)
+            if (-not $ownerTier.ContainsKey($o)) { $ownerTier[$o] = "CODEOWNERS for changed files" }
         }
     }
     # Tier 3: Area owners from label match
     foreach ($o in $labelOwners) {
         if ($o -ne $authorLogin -and $prioritizedOwners -notcontains $o) {
             [void]$prioritizedOwners.Add($o)
+            if (-not $ownerTier.ContainsKey($o)) {
+                $ownerTier[$o] = if ($matchedAreaLabel) { "$matchedAreaLabel owner" } else { "area owner" }
+            }
         }
     }
     # Tier 4: Maintainers engaged in the PR (reviewers, thread/PR commenters)
+    $reviewerSet = @{}; foreach ($r in $reviewerLogins) { if ($r) { $reviewerSet[$r] = $true } }
     foreach ($e in @(@($reviewerLogins) + @($allCommenters) | Select-Object -Unique)) {
         if ($e -ne $authorLogin -and $allMaintainerPool -contains $e -and $prioritizedOwners -notcontains $e) {
             [void]$prioritizedOwners.Add($e)
+            if (-not $ownerTier.ContainsKey($e)) {
+                $ownerTier[$e] = if ($reviewerSet.ContainsKey($e)) { "reviewed this PR" } else { "commented on this PR" }
+            }
         }
     }
     # Tier 5: Remaining from $prOwners (preserves original order)
     foreach ($m in $prOwners) {
         if ($m -ne $authorLogin -and $prioritizedOwners -notcontains $m) {
             [void]$prioritizedOwners.Add($m)
+            if (-not $ownerTier.ContainsKey($m)) {
+                $ownerTier[$m] = if ($fallbackReasons.ContainsKey($m)) { $fallbackReasons[$m] } else { "maintainer in this repo" }
+            }
+        }
         }
     }
     $prioritizedOwners = @($prioritizedOwners)
+    # Build reason lookup for all requested reviewers (including non-maintainers)
+    $requestedReviewerReasons = @{}
+    foreach ($r in $requestedReviewerLogins) {
+        $requestedReviewerReasons[$r] = if ($ownerTier.ContainsKey($r)) { $ownerTier[$r] } else { "requested reviewer" }
+    }
+
+    # Build approver lookup so Get-PersonReason can prefer "approved this PR" over tier reasons
+    $approverSet = @{}
+    foreach ($a in $approverLogins) { if ($a) { $approverSet[$a] = $true } }
 
     # Labels
     $isCommunity = ($labelNames | Where-Object { $_ -match '^community' }).Count -gt 0
@@ -935,18 +967,31 @@ foreach ($pr in $refreshCandidates) {
     # Identify 1-2 specific people responsible for the next step
     $prNextAction = ""
     $who = @()
+    $whoWhy = @()
+
+    # Helper: look up a person's reason from available sources
+    function Get-PersonReason($login) {
+        if ($approverSet.ContainsKey($login)) { return "approved this PR" }
+        if ($ownerTier.ContainsKey($login)) { return $ownerTier[$login] }
+        if ($requestedReviewerReasons.ContainsKey($login)) { return $requestedReviewerReasons[$login] }
+        if ($fallbackReasons.ContainsKey($login)) { return $fallbackReasons[$login] }
+        return ""
+    }
 
     if ($pr.mergeable -eq "CONFLICTING") {
         $prNextAction = "@$($authorLogin): resolve conflicts"
         $who = @($authorLogin)
+        $whoWhy = @("PR author")
     }
     elseif ($baConclusion -eq "FAILURE") {
         if ($hasNeedsAuthorAction) {
             $prNextAction = "@$($authorLogin): address feedback (needs-author-action)"
             $who = @($authorLogin)
+            $whoWhy = @("PR author")
         } elseif ($unresolvedThreads -gt 0) {
             $prNextAction = "@$($authorLogin): respond to $unresolvedThreads thread(s)"
             $who = @($authorLogin)
+            $whoWhy = @("PR author")
             $waitingOn = @($threadAuthors | Where-Object { $_ -ne $authorLogin }) | Select-Object -First 2
             if ($waitingOn.Count -gt 0) {
                 $prNextAction += " from @$($waitingOn -join ', @')"
@@ -955,25 +1000,31 @@ foreach ($pr in $refreshCandidates) {
             # Reviews done, no open threads — CI is the real blocker
             $prNextAction = "@$($authorLogin): fix CI failures"
             $who = @($authorLogin)
+            $whoWhy = @("PR author")
         } else {
             # No approvals yet — review is the more actionable need; CI column shows the failure
             $prNextAction = "Maintainer: review needed"
             if ($requestedReviewerLogins.Count -gt 0) {
                 $who = @($requestedReviewerLogins | Select-Object -First 2)
+                $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
             } elseif ($prioritizedOwners.Count -gt 0) {
                 $who = @($prioritizedOwners | Select-Object -First 2)
+                $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
             } else {
                 $who = @("area owner")
+                $whoWhy = @("no specific owner found")
             }
         }
     }
     elseif ($hasNeedsAuthorAction) {
         $prNextAction = "@$($authorLogin): address feedback (needs-author-action)"
         $who = @($authorLogin)
+        $whoWhy = @("PR author")
     }
     elseif ($unresolvedThreads -gt 0) {
         $prNextAction = "@$($authorLogin): respond to $unresolvedThreads thread(s)"
         $who = @($authorLogin)
+        $whoWhy = @("PR author")
         # Note who's waiting on them (thread authors)
         $waitingOn = @($threadAuthors | Where-Object { $_ -ne $authorLogin }) | Select-Object -First 2
         if ($waitingOn.Count -gt 0) {
@@ -985,21 +1036,31 @@ foreach ($pr in $refreshCandidates) {
         # Prefer explicitly requested reviewers, then prioritized owners
         if ($requestedReviewerLogins.Count -gt 0) {
             $who = @($requestedReviewerLogins | Select-Object -First 2)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
         } elseif ($prioritizedOwners.Count -gt 0) {
             $who = @($prioritizedOwners | Select-Object -First 2)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
         } else {
             $who = @("area owner")
+            $whoWhy = @("no specific owner found")
         }
     }
     elseif ($daysSinceUpdate -gt 14) {
         $prNextAction = "@$($authorLogin): merge main (stale $([int]$daysSinceUpdate)d)"
         $who = @($authorLogin)
+        $whoWhy = @("PR author")
     }
     elseif ($hasMaintainerApproval -and -not $hasCurrentMaintainerApproval) {
         $prNextAction = "Maintainer: re-review needed (approval on older commit)"
         $staleOwners = @($approverLogins | Where-Object { $allMaintainerPool -contains $_ }) | Select-Object -First 2
-        if ($staleOwners.Count -gt 0) { $who = $staleOwners }
-        elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
+        if ($staleOwners.Count -gt 0) {
+            $who = $staleOwners
+            $whoWhy = @($who | ForEach-Object { "approved this PR" })
+        }
+        elseif ($prioritizedOwners.Count -gt 0) {
+            $who = @($prioritizedOwners | Select-Object -First 2)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
+        }
     }
     elseif ($ciScore -eq 1 -and $conflictScore -eq 1 -and $maintScore -ge 0.75 -and $feedbackScore -eq 1) {
         $prNextAction = "Ready to merge"
@@ -1010,12 +1071,17 @@ foreach ($pr in $refreshCandidates) {
                 # Prefer a maintainer from $prioritizedOwners over a non-maintainer approver
                 if ($prioritizedOwners.Count -gt 0) {
                     $who = @($prioritizedOwners | Select-Object -First 1)
+                    $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
                 } else {
                     $who = @($approverLogins | Select-Object -First 1)
+                    $whoWhy = @($who | ForEach-Object { "approved this PR" })
                 }
+            } else {
+                $whoWhy = @($who | ForEach-Object { "approved this PR" })
             }
         } elseif ($prioritizedOwners.Count -gt 0) {
             $who = @($prioritizedOwners | Select-Object -First 1)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
         }
     }
     elseif (-not $hasMaintainerApproval -and -not $hasTriagerApproval) {
@@ -1023,19 +1089,30 @@ foreach ($pr in $refreshCandidates) {
         # Prefer explicitly requested reviewers, then prioritized owners not yet reviewing
         if ($requestedReviewerLogins.Count -gt 0) {
             $who = @($requestedReviewerLogins | Select-Object -First 2)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
         } else {
             $nonReviewingOwners = @($prioritizedOwners | Where-Object { $reviewerLogins -notcontains $_ }) | Select-Object -First 2
-            if ($nonReviewingOwners.Count -gt 0) { $who = $nonReviewingOwners }
-            elseif ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
+            if ($nonReviewingOwners.Count -gt 0) {
+                $who = $nonReviewingOwners
+                $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
+            }
+            elseif ($prioritizedOwners.Count -gt 0) {
+                $who = @($prioritizedOwners | Select-Object -First 2)
+                $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
+            }
         }
     }
     elseif ($baConclusion -eq "IN_PROGRESS" -or $baConclusion -eq "ABSENT") {
         $prNextAction = "Wait for CI"
         $who = @($authorLogin)
+        $whoWhy = @("PR author")
     }
     else {
         $prNextAction = "Maintainer: review/merge"
-        if ($prioritizedOwners.Count -gt 0) { $who = @($prioritizedOwners | Select-Object -First 2) }
+        if ($prioritizedOwners.Count -gt 0) {
+            $who = @($prioritizedOwners | Select-Object -First 2)
+            $whoWhy = @($who | ForEach-Object { Get-PersonReason $_ })
+        }
     }
 
     # If primary action is resolve conflicts, also note the next most important secondary action
@@ -1053,6 +1130,7 @@ foreach ($pr in $refreshCandidates) {
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): review needed"
                 $who += $reviewWho
+                $whoWhy += @($reviewWho | ForEach-Object { Get-PersonReason $_ })
             } else {
                 $prNextAction += "; review needed"
             }
@@ -1066,6 +1144,7 @@ foreach ($pr in $refreshCandidates) {
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): re-review needed"
                 $who += $reviewWho
+                $whoWhy += @($reviewWho | ForEach-Object { Get-PersonReason $_ })
             } else {
                 $prNextAction += "; re-review needed"
             }
@@ -1079,6 +1158,7 @@ foreach ($pr in $refreshCandidates) {
             if ($reviewWho.Count -gt 0) {
                 $prNextAction += "; @$($reviewWho -join ', @'): review needed"
                 $who += $reviewWho
+                $whoWhy += @($reviewWho | ForEach-Object { Get-PersonReason $_ })
             } else {
                 $prNextAction += "; review needed"
             }
@@ -1088,6 +1168,7 @@ foreach ($pr in $refreshCandidates) {
     # For bot-authored PRs, substitute the human trigger person
     if ($botTrigger -and $who.Count -gt 0 -and $who[0] -eq $pr.author.login) {
         $who = @($botTrigger)
+        $whoWhy = @("triggered this PR")
     }
 
     # Append Copilot re-request suggestion if its review errored
@@ -1096,6 +1177,14 @@ foreach ($pr in $refreshCandidates) {
     }
 
     $whoStr = if ($who.Count -gt 0) { "@" + ($who -join ", @") } else { "" }
+
+    # Build per-person reason summary for tooltip
+    $whoWhyParts = @()
+    for ($i = 0; $i -lt $who.Count; $i++) {
+        $reason = if ($i -lt $whoWhy.Count -and $whoWhy[$i]) { $whoWhy[$i] } else { "" }
+        if ($reason) { $whoWhyParts += "@$($who[$i]): $reason" }
+    }
+    $whoWhyStr = $whoWhyParts -join "`n"
 
     # Fold who names into next_action so the Who column is redundant
     if ($whoStr -and $prNextAction -match '^Maintainer:\s*(.+)') {
@@ -1171,6 +1260,7 @@ foreach ($pr in $refreshCandidates) {
         lines_changed = $totalLines
         next_action = $prNextAction
         who = $whoStr
+        who_why = $whoWhyStr
         involved = $involvedList
         blockers = $blockersStr
         why = $whyStr
