@@ -145,6 +145,13 @@ $mergedCells = foreach ($repo in $repos) {
 }
 $mergedRow = "<tr class=`"metric-row`"><td class=`"report-name`">Merged (7d)</td>$($mergedCells -join '')</tr>"
 
+# Unified view redirect URLs for non-actionable report types
+$unifiedReportUrls = @{
+    "community"   = "community=true"
+    "quick-wins"  = "quickwins=true"
+    "stale-close" = "stale=true"
+}
+
 # Build data rows (report links)
 $dataRows = foreach ($rt in $reportTypes) {
     $cells = foreach ($repo in $repos) {
@@ -153,7 +160,12 @@ $dataRows = foreach ($rt in $reportTypes) {
             $reportInfo = $repo.reports.($rt.Id)
         }
         if ($reportInfo -and $reportInfo.count -ge 0) {
-            "<td><a href=`"$($repo.slug)/$($reportInfo.file)`">$($reportInfo.count) PRs</a></td>"
+            $href = if ($unifiedReportUrls.ContainsKey($rt.Id)) {
+                "all/actionable.html?repo=$($repo.slug)&$($unifiedReportUrls[$rt.Id])"
+            } else {
+                "$($repo.slug)/$($reportInfo.file)"
+            }
+            "<td><a href=`"$href`">$($reportInfo.count) PRs</a></td>"
         } else {
             "<td class=`"na`">&mdash;</td>"
         }
