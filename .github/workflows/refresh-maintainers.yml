@@ -31,13 +31,19 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          if git diff --quiet config/maintainers.json; then
+          status_output="$(git status --porcelain -- config/maintainers.json config/maintainer-activity.json)"
+          if [ -z "$status_output" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No maintainer changes detected."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Maintainer changes detected:"
-            git diff --stat config/maintainers.json
+            printf '%s\n' "$status_output"
+            for f in config/maintainers.json config/maintainer-activity.json; do
+              if [ -f "$f" ] && git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+                git diff --stat "$f"
+              fi
+            done
           fi
 
       - name: Commit and push
@@ -48,7 +54,11 @@ jobs:
           pushed=false
           nothing_to_push=false
           for attempt in 1 2 3; do
+            # Stage maintainer outputs, including deletions for tracked files.
             git add config/maintainers.json
+            if [ -f config/maintainer-activity.json ] || git ls-files --error-unmatch config/maintainer-activity.json >/dev/null 2>&1; then
+              git add -A -- config/maintainer-activity.json
+            fi
             if git diff --cached --quiet; then
               echo "No changes to commit"
               nothing_to_push=true

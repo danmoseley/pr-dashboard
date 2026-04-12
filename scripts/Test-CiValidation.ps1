@@ -93,6 +93,54 @@ try {
 }
 Write-Check -Name "JSON: maintainers.json" -Ok $maintainersOk -Detail $maintainersDetail
 
+# maintainer-activity.json (optional — only validated if it exists)
+$activityFile = Join-Path $root "config/maintainer-activity.json"
+if (Test-Path $activityFile) {
+    $activityOk = $false
+    $activityDetail = ""
+    try {
+        $a = Get-Content $activityFile -Raw | ConvertFrom-Json
+        $repoKeys = @($a.PSObject.Properties.Name)
+        if ($repoKeys.Count -eq 0) {
+            $activityDetail = "No repo entries found"
+        } else {
+            $badRepoKeys = @($repoKeys | Where-Object { $_ -notmatch '^[\w.-]+/[\w.-]+$' })
+            if ($badRepoKeys.Count -gt 0) {
+                $activityDetail = "Invalid repo keys: $($badRepoKeys -join ', ')"
+            } else {
+                $badEntries = [System.Collections.Generic.List[string]]::new()
+                foreach ($repo in $repoKeys) {
+                    $maintainers = $a.$repo
+                    foreach ($mp in $maintainers.PSObject.Properties) {
+                        $entry = $mp.Value
+                        $hasNumericMergeCount = ($null -ne $entry.merge_count) -and (
+                            $entry.merge_count -is [int] -or
+                            $entry.merge_count -is [long] -or
+                            $entry.merge_count -is [double] -or
+                            $entry.merge_count -is [decimal]
+                        )
+                        $hasTopPathsArray = ($null -ne $entry.top_paths) -and ($entry.top_paths -is [System.Array])
+                        $hasTopAreaLabelsArray = ($null -ne $entry.top_area_labels) -and ($entry.top_area_labels -is [System.Array])
+                        if (-not $hasNumericMergeCount -or
+                            -not $hasTopPathsArray -or
+                            -not $hasTopAreaLabelsArray) {
+                            $badEntries.Add("$repo/$($mp.Name)")
+                        }
+                    }
+                }
+                if ($badEntries.Count -gt 0) {
+                    $activityDetail = "Entries missing required fields or with invalid types: $($badEntries -join ', ')"
+                } else {
+                    $activityOk = $true
+                }
+            }
+        }
+    } catch {
+        $activityDetail = "Parse error: $_"
+    }
+    Write-Check -Name "JSON: maintainer-activity.json" -Ok $activityOk -Detail $activityDetail
+}
+
 # repos.json
 $reposJsonFile = Join-Path $root "docs/repos.json"
 $reposJsonOk = $false

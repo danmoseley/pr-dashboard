@@ -156,10 +156,15 @@ jobs:
                 continue
               fi
             fi
+            # Pass activity file for smarter fallback reviewer selection
+            activity_args=""
+            if [ -f "config/maintainer-activity.json" ]; then
+              activity_args="-ActivityFile config/maintainer-activity.json"
+            fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
             scan_ok=true
             scan_stderr="docs/${slug}/scan.stderr.tmp"
-            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args -OutputFile "docs/${slug}/scan.json.tmp" 2>"$scan_stderr"
+            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args $activity_args -OutputFile "docs/${slug}/scan.json.tmp" 2>"$scan_stderr"
             scan_exit=$?
             if [ $scan_exit -ne 0 ]; then
               echo "::warning::Scan failed for $repo (exit $scan_exit)"

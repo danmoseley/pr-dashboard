@@ -7,6 +7,14 @@
     in the last N days. Users who merged at least -MinMerges PRs (excluding bots) are considered
     maintainers. The results are unioned with the existing config/maintainers.json and written back.
 
+    Also collects per-maintainer activity signals (file paths and area labels from merged PRs) and
+    writes them to config/maintainer-activity.json. These signals are used by Get-PrTriageData.ps1
+    to rank maintainers when no CODEOWNERS or area-label owner matches a PR.
+
+    Activity signals use best-effort limits (files(first:100), labels(first:20)) because full
+    pagination of files per PR would significantly increase API usage. Large PRs touching more than
+    100 files will be underrepresented in top_paths, but this is acceptable for signal collection.
+
     Requires: PowerShell 7+ (pwsh) and gh CLI authenticated with appropriate permissions.
 
     Note: Uses GitHub's search API which caps at ~1000 results. For very active repos this may
@@ -22,25 +30,34 @@
 .PARAMETER DryRun
     If set, prints what would change without writing to disk.
 
+.PARAMETER SkipActivity
+    If set, skips collecting per-maintainer activity signals and does not write
+    config/maintainer-activity.json. Useful for lightweight maintainer-only refreshes.
+
 .EXAMPLE
-    # Standard usage — updates maintainers.json in place
+    # Standard usage — updates maintainers.json and maintainer-activity.json in place
     ./scripts/Update-Maintainers.ps1
 
     # Look back 60 days, require 5+ merges, preview only
     ./scripts/Update-Maintainers.ps1 -Days 60 -MinMerges 5 -DryRun
+
+    # Refresh maintainers list only, skip activity data collection
+    ./scripts/Update-Maintainers.ps1 -SkipActivity
 #>
 #Requires -Version 7.0
 [CmdletBinding()]
 param(
     [int]$Days = 90,
     [int]$MinMerges = 3,
-    [switch]$DryRun
+    [switch]$DryRun,
+    [switch]$SkipActivity
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
+Import-Module "$PSScriptRoot/MaintainerActivity.psm1" -Force
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
@@ -53,6 +70,7 @@ if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
 
 $reposJsonPath = Join-Path $repoRoot 'docs' 'repos.json'
 $maintainersJsonPath = Join-Path $repoRoot 'config' 'maintainers.json'
+$activityJsonPath = Join-Path $repoRoot 'config' 'maintainer-activity.json'
 
 # Bot accounts to exclude
 $botLogins = @(
@@ -81,24 +99,36 @@ if (Test-Path $maintainersJsonPath) {
 
 $cutoffDate = (Get-Date).AddDays(-$Days).ToString('yyyy-MM-dd')
 Write-Host "Looking for PRs merged since $cutoffDate (last $Days days), min $MinMerges merges." -ForegroundColor Cyan
+if (-not $SkipActivity) {
+    Write-Host "  (including per-maintainer file/label activity signals)" -ForegroundColor DarkGray
+}
 Write-Host ""
 
 $updated = @{}
+# Per-repo, per-maintainer activity: filePaths buckets and area labels
+$activityAccum = @{}   # $activityAccum[$repo][$login] = @{ paths = [List]; labels = [List]; count = int }
 
 foreach ($entry in $repos) {
     $repo = $entry.repo
     Write-Host "  $repo ... " -NoNewline
 
     $mergerCounts = @{}
+    # Per-login accumulation for activity signals (only when not skipped)
+    $repoActivity = @{}
     $cursor = $null
     $totalFetched = 0
 
     do {
         $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
-        $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
+        if ($SkipActivity) {
+            $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
+        } else {
+            # files(first:100) and labels(first:20) are best-effort limits: PRs with more files or
+            # labels get partial data, which is acceptable for activity signal collection.
+            $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
+        }
 
         $result = $null
-        $stderr = $null
         $result = gh api graphql -f query="$q" 2>$null
         if ($LASTEXITCODE -ne 0) {
             Write-Host "ERROR querying $repo (skipping)" -ForegroundColor Red
@@ -114,6 +144,33 @@ foreach ($entry in $repos) {
                 $login = $node.mergedBy.login
                 if ($login -notin $botLogins) {
                     $mergerCounts[$login] = ($mergerCounts[$login] ?? 0) + 1
+
+                    if (-not $SkipActivity) {
+                        if (-not $repoActivity.ContainsKey($login)) {
+                            $repoActivity[$login] = @{
+                                paths  = [System.Collections.Generic.List[string]]@()
+                                labels = [System.Collections.Generic.List[string]]@()
+                                count  = 0
+                            }
+                        }
+                        # Collect file path prefixes (first 3 segments, e.g. src/libraries/System.IO).
+                        if ($node.files -and $node.files.nodes) {
+                            foreach ($f in $node.files.nodes) {
+                                if ($f.path) {
+                                    $prefix = Get-PathPrefix $f.path
+                                    $repoActivity[$login].paths.Add($prefix)
+                                }
+                            }
+                        }
+                        # Collect area-* labels
+                        if ($node.labels -and $node.labels.nodes) {
+                            foreach ($lbl in $node.labels.nodes) {
+                                if ($lbl.name -match '^area-') {
+                                    $repoActivity[$login].labels.Add($lbl.name)
+                                }
+                            }
+                        }
+                    }
                 }
             }
             $totalFetched++
@@ -127,6 +184,19 @@ foreach ($entry in $repos) {
     if ($null -eq $mergerCounts) {
         $updated[$repo] = @($existing[$repo] ?? @())
         continue
+    }
+
+    if (-not $SkipActivity) {
+        # Add merge_count from mergerCounts into each activity entry before storing.
+        # Invariant (holds because this block only runs when -SkipActivity is false): all logins
+        # in $mergerCounts also have a $repoActivity entry — both are populated in the inner loop
+        # above under the same `-not $SkipActivity` guard, so they stay in sync.
+        foreach ($login in @($mergerCounts.Keys)) {
+            if ($repoActivity.ContainsKey($login)) {
+                $repoActivity[$login].count = $mergerCounts[$login]
+            }
+        }
+        $activityAccum[$repo] = $repoActivity
     }
 
     # Apply threshold
@@ -188,5 +258,98 @@ if (-not $DryRun) {
         if ($added.Count -gt 0) {
             Write-Host "  $repo would add: $($added -join ', ')" -ForegroundColor Yellow
         }
+    }
+}
+
+# ─── Maintainer Activity File ─────────────────────────────────────────────────
+if (-not $SkipActivity) {
+    Write-Host ""
+    Write-Host "Computing per-maintainer activity signals..." -ForegroundColor Cyan
+
+    # Build the activity output: for each repo, for each maintainer in the final list,
+    # record merge_count, top 10 path prefixes, and top 5 area-* labels.
+    # If a repo fetch failed ($repoAcc is null), preserve the prior repo entry when
+    # available rather than overwriting good data with empty activity signals.
+    $existingActivity = $null
+    if (Test-Path -LiteralPath $activityJsonPath) {
+        try {
+            $existingActivity = Get-Content -LiteralPath $activityJsonPath -Raw | ConvertFrom-Json
+        } catch {
+            Write-Warning "Failed to read existing activity file '$activityJsonPath'. Continuing without fallback activity data. $_"
+        }
+    }
+
+    $activityOutput = [ordered]@{}
+    foreach ($entry in $repos) {
+        $repo = $entry.repo
+        $repoMaintainers = @($orderedObj[$repo] ?? @())
+        $repoAcc = $activityAccum[$repo]   # may be $null if repo fetch failed
+
+        if ($null -eq $repoAcc) {
+            # Repo fetch failed — preserve existing data if available
+            $existingRepoData = $null
+            if ($existingActivity) {
+                if ($existingActivity -is [hashtable] -and $existingActivity.ContainsKey($repo)) {
+                    $existingRepoData = $existingActivity[$repo]
+                } elseif ($existingActivity.PSObject.Properties[$repo]) {
+                    $existingRepoData = $existingActivity.PSObject.Properties[$repo].Value
+                }
+            }
+            if ($existingRepoData) {
+                $activityOutput[$repo] = $existingRepoData
+                Write-Warning "Activity fetch failed for $repo; preserving existing activity data."
+            } else {
+                Write-Warning "Activity fetch failed for $repo and no existing activity data found; omitting from output."
+            }
+            continue
+        }
+
+        $repoObj = [ordered]@{}
+        foreach ($m in ($repoMaintainers | Sort-Object)) {
+            $mergeCount = 0
+            $topPaths   = @()
+            $topLabels  = @()
+
+            if ($repoAcc -and $repoAcc.ContainsKey($m)) {
+                $acc = $repoAcc[$m]
+                $mergeCount = if ($acc.count) { [int]$acc.count } else { 0 }
+
+                # Top 10 path prefixes by frequency, with Name as a stable tie-breaker
+                $topPaths = @($acc.paths |
+                    Group-Object |
+                    Sort-Object -Property @{ Expression = 'Count'; Descending = $true }, @{ Expression = 'Name'; Descending = $false } |
+                    Select-Object -First 10 |
+                    ForEach-Object { $_.Name })
+
+                # Top 5 area-* labels by frequency, with Name as a stable tie-breaker
+                $topLabels = @($acc.labels |
+                    Group-Object |
+                    Sort-Object -Property @{ Expression = 'Count'; Descending = $true }, @{ Expression = 'Name'; Descending = $false } |
+                    Select-Object -First 5 |
+                    ForEach-Object { $_.Name })
+            }
+
+            $repoObj[$m] = [PSCustomObject]@{
+                merge_count      = $mergeCount
+                top_paths        = $topPaths
+                top_area_labels  = $topLabels
+            }
+        }
+        $activityOutput[$repo] = $repoObj
+    }
+
+    $activityJson = $activityOutput | ConvertTo-Json -Depth 4
+    # Validate well-formed JSON before writing
+    try {
+        $activityJson | ConvertFrom-Json | Out-Null
+    } catch {
+        throw "Activity JSON validation failed: $_"
+    }
+
+    if (-not $DryRun) {
+        Set-Content -Path $activityJsonPath -Value $activityJson -Encoding utf8NoBOM
+        Write-Host "Updated $activityJsonPath" -ForegroundColor Cyan
+    } else {
+        Write-Host "[DryRun] Would write $activityJsonPath" -ForegroundColor Yellow
     }
 }

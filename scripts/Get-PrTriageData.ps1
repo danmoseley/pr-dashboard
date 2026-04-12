@@ -25,6 +25,12 @@
     This avoids PowerShell stream-leaking issues when stdout is redirected
     by a shell wrapper (Write-Warning and Write-Host leak to stdout when
     pwsh runs as a subprocess). Omit for interactive/local use.
+.PARAMETER ActivityFile
+    Path to maintainer-activity.json, which contains per-maintainer activity signals
+    used by the activity-based fallback reviewer selection. When missing or unreadable,
+    activity-based ranking is unavailable, so fallback reviewer selection uses the
+    existing default ordering (currently alphabetical, or maintainer-list order in
+    the stub path, rather than merge-count-based ordering).
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 .EXAMPLE
@@ -56,6 +62,7 @@ param(
     [string[]]$Maintainers = @(),
     [string]$PreviousScanFile,
     [string]$OutputFile,
+    [string]$ActivityFile,
     [switch]$OutputCsv
 )
 
@@ -101,6 +108,22 @@ try {
 }
 $CacheVersion = Get-IncrementalCacheVersion
 
+# Import activity-based fallback reviewer selection helpers
+$activityModule = Join-Path $PSScriptRoot 'MaintainerActivity.psm1'
+try {
+    if (Test-Path $activityModule) {
+        Import-Module $activityModule -Force
+    } else { throw "Module file not found" }
+} catch {
+    Write-Verbose "MaintainerActivity module unavailable ($_) — using inline fallback"
+    # Full signature preserved for drop-in replacement compatibility with the real module function.
+    # Only $Maintainers and $ExcludeLogin are used in this stub.
+    function Select-FallbackReviewers {
+        param([string[]]$Maintainers, [string]$ExcludeLogin, [string]$Repo, $ActivityData, [string[]]$ChangedFilePaths, [string[]]$AreaLabels)
+        return @($Maintainers | Where-Object { $_ -ne $ExcludeLogin } | Select-Object -First 2)
+    }
+}
+
 # Compute a lightweight probe hash from PR numbers + updatedAt timestamps.
 # Used by Test-ScanNeeded.ps1 to skip unchanged repos without a full scan.
 # Must stay in sync with the hash logic in Test-ScanNeeded.ps1.
@@ -140,6 +163,18 @@ function Invoke-GhRetry {
 if ($Maintainers.Count -eq 1 -and $Maintainers[0] -match ',') {
     $Maintainers = $Maintainers[0] -split ','
 }
+
+# Load maintainer activity data for smarter fallback reviewer selection
+$maintainerActivityData = $null
+if ($ActivityFile -and (Test-Path $ActivityFile)) {
+    try {
+        $maintainerActivityData = Get-Content $ActivityFile -Raw | ConvertFrom-Json
+        Write-Verbose "Loaded maintainer activity data from $ActivityFile"
+    } catch {
+        Write-Host "Warning: Could not load maintainer activity file '$ActivityFile': $_" -ForegroundColor Yellow
+    }
+}
+
 $scriptStart = Get-Date
 
 try {   # Top-level catch ensures stdout is always valid JSON
@@ -520,16 +555,6 @@ foreach ($pr in $refreshCandidates) {
             catch { Write-Verbose "Warning: could not expand CODEOWNERS team handle @$o - $_"; @() }
         } else { @($o) }
     }
-    # Merge: codeowners first (higher authority), then area-label owners
-    $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
-    if ($prOwners.Count -eq 0) { $prOwners = $owners }
-    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) { $prOwners = $Maintainers }
-    # Any maintainer's approval satisfies the merge gate; $prOwners is used to
-    # suggest reviewers, not to gate merging. Compute once for reuse below.
-    # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
-    # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
-    $allMaintainerPool = @($Maintainers | Select-Object -Unique)
-
     # For bot-authored PRs, find the human who triggered it
     $botTrigger = $null
     if ($pr.author.login -match "^(app/)?copilot-swe-agent$") {
@@ -542,9 +567,42 @@ foreach ($pr in $refreshCandidates) {
         }
     }
 
-    # Resolve effective author early (needed for $prioritizedOwners exclusion and scoring)
-    $authorLogin = $pr.author.login
+    # Resolve effective author (needed for $prioritizedOwners exclusion, fallback scoring, and output).
+    # For bot-authored PRs, the human who triggered it is the effective author.
+    $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
     if ($botTrigger) { $authorLogin = $botTrigger }
+
+    # Merge: codeowners first (higher authority), then area-label owners.
+    # Use HashSet to dedupe while preserving first-occurrence order (CODEOWNERS take precedence).
+    $seenPrOwners = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $prOwners = @(
+        foreach ($owner in (@($codeownersForPr) + @($labelOwners))) {
+            if ($owner -and $seenPrOwners.Add([string]$owner)) {
+                $owner
+            }
+        }
+    )
+    if ($prOwners.Count -eq 0) { $prOwners = $owners }
+    if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
+        # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
+        # Scoring: path match (+3) > label match (+2) > merge_count bonus (capped +1).
+        # Tie-breaks: score desc → merge_count desc → login alphabetical.
+        # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
+        $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
+        $prOwners = @(Select-FallbackReviewers `
+            -Maintainers $Maintainers `
+            -ExcludeLogin $authorLogin `
+            -Repo $Repo `
+            -ActivityData $maintainerActivityData `
+            -ChangedFilePaths $changedFilePaths `
+            -AreaLabels $prAreaLabels)
+        if ($prOwners.Count -eq 0) { $prOwners = @($Maintainers | Where-Object { $_ -ne $authorLogin } | Select-Object -First 2) }
+    }
+    # Any maintainer's approval satisfies the merge gate; $prOwners is used to
+    # suggest reviewers, not to gate merging. Compute once for reuse below.
+    # Only $Maintainers (from maintainers.json) counts for gating; $prOwners
+    # (CODEOWNERS / area-label owners) is for reviewer suggestions only.
+    $allMaintainerPool = @($Maintainers | Select-Object -Unique)
 
     # Extract Build Analysis
     $checks = @()
