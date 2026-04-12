@@ -9,14 +9,14 @@
   /* Page-specific styles for cross-repo view */
   .user-input { margin-bottom: 1em; display: flex; align-items: center; gap: 8px; }
   .user-input input[type="text"] { background: var(--header-bg); color: var(--fg); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 12px; font-size: 0.95em; width: 220px; }
+    border-radius: 6px; padding: 3px 10px; font-size: 0.85em; width: 220px; }
   .user-input input[type="text"]::placeholder { color: #484f58; }
   .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
   .user-input button { background: #238636; color: #fff; border: none; border-radius: 6px;
-    padding: 6px 16px; font-size: 0.9em; cursor: pointer; font-weight: 500; }
+    padding: 3px 12px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
   .user-input button:hover { background: #2ea043; }
   .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
-    color: #8b949e !important; padding: 4px 8px !important; font-size: 0.9em !important;
+    color: #8b949e !important; padding: 3px 8px !important; font-size: 0.85em !important;
     font-weight: normal !important; line-height: 1; }
   .clear-user-btn:hover { color: var(--fg) !important; background: none !important; }
   .involves-label { font-size: 0.85em; color: #8b949e; cursor: pointer; user-select: none;
@@ -31,7 +31,7 @@
   .easy-badge { font-size: 0.95em; white-space: nowrap; }
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
   table#pr-table { table-layout: fixed; }
-  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5em; }
+  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.8em; }
   .recent-tiles:empty { display: none; margin: 0; }
   .recent-tile {
     background: var(--header-bg); color: #8b949e; border: 1px solid var(--border);
@@ -59,8 +59,8 @@
 </div>
 <div class="recent-tiles" id="recent-tiles"></div>
 <div class="user-input" id="filter-checkboxes" style="gap:12px;margin-top:-0.5em;margin-bottom:0.7em;flex-wrap:wrap">
-  <label class="involves-label" id="involves-label" style="display:none">
-    <input type="checkbox" id="involves-toggle">
+  <label class="involves-label" id="involves-label">
+    <input type="checkbox" id="involves-toggle" checked disabled>
     Include all involved PRs
   </label>
   <label class="involves-label" id="next-action-label" style="display:none">
@@ -300,7 +300,7 @@
   if (initialUsers.length > 0) {
     activeUsers = initialUsers.slice();
     document.getElementById('user-field').value = initialUsers[0];
-    document.getElementById('involves-label').style.display = '';
+    document.getElementById('involves-toggle').disabled = false;
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
     initialUsers.forEach(function(u) { addRecentUser(u); });
@@ -308,10 +308,12 @@
     try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
     document.getElementById('clear-user-btn').style.display = '';
   } else {
+    // No user filter: involves is forced checked+disabled (already set in HTML)
+    involvesMode = true;
     document.getElementById('next-action-maintainer-label').style.display = '';
     document.getElementById('easy-action-maintainer-label').style.display = '';
   }
-  document.getElementById('involves-toggle').checked = involvesMode;
+  document.getElementById('involves-toggle').checked = initialUsers.length > 0 ? involvesMode : true;
   document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
   document.getElementById('easy-action-toggle').checked = easyActionMode;
   document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
@@ -754,7 +756,7 @@
     activeRepos = [];
     moreRowsExpanded = false;
     document.getElementById('user-field').value = '';
-    involvesMode = false;
+    involvesMode = true;
     nextActionOnlyMode = false;
     easyActionMode = false;
     nextActionMaintainerMode = false;
@@ -762,8 +764,8 @@
     communityMode = false;
     quickWinsMode = false;
     staleMode = false;
-    document.getElementById('involves-toggle').checked = false;
-    document.getElementById('involves-toggle').disabled = false;
+    document.getElementById('involves-toggle').checked = true;
+    document.getElementById('involves-toggle').disabled = true;
     document.getElementById('next-action-toggle').checked = false;
     document.getElementById('easy-action-toggle').checked = false;
     document.getElementById('next-action-maintainer-toggle').checked = false;
@@ -773,7 +775,6 @@
     document.getElementById('quickwins-toggle').checked = false;
     document.getElementById('stale-toggle').checked = false;
     document.getElementById('clear-user-btn').style.display = 'none';
-    document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
     document.getElementById('next-action-maintainer-label').style.display = '';
@@ -794,7 +795,7 @@
   };
 
   function showUserToggles() {
-    document.getElementById('involves-label').style.display = '';
+    document.getElementById('involves-toggle').disabled = false;
     document.getElementById('next-action-label').style.display = '';
     document.getElementById('easy-action-label').style.display = '';
     document.getElementById('next-action-maintainer-label').style.display = 'none';
@@ -805,7 +806,9 @@
   function showMaintainerToggles() {
     document.getElementById('next-action-maintainer-label').style.display = '';
     document.getElementById('easy-action-maintainer-label').style.display = '';
-    document.getElementById('involves-label').style.display = 'none';
+    document.getElementById('involves-toggle').checked = true;
+    document.getElementById('involves-toggle').disabled = true;
+    involvesMode = true;
     document.getElementById('next-action-label').style.display = 'none';
     document.getElementById('easy-action-label').style.display = 'none';
     document.getElementById('clear-user-btn').style.display = 'none';
@@ -951,41 +954,13 @@
       filtered.forEach(function(pr) { repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1; });
       var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
         .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
-      var modeDesc = '';
-      if (easyActionMaintainerMode) modeDesc = 'Easy next action on maintainer';
-      else if (hasMaintainerFilter) modeDesc = 'Next action on maintainer';
-      var reportParts = [];
-      if (communityMode) reportParts.push('Community awaiting review');
-      if (quickWinsMode) reportParts.push('Quick wins');
-      if (staleMode) reportParts.push('Consider closing');
-      if (reportParts.length > 0) {
-        modeDesc = modeDesc ? modeDesc + ' + ' + reportParts.join(' + ') : reportParts.join(' + ');
-      }
       while (bar.firstChild) bar.removeChild(bar.firstChild);
 
-      var strong = document.createElement('strong');
-      strong.textContent = modeDesc;
-      bar.appendChild(strong);
-
-      bar.appendChild(document.createTextNode(' '));
-
-      var clearLink = document.createElement('a');
-      clearLink.href = '#';
-      clearLink.textContent = '\u2715 Clear';
-      clearLink.onclick = function() {
-        if (hasMaintainerFilter) window.clearMaintainerFilters();
-        if (hasReportFilter) window.clearReportFilters();
-        return false;
-      };
-      bar.appendChild(clearLink);
-
-      var breakdownSpan = document.createElement('span');
-      breakdownSpan.className = 'repo-breakdown';
-      breakdownSpan.textContent = ' \u2014 ' + filtered.length + ' PRs' +
-        (breakdown ? ': ' + breakdown : '');
-      bar.appendChild(breakdownSpan);
+      var countSpan = document.createElement('span');
+      countSpan.className = 'repo-breakdown';
+      countSpan.textContent = filtered.length + ' PRs' + (breakdown ? ': ' + breakdown : '');
+      bar.appendChild(countSpan);
       bar.style.display = 'block';
-      document.getElementById('filter-banner').style.display = 'none';
     } else {
       if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
     }
@@ -1123,7 +1098,7 @@
 
     defaultSort(filtered);
 
-    // Summary bar
+    // Summary bar — just PR count and repo breakdown (user/mode visible in controls above)
     var repoCounts = {};
     filtered.forEach(function(pr) {
       repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1;
@@ -1131,18 +1106,12 @@
     var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
       .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
     var bar = document.getElementById('summary-bar');
-    var userDisplay = usernames.map(function(u) { return '@' + escHtml(u); }).join(', ');
-    var modeNote = nextActionOnlyMode ? ' (next action on me only)' : involvesMode ? ' (includes all involved)' : '';
-    if (easyActionMode) modeNote += ' (easy actions only)';
-    if (communityMode) modeNote += ' (community awaiting review)';
-    if (quickWinsMode) modeNote += ' (quick wins)';
-    if (staleMode) modeNote += ' (consider closing)';
-    bar.innerHTML = 'Showing PRs for <strong>' + userDisplay + '</strong>' + modeNote +
-      ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
-      '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
-      (breakdown ? ': ' + breakdown : '') + '</span>';
+    while (bar.firstChild) bar.removeChild(bar.firstChild);
+    var countSpan = document.createElement('span');
+    countSpan.className = 'repo-breakdown';
+    countSpan.textContent = filtered.length + ' PRs' + (breakdown ? ': ' + breakdown : '');
+    bar.appendChild(countSpan);
     bar.style.display = 'block';
-    document.getElementById('filter-banner').style.display = 'none';
 
     renderTable(filtered);
   }
