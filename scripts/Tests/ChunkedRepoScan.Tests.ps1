@@ -218,7 +218,7 @@ Describe 'Invoke-ChunkedRepoScan' {
             }
 
             $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
-                -BotLogins @('bot') -ChunkDays 30
+                -BotLogins @('bot') -ChunkDays 30 -MinChunkDays 30
 
             $result.Success | Should -BeTrue  # partial success — at least one chunk worked
             $result.TotalFetched | Should -Be 50
@@ -238,7 +238,7 @@ Describe 'Invoke-ChunkedRepoScan' {
             }
 
             $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
-                -BotLogins @('bot') -ChunkDays 30
+                -BotLogins @('bot') -ChunkDays 30 -MinChunkDays 30
 
             $result.Success | Should -BeFalse
             $result.TotalFetched | Should -Be 0
@@ -280,6 +280,119 @@ Describe 'Invoke-ChunkedRepoScan' {
                 -BotLogins @('bot') -ChunkDays 30 | Out-Null
 
             Should -Invoke Invoke-RepoMaintainerScan -Times 1 -Exactly
+        }
+    }
+
+    Context 'Adaptive sub-chunking' {
+        It 'Sub-chunks a failed 7-day chunk into 1-day ranges and merges results' {
+            # Use a 14-day window with 7-day chunks => 2 chunks
+            $cutoff = (Get-Date).AddDays(-14).ToString('yyyy-MM-dd')
+            $chunk1Start = ([datetime]::Parse($cutoff)).AddDays(1).ToString('yyyy-MM-dd')
+            $chunk1End   = ([datetime]::Parse($cutoff)).AddDays(7).ToString('yyyy-MM-dd')
+
+            # First 7-day chunk succeeds
+            Mock Invoke-RepoMaintainerScan -ParameterFilter { $CutoffDate -eq $chunk1Start } {
+                [PSCustomObject]@{
+                    Success = $true; TotalFetched = 40; Error = ''
+                    MergerCounts = @{ alice = 3 }; Activity = @{}
+                }
+            }
+            # All other calls: fail if range > 1 day, succeed if 1-day range
+            Mock Invoke-RepoMaintainerScan {
+                $start = [datetime]::Parse($CutoffDate)
+                $end   = [datetime]::Parse($EndDate)
+                $span  = ($end - $start).Days
+                if ($span -gt 0) {
+                    [PSCustomObject]@{
+                        Success = $false; TotalFetched = 0; Error = '502'
+                        MergerCounts = $null; Activity = $null
+                    }
+                } else {
+                    [PSCustomObject]@{
+                        Success = $true; TotalFetched = 2; Error = ''
+                        MergerCounts = @{ bob = 1 }; Activity = @{}
+                    }
+                }
+            }
+
+            $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
+                -BotLogins @('bot') -ChunkDays 7 -MinChunkDays 1
+
+            $result.Success | Should -BeTrue
+            $result.MergerCounts['alice'] | Should -Be 3
+            $result.MergerCounts['bob'] | Should -BeGreaterOrEqual 1
+            $result.FailedChunks | Should -HaveCount 0
+            $result.TotalFetched | Should -BeGreaterThan 40
+        }
+
+        It 'Reports 1-day failures as FailedChunks when MinChunkDays reached' {
+            $cutoff = (Get-Date).AddDays(-7).ToString('yyyy-MM-dd')
+
+            # Everything fails at every granularity
+            Mock Invoke-RepoMaintainerScan {
+                [PSCustomObject]@{
+                    Success = $false; TotalFetched = 0; Error = '502'
+                    MergerCounts = $null; Activity = $null
+                }
+            }
+
+            $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
+                -BotLogins @('bot') -ChunkDays 7 -MinChunkDays 1
+
+            $result.Success | Should -BeFalse
+            # Should have individual 1-day failures, not 7-day chunk failures
+            foreach ($fc in $result.FailedChunks) {
+                $parts = $fc -split '\.\.'
+                $start = [datetime]::Parse($parts[0])
+                $end   = [datetime]::Parse($parts[1])
+                ($end - $start).Days | Should -Be 0 -Because "failed chunks should be 1-day ranges at MinChunkDays"
+            }
+        }
+
+        It 'Does not sub-chunk when ChunkDays equals MinChunkDays' {
+            $cutoff = (Get-Date).AddDays(-14).ToString('yyyy-MM-dd')
+
+            Mock Invoke-RepoMaintainerScan {
+                [PSCustomObject]@{
+                    Success = $false; TotalFetched = 0; Error = '502'
+                    MergerCounts = $null; Activity = $null
+                }
+            }
+
+            $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
+                -BotLogins @('bot') -ChunkDays 7 -MinChunkDays 7
+
+            # With MinChunkDays=ChunkDays, no sub-chunking should occur.
+            # FailedChunks should be 7-day ranges, not 1-day ranges.
+            $result.Success | Should -BeFalse
+            foreach ($fc in $result.FailedChunks) {
+                $parts = $fc -split '\.\.'
+                $start = [datetime]::Parse($parts[0])
+                $end   = [datetime]::Parse($parts[1])
+                ($end - $start).Days | Should -BeLessOrEqual 6 -Because "chunks are up to 7 days"
+            }
+        }
+
+        It 'Respects EndDate parameter for bounded sub-chunking' {
+            $cutoff = '2026-03-01'
+            $endDate = '2026-03-14'
+
+            Mock Invoke-RepoMaintainerScan {
+                [PSCustomObject]@{
+                    Success = $true; TotalFetched = 5; Error = ''
+                    MergerCounts = @{ carol = 2 }; Activity = @{}
+                }
+            }
+
+            $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
+                -EndDate $endDate -BotLogins @('bot') -ChunkDays 7
+
+            $result.Success | Should -BeTrue
+            $result.TotalFetched | Should -Be 10   # 2 chunks of 5
+            # Verify no scan extends beyond EndDate
+            Should -Invoke Invoke-RepoMaintainerScan -ParameterFilter {
+                -not $EndDate -or [datetime]::Parse($EndDate) -le [datetime]::Parse('2026-03-14')
+            }
         }
     }
 }
