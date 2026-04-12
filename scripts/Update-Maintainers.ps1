@@ -233,15 +233,15 @@ function Invoke-ChunkedRepoScan {
         }
     }
 
-    $chunks = @()
+    $chunks = [System.Collections.Generic.List[hashtable]]::new()
     $chunkStart = $startDate
     while ($chunkStart -le $scanEnd) {
         $chunkEnd = $chunkStart.AddDays($ChunkDays - 1)
         if ($chunkEnd -gt $scanEnd) { $chunkEnd = $scanEnd }
-        $chunks += @{
+        $chunks.Add(@{
             Start = $chunkStart.ToString('yyyy-MM-dd')
             End   = $chunkEnd.ToString('yyyy-MM-dd')
-        }
+        })
         $chunkStart = $chunkEnd.AddDays(1)
     }
 
@@ -412,7 +412,7 @@ if ($failedRepos.Count -gt 0) {
 
     foreach ($entry in $failedRepos) {
         $repo = $entry.repo
-        Write-Host "  $repo (chunked retry) ... " -NoNewline
+        Write-Host "  $repo (chunked retry) ..."
 
         $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity -DisplayPrefix '  '
 

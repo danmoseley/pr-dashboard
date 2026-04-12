@@ -46,7 +46,7 @@ Describe 'Invoke-ChunkedRepoScan' {
             $result = Invoke-ChunkedRepoScan -Repo 'test/repo' -CutoffDate $cutoff `
                 -BotLogins @('bot') -ChunkDays 30
 
-            # Should have 3 or 4 chunks (days 1-30, 31-60, 61-90ish)
+            # Should have 3 chunks (days 1-30, 31-60, 61-90)
             Should -Invoke Invoke-RepoMaintainerScan -Times 3 -ParameterFilter { $EndDate }
         }
 
