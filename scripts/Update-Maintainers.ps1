@@ -82,6 +82,9 @@ function Invoke-RepoMaintainerScan {
 
     # Build the merged: filter — use a date range when EndDate is provided,
     # otherwise use the open-ended >CutoffDate syntax.
+    # Note: when EndDate is set, CutoffDate is treated as the inclusive start
+    # of a date range (merged:A..B). Callers (e.g. Invoke-ChunkedRepoScan)
+    # are responsible for adjusting dates to preserve the desired semantics.
     $mergedFilter = if ($EndDate) { "merged:$CutoffDate..$EndDate" } else { "merged:>$CutoffDate" }
 
     do {
@@ -251,7 +254,7 @@ function Invoke-ChunkedRepoScan {
     $mergedCounts = @{}
     $mergedActivity = @{}
     $totalFetched = 0
-    $failedChunks = @()
+    $failedChunks = [System.Collections.Generic.List[string]]::new()
 
     foreach ($chunk in $chunks) {
         Write-Host "${DisplayPrefix}  $Repo [$($chunk.Start)..$($chunk.End)] ... " -NoNewline
@@ -261,7 +264,7 @@ function Invoke-ChunkedRepoScan {
 
         if (-not $scanResult.Success) {
             Write-Host "FAILED ($($scanResult.Error))" -ForegroundColor Red
-            $failedChunks += "$($chunk.Start)..$($chunk.End)"
+            $failedChunks.Add("$($chunk.Start)..$($chunk.End)")
             continue
         }
 

@@ -47,7 +47,7 @@ Describe 'Invoke-ChunkedRepoScan' {
                 -BotLogins @('bot') -ChunkDays 30
 
             # Should have 3 chunks (days 1-30, 31-60, 61-90)
-            Should -Invoke Invoke-RepoMaintainerScan -Times 3 -ParameterFilter { $EndDate }
+            Should -Invoke Invoke-RepoMaintainerScan -Times 3 -Exactly -ParameterFilter { $EndDate }
         }
 
         It 'Creates a single chunk when window <= ChunkDays' {
