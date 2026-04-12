@@ -87,6 +87,10 @@ function Select-FallbackReviewers {
 
         $score = 0.0
         $mergeCount = 0
+        $hasPathMatch = $false
+        $hasLabelMatch = $false
+        $matchedLabel = $null
+        $matchedPath = $null
 
         # Look up this maintainer's activity entry
         $actData = $null
@@ -104,18 +108,24 @@ function Select-FallbackReviewers {
             $mergeCount = if ($actData.merge_count) { [int]$actData.merge_count } else { 0 }
 
             # +3 if any PR file prefix matches maintainer's top_paths
-            if (@($topPaths | Where-Object { $prFilePrefixes -contains $_ }).Count -gt 0) {
+            $pathHit = @($topPaths | Where-Object { $prFilePrefixes -contains $_ }) | Select-Object -First 1
+            if ($pathHit) {
                 $score += 3
+                $hasPathMatch = $true
+                $matchedPath = $pathHit
             }
             # +2 if any PR area-* label matches maintainer's top_area_labels
-            if (@($topLabels | Where-Object { $AreaLabels -contains $_ }).Count -gt 0) {
+            $labelHit = @($topLabels | Where-Object { $AreaLabels -contains $_ }) | Select-Object -First 1
+            if ($labelHit) {
                 $score += 2
+                $hasLabelMatch = $true
+                $matchedLabel = $labelHit
             }
             # +min(merge_count / 10, 1)
             $score += [Math]::Min($mergeCount / 10.0, 1.0)
         }
 
-        $scores.Add([PSCustomObject]@{ Login = $m; Score = $score; MergeCount = $mergeCount })
+        $scores.Add([PSCustomObject]@{ Login = $m; Score = $score; MergeCount = $mergeCount; HasPathMatch = $hasPathMatch; HasLabelMatch = $hasLabelMatch; MatchedLabel = $matchedLabel; MatchedPath = $matchedPath })
     }
 
     if ($scores.Count -eq 0) { return @() }
@@ -123,18 +133,31 @@ function Select-FallbackReviewers {
     # If all scores are 0, fall back to top 2 by merge_count, then alphabetically
     $allZero = ($scores | Where-Object { $_.Score -gt 0 }).Count -eq 0
 
-    if ($allZero) {
-        return @($scores |
+    $sorted = if ($allZero) {
+        @($scores |
             Sort-Object -Property @{Expression='MergeCount'; Descending=$true}, @{Expression='Login'} |
-            Select-Object -First 2 |
-            ForEach-Object { $_.Login })
+            Select-Object -First 2)
+    } else {
+        # Pick top 2 by score desc, then merge_count desc, then login alphabetical
+        @($scores |
+            Sort-Object -Property @{Expression='Score'; Descending=$true}, @{Expression='MergeCount'; Descending=$true}, @{Expression='Login'} |
+            Select-Object -First 2)
     }
 
-    # Pick top 2 by score desc, then merge_count desc, then login alphabetical
-    return @($scores |
-        Sort-Object -Property @{Expression='Score'; Descending=$true}, @{Expression='MergeCount'; Descending=$true}, @{Expression='Login'} |
-        Select-Object -First 2 |
-        ForEach-Object { $_.Login })
+    return @($sorted | ForEach-Object {
+        $reason = if ($_.HasPathMatch -and $_.HasLabelMatch) {
+            "often merges PRs with files in $($_.MatchedPath), and PRs labeled $($_.MatchedLabel)"
+        } elseif ($_.HasPathMatch) {
+            "often merges PRs with files in $($_.MatchedPath)"
+        } elseif ($_.HasLabelMatch) {
+            "often merges PRs labeled $($_.MatchedLabel)"
+        } elseif ($_.MergeCount -gt 0) {
+            "merges many PRs in this repo"
+        } else {
+            "maintainer in this repo"
+        }
+        [PSCustomObject]@{ Login = $_.Login; Reason = $reason }
+    })
 }
 
 Export-ModuleMember -Function Select-FallbackReviewers, Get-PathPrefix

@@ -239,6 +239,7 @@
       lines_changed: linesChanged,
       next_action: '',
       who: '',
+      who_why: '',
       blockers: '',
       why: 'newly discovered — scores pending next pipeline run',
       value_why: 'newly discovered — scores pending next pipeline run',
