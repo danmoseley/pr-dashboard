@@ -108,6 +108,7 @@ Write-Host ""
 $updated = @{}
 # Per-repo, per-maintainer activity: filePaths buckets and area labels
 $activityAccum = @{}   # $activityAccum[$repo][$login] = @{ paths = [List]; labels = [List]; count = int }
+$failedRepos = [System.Collections.Generic.List[object]]@()   # entries to retry in a second pass
 
 foreach ($entry in $repos) {
     $repo = $entry.repo
@@ -222,8 +223,9 @@ foreach ($entry in $repos) {
         $cursor = $searchData.pageInfo.endCursor
     } while ($hasNext)
 
-    # Skip repo if fetch failed — keep existing entry unchanged
+    # Skip repo if fetch failed — queue for second pass
     if ($null -eq $mergerCounts) {
+        $failedRepos.Add($entry)
         $updated[$repo] = @($existing[$repo] ?? @())
         continue
     }
@@ -260,6 +262,153 @@ foreach ($entry in $repos) {
         Write-Host " (+$($added.Count) new: $($added -join ', '))" -ForegroundColor Green
     } else {
         Write-Host " (no changes)" -ForegroundColor DarkGray
+    }
+}
+
+# ─── Second pass: retry repos that failed in the first pass ───────────────────
+# By the time we reach here, minutes have elapsed processing other repos, giving
+# GitHub's API time to recover from transient 502/504 errors.
+if ($failedRepos.Count -gt 0) {
+    $retryDelay = 60
+    Write-Host ""
+    Write-Host "Retrying $($failedRepos.Count) failed repo(s) after ${retryDelay}s cooldown..." -ForegroundColor Yellow
+    Start-Sleep -Seconds $retryDelay
+
+    foreach ($entry in $failedRepos) {
+        $repo = $entry.repo
+        Write-Host "  $repo (retry) ... " -NoNewline
+
+        $mergerCounts = @{}
+        $repoActivity = @{}
+        $cursor = $null
+        $totalFetched = 0
+
+        do {
+            $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
+            if ($SkipActivity) {
+                $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
+            } else {
+                $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
+            }
+
+            $result = $null
+            $maxRetries = 5
+            $succeeded = $false
+            for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+                $errFile = [System.IO.Path]::GetTempFileName()
+                $errText = ''
+                try {
+                    $result = gh api graphql -f query="$q" 2>$errFile
+                    $exitCode = $LASTEXITCODE
+                    if ($exitCode -ne 0) {
+                        $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
+                    } else {
+                        $validation = Test-GraphQLResponse -RawJson $result
+                        $parsed = $validation.Parsed
+                        if (-not $validation.Success) {
+                            $exitCode = 1
+                            $errText = $validation.Error
+                        }
+                    }
+                    if ($exitCode -eq 0) {
+                        $succeeded = $true
+                        break
+                    }
+                } finally {
+                    Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
+                }
+                $displayErr = $errText.Trim()
+                if ([string]::IsNullOrWhiteSpace($displayErr)) {
+                    $displayErr = "gh api graphql exited with code $exitCode"
+                }
+                if ($attempt -lt $maxRetries) {
+                    $delay = $attempt * 15
+                    Write-Host ""
+                    Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Yellow
+                    Write-Host "    Retrying in ${delay}s..." -ForegroundColor Yellow
+                    Start-Sleep -Seconds $delay
+                    Write-Host "  $repo (retry) ... " -NoNewline
+                } else {
+                    Write-Host ""
+                    Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Red
+                }
+            }
+            if (-not $succeeded) {
+                Write-Host "  ERROR querying $repo on second pass (giving up)" -ForegroundColor Red
+                $mergerCounts = $null
+                break
+            }
+
+            $searchData = $parsed.data.search
+            foreach ($node in $searchData.nodes) {
+                if ($node.mergedBy -and $node.mergedBy.login) {
+                    $login = $node.mergedBy.login
+                    if ($login -notin $botLogins) {
+                        $mergerCounts[$login] = ($mergerCounts[$login] ?? 0) + 1
+                        if (-not $SkipActivity) {
+                            if (-not $repoActivity.ContainsKey($login)) {
+                                $repoActivity[$login] = @{
+                                    paths  = [System.Collections.Generic.List[string]]@()
+                                    labels = [System.Collections.Generic.List[string]]@()
+                                    count  = 0
+                                }
+                            }
+                            if ($node.files -and $node.files.nodes) {
+                                foreach ($f in $node.files.nodes) {
+                                    if ($f.path) {
+                                        $prefix = Get-PathPrefix $f.path
+                                        $repoActivity[$login].paths.Add($prefix)
+                                    }
+                                }
+                            }
+                            if ($node.labels -and $node.labels.nodes) {
+                                foreach ($lbl in $node.labels.nodes) {
+                                    if ($lbl.name -match '^area-') {
+                                        $repoActivity[$login].labels.Add($lbl.name)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                $totalFetched++
+            }
+
+            $hasNext = $searchData.pageInfo.hasNextPage
+            $cursor = $searchData.pageInfo.endCursor
+        } while ($hasNext)
+
+        if ($null -eq $mergerCounts) {
+            # Still failed — keep existing entry
+            continue
+        }
+
+        # Success on second pass — process results
+        if (-not $SkipActivity) {
+            foreach ($login in @($mergerCounts.Keys)) {
+                if ($repoActivity.ContainsKey($login)) {
+                    $repoActivity[$login].count = $mergerCounts[$login]
+                }
+            }
+            $activityAccum[$repo] = $repoActivity
+        }
+
+        $discovered = @($mergerCounts.GetEnumerator() |
+            Where-Object { $_.Value -ge $MinMerges } |
+            Sort-Object Value -Descending |
+            ForEach-Object { $_.Key })
+
+        $existingForRepo = @($existing[$repo] ?? @())
+        $merged = @($existingForRepo + $discovered | Select-Object -Unique | Sort-Object)
+        $added = @($merged | Where-Object { $_ -notin $existingForRepo })
+        $updated[$repo] = $merged
+
+        Write-Host "$totalFetched merged PRs, $($discovered.Count) qualifying mergers" -NoNewline
+        if ($added.Count -gt 0) {
+            Write-Host " (+$($added.Count) new: $($added -join ', '))" -ForegroundColor Green
+        } else {
+            Write-Host " (no changes)" -ForegroundColor DarkGray
+        }
     }
 }
 
