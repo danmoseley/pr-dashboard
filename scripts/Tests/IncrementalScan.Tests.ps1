@@ -258,40 +258,65 @@ Describe 'Get-IncrementalPartition' {
         $partition.RefreshCandidates.Count | Should -Be 1
     }
 
-    It 'Refreshes PRs with FAILURE CI (can change via rerun)' {
+    It 'Reuses PRs with FAILURE CI when fingerprint matches and TTL not expired' {
         $failEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -CI 'FAILURE'
         $lookup = @{ '10' = $failEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
-        $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 1
     }
 
-    It 'Refreshes PRs with IN_PROGRESS CI' {
+    It 'Reuses PRs with IN_PROGRESS CI when fingerprint matches and TTL not expired' {
         $inProgressEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -CI 'IN_PROGRESS'
         $lookup = @{ '10' = $inProgressEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
-        $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
     }
 
-    It 'Refreshes PRs with ABSENT CI' {
+    It 'Reuses PRs with ABSENT CI when fingerprint matches and TTL not expired' {
         $absentEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -CI 'ABSENT'
         $lookup = @{ '10' = $absentEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
-        $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
     }
 
-    It 'Refreshes PRs with UNKNOWN mergeable' {
+    It 'Reuses PRs with UNKNOWN mergeable when fingerprint matches and TTL not expired' {
         $unknownEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -Mergeable 'UNKNOWN'
         $lookup = @{ '10' = $unknownEntry }
         $fpMap = @{ '10' = $fp1 }
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
+        $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
+    }
+
+    It 'Refreshes FAILURE CI when TTL expired' {
+        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $failEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -CI 'FAILURE' -RefreshedAt $staleAt
+        $lookup = @{ '10' = $failEntry }
+        $fpMap = @{ '10' = $fp1 }
+        $partition = Get-IncrementalPartition -Candidates @($pr1) `
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 0
+    }
+
+    It 'Refreshes UNKNOWN mergeable when TTL expired' {
+        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $unknownEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -Mergeable 'UNKNOWN' -RefreshedAt $staleAt
+        $lookup = @{ '10' = $unknownEntry }
+        $fpMap = @{ '10' = $fp1 }
+        $partition = Get-IncrementalPartition -Candidates @($pr1) `
+            -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
+        $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 0
     }
 
     It 'Force-refreshes when per-PR _refreshed_at exceeds TTL' {

@@ -141,6 +141,7 @@ async function runTests() {
       const userVal = await p.$eval('#user-field', e => e.value).catch(() => '');
       if (userVal === 'dotnet-bot') pass('A3: ?user= param pre-fills user field');
       else fail('A3: ?user= param', 'user-field="' + userVal + '", expected "dotnet-bot"');
+      await p.waitForFunction(() => { const sb = document.getElementById('summary-bar'); return sb && getComputedStyle(sb).display !== 'none'; }, null, { timeout: 5000 }).catch(() => null);
       const summaryDisplay = await p.$eval('#summary-bar', e => getComputedStyle(e).display).catch(() => 'missing');
       if (summaryDisplay !== 'none' && summaryDisplay !== 'missing') {
         pass('A3: ?user= param shows summary bar on load');

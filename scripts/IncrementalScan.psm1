@@ -84,8 +84,6 @@ function Get-IncrementalPartition {
         PRs are forced to refresh when:
         - No previous entry or fingerprint exists (new PR)
         - Fingerprint changed (labels, mergeable, draft status, etc.)
-        - Previous CI was anything other than SUCCESS (e.g. IN_PROGRESS, ABSENT, or FAILURE)
-        - Previous mergeable was UNKNOWN
         - Cache TTL exceeded (MaxReuseSeconds)
         - Previous entry is missing required fields (corrupt)
     .OUTPUTS
@@ -118,10 +116,6 @@ function Get-IncrementalPartition {
             if (-not $prevEntry -or -not $prevFp) {
                 $mustRefresh = $true
             } elseif ($currentFp -ne $prevFp) {
-                $mustRefresh = $true
-            } elseif ($prevEntry.ci -ne 'SUCCESS') {
-                $mustRefresh = $true  # non-success CI can change via rerun without PR fields changing
-            } elseif ($prevEntry.mergeable -eq 'UNKNOWN') {
                 $mustRefresh = $true
             } else {
                 # Per-PR TTL: require a valid _refreshed_at (when this PR was last fully analyzed).
