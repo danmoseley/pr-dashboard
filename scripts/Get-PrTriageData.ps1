@@ -28,7 +28,8 @@
 .PARAMETER ActivityFile
     Path to maintainer-activity.json, which contains per-maintainer activity signals
     used by the activity-based fallback reviewer selection. When missing or unreadable,
-    fallback reviewer selection degrades to top-2-by-merge-count ordering.
+    activity-based ranking is unavailable, so fallback reviewer selection uses the
+    default ordering (currently alphabetical rather than merge-count-based).
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 .EXAMPLE

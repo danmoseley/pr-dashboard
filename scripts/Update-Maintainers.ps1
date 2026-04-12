@@ -271,7 +271,7 @@ if (-not $SkipActivity) {
     Write-Host "Computing per-maintainer activity signals..." -ForegroundColor Cyan
 
     # Build the activity output: for each repo, for each maintainer in the final list,
-    # record merge_count, top 5 path prefixes, and top 5 area-* labels.
+    # record merge_count, top 10 path prefixes, and top 5 area-* labels.
     $activityOutput = [ordered]@{}
     foreach ($entry in $repos) {
         $repo = $entry.repo

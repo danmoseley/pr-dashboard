@@ -54,9 +54,11 @@ jobs:
           pushed=false
           nothing_to_push=false
           for attempt in 1 2 3; do
-            # Only stage files that exist (maintainer-activity.json created on first run)
+            # Stage maintainer outputs, including deletions for tracked files.
             git add config/maintainers.json
-            [ -f config/maintainer-activity.json ] && git add config/maintainer-activity.json
+            if [ -f config/maintainer-activity.json ] || git ls-files --error-unmatch config/maintainer-activity.json >/dev/null 2>&1; then
+              git add -A -- config/maintainer-activity.json
+            fi
             if git diff --cached --quiet; then
               echo "No changes to commit"
               nothing_to_push=true
