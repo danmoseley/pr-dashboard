@@ -17,8 +17,8 @@
 
     Tie-breaking: score desc → merge_count desc → login alphabetical (for determinism).
 
-    If all scores are 0 (no activity data or no matches), falls back to top 2 by merge_count.
-    If merge_counts are also all 0, picks the first 2 alphabetically.
+    If all scores are 0 (for example, because activity data is missing or there are no path/label matches),
+    falls back to top 2 by merge_count. If merge_counts are also all 0, picks the first 2 alphabetically.
 
 .PARAMETER Maintainers
     Array of maintainer login names (from maintainers.json for the repo).

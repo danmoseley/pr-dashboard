@@ -25,6 +25,10 @@
     This avoids PowerShell stream-leaking issues when stdout is redirected
     by a shell wrapper (Write-Warning and Write-Host leak to stdout when
     pwsh runs as a subprocess). Omit for interactive/local use.
+.PARAMETER ActivityFile
+    Path to maintainer-activity.json, which contains per-maintainer activity signals
+    used by the activity-based fallback reviewer selection. When missing or unreadable,
+    fallback reviewer selection degrades to top-2-by-merge-count ordering.
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 .EXAMPLE

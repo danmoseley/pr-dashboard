@@ -31,21 +31,19 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          changed_files=()
-          for f in config/maintainers.json config/maintainer-activity.json; do
-            # Detect both modified tracked files and newly created untracked files.
-            # git diff --quiet misses untracked files (exits 0 for new files not yet staged).
-            if [ -f "$f" ] && [ -n "$(git status --porcelain "$f")" ]; then
-              changed_files+=("$f")
-            fi
-          done
-          if [ ${#changed_files[@]} -eq 0 ]; then
+          status_output="$(git status --porcelain -- config/maintainers.json config/maintainer-activity.json)"
+          if [ -z "$status_output" ]; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
             echo "No maintainer changes detected."
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
             echo "Maintainer changes detected:"
-            for f in "${changed_files[@]}"; do git diff --stat "$f"; done
+            printf '%s\n' "$status_output"
+            for f in config/maintainers.json config/maintainer-activity.json; do
+              if [ -f "$f" ] && git ls-files --error-unmatch "$f" >/dev/null 2>&1; then
+                git diff --stat "$f"
+              fi
+            done
           fi
 
       - name: Commit and push
