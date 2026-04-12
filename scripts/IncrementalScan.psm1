@@ -84,8 +84,6 @@ function Get-IncrementalPartition {
         PRs are forced to refresh when:
         - No previous entry or fingerprint exists (new PR)
         - Fingerprint changed (labels, mergeable, draft status, etc.)
-        - Previous CI was anything other than SUCCESS (e.g. IN_PROGRESS, ABSENT, or FAILURE)
-        - Previous mergeable was UNKNOWN
         - Cache TTL exceeded (MaxReuseSeconds)
         - Previous entry is missing required fields (corrupt)
     .OUTPUTS
