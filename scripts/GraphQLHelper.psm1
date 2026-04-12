@@ -16,7 +16,7 @@ function Test-GraphQLResponse {
 
     .DESCRIPTION
         Returns a PSCustomObject with:
-          - Success  [bool]   : $true when response contains data.search
+          - Success  [bool]   : $true when response contains data.search and no GraphQL errors
           - Parsed   [object] : the parsed PSCustomObject (or $null on failure)
           - Error    [string] : human-readable error message (empty on success)
 
@@ -50,7 +50,7 @@ function Test-GraphQLResponse {
     }
 
     # Guard against JSON null or non-object top-level values
-    if ($null -eq $parsed -or -not $parsed.PSObject) {
+    if ($null -eq $parsed -or $parsed -isnot [pscustomobject]) {
         return [PSCustomObject]@{
             Success = $false
             Parsed  = $null
