@@ -792,7 +792,6 @@ foreach ($pr in $refreshCandidates) {
                 $ownerTier[$m] = if ($fallbackReasons.ContainsKey($m)) { $fallbackReasons[$m] } else { "maintainer in this repo" }
             }
         }
-        }
     }
     $prioritizedOwners = @($prioritizedOwners)
     # Build reason lookup for all requested reviewers (including non-maintainers)
@@ -1179,10 +1178,10 @@ foreach ($pr in $refreshCandidates) {
     $whoStr = if ($who.Count -gt 0) { "@" + ($who -join ", @") } else { "" }
 
     # Build per-person reason summary for tooltip
-    $whoWhyParts = @()
+    $whoWhyParts = [System.Collections.Generic.List[string]]::new()
     for ($i = 0; $i -lt $who.Count; $i++) {
         $reason = if ($i -lt $whoWhy.Count -and $whoWhy[$i]) { $whoWhy[$i] } else { "" }
-        if ($reason) { $whoWhyParts += "@$($who[$i]): $reason" }
+        if ($reason) { $whoWhyParts.Add("@$($who[$i]): $reason") }
     }
     $whoWhyStr = $whoWhyParts -join "`n"
 
