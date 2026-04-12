@@ -129,15 +129,54 @@ foreach ($entry in $repos) {
         }
 
         $result = $null
-        $result = gh api graphql -f query="$q" 2>$null
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR querying $repo (skipping)" -ForegroundColor Red
+        $maxRetries = 3
+        $succeeded = $false
+        for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+            $errFile = [System.IO.Path]::GetTempFileName()
+            $errText = ''
+            try {
+                $result = gh api graphql -f query="$q" 2>$errFile
+                $exitCode = $LASTEXITCODE
+                if ($exitCode -ne 0) {
+                    $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
+                } else {
+                    # gh can return exit 0 with GraphQL-level errors in the body
+                    $parsed = $result | ConvertFrom-Json
+                    if ($parsed.errors) {
+                        $exitCode = 1
+                        $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
+                    } elseif (-not $parsed.data -or -not $parsed.data.search) {
+                        $exitCode = 1
+                        $errText = 'Response missing data.search'
+                    }
+                }
+                if ($exitCode -eq 0) {
+                    $succeeded = $true
+                    break
+                }
+            } finally {
+                Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
+            }
+            if ($attempt -lt $maxRetries) {
+                $delay = $attempt * 15
+                Write-Host "" # finish the "repo ..." line
+                Write-Host "    Attempt $attempt/$maxRetries failed: $($errText.Trim())" -ForegroundColor Yellow
+                Write-Host "    Retrying in ${delay}s..." -ForegroundColor Yellow
+                Start-Sleep -Seconds $delay
+                Write-Host "  $repo ... " -NoNewline  # re-print the prefix for the next attempt
+            } else {
+                Write-Host "" # finish the "repo ..." line
+                Write-Host "    Attempt $attempt/$maxRetries failed: $($errText.Trim())" -ForegroundColor Red
+            }
+        }
+        if (-not $succeeded) {
+            Write-Host "  ERROR querying $repo after $maxRetries attempts (skipping)" -ForegroundColor Red
             $mergerCounts = $null
             break
         }
 
-        $data = $result | ConvertFrom-Json
-        $searchData = $data.data.search
+        # $parsed was already validated inside the retry loop
+        $searchData = $parsed.data.search
 
         foreach ($node in $searchData.nodes) {
             if ($node.mergedBy -and $node.mergedBy.login) {
