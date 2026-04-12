@@ -20,8 +20,15 @@
     full scan if the file is missing, corrupt, or from a different repo or
     cache version; when a previous scan file was explicitly provided, a
     warning is emitted to explain why incremental mode was not used.
+.PARAMETER OutputFile
+    When specified, JSON output is written to this file instead of stdout.
+    This avoids PowerShell stream-leaking issues when stdout is redirected
+    by a shell wrapper (Write-Warning and Write-Host leak to stdout when
+    pwsh runs as a subprocess). Omit for interactive/local use.
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
+.EXAMPLE
+    .\Get-PrTriageData.ps1 -Repo "dotnet/runtime" -OutputFile docs/runtime/scan.json
 #>
 [CmdletBinding()]
 param(
@@ -48,10 +55,24 @@ param(
     [string]$Repo = "dotnet/runtime",
     [string[]]$Maintainers = @(),
     [string]$PreviousScanFile,
+    [string]$OutputFile,
     [switch]$OutputCsv
 )
 
 $ErrorActionPreference = "Stop"
+
+# Helper: emit text to -OutputFile if specified, otherwise stdout.
+# This keeps Write-Warning/Write-Host safe — when the caller uses -OutputFile,
+# stdout is not redirected, so PowerShell streams work naturally.
+function Emit-Output([string]$Text) {
+    if ($OutputFile) {
+        $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+        [System.IO.File]::WriteAllText($OutputFile, $Text, $utf8NoBom)
+        Write-Verbose "Wrote $($Text.Length) chars to $OutputFile"
+    } else {
+        $Text
+    }
+}
 
 # Import incremental scan helpers (fingerprint, partitioning, cache loading)
 $incrementalModule = Join-Path $PSScriptRoot 'IncrementalScan.psm1'
@@ -102,10 +123,10 @@ function Invoke-GhRetry {
         }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
-            [Console]::Error.WriteLine("WARNING: gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s")
+            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            [Console]::Error.WriteLine("WARNING: gh failed after $MaxAttempts attempts: $errText")
+            Write-Warning "gh failed after $MaxAttempts attempts: $errText"
             return ($out -join "`n")
         }
     }
@@ -221,9 +242,9 @@ if ($incrementalEnabled) {
 } elseif ($PreviousScanFile) {
     $reason = if ($prevScanResult.DisableReason) { $prevScanResult.DisableReason } else { 'unknown' }
     $msg = "Incremental mode disabled — full scan. Reason: $reason"
-    [Console]::Error.WriteLine("WARNING: $msg")
+    Write-Warning $msg
     if ($env:GITHUB_ACTIONS) {
-        [Console]::Error.WriteLine("::warning::$msg")
+        Write-Host "::warning::$msg"
     }
 }
 
@@ -289,7 +310,7 @@ Write-Verbose "Scanned $($prsRaw.Count) -> $($candidates.Count) candidates ($exc
 
 if ($candidates.Count -eq 0) {
     Write-Verbose "No candidates to analyze."
-    @{
+    $emptyOutput = @{
         repo = $Repo
         timestamp = $now.ToString("o")
         scanned = $prsRaw.Count
@@ -297,7 +318,9 @@ if ($candidates.Count -eq 0) {
         prs = @()
         _cache_version = $CacheVersion
         _probe_hash = (Get-ProbeHash $prsRaw)
-    } | ConvertTo-Json -Depth 5
+    }
+    $json = $emptyOutput | ConvertTo-Json -Depth 5
+    Emit-Output $json
     return
 }
 
@@ -316,8 +339,8 @@ if ($incrementalEnabled) {
     $reusedCount = $reusedPrEntries.Count
     $incrementalFallback = $partition.Fallback
     if ($incrementalFallback) {
-        [Console]::Error.WriteLine("WARNING: Incremental partitioning failed — falling back to full scan")
-        if ($env:GITHUB_ACTIONS) { [Console]::Error.WriteLine("::warning::Incremental scan failed for $Repo — fell back to full scan") }
+        Write-Warning "Incremental partitioning failed — falling back to full scan"
+        if ($env:GITHUB_ACTIONS) { Write-Host "::warning::Incremental scan failed for $Repo — fell back to full scan" }
     } else {
         Write-Verbose "Incremental: $($refreshCandidates.Count) to refresh, $reusedCount reused from cache"
     }
@@ -370,7 +393,7 @@ foreach ($prNum in @($graphqlData.Keys)) {
         $q = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { pullRequest(number:$prNum) { commits(last:1) { nodes { commit { statusCheckRollup { contexts(first:100, after:`"$cursor`") { pageInfo { hasNextPage endCursor } nodes { ...on CheckRun { name conclusion status } } } } } } } } } }"
         $res = (Invoke-GhRetry @("api","graphql","-f","query=$q")) | ConvertFrom-Json
         if (-not $res -or -not $res.data -or $res.errors) {
-            [Console]::Error.WriteLine("WARNING: Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')")
+            Write-Warning "Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
             break
         }
         $ctx = $res.data.repository.pullRequest.commits.nodes[0].commit.statusCheckRollup.contexts
@@ -1193,15 +1216,16 @@ if ($OutputCsv) {
         if ($t.Length -gt 0 -and $t[0] -in '=','+','-','@') { $t = "'$t" }
         $lines += "$($r.number)`t$t`t$($r.author)`t$($r.score)`t$($r.ci)`t$($r.ci_detail)`t$($r.unresolved_threads)`t$($r.total_threads)`t$($r.total_comments)`t$($r.distinct_commenters)`t$($r.mergeable)`t$($r.approval_count)`t$(if ($r.is_community) {1} else {0})`t$($r.age_days)`t$($r.days_since_update)`t$($r.changed_files)`t$($r.lines_changed)`t$($r.next_action)`t$($r.who)`t$($r.blockers)`t$($r.why)"
     }
-    $lines -join "`n"
+    Emit-Output ($lines -join "`n")
 } else {
-    $output | ConvertTo-Json -Depth 5
+    $json = $output | ConvertTo-Json -Depth 5
+    Emit-Output $json
 }
 
 } catch {
-    # Ensure stdout is always valid JSON so downstream scripts don't crash
-    [Console]::Error.WriteLine("WARNING: Get-PrTriageData failed for ${Repo}: $_")
-    @{
+    # Ensure output is always valid JSON so downstream scripts don't crash
+    Write-Warning "Get-PrTriageData failed for ${Repo}: $_"
+    $errorJson = @{
         repo = $Repo
         scanned = 0
         analyzed = 0
@@ -1210,5 +1234,7 @@ if ($OutputCsv) {
         error = "$_"
         elapsed_seconds = [Math]::Round(((Get-Date) - $scriptStart).TotalSeconds, 1)
     } | ConvertTo-Json -Depth 5
+    try { Emit-Output $errorJson }
+    catch { Write-Warning "Failed to write error output: $_" }
     exit 1
 }

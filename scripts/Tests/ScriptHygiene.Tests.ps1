@@ -2,19 +2,17 @@ Describe 'Script hygiene' {
     It 'Get-PrTriageData.ps1 must not use Write-Output (stdout is JSON data)' {
         $script = Join-Path $PSScriptRoot '../Get-PrTriageData.ps1'
         $hits = Select-String -Path $script -Pattern '\bWrite-Output\b'
-        $hits | Should -BeNullOrEmpty -Because 'Write-Output sends to stdout which is redirected to scan.json; use [Console]::Error.WriteLine() for diagnostics'
+        $hits | Should -BeNullOrEmpty -Because 'Write-Output sends to stdout which corrupts scan.json; use Write-Warning for diagnostics'
     }
 
-    It 'Get-PrTriageData.ps1 must not use Write-Warning (can leak to stdout with ANSI codes)' {
-        $script = Join-Path $PSScriptRoot '../Get-PrTriageData.ps1'
-        $hits = Select-String -Path $script -Pattern '\bWrite-Warning\b'
-        $hits | Should -BeNullOrEmpty -Because 'Write-Warning (stream 3) can leak ANSI-colored text to stdout in CI; use [Console]::Error.WriteLine() for diagnostics'
-    }
-
-    It 'Get-PrTriageData.ps1 must not use Write-Host (leaks to stdout when run as subprocess)' {
-        $script = Join-Path $PSScriptRoot '../Get-PrTriageData.ps1'
-        $hits = Select-String -Path $script -Pattern '\bWrite-Host\b'
-        $hits | Should -BeNullOrEmpty -Because 'Write-Host uses the Information stream which flows to process stdout in non-interactive/subprocess mode, corrupting scan.json; use [Console]::Error.WriteLine() for diagnostics'
+    It 'Get-PrTriageData.ps1 must not redirect stdout to scan.json (use -OutputFile instead)' {
+        $workflow = Join-Path $PSScriptRoot '../../.github/workflows/generate-reports.yml'
+        $lines = Get-Content $workflow
+        # Find lines that invoke the scan script and redirect stdout (> or 1>)
+        $scanLines = $lines | Where-Object { $_ -match 'Get-PrTriageData\.ps1' }
+        # Reject stdout redirect: "> file" or "1> file" but not "2> file"
+        $violations = $scanLines | Where-Object { $_ -match '(?<![2-9])>\s*"' }
+        $violations | Should -BeNullOrEmpty -Because 'stdout redirection causes PowerShell stream leaking; use -OutputFile parameter instead'
     }
 
     It 'Workflow pwsh -Command in if-conditions must use explicit exit codes' {
