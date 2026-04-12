@@ -165,7 +165,7 @@ if ($ActivityFile -and (Test-Path $ActivityFile)) {
         $maintainerActivityData = Get-Content $ActivityFile -Raw | ConvertFrom-Json
         Write-Verbose "Loaded maintainer activity data from $ActivityFile"
     } catch {
-        Write-Warning "Could not load maintainer activity file '$ActivityFile': $_"
+        Write-Host "Warning: Could not load maintainer activity file '$ActivityFile': $_" -ForegroundColor Yellow
     }
 }
 

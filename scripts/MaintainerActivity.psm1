@@ -11,7 +11,7 @@
     from the full maintainer pool using per-maintainer activity signals from maintainer-activity.json.
 
     Scoring per maintainer (excluding the PR author):
-      +3  if any changed file path prefix (first 2 segments) matches maintainer's top_paths
+      +3  if any changed file path prefix (first 3 segments) matches maintainer's top_paths
       +2  if any PR area-* label matches maintainer's top_area_labels
       +min(merge_count / 10, 1)  activity bonus, capped at 1
 
