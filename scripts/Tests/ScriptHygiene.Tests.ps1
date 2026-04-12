@@ -8,7 +8,13 @@ Describe 'Script hygiene' {
     It 'Get-PrTriageData.ps1 must not use Write-Warning (can leak to stdout with ANSI codes)' {
         $script = Join-Path $PSScriptRoot '../Get-PrTriageData.ps1'
         $hits = Select-String -Path $script -Pattern '\bWrite-Warning\b'
-        $hits | Should -BeNullOrEmpty -Because 'Write-Warning (stream 3) can leak ANSI-colored text to stdout in CI; use Write-Host for diagnostics'
+        $hits | Should -BeNullOrEmpty -Because 'Write-Warning (stream 3) can leak ANSI-colored text to stdout in CI; use [Console]::Error.WriteLine() for diagnostics'
+    }
+
+    It 'Get-PrTriageData.ps1 must not use Write-Host (leaks to stdout when run as subprocess)' {
+        $script = Join-Path $PSScriptRoot '../Get-PrTriageData.ps1'
+        $hits = Select-String -Path $script -Pattern '\bWrite-Host\b'
+        $hits | Should -BeNullOrEmpty -Because 'Write-Host uses the Information stream which flows to process stdout in non-interactive/subprocess mode, corrupting scan.json; use [Console]::Error.WriteLine() for diagnostics'
     }
 
     It 'Workflow pwsh -Command in if-conditions must use explicit exit codes' {
