@@ -58,6 +58,143 @@ $ErrorActionPreference = 'Stop'
 
 Import-Module "$PSScriptRoot/MaintainersGuard.psm1" -Force
 Import-Module "$PSScriptRoot/MaintainerActivity.psm1" -Force
+Import-Module "$PSScriptRoot/GraphQLHelper.psm1" -Force
+
+# ─── Invoke-RepoMaintainerScan ────────────────────────────────────────────────
+# Scans a single repo for merged PRs via GitHub GraphQL API with retry/backoff.
+# Returns a result object with Success, MergerCounts, Activity, TotalFetched, Error.
+function Invoke-RepoMaintainerScan {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)][string]$Repo,
+        [Parameter(Mandatory)][string]$CutoffDate,
+        [Parameter(Mandatory)][string[]]$BotLogins,
+        [switch]$SkipActivity,
+        [string]$DisplayPrefix = '  ',
+        [int]$MaxRetries = 5
+    )
+
+    $mergerCounts = @{}
+    $repoActivity = @{}
+    $cursor = $null
+    $totalFetched = 0
+
+    do {
+        $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
+        if ($SkipActivity) {
+            $q = "{ search(query: `"repo:$Repo is:pr is:merged merged:>$CutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
+        } else {
+            $q = "{ search(query: `"repo:$Repo is:pr is:merged merged:>$CutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
+        }
+
+        $result = $null
+        $succeeded = $false
+        for ($attempt = 1; $attempt -le $MaxRetries; $attempt++) {
+            $errFile = [System.IO.Path]::GetTempFileName()
+            $errText = ''
+            try {
+                $result = gh api graphql -f query="$q" 2>$errFile
+                $exitCode = $LASTEXITCODE
+                if ($exitCode -ne 0) {
+                    $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
+                } else {
+                    $validation = Test-GraphQLResponse -RawJson $result
+                    $parsed = $validation.Parsed
+                    if (-not $validation.Success) {
+                        $exitCode = 1
+                        $errText = $validation.Error
+                    }
+                }
+                if ($exitCode -eq 0) {
+                    $succeeded = $true
+                    break
+                }
+            } finally {
+                Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
+            }
+            $displayErr = $errText.Trim()
+            if ([string]::IsNullOrWhiteSpace($displayErr)) {
+                $displayErr = "gh api graphql exited with code $exitCode"
+            }
+            if ($attempt -lt $MaxRetries) {
+                $delay = $attempt * 15
+                Write-Host ""
+                Write-Host "${DisplayPrefix}  Attempt $attempt/$MaxRetries failed: $displayErr" -ForegroundColor Yellow
+                Write-Host "${DisplayPrefix}  Retrying in ${delay}s..." -ForegroundColor Yellow
+                Start-Sleep -Seconds $delay
+                Write-Host "${DisplayPrefix}$Repo ... " -NoNewline
+            } else {
+                Write-Host ""
+                Write-Host "${DisplayPrefix}  Attempt $attempt/$MaxRetries failed: $displayErr" -ForegroundColor Red
+            }
+        }
+        if (-not $succeeded) {
+            return [PSCustomObject]@{
+                Success      = $false
+                MergerCounts = $null
+                Activity     = $null
+                TotalFetched = $totalFetched
+                Error        = "Failed after $MaxRetries attempts"
+            }
+        }
+
+        $searchData = $parsed.data.search
+        foreach ($node in $searchData.nodes) {
+            if ($node.mergedBy -and $node.mergedBy.login) {
+                $login = $node.mergedBy.login
+                if ($login -notin $BotLogins) {
+                    $mergerCounts[$login] = ($mergerCounts[$login] ?? 0) + 1
+
+                    if (-not $SkipActivity) {
+                        if (-not $repoActivity.ContainsKey($login)) {
+                            $repoActivity[$login] = @{
+                                paths  = [System.Collections.Generic.List[string]]@()
+                                labels = [System.Collections.Generic.List[string]]@()
+                                count  = 0
+                            }
+                        }
+                        if ($node.files -and $node.files.nodes) {
+                            foreach ($f in $node.files.nodes) {
+                                if ($f.path) {
+                                    $prefix = Get-PathPrefix $f.path
+                                    $repoActivity[$login].paths.Add($prefix)
+                                }
+                            }
+                        }
+                        if ($node.labels -and $node.labels.nodes) {
+                            foreach ($lbl in $node.labels.nodes) {
+                                if ($lbl.name -match '^area-') {
+                                    $repoActivity[$login].labels.Add($lbl.name)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            $totalFetched++
+        }
+
+        $hasNext = $searchData.pageInfo.hasNextPage
+        $cursor = $searchData.pageInfo.endCursor
+    } while ($hasNext)
+
+    # Add merge_count into activity entries
+    if (-not $SkipActivity) {
+        foreach ($login in @($mergerCounts.Keys)) {
+            if ($repoActivity.ContainsKey($login)) {
+                $repoActivity[$login].count = $mergerCounts[$login]
+            }
+        }
+    }
+
+    return [PSCustomObject]@{
+        Success      = $true
+        MergerCounts = $mergerCounts
+        Activity     = $repoActivity
+        TotalFetched = $totalFetched
+        Error        = ''
+    }
+}
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 if (-not (Test-Path (Join-Path $repoRoot 'docs' 'repos.json'))) {
@@ -107,147 +244,24 @@ Write-Host ""
 $updated = @{}
 # Per-repo, per-maintainer activity: filePaths buckets and area labels
 $activityAccum = @{}   # $activityAccum[$repo][$login] = @{ paths = [List]; labels = [List]; count = int }
+$failedRepos = [System.Collections.Generic.List[object]]@()   # entries to retry in a second pass
 
 foreach ($entry in $repos) {
     $repo = $entry.repo
     Write-Host "  $repo ... " -NoNewline
 
-    $mergerCounts = @{}
-    # Per-login accumulation for activity signals (only when not skipped)
-    $repoActivity = @{}
-    $cursor = $null
-    $totalFetched = 0
+    $scanResult = Invoke-RepoMaintainerScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity
 
-    do {
-        $afterClause = if ($cursor) { ", after: `"$cursor`"" } else { "" }
-        if ($SkipActivity) {
-            $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } } } } }"
-        } else {
-            # files(first:100) and labels(first:20) are best-effort limits: PRs with more files or
-            # labels get partial data, which is acceptable for activity signal collection.
-            $q = "{ search(query: `"repo:$repo is:pr is:merged merged:>$cutoffDate`", type: ISSUE, first: 100$afterClause) { pageInfo { hasNextPage endCursor } nodes { ... on PullRequest { mergedBy { login } files(first: 100) { nodes { path } } labels(first: 20) { nodes { name } } } } } }"
-        }
-
-        $result = $null
-        $maxRetries = 5
-        $succeeded = $false
-        for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
-            $errFile = [System.IO.Path]::GetTempFileName()
-            $errText = ''
-            try {
-                $result = gh api graphql -f query="$q" 2>$errFile
-                $exitCode = $LASTEXITCODE
-                if ($exitCode -ne 0) {
-                    $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
-                } else {
-                    # gh can return exit 0 with GraphQL-level errors in the body
-                    try {
-                        $parsed = $result | ConvertFrom-Json
-                    } catch {
-                        $exitCode = 1
-                        $errText = "Failed to parse response: $($_.Exception.Message)"
-                        $parsed = $null
-                    }
-                    if ($parsed) {
-                        if ($parsed.PSObject.Properties['errors']) {
-                            $exitCode = 1
-                            $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
-                        } elseif (-not $parsed.PSObject.Properties['data'] -or -not $parsed.data.PSObject.Properties['search']) {
-                            $exitCode = 1
-                            $errText = 'Response missing data.search'
-                        }
-                    }
-                }
-                if ($exitCode -eq 0) {
-                    $succeeded = $true
-                    break
-                }
-            } finally {
-                Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
-            }
-            $displayErr = $errText.Trim()
-            if ([string]::IsNullOrWhiteSpace($displayErr)) {
-                $displayErr = "gh api graphql exited with code $exitCode"
-            }
-            if ($attempt -lt $maxRetries) {
-                $delay = $attempt * 15
-                Write-Host "" # finish the "repo ..." line
-                Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Yellow
-                Write-Host "    Retrying in ${delay}s..." -ForegroundColor Yellow
-                Start-Sleep -Seconds $delay
-                Write-Host "  $repo ... " -NoNewline  # re-print the prefix for the next attempt
-            } else {
-                Write-Host "" # finish the "repo ..." line
-                Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Red
-            }
-        }
-        if (-not $succeeded) {
-            Write-Host "  ERROR querying $repo after $maxRetries attempts (skipping)" -ForegroundColor Red
-            $mergerCounts = $null
-            break
-        }
-
-        # $parsed was already validated inside the retry loop
-        $searchData = $parsed.data.search
-
-        foreach ($node in $searchData.nodes) {
-            if ($node.mergedBy -and $node.mergedBy.login) {
-                $login = $node.mergedBy.login
-                if ($login -notin $botLogins) {
-                    $mergerCounts[$login] = ($mergerCounts[$login] ?? 0) + 1
-
-                    if (-not $SkipActivity) {
-                        if (-not $repoActivity.ContainsKey($login)) {
-                            $repoActivity[$login] = @{
-                                paths  = [System.Collections.Generic.List[string]]@()
-                                labels = [System.Collections.Generic.List[string]]@()
-                                count  = 0
-                            }
-                        }
-                        # Collect file path prefixes (first 3 segments, e.g. src/libraries/System.IO).
-                        if ($node.files -and $node.files.nodes) {
-                            foreach ($f in $node.files.nodes) {
-                                if ($f.path) {
-                                    $prefix = Get-PathPrefix $f.path
-                                    $repoActivity[$login].paths.Add($prefix)
-                                }
-                            }
-                        }
-                        # Collect area-* labels
-                        if ($node.labels -and $node.labels.nodes) {
-                            foreach ($lbl in $node.labels.nodes) {
-                                if ($lbl.name -match '^area-') {
-                                    $repoActivity[$login].labels.Add($lbl.name)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            $totalFetched++
-        }
-
-        $hasNext = $searchData.pageInfo.hasNextPage
-        $cursor = $searchData.pageInfo.endCursor
-    } while ($hasNext)
-
-    # Skip repo if fetch failed — keep existing entry unchanged
-    if ($null -eq $mergerCounts) {
+    if (-not $scanResult.Success) {
+        Write-Host "  ERROR querying $repo ($($scanResult.Error)) — queued for retry" -ForegroundColor Red
+        $failedRepos.Add($entry)
         $updated[$repo] = @($existing[$repo] ?? @())
         continue
     }
 
+    $mergerCounts = $scanResult.MergerCounts
     if (-not $SkipActivity) {
-        # Add merge_count from mergerCounts into each activity entry before storing.
-        # Invariant (holds because this block only runs when -SkipActivity is false): all logins
-        # in $mergerCounts also have a $repoActivity entry — both are populated in the inner loop
-        # above under the same `-not $SkipActivity` guard, so they stay in sync.
-        foreach ($login in @($mergerCounts.Keys)) {
-            if ($repoActivity.ContainsKey($login)) {
-                $repoActivity[$login].count = $mergerCounts[$login]
-            }
-        }
-        $activityAccum[$repo] = $repoActivity
+        $activityAccum[$repo] = $scanResult.Activity
     }
 
     # Apply threshold
@@ -258,17 +272,61 @@ foreach ($entry in $repos) {
 
     # Union with existing
     $existingForRepo = @($existing[$repo] ?? @())
-    $merged = @($existingForRepo + $discovered | Select-Object -Unique | Sort-Object)
+    $merged = @($existingForRepo + $discovered | Sort-Object -Unique)
 
     $added = @($merged | Where-Object { $_ -notin $existingForRepo })
 
     $updated[$repo] = $merged
 
-    Write-Host "$totalFetched merged PRs, $($discovered.Count) qualifying mergers" -NoNewline
+    Write-Host "$($scanResult.TotalFetched) merged PRs, $($discovered.Count) qualifying mergers" -NoNewline
     if ($added.Count -gt 0) {
         Write-Host " (+$($added.Count) new: $($added -join ', '))" -ForegroundColor Green
     } else {
         Write-Host " (no changes)" -ForegroundColor DarkGray
+    }
+}
+
+# ─── Second pass: retry repos that failed in the first pass ───────────────────
+# By the time we reach here, minutes have elapsed processing other repos, giving
+# GitHub's API time to recover from transient 502/504 errors.
+if ($failedRepos.Count -gt 0) {
+    $retryDelay = 60
+    Write-Host ""
+    Write-Host "Retrying $($failedRepos.Count) failed repo(s) after ${retryDelay}s cooldown..." -ForegroundColor Yellow
+    Start-Sleep -Seconds $retryDelay
+
+    foreach ($entry in $failedRepos) {
+        $repo = $entry.repo
+        Write-Host "  $repo (retry) ... " -NoNewline
+
+        $scanResult = Invoke-RepoMaintainerScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity -DisplayPrefix '  '
+
+        if (-not $scanResult.Success) {
+            Write-Host "  ERROR querying $repo on second pass (giving up)" -ForegroundColor Red
+            continue
+        }
+
+        $mergerCounts = $scanResult.MergerCounts
+        if (-not $SkipActivity) {
+            $activityAccum[$repo] = $scanResult.Activity
+        }
+
+        $discovered = @($mergerCounts.GetEnumerator() |
+            Where-Object { $_.Value -ge $MinMerges } |
+            Sort-Object Value -Descending |
+            ForEach-Object { $_.Key })
+
+        $existingForRepo = @($existing[$repo] ?? @())
+        $merged = @($existingForRepo + $discovered | Sort-Object -Unique)
+        $added = @($merged | Where-Object { $_ -notin $existingForRepo })
+        $updated[$repo] = $merged
+
+        Write-Host "$($scanResult.TotalFetched) merged PRs, $($discovered.Count) qualifying mergers" -NoNewline
+        if ($added.Count -gt 0) {
+            Write-Host " (+$($added.Count) new: $($added -join ', '))" -ForegroundColor Green
+        } else {
+            Write-Host " (no changes)" -ForegroundColor DarkGray
+        }
     }
 }
 
