@@ -286,8 +286,9 @@ foreach ($report in $reports) {
         # base redirect params. The meta-refresh is a no-JS fallback (no param merging).
         $hasQuery = $redirectUrl.Contains('?')
         $sep = if ($hasQuery) { '&' } else { '?' }
+        $redirectUrlHtml = [System.Net.WebUtility]::HtmlEncode($redirectUrl)
         $stubHtml = "<!DOCTYPE html><html><head>" +
-            "<meta http-equiv=`"refresh`" content=`"0;url=$redirectUrl`">" +
+            "<meta http-equiv=`"refresh`" content=`"0;url=$redirectUrlHtml`">" +
             "<script>" +
             "var base='$redirectUrl';" +
             "var extra=location.search?location.search.replace(/^\?/,''):'';" +

@@ -5,8 +5,9 @@ Describe 'Report filter parity' {
         $buildIndex = Join-Path $scriptDir 'Build-Index.ps1'
         $actionableHtml = Join-Path $PSScriptRoot '../../docs/actionable.html'
 
-        # Extract filter predicates from Build-Reports.ps1 by sourcing the report definitions
-        # We can't dot-source the whole script (it has mandatory params), so we parse the predicates
+        # Read Build-Reports.ps1 as raw text for lightweight parity checks.
+        # We can't dot-source the whole script (it has mandatory params), so tests
+        # re-implement predicates and verify they match the JS in actionable.html.
         $buildReportsContent = Get-Content $buildReports -Raw
 
         # Create synthetic test data that exercises all filter boundaries

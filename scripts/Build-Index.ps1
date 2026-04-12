@@ -168,7 +168,8 @@ $dataRows = foreach ($rt in $reportTypes) {
             } else {
                 "$($repo.slug)/$($reportInfo.file)"
             }
-            "<td><a href=`"$href`">$($reportInfo.count) PRs</a></td>"
+            $encodedHref = [System.Net.WebUtility]::HtmlEncode($href)
+            "<td><a href=`"$encodedHref`">$($reportInfo.count) PRs</a></td>"
         } else {
             "<td class=`"na`">&mdash;</td>"
         }

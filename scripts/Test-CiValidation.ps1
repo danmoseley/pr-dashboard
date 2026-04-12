@@ -270,18 +270,17 @@ if ($scanFiles.Count -eq 0) {
             Write-Check -Name "index.html exists" -Ok $false -Detail "Not generated"
         }
 
-        # Check a report page structure
+        # Check a per-repo report page — now a redirect stub, not a full report
         $testSlug = $testedSlugs[0]
         $reportFile = Join-Path $tempDocs "$testSlug/actionable.html"
         if (Test-Path $reportFile) {
             $reportContent = Get-Content $reportFile -Raw
             $reportChecks = @(
-                @{ Name = "report: <table> tag";            Ok = $reportContent -match '<table[\s>]' }
-                @{ Name = "report: <nav> tag";              Ok = $reportContent -match '<nav>' }
-                @{ Name = "report: score column";           Ok = $reportContent -match 'class="score"' }
-                @{ Name = "report: ci column";              Ok = $reportContent -match 'class="ci"' }
-                @{ Name = "report: data-server-updated";    Ok = $reportContent -match 'data-server-updated' }
-                @{ Name = "report: pr-refresh.js ref";      Ok = $reportContent -match 'pr-refresh\.js' }
+                @{ Name = "report: redirect stub";           Ok = $reportContent -match 'Redirecting' }
+                @{ Name = "report: meta-refresh";            Ok = $reportContent -match 'meta http-equiv="refresh"' }
+                @{ Name = "report: location.replace";        Ok = $reportContent -match 'location\.replace' }
+                @{ Name = "report: targets actionable.html"; Ok = $reportContent -match 'actionable\.html\?repo=' }
+                @{ Name = "report: preserves query params";  Ok = $reportContent -match 'location\.search' }
             )
             foreach ($c in $reportChecks) {
                 Write-Check -Name $c.Name -Ok $c.Ok -Detail "Missing expected element"
