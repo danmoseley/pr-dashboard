@@ -268,11 +268,41 @@ if (-not $SkipActivity) {
 
     # Build the activity output: for each repo, for each maintainer in the final list,
     # record merge_count, top 10 path prefixes, and top 5 area-* labels.
+    # If a repo fetch failed ($repoAcc is null), preserve the prior repo entry when
+    # available rather than overwriting good data with empty activity signals.
+    $existingActivity = $null
+    if (Test-Path -LiteralPath $activityJsonPath) {
+        try {
+            $existingActivity = Get-Content -LiteralPath $activityJsonPath -Raw | ConvertFrom-Json
+        } catch {
+            Write-Warning "Failed to read existing activity file '$activityJsonPath'. Continuing without fallback activity data. $_"
+        }
+    }
+
     $activityOutput = [ordered]@{}
     foreach ($entry in $repos) {
         $repo = $entry.repo
         $repoMaintainers = @($orderedObj[$repo] ?? @())
         $repoAcc = $activityAccum[$repo]   # may be $null if repo fetch failed
+
+        if ($null -eq $repoAcc) {
+            # Repo fetch failed — preserve existing data if available
+            $existingRepoData = $null
+            if ($existingActivity) {
+                if ($existingActivity -is [hashtable] -and $existingActivity.ContainsKey($repo)) {
+                    $existingRepoData = $existingActivity[$repo]
+                } elseif ($existingActivity.PSObject.Properties[$repo]) {
+                    $existingRepoData = $existingActivity.PSObject.Properties[$repo].Value
+                }
+            }
+            if ($existingRepoData) {
+                $activityOutput[$repo] = $existingRepoData
+                Write-Warning "Activity fetch failed for $repo; preserving existing activity data."
+            } else {
+                Write-Warning "Activity fetch failed for $repo and no existing activity data found; omitting from output."
+            }
+            continue
+        }
 
         $repoObj = [ordered]@{}
         foreach ($m in ($repoMaintainers | Sort-Object)) {

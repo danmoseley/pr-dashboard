@@ -113,15 +113,23 @@ if (Test-Path $activityFile) {
                     $maintainers = $a.$repo
                     foreach ($mp in $maintainers.PSObject.Properties) {
                         $entry = $mp.Value
-                        if ($null -eq $entry.merge_count -or
-                            $null -eq $entry.top_paths -or
-                            $null -eq $entry.top_area_labels) {
+                        $hasNumericMergeCount = ($null -ne $entry.merge_count) -and (
+                            $entry.merge_count -is [int] -or
+                            $entry.merge_count -is [long] -or
+                            $entry.merge_count -is [double] -or
+                            $entry.merge_count -is [decimal]
+                        )
+                        $hasTopPathsArray = ($null -ne $entry.top_paths) -and ($entry.top_paths -is [System.Array])
+                        $hasTopAreaLabelsArray = ($null -ne $entry.top_area_labels) -and ($entry.top_area_labels -is [System.Array])
+                        if (-not $hasNumericMergeCount -or
+                            -not $hasTopPathsArray -or
+                            -not $hasTopAreaLabelsArray) {
                             $badEntries.Add("$repo/$($mp.Name)")
                         }
                     }
                 }
                 if ($badEntries.Count -gt 0) {
-                    $activityDetail = "Entries missing required fields: $($badEntries -join ', ')"
+                    $activityDetail = "Entries missing required fields or with invalid types: $($badEntries -join ', ')"
                 } else {
                     $activityOk = $true
                 }

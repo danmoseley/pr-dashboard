@@ -572,8 +572,16 @@ foreach ($pr in $refreshCandidates) {
     $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
     if ($botTrigger) { $authorLogin = $botTrigger }
 
-    # Merge: codeowners first (higher authority), then area-label owners
-    $prOwners = @(@($codeownersForPr) + @($labelOwners) | Select-Object -Unique)
+    # Merge: codeowners first (higher authority), then area-label owners.
+    # Use HashSet to dedupe while preserving first-occurrence order (CODEOWNERS take precedence).
+    $seenPrOwners = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+    $prOwners = @(
+        foreach ($owner in (@($codeownersForPr) + @($labelOwners))) {
+            if ($owner -and $seenPrOwners.Add([string]$owner)) {
+                $owner
+            }
+        }
+    )
     if ($prOwners.Count -eq 0) { $prOwners = $owners }
     if ($prOwners.Count -eq 0 -and $Maintainers.Count -gt 0) {
         # No CODEOWNERS or area-label owners — use activity-based scoring to pick top 2 candidates.
