@@ -274,6 +274,7 @@ Describe 'Get-IncrementalPartition' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
     }
 
     It 'Reuses PRs with ABSENT CI when fingerprint matches and TTL not expired' {
@@ -283,6 +284,7 @@ Describe 'Get-IncrementalPartition' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
     }
 
     It 'Reuses PRs with UNKNOWN mergeable when fingerprint matches and TTL not expired' {
@@ -292,6 +294,7 @@ Describe 'Get-IncrementalPartition' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.ReusedEntries.Count | Should -Be 1
+        $partition.RefreshCandidates.Count | Should -Be 0
     }
 
     It 'Refreshes FAILURE CI when TTL expired' {
@@ -302,6 +305,7 @@ Describe 'Get-IncrementalPartition' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 0
     }
 
     It 'Refreshes UNKNOWN mergeable when TTL expired' {
@@ -312,6 +316,7 @@ Describe 'Get-IncrementalPartition' {
         $partition = Get-IncrementalPartition -Candidates @($pr1) `
             -PreviousPrLookup $lookup -PreviousFingerprints $fpMap
         $partition.RefreshCandidates.Count | Should -Be 1
+        $partition.ReusedEntries.Count | Should -Be 0
     }
 
     It 'Force-refreshes when per-PR _refreshed_at exceeds TTL' {
