@@ -288,7 +288,6 @@ Describe 'Invoke-ChunkedRepoScan' {
             # Use a 14-day window with 7-day chunks => 2 chunks
             $cutoff = (Get-Date).AddDays(-14).ToString('yyyy-MM-dd')
             $chunk1Start = ([datetime]::Parse($cutoff)).AddDays(1).ToString('yyyy-MM-dd')
-            $chunk1End   = ([datetime]::Parse($cutoff)).AddDays(7).ToString('yyyy-MM-dd')
 
             # First 7-day chunk succeeds
             Mock Invoke-RepoMaintainerScan -ParameterFilter { $CutoffDate -eq $chunk1Start } {

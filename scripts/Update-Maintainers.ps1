@@ -255,11 +255,14 @@ function Invoke-ChunkedRepoScan {
         [string]$EndDate   # optional: limit scan to this date instead of today
     )
 
+    # Clamp MinChunkDays to ChunkDays if misconfigured
+    if ($MinChunkDays -gt $ChunkDays) { $MinChunkDays = $ChunkDays }
+
     # Compute non-overlapping date ranges from (CutoffDate + 1 day) to EndDate (or today).
     # The original query uses merged:>CutoffDate (exclusive), so chunks start
     # the day after CutoffDate to preserve semantics.
     $startDate = ([datetime]::Parse($CutoffDate)).AddDays(1)
-     $scanEnd = if ($EndDate) { ([datetime]::Parse($EndDate)).Date } else { (Get-Date).Date }
+    $scanEnd = if ($EndDate) { ([datetime]::Parse($EndDate)).Date } else { (Get-Date).Date }
     if ($startDate -gt $scanEnd) {
         return [PSCustomObject]@{
             Success      = $true
@@ -312,7 +315,7 @@ function Invoke-ChunkedRepoScan {
                     -MaxRetries $MaxRetries -ChunkDays $subChunkDays -MinChunkDays $MinChunkDays
 
                 # Merge successful sub-chunk results
-                Merge-ScanResult $subResult $mergedCounts $mergedActivity (-not $SkipActivity) ([ref]$totalFetched)
+                Merge-ScanResult -Result $subResult -MergedCounts $mergedCounts -MergedActivity $mergedActivity -IncludeActivity (-not $SkipActivity) -TotalFetched ([ref]$totalFetched)
                 # Propagate any sub-chunk failures
                 if ($subResult.FailedChunks) {
                     foreach ($fc in $subResult.FailedChunks) { $failedChunks.Add($fc) }
@@ -328,7 +331,7 @@ function Invoke-ChunkedRepoScan {
 
         $anyChunkSucceeded = $true
         Write-Host "$($scanResult.TotalFetched) PRs" -ForegroundColor Green
-        Merge-ScanResult $scanResult $mergedCounts $mergedActivity (-not $SkipActivity) ([ref]$totalFetched)
+        Merge-ScanResult -Result $scanResult -MergedCounts $mergedCounts -MergedActivity $mergedActivity -IncludeActivity (-not $SkipActivity) -TotalFetched ([ref]$totalFetched)
     }
 
     $anySuccess = $anyChunkSucceeded
