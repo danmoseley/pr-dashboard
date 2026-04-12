@@ -180,6 +180,46 @@ Describe 'Report filter parity' {
             # The redirect block should skip AI and HTML generation via 'continue'
             $buildReportsContent | Should -Match '(?s)redirectReports.*continue'
         }
+
+        It 'Redirect stubs preserve existing query params via JS' {
+            # The JS in the stub should append location.search to the base URL
+            $buildReportsContent | Should -Match 'location\.search'
+            $buildReportsContent | Should -Match 'location\.hash'
+        }
+    }
+
+    Context 'Old bookmark redirects' {
+        It 'docs/all/actionable.html exists as a redirect stub' {
+            $allRedirect = Join-Path $PSScriptRoot '../../docs/all/actionable.html'
+            Test-Path $allRedirect | Should -Be $true
+        }
+
+        It 'docs/all/actionable.html redirects to ../actionable.html' {
+            $allRedirect = Get-Content (Join-Path $PSScriptRoot '../../docs/all/actionable.html') -Raw
+            $allRedirect | Should -Match 'url=\.\./actionable\.html'
+            $allRedirect | Should -Match "location\.replace\('\.\./actionable\.html'"
+        }
+
+        It 'docs/all/actionable.html preserves query string and hash' {
+            $allRedirect = Get-Content (Join-Path $PSScriptRoot '../../docs/all/actionable.html') -Raw
+            $allRedirect | Should -Match 'location\.search'
+            $allRedirect | Should -Match 'location\.hash'
+        }
+
+        It 'Per-repo redirect stubs target correct URLs' {
+            # Verify the stub template in Build-Reports.ps1 includes repo slug and report params
+            foreach ($reportId in @('top15', 'community', 'quick-wins', 'stale-close')) {
+                $buildReportsContent | Should -Match "(?s)`"$reportId`"\s*=\s*`"\.\./actionable\.html\?repo="
+            }
+        }
+
+        It 'Per-repo redirect stubs use meta-refresh as no-JS fallback' {
+            $buildReportsContent | Should -Match 'meta http-equiv.*refresh.*content=.*0;url='
+        }
+
+        It 'Per-repo redirect stubs use location.replace for JS redirect' {
+            $buildReportsContent | Should -Match 'location\.replace\(url\)'
+        }
     }
 
     Context 'Index link targets' {

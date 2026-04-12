@@ -282,9 +282,19 @@ foreach ($report in $reports) {
     # For redirected reports, write a stub that sends users to the unified view
     if ($redirectReports.ContainsKey($report.Id)) {
         $redirectUrl = $redirectReports[$report.Id]
+        # The JS redirect merges any existing query params (e.g. ?user=alice) with the
+        # base redirect params. The meta-refresh is a no-JS fallback (no param merging).
+        $hasQuery = $redirectUrl.Contains('?')
+        $sep = if ($hasQuery) { '&' } else { '?' }
         $stubHtml = "<!DOCTYPE html><html><head>" +
             "<meta http-equiv=`"refresh`" content=`"0;url=$redirectUrl`">" +
-            "<script>location.replace('$redirectUrl')</script>" +
+            "<script>" +
+            "var base='$redirectUrl';" +
+            "var extra=location.search?location.search.replace(/^\?/,''):'';" +
+            "var hash=location.hash||'';" +
+            "var url=extra?base+'$sep'+extra+hash:base+hash;" +
+            "location.replace(url)" +
+            "</script>" +
             "</head><body>Redirecting...</body></html>"
         $stubHtml | Out-File -FilePath (Join-Path $outDir $report.File) -Encoding utf8
         Write-Host "  -> $Slug/$($report.File) (redirect stub, $($filteredArray.Count) PRs counted)"

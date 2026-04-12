@@ -268,7 +268,12 @@
   if (!hasReportModeParam || urlUsers.length > 0) {
     try {
       var raw = localStorage.getItem(LS_ACTIVE_USERS_KEY);
-      if (raw) { savedUsers = JSON.parse(raw); }
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          savedUsers = parsed.filter(function(u) { return typeof u === 'string' && u.length > 0; });
+        }
+      }
       // Backward compat: fall back to single-user key
       if (savedUsers.length === 0) {
         var single = localStorage.getItem(LS_KEY) || '';
