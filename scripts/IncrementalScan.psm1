@@ -119,10 +119,6 @@ function Get-IncrementalPartition {
                 $mustRefresh = $true
             } elseif ($currentFp -ne $prevFp) {
                 $mustRefresh = $true
-            } elseif ($prevEntry.ci -ne 'SUCCESS') {
-                $mustRefresh = $true  # non-success CI can change via rerun without PR fields changing
-            } elseif ($prevEntry.mergeable -eq 'UNKNOWN') {
-                $mustRefresh = $true
             } else {
                 # Per-PR TTL: require a valid _refreshed_at (when this PR was last fully analyzed).
                 # Missing or malformed values indicate a legacy/corrupt cache entry — force refresh
