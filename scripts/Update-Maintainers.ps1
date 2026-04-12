@@ -141,13 +141,21 @@ foreach ($entry in $repos) {
                     $errText = (Get-Content -LiteralPath $errFile -Raw -ErrorAction SilentlyContinue) ?? ''
                 } else {
                     # gh can return exit 0 with GraphQL-level errors in the body
-                    $parsed = $result | ConvertFrom-Json
-                    if ($parsed.errors) {
+                    try {
+                        $parsed = $result | ConvertFrom-Json
+                    } catch {
                         $exitCode = 1
-                        $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
-                    } elseif (-not $parsed.data -or -not $parsed.data.search) {
-                        $exitCode = 1
-                        $errText = 'Response missing data.search'
+                        $errText = "Failed to parse response: $($_.Exception.Message)"
+                        $parsed = $null
+                    }
+                    if ($parsed) {
+                        if ($parsed.errors) {
+                            $exitCode = 1
+                            $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
+                        } elseif (-not $parsed.data -or -not $parsed.data.search) {
+                            $exitCode = 1
+                            $errText = 'Response missing data.search'
+                        }
                     }
                 }
                 if ($exitCode -eq 0) {
@@ -157,16 +165,20 @@ foreach ($entry in $repos) {
             } finally {
                 Remove-Item -LiteralPath $errFile -ErrorAction SilentlyContinue
             }
+            $displayErr = $errText.Trim()
+            if ([string]::IsNullOrWhiteSpace($displayErr)) {
+                $displayErr = "gh api graphql exited with code $exitCode"
+            }
             if ($attempt -lt $maxRetries) {
                 $delay = $attempt * 15
                 Write-Host "" # finish the "repo ..." line
-                Write-Host "    Attempt $attempt/$maxRetries failed: $($errText.Trim())" -ForegroundColor Yellow
+                Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Yellow
                 Write-Host "    Retrying in ${delay}s..." -ForegroundColor Yellow
                 Start-Sleep -Seconds $delay
                 Write-Host "  $repo ... " -NoNewline  # re-print the prefix for the next attempt
             } else {
                 Write-Host "" # finish the "repo ..." line
-                Write-Host "    Attempt $attempt/$maxRetries failed: $($errText.Trim())" -ForegroundColor Red
+                Write-Host "    Attempt $attempt/$maxRetries failed: $displayErr" -ForegroundColor Red
             }
         }
         if (-not $succeeded) {
