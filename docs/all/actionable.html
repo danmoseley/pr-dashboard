@@ -31,8 +31,8 @@
   .easy-badge { font-size: 0.95em; white-space: nowrap; }
   .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
   table#pr-table { table-layout: fixed; }
-  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-  .recent-tiles:empty { display: none; }
+  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 0.5em; }
+  .recent-tiles:empty { display: none; margin: 0; }
   .recent-tile {
     background: var(--header-bg); color: #8b949e; border: 1px solid var(--border);
     border-radius: 12px; padding: 2px 10px; font-size: 0.8em; cursor: pointer;
@@ -56,8 +56,8 @@
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
   <button id="clear-user-btn" class="clear-user-btn" onclick="clearUserOnly()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
-  <div class="recent-tiles" id="recent-tiles" style="margin:0"></div>
 </div>
+<div class="recent-tiles" id="recent-tiles"></div>
 <div class="user-input" id="filter-checkboxes" style="gap:12px;margin-top:-0.5em;margin-bottom:0.7em;flex-wrap:wrap">
   <label class="involves-label" id="involves-label" style="display:none">
     <input type="checkbox" id="involves-toggle">
