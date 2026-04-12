@@ -10,8 +10,8 @@ Describe 'Script hygiene' {
         $lines = Get-Content $workflow
         # Find lines that invoke the scan script and redirect stdout (> or 1>)
         $scanLines = $lines | Where-Object { $_ -match 'Get-PrTriageData\.ps1' }
-        # Reject stdout redirect: "> file" or "1> file" but not "2> file"
-        $violations = $scanLines | Where-Object { $_ -match '(?<![2-9])>\s*"' }
+        # Reject stdout redirect: >, >>, 1>, 1>> (quoted or unquoted targets) but not 2>/2>>
+        $violations = $scanLines | Where-Object { $_ -match '(?<![2-9])1?>>?\s*["\w/\$]' }
         $violations | Should -BeNullOrEmpty -Because 'stdout redirection causes PowerShell stream leaking; use -OutputFile parameter instead'
     }
 

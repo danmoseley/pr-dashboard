@@ -66,6 +66,10 @@ $ErrorActionPreference = "Stop"
 # stdout is not redirected, so PowerShell streams work naturally.
 function Emit-Output([string]$Text) {
     if ($OutputFile) {
+        $dir = Split-Path -Parent $OutputFile
+        if ($dir -and -not (Test-Path $dir)) {
+            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        }
         $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
         [System.IO.File]::WriteAllText($OutputFile, $Text, $utf8NoBom)
         Write-Verbose "Wrote $($Text.Length) chars to $OutputFile"
