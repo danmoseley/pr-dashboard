@@ -318,6 +318,8 @@
   document.getElementById('easy-action-toggle').checked = easyActionMode;
   document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
   document.getElementById('easy-action-maintainer-toggle').checked = easyActionMaintainerMode;
+  // Sync URL to reflect restored state (e.g. savedUser from localStorage)
+  history.replaceState(null, '', buildCurrentUrl());
   document.getElementById('community-toggle').checked = communityMode;
   document.getElementById('quickwins-toggle').checked = quickWinsMode;
   document.getElementById('stale-toggle').checked = staleMode;
