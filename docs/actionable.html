@@ -1297,7 +1297,7 @@
     if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
       areaHtml = pr.area_labels.map(function(lbl) {
         var short = lbl.replace(/^area-/i, '');
-        return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escJs(lbl) + '\')" title="Filter to ' + escHtml(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
+        return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escJs(lbl) + '\')" title="Filter to ' + escAttr(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
       }).join('');
     }
 
