@@ -54,13 +54,13 @@ function runScript(script, extraEnv) {
 
   // Four parallel workers:
   //   filters         : ~22 s
-  //   extended A-E,G-K: ~52 s  (fast groups)
+  //   extended A-E,G-K,L: ~52 s  (fast groups)
   //   extended F      : ~120 s (per-repo pages, one slow page-load per test)
   //   extended I      : ~90 s  (smoke tests, one slow page-load per test)
   // Wall-clock bottleneck: ~120 s instead of the previous ~264 s sequential run.
   const results = await Promise.all([
     runScript('test-pr-filters.js'),
-    runScript('test-pr-extended.js', { ONLY_GROUPS: 'A,B,C,D,E,G,H,J,K' }),
+    runScript('test-pr-extended.js', { ONLY_GROUPS: 'A,B,C,D,E,G,H,J,K,L' }),
     runScript('test-pr-extended.js', { ONLY_GROUPS: 'F' }),
     runScript('test-pr-extended.js', { ONLY_GROUPS: 'I' }),
   ]);

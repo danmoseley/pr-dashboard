@@ -28,7 +28,7 @@ npm run test:all
 
 # Run individual test files:
 node test-pr-filters.js    # filter UI tests (tests 1–18)
-node test-pr-extended.js   # extended tests (groups A–K)
+node test-pr-extended.js   # extended tests (groups A–L)
 ```
 
 `npm run test:all` uses `run-parallel.js` which spawns both scripts simultaneously,
@@ -45,7 +45,7 @@ This avoids interleaved output while still saving the time of running them in se
 - URL params (`?area=`, `?repo=`) restore filters on load
 - User filter + area filter combo
 
-`test-pr-extended.js` covers additional features (groups A–K):
+`test-pr-extended.js` covers additional features (groups A–L):
 - User filter, involves/next-action/easy-action toggles (A–C)
 - URL param round-trips (B)
 - Column sorting (D)
@@ -56,5 +56,6 @@ This avoids interleaved output while still saving the time of running them in se
 - Page smoke tests (I)
 - Recent name tiles (J)
 - Maintainer filter checkboxes (K)
+- Best-effort refresh button (L)
 
 Tests expect the server to be running on `http://localhost:8080`.

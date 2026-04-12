@@ -51,6 +51,17 @@ async function runTests() {
     return p;
   }
 
+  // Helper: find the login of the first PR author visible in the table.
+  async function findTableAuthor(page) {
+    return page.evaluate(() => {
+      for (const b of document.querySelectorAll('#pr-table tbody tr .author .filter-btn')) {
+        const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
+        if (m) return m[1];
+      }
+      return null;
+    });
+  }
+
   try {
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -1251,6 +1262,136 @@ async function runTests() {
     }
 
     } // end GROUP K
+
+    // ══════════════════════════════════════════════════════════════════════════
+    // GROUP L — Best-effort refresh button
+    // ══════════════════════════════════════════════════════════════════════════
+
+    if (shouldRun('L')) { log('\n── Group L: Best-effort refresh button ──');
+
+    // L1: Clicking the refresh button with NO user filter (maintainer mode) starts AND
+    // completes the refresh cycle, and skips Phase 2 (new PR search).
+    // Before the fix, the button handler returned early when currentUser was empty,
+    // so the status element stayed hidden and the button stayed enabled — a silent no-op.
+    {
+      const p = await openPage(ALL + '?nextmaintainer=true', 1, 30000);
+      // Wait for the summary-bar to become visible (shown by renderFilteredMaintainer)
+      const barReady = await p.waitForFunction(
+        () => {
+          const bar = document.getElementById('summary-bar');
+          return bar && bar.style.display === 'block';
+        },
+        null, { timeout: 10000 }
+      ).catch(() => null);
+
+      // catch(() => null): null indicates timeout — !null is truthy, triggering the fail path below.
+      if (!barReady) {
+        fail('L1: Best-effort refresh button (no user) — summary-bar did not appear within 10s');
+      } else {
+        // Wait for the refresh button to be injected (MutationObserver + 50ms debounce)
+        const refreshBtn = await p.waitForSelector('#view-refresh-btn', { timeout: 5000 }).catch(() => null);
+        if (!refreshBtn) {
+          fail('L1: Best-effort refresh button (no user) — button not injected in summary-bar');
+        } else {
+          // Force GitHub API calls to fail immediately so this test is deterministic even when
+          // outbound network is available on the host/CI machine.
+          const githubApiRoute = 'https://api.github.com/**';
+          await p.route(githubApiRoute, route => route.abort());
+          try {
+            await refreshBtn.click();
+            const [btnDisabled, statusText] = await p.evaluate(() => {
+              const btn = document.getElementById('view-refresh-btn');
+              const statusEl = document.getElementById('view-refresh-status');
+              return [btn ? btn.disabled : null, statusEl ? statusEl.textContent : ''];
+            });
+
+            if (!btnDisabled || !(statusText.includes('Checking') || statusText.includes('Core API exhausted'))) {
+              fail('L1: Best-effort refresh button (no user filter) — refresh did not start',
+                'btnDisabled=' + btnDisabled + ', statusText="' + statusText + '" (expected disabled=true and "Checking PRs…" or "Core API exhausted…")');
+            } else {
+              // Wait for the refresh cycle to complete: the final .then() re-enables the button.
+              // GitHub API requests are intercepted above, so Phase 1 fails fast without any
+              // external network dependency. If this times out, catch returns null;
+              // finalBtnEnabled will be false, failing the test.
+              await p.waitForFunction(
+                () => !document.getElementById('view-refresh-btn').disabled,
+                null, { timeout: 15000 }
+              ).catch(() => null);
+
+              const [finalBtnEnabled, finalStatus] = await p.evaluate(() => {
+                const btn = document.getElementById('view-refresh-btn');
+                const statusEl = document.getElementById('view-refresh-status');
+                return [btn ? !btn.disabled : null, statusEl ? statusEl.textContent : ''];
+              });
+
+              // Phase 2 (new PR search) should be skipped when no user filter is active.
+              // If it ran, the intermediate status "Searching for new PRs…" would have appeared,
+              // and the final status might mention "new PRs found". Verify it does not.
+              const completedOk = finalBtnEnabled;
+              const phase2Skipped = !finalStatus.includes('Searching for new PRs') &&
+                                    !finalStatus.includes('new PR');
+              if (completedOk && phase2Skipped) {
+                pass('L1: Best-effort refresh (no user filter) — starts, completes, and skips new-PR search');
+              } else {
+                fail('L1: Best-effort refresh (no user filter)',
+                  'finalBtnEnabled=' + finalBtnEnabled + ', finalStatus="' + finalStatus + '"');
+              }
+            }
+          } finally {
+            await p.unroute(githubApiRoute);
+          }
+        }
+      }
+      await p.close();
+    }
+
+    // L2: Clicking the refresh button WITH a user filter also starts refresh (regression).
+    // This worked before the fix too, but we verify it still works after.
+    {
+      const p = await openPage(ALL, 100);
+      const author = await findTableAuthor(p);
+      if (!author) {
+        fail('L2: Best-effort refresh button (user filter) — no author found in table');
+      } else {
+        await p.$eval('#user-field', (el, u) => { el.value = u; }, author);
+        await p.click('#go-btn');
+        // Wait for summary-bar to appear with user context.
+        // catch(() => null): null indicates timeout — !null is truthy, triggering the fail path below.
+        const barReady = await p.waitForFunction(
+          () => {
+            const bar = document.getElementById('summary-bar');
+            return bar && bar.style.display === 'block';
+          },
+          null, { timeout: 5000 }
+        ).catch(() => null);
+
+        if (!barReady) {
+          fail('L2: Best-effort refresh button (user filter) — summary-bar did not appear within 5s');
+        } else {
+          // Wait for refresh button to be injected
+          const refreshBtn = await p.waitForSelector('#view-refresh-btn', { timeout: 5000 }).catch(() => null);
+          if (!refreshBtn) {
+            fail('L2: Best-effort refresh button (user filter) — button not injected in summary-bar');
+          } else {
+            await refreshBtn.click();
+            const [btnDisabled, statusVisible] = await p.evaluate(() => {
+              const btn = document.getElementById('view-refresh-btn');
+              const statusEl = document.getElementById('view-refresh-status');
+              return [btn ? btn.disabled : null, statusEl ? statusEl.style.display !== 'none' : null];
+            });
+            if (btnDisabled && statusVisible) {
+              pass('L2: Best-effort refresh button (user filter) — click starts refresh (button disabled, status visible)');
+            } else {
+              fail('L2: Best-effort refresh button (user filter)',
+                'btnDisabled=' + btnDisabled + ', statusVisible=' + statusVisible);
+            }
+          }
+        }
+      }
+      await p.close();
+    }
+
+    } // end GROUP L
 
     // ── Summary ──────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
