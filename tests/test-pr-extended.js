@@ -54,7 +54,7 @@ async function runTests() {
   // Helper: find the login of the first PR author visible in the table.
   async function findTableAuthor(page) {
     return page.evaluate(() => {
-      for (const b of document.querySelectorAll('#pr-table tbody tr .filter-btn')) {
+      for (const b of document.querySelectorAll('#pr-table tbody tr .author .filter-btn')) {
         const m = (b.getAttribute('onclick') || '').match(/filterByUser\('([^']+)'\)/);
         if (m) return m[1];
       }
@@ -1293,46 +1293,52 @@ async function runTests() {
         if (!refreshBtn) {
           fail('L1: Best-effort refresh button (no user) — button not injected in summary-bar');
         } else {
-          // Click the button and immediately check for synchronous state changes.
-          // The fix causes doViewRefresh() to disable the button and show status synchronously
-          // before any async API calls. Without the fix, it returns early and does nothing.
-          await refreshBtn.click();
-          const [btnDisabled, statusText] = await p.evaluate(() => {
-            const btn = document.getElementById('view-refresh-btn');
-            const statusEl = document.getElementById('view-refresh-status');
-            return [btn ? btn.disabled : null, statusEl ? statusEl.textContent : ''];
-          });
-
-          if (!btnDisabled || !statusText.includes('Checking')) {
-            fail('L1: Best-effort refresh button (no user filter) — refresh did not start',
-              'btnDisabled=' + btnDisabled + ', statusText="' + statusText + '" (expected disabled=true and "Checking PRs…")');
-          } else {
-            // Wait for the refresh cycle to complete: the final .then() re-enables the button.
-            // API calls fail immediately in the sandbox, so this resolves quickly.
-            // If this times out, catch returns null; finalBtnEnabled will be false, failing the test.
-            await p.waitForFunction(
-              () => !document.getElementById('view-refresh-btn').disabled,
-              null, { timeout: 15000 }
-            ).catch(() => null);
-
-            const [finalBtnEnabled, finalStatus] = await p.evaluate(() => {
+          // Force GitHub API calls to fail immediately so this test is deterministic even when
+          // outbound network is available on the host/CI machine.
+          const githubApiRoute = 'https://api.github.com/**';
+          await p.route(githubApiRoute, route => route.abort());
+          try {
+            await refreshBtn.click();
+            const [btnDisabled, statusText] = await p.evaluate(() => {
               const btn = document.getElementById('view-refresh-btn');
               const statusEl = document.getElementById('view-refresh-status');
-              return [btn ? !btn.disabled : null, statusEl ? statusEl.textContent : ''];
+              return [btn ? btn.disabled : null, statusEl ? statusEl.textContent : ''];
             });
 
-            // Phase 2 (new PR search) should be skipped when no user filter is active.
-            // If it ran, the intermediate status "Searching for new PRs…" would have appeared,
-            // and the final status might mention "new PRs found". Verify it does not.
-            const completedOk = finalBtnEnabled;
-            const phase2Skipped = !finalStatus.includes('Searching for new PRs') &&
-                                  !finalStatus.includes('new PR');
-            if (completedOk && phase2Skipped) {
-              pass('L1: Best-effort refresh (no user filter) — starts, completes, and skips new-PR search');
+            if (!btnDisabled || !statusText.includes('Checking')) {
+              fail('L1: Best-effort refresh button (no user filter) — refresh did not start',
+                'btnDisabled=' + btnDisabled + ', statusText="' + statusText + '" (expected disabled=true and "Checking PRs…")');
             } else {
-              fail('L1: Best-effort refresh (no user filter)',
-                'finalBtnEnabled=' + finalBtnEnabled + ', finalStatus="' + finalStatus + '"');
+              // Wait for the refresh cycle to complete: the final .then() re-enables the button.
+              // GitHub API requests are intercepted above, so Phase 1 fails fast without any
+              // external network dependency. If this times out, catch returns null;
+              // finalBtnEnabled will be false, failing the test.
+              await p.waitForFunction(
+                () => !document.getElementById('view-refresh-btn').disabled,
+                null, { timeout: 15000 }
+              ).catch(() => null);
+
+              const [finalBtnEnabled, finalStatus] = await p.evaluate(() => {
+                const btn = document.getElementById('view-refresh-btn');
+                const statusEl = document.getElementById('view-refresh-status');
+                return [btn ? !btn.disabled : null, statusEl ? statusEl.textContent : ''];
+              });
+
+              // Phase 2 (new PR search) should be skipped when no user filter is active.
+              // If it ran, the intermediate status "Searching for new PRs…" would have appeared,
+              // and the final status might mention "new PRs found". Verify it does not.
+              const completedOk = finalBtnEnabled;
+              const phase2Skipped = !finalStatus.includes('Searching for new PRs') &&
+                                    !finalStatus.includes('new PR');
+              if (completedOk && phase2Skipped) {
+                pass('L1: Best-effort refresh (no user filter) — starts, completes, and skips new-PR search');
+              } else {
+                fail('L1: Best-effort refresh (no user filter)',
+                  'finalBtnEnabled=' + finalBtnEnabled + ', finalStatus="' + finalStatus + '"');
+              }
             }
+          } finally {
+            await p.unroute(githubApiRoute);
           }
         }
       }

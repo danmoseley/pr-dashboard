@@ -391,7 +391,10 @@
       .then(function() {
         // Phase 2: Discover new PRs (uses search rate limit — separate from core)
         // Requires a user filter; skip if no user is active.
-        if (!currentUser) return { prs: [], truncated: false, failed: false };
+        if (!currentUser) {
+          if (statusEl) statusEl.textContent = 'Skipping new PR discovery (no active user)\u2026';
+          return { prs: [], truncated: false, failed: false };
+        }
         if (statusEl) statusEl.textContent = 'Searching for new PRs\u2026';
         return searchNewPrs(currentUser, existingKeys, repoList)
           .catch(function(err) {
