@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 
 const BASE = 'http://localhost:8080';
-const PAGE = BASE + '/all/actionable.html';
+const PAGE = BASE + '/actionable.html';
 
 async function log(msg) { console.log('[' + new Date().toISOString().slice(11,19) + '] ' + msg); }
 
@@ -85,7 +85,7 @@ async function runTests() {
 
     // ── Test 6: Ctrl+click adds second area filter (REAL modifier, not synthetic) ──
     // Navigate back to clean URL (reload would preserve ?area= query and re-filter)
-    await page.goto('http://localhost:8080/all/actionable.html', { waitUntil: 'domcontentloaded' });
+    await page.goto('http://localhost:8080/actionable.html', { waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => document.querySelectorAll('#pr-table tbody tr').length > 0, { timeout: TABLE_TIMEOUT }).catch(() => null);
 
     // Find a row with 2+ area labels so after filtering by label1, label2 is still in a visible row

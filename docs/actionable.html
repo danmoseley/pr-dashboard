@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Actionable PRs — All Repos - PR Dashboard</title>
+<link rel="stylesheet" href="./shared-styles.css">
+<style>
+  /* Page-specific styles for cross-repo view */
+  .user-input { margin-bottom: 1em; display: flex; align-items: center; gap: 8px; }
+  .user-input input[type="text"] { background: var(--header-bg); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 3px 10px; font-size: 0.85em; width: 220px; }
+  .user-input input[type="text"]::placeholder { color: #484f58; }
+  .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
+  .user-input > button { background: #238636; color: #fff; border: none; border-radius: 6px;
+    padding: 3px 12px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
+  .user-input > button:hover { background: #2ea043; }
+  .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
+    color: #8b949e !important; padding: 3px 8px !important; font-size: 0.85em !important;
+    font-weight: normal !important; line-height: 1; }
+  .clear-user-btn:hover { color: var(--fg) !important; background: none !important; }
+  .involves-label { font-size: 0.85em; color: #8b949e; cursor: pointer; user-select: none;
+    display: flex; align-items: center; gap: 4px; margin-left: 4px; }
+  .summary-bar { background: var(--header-bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 8px 14px; margin-bottom: 1em; font-size: 0.9em; display: none; }
+  .summary-bar .total { font-weight: 600; }
+  .summary-bar .repo-breakdown { color: #8b949e; margin-left: 8px; }
+  .status { color: #8b949e; font-size: 0.9em; margin: 2em 0; }
+  .error { color: #f85149; }
+  .repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 0.9em; }
+  .easy-badge { font-size: 0.95em; white-space: nowrap; }
+  .easy-why-btn { font-size: 0.7em; vertical-align: super; margin-left: 1px; }
+  table#pr-table { table-layout: fixed; }
+  .recent-tiles { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; }
+  .recent-tiles:empty { display: none; }
+  .recent-tile {
+    background: var(--header-bg); color: #8b949e; border: 1px solid var(--border);
+    border-radius: 12px; padding: 2px 10px; font-size: 0.8em; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    user-select: none; white-space: nowrap;
+  }
+  .recent-tile:hover { border-color: #484f58; color: var(--fg); }
+  .recent-tile.active { background: rgba(56,139,253,0.12); border-color: rgba(56,139,253,0.35); color: var(--link); }
+</style>
+</head>
+<body>
+<nav>
+  <a href="./index.html">Dashboard</a> |
+  <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback&amp;body=Report:%20actionable.html" target="_blank">&#x1F4AC; Feedback</a>
+</nav>
+<h1>Actionable PRs &#8212; All Repos</h1>
+<p class="meta">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
+<p class="meta" id="meta-line"></p>
+
+<div class="user-input">
+  <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
+  <button id="go-btn" onclick="applyUser()">Go</button>
+  <button id="clear-user-btn" class="clear-user-btn" onclick="clearUserOnly()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
+  <div class="recent-tiles" id="recent-tiles"></div>
+</div>
+<div class="user-input" id="filter-checkboxes" style="gap:12px;margin-top:-0.5em;margin-bottom:0.7em;flex-wrap:wrap">
+  <label class="involves-label" id="involves-label">
+    <input type="checkbox" id="involves-toggle" checked disabled>
+    Include all involved PRs
+  </label>
+  <label class="involves-label" id="next-action-label" style="display:none">
+    <input type="checkbox" id="next-action-toggle">
+    Next action on me only
+  </label>
+  <label class="involves-label" id="easy-action-label" style="display:none">
+    <input type="checkbox" id="easy-action-toggle">
+    Easy next actions only
+  </label>
+  <label class="involves-label" id="next-action-maintainer-label" style="display:none">
+    <input type="checkbox" id="next-action-maintainer-toggle">
+    Next action on maintainer
+  </label>
+  <label class="involves-label" id="easy-action-maintainer-label" style="display:none">
+    <input type="checkbox" id="easy-action-maintainer-toggle">
+    Easy next action on maintainer
+  </label>
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="community-toggle">
+    Community awaiting review
+  </label>
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="quickwins-toggle">
+    Quick wins: Ready to merge
+  </label>
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="stale-toggle">
+    Consider closing
+  </label>
+</div>
+
+<div class="summary-bar" id="summary-bar"></div>
+<div class="filter-banner" id="filter-banner"></div>
+
+<div id="status" class="status">Loading repository data&#8230;</div>
+<div id="content"></div>
+
+<details class="scoring">
+  <summary style="color:#8b949e">How are the scores calculated?</summary>
+  <p>Each PR has three scores on a 0&ndash;10 scale:</p>
+  <div style="display:flex; gap:1.5em; flex-wrap:wrap; min-width:0;">
+    <div style="flex:1; min-width:200px;">
+      <h4 style="margin:0.5em 0 0.3em">Ready &mdash; how close to merging?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>3.0</td><td>No merge conflicts</td></tr>
+        <tr><td>2.5</td><td>CI passing <sup>1</sup></td></tr>
+        <tr><td>2.5</td><td>Has approval <sup>1</sup></td></tr>
+        <tr><td>2.5</td><td>Feedback addressed <sup>1</sup></td></tr>
+        <tr><td>2.5</td><td>Discussion healthy <sup>1</sup></td></tr>
+        <tr><td>2.0&ndash;3.0</td><td>Small, easy to review (2.0) / trivial &le;2 files, &le;20 lines (3.0) <sup>1</sup></td></tr>
+        <tr><td>1.5</td><td>Has maintainer review <sup>1</sup></td></tr>
+        <tr><td>1.0</td><td>Recently active <sup>1</sup></td></tr>
+        <tr><td>0.5&ndash;1.0</td><td>Team or known author (1.0) / community (0.5) <sup>1</sup></td></tr>
+        <tr><td>0.7</td><td>Recently updated <sup>1</sup></td></tr>
+        <tr><td>0.5</td><td>Well labeled <sup>1</sup></td></tr>
+        <tr><td>0.3</td><td>Good review momentum <sup>1</sup></td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <h4 style="margin:0.5em 0 0.3em">Need &mdash; benefits from maintainer attention?</h4>
+      <table class="scoring-table">
+        <tr><th>Points</th><th>Signal</th></tr>
+        <tr><td>1.5</td><td>No approval yet</td></tr>
+        <tr><td>1.5</td><td>CI blocking merge (otherwise merge-ready)</td></tr>
+        <tr><td>1.0</td><td>Community author</td></tr>
+        <tr><td>1.0</td><td>Reviewed, not approved</td></tr>
+        <tr><td>1.0</td><td>Has unresolved feedback</td></tr>
+        <tr><td>1.0</td><td>High interest</td></tr>
+        <tr><td>0.5</td><td>Large change (&gt;200 lines)</td></tr>
+        <tr><td>0.5</td><td>Trivial change (&le;2 files, &le;20 lines, no unresolved threads)</td></tr>
+        <tr><td>0.5</td><td>Old but active (&gt;30d)</td></tr>
+        <tr><td>&minus;1.5</td><td>Author silent &gt;14d (ball in their court)</td></tr>
+        <tr><td>&minus;0.5</td><td>Author slow 7&ndash;14d (ball in their court)</td></tr>
+      </table>
+    </div>
+    <div style="flex:1; min-width:200px;">
+      <h4 style="margin:0.5em 0 0.3em">Action &mdash; best use of your time?</h4>
+      <p><code>(ready + 1) &times; (need + 1)</code><br>normalized to 0&ndash;10</p>
+      <p>PRs that are both high-need <em>and</em> near-ready rank highest.</p>
+      <p>&#x1F3AF; = action &ge; 5<br>&#x26A1; = action 4&ndash;5</p>
+    </div>
+    <div style="flex:1; min-width:180px;" id="easy-action-details">
+      <h4 style="margin:0.5em 0 0.3em">Easy next action filter</h4>
+      <table class="scoring-table">
+        <tr><td>&#x1F7E2;</td><td><b>Merge it</b></td><td>&ldquo;Ready to merge&rdquo;</td></tr>
+        <tr><td>&#x1F440;</td><td><b>Quick review</b></td><td>&le;50 lines, &le;3 files, CI ok, &le;3 comments</td></tr>
+        <tr><td>&#x2705;</td><td><b>Needs approval</b></td><td>CI green, no conflicts, no threads, &le;200 lines</td></tr>
+        <tr><td>&#x1F527;</td><td><b>Needs rebase</b></td><td>Approved, has conflicts, no threads</td></tr>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:0.85em; margin-top:0.8em;"><sup>1</sup> Weight from <a href="https://github.com/danmoseley/pr-dashboard/blob/main/scripts/weightings/README.md">980-PR statistical analysis</a>. Click any column header to re-sort. Click <strong>[?]</strong> on any score to see the breakdown.</p>
+</details>
+
+<script src="./shared-ui.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  // Escapes a string for use as a JS string literal inside an inline event handler.
+  // HTML entity escaping is NOT sufficient here — the HTML parser decodes entities
+  // before the JS engine sees them, so &#39; becomes ' and breaks the string.
+  function escJs(s) {
+    return String(s == null ? '' : s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\x22');
+  }
+
+  // --- State ---
+  var allPrs = [];        // merged from all repos, each with .slug and .repo
+  var repoList = [];      // [{slug, repo}]
+  var activeUsers = [];    // filter usernames (multi-select via Ctrl-click tiles)
+  var loaded = false;
+  var involvesMode = false; // whether "Include all involved PRs" is checked
+  var nextActionOnlyMode = false; // whether "Next action on me only" is checked
+
+  var easyActionMode = false;         // whether "Easy next actions only" is checked (user-filter context)
+  var nextActionMaintainerMode = false; // whether "Next action on maintainer" is checked (no-user context)
+  var easyActionMaintainerMode = false; // whether "Easy next action on maintainer" is checked (no-user context)
+  var communityMode = false;           // "Community awaiting review" filter (URL-only, not localStorage)
+  var quickWinsMode = false;           // "Quick wins: Ready to merge" filter (URL-only, not localStorage)
+  var staleMode = false;               // "Consider closing" filter (URL-only, not localStorage)
+  var activeAreas = [];   // area labels currently filtered (multi-select)
+  var activeRepos = [];   // repo slugs currently filtered (multi-select)
+  var moreRowsExpanded = false; // track whether "Show N more" rows are visible
+  var ctrlHeld = false;   // true while Ctrl/Cmd key is physically held down
+
+  // Ctrl/Cmd held: temporarily un-hide all rows so user can Ctrl+click any area
+  // label even in filtered-out rows. On release, the combined OR filter applies.
+  document.addEventListener('keydown', function(e) {
+    if ((e.key === 'Control' || e.key === 'Meta') && !ctrlHeld) {
+      ctrlHeld = true;
+      if (activeAreas.length > 0 || activeRepos.length > 0) {
+        document.querySelectorAll('#pr-table tbody tr').forEach(function(r) { r.style.display = ''; });
+      }
+    }
+  });
+  document.addEventListener('keyup', function(e) {
+    if (e.key === 'Control' || e.key === 'Meta') {
+      ctrlHeld = false;
+      applyTableFilter();
+    }
+  });
+
+  var LS_KEY = 'pr-dashboard-user';
+  var LS_INVOLVES_KEY = 'pr-dashboard-involves';
+  var LS_NEXT_ACTION_KEY = 'pr-dashboard-next-action-only';
+  var LS_EASY_ACTION_KEY = 'pr-dashboard-easy-action';
+  var LS_NEXT_MAINTAINER_KEY = 'pr-dashboard-next-maintainer';
+  var LS_EASY_MAINTAINER_KEY = 'pr-dashboard-easy-maintainer';
+  var LS_NM_BEFORE_EASY_KEY = 'pr-dashboard-nm-before-easy';
+  var LS_ACTIVE_USERS_KEY = 'pr-dashboard-active-users';
+  var LS_RECENT_USERS_KEY = 'pr-dashboard-recent-users';
+  var MAX_RECENT_USERS = 5;
+
+  // --- Init ---
+  var params = new URLSearchParams(location.search);
+  var urlUsers = (function() {
+    var raw = params.getAll('user').filter(Boolean);
+    if (raw.length === 0) {
+      var lu = params.get('user') || '';
+      if (lu) raw = [lu];
+    }
+    var seen = Object.create(null);
+    return raw.map(function(u) { return (u || '').trim().replace(/^@/, ''); })
+      .filter(function(u) {
+        if (!u) return false;
+        var key = u.toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
+  })();
+  var urlInvolves = params.get('involves');
+  var urlNextAction = params.get('nextaction');
+  var urlEasyAction = params.get('easyaction');
+  var urlNextMaintainer = params.get('nextmaintainer');
+  var urlEasyMaintainer = params.get('easymaintainer');
+  // Report-mode filters: URL-authoritative only, NOT localStorage-persisted
+  var urlCommunity = params.get('community');
+  var urlQuickWins = params.get('quickwins');
+  var urlStale = params.get('stale');
+  if (urlCommunity !== null) communityMode = urlCommunity === 'true' || urlCommunity === '1';
+  if (urlQuickWins !== null) quickWinsMode = urlQuickWins === 'true' || urlQuickWins === '1';
+  if (urlStale !== null) staleMode = urlStale === 'true' || urlStale === '1';
+  try {
+    // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
+    // For backward compat, also accept the legacy comma-separated form (?area=a,b).
+    activeAreas = params.getAll('area').filter(Boolean);
+    if (activeAreas.length === 0) {
+      var legacyArea = params.get('area') || '';
+      activeAreas = legacyArea ? legacyArea.split(',').filter(Boolean) : [];
+    }
+    activeRepos = params.getAll('repo').filter(Boolean);
+    if (activeRepos.length === 0) {
+      var legacyRepo = params.get('repo') || '';
+      activeRepos = legacyRepo ? legacyRepo.split(',').filter(Boolean) : [];
+    }
+  } catch(e) {}
+  var savedUsers = [];
+  // When report-mode params are present without a user param, don't restore savedUsers
+  // from localStorage. This prevents shared links like ?stale=true from silently
+  // becoming user-scoped views.
+  var hasReportModeParam = urlCommunity !== null || urlQuickWins !== null || urlStale !== null;
+  if (!hasReportModeParam || urlUsers.length > 0) {
+    try {
+      var raw = localStorage.getItem(LS_ACTIVE_USERS_KEY);
+      if (raw) {
+        var parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          savedUsers = parsed.filter(function(u) { return typeof u === 'string' && u.length > 0; });
+        }
+      }
+      // Backward compat: fall back to single-user key
+      if (savedUsers.length === 0) {
+        var single = localStorage.getItem(LS_KEY) || '';
+        if (single) savedUsers = [single];
+      }
+    } catch(e) {}
+  }
+  // User-context URL params (involves/nextaction/easyaction) are only meaningful when a
+  // user filter is active. Ignore them when no user is set so stale URLs like
+  // ?involves=true don't silently flip filter state.
+  var hasUser = urlUsers.length > 0 || savedUsers.length > 0;
+  if (hasUser && urlInvolves !== null) {
+    involvesMode = urlInvolves === 'true' || urlInvolves === '1';
+  } else {
+    try { involvesMode = localStorage.getItem(LS_INVOLVES_KEY) === 'true'; } catch(e) {}
+  }
+  if (hasUser && urlNextAction !== null) {
+    nextActionOnlyMode = urlNextAction === 'true' || urlNextAction === '1';
+  } else {
+    try { nextActionOnlyMode = localStorage.getItem(LS_NEXT_ACTION_KEY) === 'true'; } catch(e) {}
+  }
+  if (hasUser && urlEasyAction !== null) {
+    easyActionMode = urlEasyAction === 'true' || urlEasyAction === '1';
+  } else {
+    try { easyActionMode = localStorage.getItem(LS_EASY_ACTION_KEY) === 'true'; } catch(e) {}
+  }
+  if (urlNextMaintainer !== null) {
+    nextActionMaintainerMode = urlNextMaintainer === 'true' || urlNextMaintainer === '1';
+  } else {
+    try { nextActionMaintainerMode = localStorage.getItem(LS_NEXT_MAINTAINER_KEY) === 'true'; } catch(e) {}
+  }
+  if (urlEasyMaintainer !== null) {
+    easyActionMaintainerMode = urlEasyMaintainer === 'true' || urlEasyMaintainer === '1';
+  } else {
+    try { easyActionMaintainerMode = localStorage.getItem(LS_EASY_MAINTAINER_KEY) === 'true'; } catch(e) {}
+  }
+  var initialUsers = urlUsers.length > 0 ? urlUsers : savedUsers;
+  if (initialUsers.length > 0) {
+    activeUsers = initialUsers.slice();
+    document.getElementById('user-field').value = initialUsers[0];
+    document.getElementById('involves-toggle').disabled = false;
+    document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
+    initialUsers.forEach(function(u) { addRecentUser(u); });
+    // Ensure LS_KEY matches the displayed user (addRecentUser writes LS_KEY on each call)
+    try { localStorage.setItem(LS_KEY, initialUsers[0]); } catch(e) {}
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(initialUsers)); } catch(e) {}
+    document.getElementById('clear-user-btn').style.display = '';
+  } else {
+    // No user filter: involves is forced checked+disabled (already set in HTML)
+    involvesMode = true;
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
+  }
+  document.getElementById('involves-toggle').checked = initialUsers.length > 0 ? involvesMode : true;
+  document.getElementById('next-action-toggle').checked = nextActionOnlyMode;
+  document.getElementById('easy-action-toggle').checked = easyActionMode;
+  document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
+  document.getElementById('easy-action-maintainer-toggle').checked = easyActionMaintainerMode;
+  // Sync URL to reflect restored state (e.g. savedUser from localStorage)
+  history.replaceState(null, '', buildCurrentUrl());
+  document.getElementById('community-toggle').checked = communityMode;
+  document.getElementById('quickwins-toggle').checked = quickWinsMode;
+  document.getElementById('stale-toggle').checked = staleMode;
+  renderRecentTiles();
+
+  // Clean up URL: remove user-context params (involves/nextaction/easyaction) if no user is set.
+  // This prevents ?involves=true from appearing in the URL when there is no user filter.
+  if (activeUsers.length === 0 && location.search) {
+    history.replaceState(null, '', buildCurrentUrl());
+  }
+
+  // Enter key on input
+  document.getElementById('user-field').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') applyUser();
+  });
+
+  // Involves toggle handler
+  var involvesToggle = document.getElementById('involves-toggle');
+  if (!involvesToggle) {
+    console.error('involves-toggle element not found!');
+  } else {
+    involvesToggle.addEventListener('change', function() {
+      involvesMode = this.checked;
+      try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
+    });
+  }
+
+  // Next action on me only toggle handler
+  var nextActionToggle = document.getElementById('next-action-toggle');
+  var savedInvolvesBeforeNextAction = involvesMode;
+  if (nextActionToggle) {
+    nextActionToggle.addEventListener('change', function() {
+      nextActionOnlyMode = this.checked;
+      try { localStorage.setItem(LS_NEXT_ACTION_KEY, nextActionOnlyMode ? 'true' : 'false'); } catch(e) {}
+      if (nextActionOnlyMode) {
+        // Save involves state, then check and disable it
+        savedInvolvesBeforeNextAction = involvesMode;
+        involvesToggle.checked = true;
+        involvesToggle.disabled = true;
+        involvesMode = true;
+      } else {
+        // Restore involves to its previous state
+        involvesMode = savedInvolvesBeforeNextAction;
+        involvesToggle.checked = involvesMode;
+        involvesToggle.disabled = false;
+      }
+      try { localStorage.setItem(LS_INVOLVES_KEY, involvesMode ? 'true' : 'false'); } catch(e) {}
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
+    });
+  }
+
+  // Apply initial disabled state if next-action was persisted
+  if (nextActionOnlyMode) {
+    savedInvolvesBeforeNextAction = involvesMode;
+    involvesToggle.checked = true;
+    involvesToggle.disabled = true;
+    involvesMode = true;
+  }
+
+  // Easy action toggle handler
+  var easyActionToggle = document.getElementById('easy-action-toggle');
+  if (easyActionToggle) {
+    easyActionToggle.addEventListener('change', function() {
+      easyActionMode = this.checked;
+      try { localStorage.setItem(LS_EASY_ACTION_KEY, easyActionMode ? 'true' : 'false'); } catch(e) {}
+      if (activeUsers.length > 0) history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length > 0 && loaded) renderFiltered(activeUsers);
+    });
+  }
+
+  // Next action on maintainer toggle handler (no-user context)
+  var nextActionMaintainerToggle = document.getElementById('next-action-maintainer-toggle');
+  // Tracks the next-maintainer state that was active before easy-maintainer was enabled.
+  // Only read from localStorage; written when easy-maintainer is toggled on.
+  var savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+  try {
+    var savedNextMaintainerBeforeEasyValue = localStorage.getItem(LS_NM_BEFORE_EASY_KEY);
+    if (savedNextMaintainerBeforeEasyValue !== null) {
+      savedNextMaintainerBeforeEasy = savedNextMaintainerBeforeEasyValue === 'true';
+    }
+  } catch(e) {}
+  if (nextActionMaintainerToggle) {
+    nextActionMaintainerToggle.addEventListener('change', function() {
+      nextActionMaintainerMode = this.checked;
+      try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
+    });
+  }
+
+  // Applies the grayed-out/disabled state to the next-maintainer toggle when easy-maintainer
+  // is enabled. Mirrors the pattern used by nextActionOnlyMode → involvesToggle.
+  function applyEasyMaintainerImpliedState() {
+    if (!nextActionMaintainerToggle) return;
+    nextActionMaintainerToggle.checked = true;
+    nextActionMaintainerToggle.disabled = true;
+    nextActionMaintainerMode = true;
+  }
+
+  // Easy next action on maintainer toggle handler (no-user context)
+  var easyActionMaintainerToggle = document.getElementById('easy-action-maintainer-toggle');
+  if (easyActionMaintainerToggle) {
+    easyActionMaintainerToggle.addEventListener('change', function() {
+      easyActionMaintainerMode = this.checked;
+      try { localStorage.setItem(LS_EASY_MAINTAINER_KEY, easyActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      if (easyActionMaintainerMode) {
+        // Save next-maintainer state, then check and disable it (easy implies next-maintainer)
+        savedNextMaintainerBeforeEasy = nextActionMaintainerMode;
+        try { localStorage.setItem(LS_NM_BEFORE_EASY_KEY, savedNextMaintainerBeforeEasy ? 'true' : 'false'); } catch(e) {}
+        applyEasyMaintainerImpliedState();
+        // Persist the forced NM=true state
+        try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, 'true'); } catch(e) {}
+      } else {
+        // Restore next-maintainer to its previous state
+        nextActionMaintainerMode = savedNextMaintainerBeforeEasy;
+        nextActionMaintainerToggle.checked = nextActionMaintainerMode;
+        nextActionMaintainerToggle.disabled = false;
+        try { localStorage.removeItem(LS_NM_BEFORE_EASY_KEY); } catch(e) {}
+        try { localStorage.setItem(LS_NEXT_MAINTAINER_KEY, nextActionMaintainerMode ? 'true' : 'false'); } catch(e) {}
+      }
+      history.replaceState(null, '', buildCurrentUrl());
+      if (activeUsers.length === 0 && loaded) renderFilteredMaintainer();
+    });
+  }
+
+  // Apply initial disabled state if easy-action-maintainer was persisted.
+  // showMaintainerToggles() will also call applyEasyMaintainerImpliedState() if easy is active
+  // when switching from user to maintainer context — this is intentional and harmless.
+  if (easyActionMaintainerMode) {
+    applyEasyMaintainerImpliedState();
+  }
+
+  // --- Report-mode filter toggle handlers (URL-only, not localStorage) ---
+  function reRender() {
+    history.replaceState(null, '', buildCurrentUrl());
+    if (!loaded) return;
+    if (activeUsers.length > 0) renderFiltered(activeUsers);
+    else renderFilteredMaintainer();
+  }
+
+  var communityToggle = document.getElementById('community-toggle');
+  if (communityToggle) {
+    communityToggle.addEventListener('change', function() {
+      communityMode = this.checked;
+      reRender();
+    });
+  }
+
+  var quickWinsToggle = document.getElementById('quickwins-toggle');
+  if (quickWinsToggle) {
+    quickWinsToggle.addEventListener('change', function() {
+      quickWinsMode = this.checked;
+      reRender();
+    });
+  }
+
+  var staleToggle = document.getElementById('stale-toggle');
+  if (staleToggle) {
+    staleToggle.addEventListener('change', function() {
+      staleMode = this.checked;
+      reRender();
+    });
+  }
+
+  // Start fetching
+  fetchData();
+
+  // --- Data loading ---
+  function fetchData() {
+    fetch('./repos.json')
+      .then(function(r) { return r.json(); })
+      .then(function(repos) {
+        repoList = repos;
+        var fetches = repos.map(function(repo) {
+          var scanP = fetch('./' + repo.slug + '/scan.json')
+            .then(function(r) { return r.json(); })
+            .catch(function() { return { prs: [] }; });
+          var metaP = fetch('./' + repo.slug + '/meta.json')
+            .then(function(r) { return r.json(); })
+            .catch(function() { return {}; });
+          return Promise.all([scanP, metaP]).then(function(pair) {
+            var data = pair[0], meta = pair[1];
+            var slug = repo.slug;
+            var repoName = data.repo || repo.repo;
+            (data.prs || []).forEach(function(pr) {
+              pr._slug = slug;
+              pr._repo = repoName;
+            });
+            return { slug: slug, repo: repoName, prs: data.prs || [], updated: meta.updated || null, schedule_desc: meta.schedule_desc || null, _rate_limit: data._rate_limit || null };
+          });
+        });
+        return Promise.all(fetches);
+      })
+      .then(function(results) {
+        allPrs = [];
+        var timestamps = [];
+        results.forEach(function(r) {
+          allPrs = allPrs.concat(r.prs);
+          if (r.updated) timestamps.push(new Date(r.updated));
+        });
+        allPrs.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+        // Pre-compute easy action categories once after load so renderFiltered doesn't recompute them on every call
+        allPrs.forEach(function(pr) { pr._easyCategory = getEasyActionCategory(pr); });
+        loaded = true;
+        document.getElementById('status').style.display = 'none';
+
+        // Show update timestamp and schedule summary
+        if (timestamps.length > 0) {
+          timestamps.sort(function(a, b) { return a - b; });
+          var newest = timestamps[timestamps.length - 1];
+          var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Los_Angeles', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' }).formatToParts(newest);
+          var p = {}; parts.forEach(function(x) { p[x.type] = x.value; });
+          var tz = p.timeZoneName || '';
+          var tzAbbr = /^P[SD]T$/.test(tz) ? tz : (tz.indexOf('-7') >= 0 ? 'PDT' : 'PST');
+          var ts = p.year + '-' + p.month + '-' + p.day + ' ' + p.hour + ':' + p.minute + ' ' + tzAbbr;
+          // Build schedule description from per-repo metadata
+          var schedDescs = {};
+          results.forEach(function(r) { if (r.schedule_desc) schedDescs[r.schedule_desc] = true; });
+          var uniqueScheds = Object.keys(schedDescs);
+          var schedText = uniqueScheds.length === 1 ? uniqueScheds[0] : uniqueScheds.join(' / ');
+          if (!schedText) schedText = '~daily';
+          document.getElementById('meta-line').textContent =
+            'Updated ' + schedText + ', last at ' + ts + ' \u00B7 ' + allPrs.length + ' PRs across ' + results.length + ' repos';
+          // Expose oldest scan timestamp so pr-view-refresh.js can filter new-PR discovery
+          document.getElementById('meta-line').setAttribute('data-server-updated', timestamps[0].toISOString());
+        }
+
+        // Show API rate limit in footer (subtle, for admins)
+        // Only use _rate_limit from the most recent scan run to avoid mixing stale data
+        // Use 1h tolerance since repos in the same run finish within minutes of each other
+        var rateLimitResults = results.filter(function(r) { return r._rate_limit; });
+        var newestUpdatedMs = null;
+        rateLimitResults.forEach(function(r) {
+          if (!r.updated) return;
+          var ms = new Date(r.updated).getTime();
+          if (!isNaN(ms) && (newestUpdatedMs === null || ms > newestUpdatedMs)) newestUpdatedMs = ms;
+        });
+        if (newestUpdatedMs !== null) {
+          var ONE_HOUR_MS = 3600000;
+          rateLimitResults = rateLimitResults.filter(function(r) {
+            if (!r.updated) return false;
+            var ms = new Date(r.updated).getTime();
+            return !isNaN(ms) && (newestUpdatedMs - ms) < ONE_HOUR_MS;
+          });
+        }
+        var rateLimits = rateLimitResults
+          .map(function(r) { return { repo: r.repo, rest_remaining: r._rate_limit.rest_remaining, graphql_remaining: r._rate_limit.graphql_remaining, reset: r._rate_limit.reset, total_used: r._rate_limit.total_used }; });
+        if (window.showRateLimit) window.showRateLimit(rateLimits);
+
+        if (activeUsers.length > 0) {
+          renderFiltered(activeUsers);
+        } else {
+          renderFilteredMaintainer();
+        }
+      })
+      .catch(function(err) {
+        document.getElementById('status').className = 'status error';
+        document.getElementById('status').textContent = 'Failed to load data: ' + err.message;
+      });
+  }
+
+  // --- Actions (global) ---
+  function buildCurrentUrl() {
+    var p = new URLSearchParams();
+    activeUsers.forEach(function(u) { p.append('user', u); });
+    if (activeUsers.length > 0 && involvesMode) p.set('involves', 'true');
+    if (activeUsers.length > 0 && nextActionOnlyMode) p.set('nextaction', 'true');
+    if (activeUsers.length > 0 && easyActionMode) p.set('easyaction', 'true');
+    if (nextActionMaintainerMode) p.set('nextmaintainer', 'true');
+    if (easyActionMaintainerMode) p.set('easymaintainer', 'true');
+    if (communityMode) p.set('community', 'true');
+    if (quickWinsMode) p.set('quickwins', 'true');
+    if (staleMode) p.set('stale', 'true');
+    activeAreas.forEach(function(a) { p.append('area', a); });
+    activeRepos.forEach(function(r) { p.append('repo', r); });
+    var qs = p.toString();
+    return location.pathname + (qs ? '?' + qs : '') + (location.hash || '');
+  }
+
+  // Clears only the user filter, preserving area/repo filters and sort order.
+  // Used by the ✕ button and empty-Go; full reset lives in clearUser().
+  window.clearUserOnly = function() {
+    activeUsers = [];
+    document.getElementById('user-field').value = '';
+    document.getElementById('clear-user-btn').style.display = 'none';
+    try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
+    showMaintainerToggles();
+    history.replaceState(null, '', buildCurrentUrl());
+    renderRecentTiles();
+    var summaryBar = document.getElementById('summary-bar');
+    if (loaded) renderFilteredMaintainer();
+  }
+
+  window.applyUser = function() {
+    var name = document.getElementById('user-field').value.trim().replace(/^@/, '');
+    if (!name) {
+      clearUserOnly();
+      return;
+    }
+    activeUsers = [name];
+    addRecentUser(name);
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
+    renderRecentTiles();
+    showUserToggles();
+    history.replaceState(null, '', buildCurrentUrl());
+    if (loaded) renderFiltered(activeUsers);
+  };
+
+  window.filterByUser = function(name) {
+    document.getElementById('user-field').value = name;
+    activeUsers = [name];
+    addRecentUser(name);
+    try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
+    renderRecentTiles();
+    showUserToggles();
+    history.replaceState(null, '', buildCurrentUrl());
+    renderFiltered(activeUsers);
+  };
+
+  // --- Secondary filters ---
+
+  function applyTableFilter() {
+    var table = document.getElementById('pr-table');
+    if (table) {
+      var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
+      var rows = table.querySelectorAll('tbody tr');
+      rows.forEach(function(r) {
+        var show = true;
+        if (activeAreas.length > 0) {
+          var rowLabels = (',' + (r.getAttribute('data-labels') || '') + ',').toLowerCase();
+          var match = activeAreas.some(function(a) {
+            return rowLabels.indexOf(',' + a.toLowerCase() + ',') >= 0;
+          });
+          if (!match) show = false;
+        }
+        if (activeRepos.length > 0 && show) {
+          var rowRepo = r.getAttribute('data-repo') || '';
+          if (activeRepos.indexOf(rowRepo) < 0) show = false;
+        }
+        // When filters are active, show ALL matching rows (including more-rows).
+        // When no filters, respect moreRowsExpanded state.
+        if (!hasFilters && show && r.classList.contains('more-row') && !moreRowsExpanded) show = false;
+        r.style.display = show ? '' : 'none';
+      });
+      // Hide the show-more toggle when filters are active (all matching rows are already shown)
+      var btn = document.getElementById('toggle-more');
+      if (btn) {
+        btn.style.display = hasFilters ? 'none' : '';
+        // Reset button text when filters cleared and rows are collapsed again
+        if (!hasFilters && !moreRowsExpanded) {
+          var moreCount = table.querySelectorAll('tbody tr.more-row').length;
+          if (moreCount > 0) btn.textContent = 'Show ' + moreCount + ' more \u25BC';
+        }
+      }
+    }
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+  }
+
+  function renderFilterBanner() {
+    var banner = document.getElementById('filter-banner');
+    if (!banner) return;
+    var hasFilters = activeAreas.length > 0 || activeRepos.length > 0;
+    if (!hasFilters) {
+      banner.style.display = 'none';
+      banner.innerHTML = '';
+      return;
+    }
+    var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
+    activeAreas.forEach(function(a) {
+      var short = a.replace(/^area-/i, '');
+      html += '<span class="filter-chip">' + escHtml(short) +
+        ' <a class="chip-remove" href="#" onclick="removeAreaFilter(\'' + escJs(a) + '\');return false" title="Remove area filter" aria-label="Remove ' + escAttr(a) + ' filter">&#x2715;</a></span>';
+    });
+    activeRepos.forEach(function(r) {
+      html += '<span class="filter-chip">Repo: ' + escHtml(r) +
+        ' <a class="chip-remove" href="#" onclick="removeRepoFilter(\'' + escJs(r) + '\');return false" title="Remove repo filter" aria-label="Remove ' + escAttr(r) + ' filter">&#x2715;</a></span>';
+    });
+    html += ' <a href="#" onclick="clearAllSecondaryFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
+    banner.innerHTML = html;
+    banner.style.display = 'flex';
+  }
+
+
+  window.filterByArea = function(event, label) {
+    var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
+    var idx = activeAreas.indexOf(label);
+    if (ctrl) {
+      if (idx >= 0) activeAreas.splice(idx, 1); else activeAreas.push(label);
+      renderFilterBanner();
+      history.replaceState(null, '', buildCurrentUrl());
+    } else {
+      activeAreas = [label];
+      activeRepos = [];
+      applyTableFilter();
+    }
+  };
+
+  window.filterByRepo = function(event, slug) {
+    var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
+    var idx = activeRepos.indexOf(slug);
+    if (ctrl) {
+      if (idx >= 0) activeRepos.splice(idx, 1); else activeRepos.push(slug);
+      renderFilterBanner();
+      history.replaceState(null, '', buildCurrentUrl());
+    } else {
+      activeRepos = [slug];
+      activeAreas = [];
+      applyTableFilter();
+    }
+  };
+
+  window.removeAreaFilter = function(label) {
+    var idx = activeAreas.indexOf(label);
+    if (idx >= 0) activeAreas.splice(idx, 1);
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
+  };
+
+  window.removeRepoFilter = function(slug) {
+    var idx = activeRepos.indexOf(slug);
+    if (idx >= 0) activeRepos.splice(idx, 1);
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
+  };
+
+  window.clearAllSecondaryFilters = function() {
+    activeAreas = [];
+    activeRepos = [];
+    moreRowsExpanded = false;
+    renderFilterBanner();
+    history.replaceState(null, '', buildCurrentUrl());
+    reRender();
+  };
+
+  window.clearUser = function() {
+    activeUsers = [];
+    activeAreas = [];
+    activeRepos = [];
+    moreRowsExpanded = false;
+    document.getElementById('user-field').value = '';
+    involvesMode = true;
+    nextActionOnlyMode = false;
+    easyActionMode = false;
+    nextActionMaintainerMode = false;
+    easyActionMaintainerMode = false;
+    communityMode = false;
+    quickWinsMode = false;
+    staleMode = false;
+    document.getElementById('involves-toggle').checked = true;
+    document.getElementById('involves-toggle').disabled = true;
+    document.getElementById('next-action-toggle').checked = false;
+    document.getElementById('easy-action-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').disabled = false;
+    document.getElementById('easy-action-maintainer-toggle').checked = false;
+    document.getElementById('community-toggle').checked = false;
+    document.getElementById('quickwins-toggle').checked = false;
+    document.getElementById('stale-toggle').checked = false;
+    document.getElementById('clear-user-btn').style.display = 'none';
+    document.getElementById('next-action-label').style.display = 'none';
+    document.getElementById('easy-action-label').style.display = 'none';
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
+    history.replaceState(null, '', location.pathname);
+    document.getElementById('summary-bar').style.display = 'none';
+    var banner = document.getElementById('filter-banner');
+    if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    try { localStorage.removeItem(LS_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NEXT_ACTION_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_ACTION_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NEXT_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NM_BEFORE_EASY_KEY); } catch(e) {}
+    renderRecentTiles();
+    if (loaded) renderTable(allPrs);
+  };
+
+  function showUserToggles() {
+    document.getElementById('involves-toggle').disabled = false;
+    document.getElementById('next-action-label').style.display = '';
+    document.getElementById('easy-action-label').style.display = '';
+    document.getElementById('next-action-maintainer-label').style.display = 'none';
+    document.getElementById('easy-action-maintainer-label').style.display = 'none';
+    document.getElementById('clear-user-btn').style.display = '';
+  }
+
+  function showMaintainerToggles() {
+    document.getElementById('next-action-maintainer-label').style.display = '';
+    document.getElementById('easy-action-maintainer-label').style.display = '';
+    document.getElementById('involves-toggle').checked = true;
+    document.getElementById('involves-toggle').disabled = true;
+    involvesMode = true;
+    document.getElementById('next-action-label').style.display = 'none';
+    document.getElementById('easy-action-label').style.display = 'none';
+    document.getElementById('clear-user-btn').style.display = 'none';
+    // Re-apply disabled state based on persisted easyActionMaintainerMode
+    if (easyActionMaintainerMode) applyEasyMaintainerImpliedState();
+  }
+
+  // --- Recent Users ---
+  function loadRecentUsers() {
+    try {
+      var json = localStorage.getItem(LS_RECENT_USERS_KEY);
+      if (json) {
+        var parsed = JSON.parse(json);
+        if (!Array.isArray(parsed)) return [];
+        return parsed.filter(function(v) { return typeof v === 'string' && v.length > 0; }).map(function(v) { return v.trim().replace(/^@/, ''); }).filter(Boolean).slice(0, MAX_RECENT_USERS);
+      }
+    } catch(e) {}
+    return [];
+  }
+
+  function addRecentUser(name) {
+    if (!name) return;
+    var lc = name.toLowerCase();
+    var recent = loadRecentUsers().filter(function(u) { return u.toLowerCase() !== lc; });
+    recent.unshift(name);
+    if (recent.length > MAX_RECENT_USERS) recent = recent.slice(0, MAX_RECENT_USERS);
+    try { localStorage.setItem(LS_RECENT_USERS_KEY, JSON.stringify(recent)); } catch(e) {}
+    // Also save to LS_KEY for page-reload restore (backward compat with single-user storage)
+    try { localStorage.setItem(LS_KEY, name); } catch(e) {}
+  }
+
+  function renderRecentTiles() {
+    var container = document.getElementById('recent-tiles');
+    if (!container) return;
+    var recent = loadRecentUsers();
+    if (recent.length === 0) { container.innerHTML = ''; return; }
+    var lcActive = activeUsers.map(function(u) { return u.toLowerCase(); });
+    var html = '';
+    recent.forEach(function(name) {
+      var isActive = lcActive.indexOf(name.toLowerCase()) >= 0;
+      html += '<button type="button" class="recent-tile' + (isActive ? ' active' : '') + '" data-user="' + escAttr(name) + '" aria-pressed="' + (isActive ? 'true' : 'false') + '">' + escHtml(name) + '</button>';
+    });
+    container.innerHTML = html;
+  }
+
+  // Delegate clicks on recent tiles
+  var tilesContainer = document.getElementById('recent-tiles');
+  if (tilesContainer) {
+    tilesContainer.addEventListener('click', function(event) {
+      var tile = event.target.closest('.recent-tile');
+      if (!tile) return;
+      var name = tile.getAttribute('data-user');
+      if (!name) return;
+      var ctrl = event.ctrlKey || event.metaKey;
+      var lc = name.toLowerCase();
+      var idx = -1;
+      for (var i = 0; i < activeUsers.length; i++) {
+        if (activeUsers[i].toLowerCase() === lc) { idx = i; break; }
+      }
+      if (ctrl) {
+        if (idx >= 0) activeUsers.splice(idx, 1); else activeUsers.push(name);
+      } else {
+        if (idx >= 0) activeUsers.splice(idx, 1); else activeUsers = [name];
+      }
+      if (!ctrl) addRecentUser(name);
+      try { localStorage.setItem(LS_ACTIVE_USERS_KEY, JSON.stringify(activeUsers)); } catch(e) {}
+      renderRecentTiles();
+      if (activeUsers.length > 0) {
+        document.getElementById('user-field').value = activeUsers[activeUsers.length - 1];
+        showUserToggles();
+        history.replaceState(null, '', buildCurrentUrl());
+        if (loaded) renderFiltered(activeUsers);
+      } else {
+        // Only clear user-related state; preserve area/repo/other filters
+        document.getElementById('user-field').value = '';
+        try { localStorage.removeItem(LS_KEY); } catch(e) {}
+        try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
+        showMaintainerToggles();
+        history.replaceState(null, '', buildCurrentUrl());
+        renderRecentTiles();
+        var summaryBar = document.getElementById('summary-bar');
+        if (summaryBar) { summaryBar.textContent = ''; summaryBar.style.display = 'none'; }
+        if (loaded) renderFilteredMaintainer();
+      }
+    });
+  }
+
+  // --- Rendering ---
+  function renderPrompt() {
+    var count = allPrs.length;
+    var repoCount = repoList.length;
+    document.getElementById('content').innerHTML =
+      '<p class="status" style="margin:2em 0">Enter a GitHub username above to see actionable PRs across ' +
+      repoCount + ' repositories (' + count + ' open PRs).</p>';
+  }
+
+  // Cache compiled regexes per lowercase username to avoid rebuilding them in hot loops
+  var userTurnRegexCache = {};
+
+  // Check whether the given username is the person who should act next on this PR
+  function isUsersTurn(pr, username) {
+    if (!username) return false;
+    var lc = username.toLowerCase();
+    var who = (pr.who || '').toLowerCase();
+    var re = userTurnRegexCache[lc];
+    if (!re) {
+      var escaped = lc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      re = new RegExp('@' + escaped + '(?=[,;:\\s]|$)', 'i');
+      userTurnRegexCache[lc] = re;
+    }
+    return re.test(who);
+  }
+
+  function getNormalizedMentions(text) {
+    var matches = (text || '').match(/@[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*/g) || [];
+    return matches.map(function(m) { return m.slice(1).toLowerCase(); });
+  }
+
+  // Check whether the next action is on a maintainer (someone other than the PR author)
+  function isMaintainersTurn(pr) {
+    var authorLc = (pr.author || '').toLowerCase();
+    var mentions = getNormalizedMentions(pr.who);
+    return mentions.some(function(m) { return m && m !== authorLc; });
+  }
+
+  // Filter and render all PRs using the maintainer-context filters (no user set)
+  function renderFilteredMaintainer() {
+    var hasMaintainerFilter = nextActionMaintainerMode || easyActionMaintainerMode;
+    var hasReportFilter = communityMode || quickWinsMode || staleMode;
+    var filtered = allPrs;
+    if (hasMaintainerFilter) {
+      filtered = filtered.filter(isMaintainersTurn);
+    }
+    if (easyActionMaintainerMode) {
+      filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
+    }
+
+    // Apply report-mode filters (community, quickwins, stale)
+    filtered = applyReportModeFilters(filtered);
+
+    var bar = document.getElementById('summary-bar');
+    if (hasMaintainerFilter || hasReportFilter) {
+      defaultSort(filtered);
+      var repoCounts = {};
+      filtered.forEach(function(pr) { repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1; });
+      var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
+        .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
+      while (bar.firstChild) bar.removeChild(bar.firstChild);
+
+      var countSpan = document.createElement('span');
+      countSpan.className = 'repo-breakdown';
+      countSpan.textContent = filtered.length + ' PRs' + (breakdown ? ': ' + breakdown : '');
+      bar.appendChild(countSpan);
+      bar.style.display = 'block';
+    } else {
+      if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
+    }
+    renderTable(filtered);
+    renderFilterBanner();
+  }
+
+  window.clearMaintainerFilters = function() {
+    nextActionMaintainerMode = false;
+    easyActionMaintainerMode = false;
+    document.getElementById('next-action-maintainer-toggle').checked = false;
+    document.getElementById('next-action-maintainer-toggle').disabled = false;
+    document.getElementById('easy-action-maintainer-toggle').checked = false;
+    try { localStorage.removeItem(LS_NEXT_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_EASY_MAINTAINER_KEY); } catch(e) {}
+    try { localStorage.removeItem(LS_NM_BEFORE_EASY_KEY); } catch(e) {}
+    savedNextMaintainerBeforeEasy = false;
+    history.replaceState(null, '', buildCurrentUrl());
+    if (loaded) renderFilteredMaintainer();
+  };
+
+  window.clearReportFilters = function() {
+    communityMode = false;
+    quickWinsMode = false;
+    staleMode = false;
+    document.getElementById('community-toggle').checked = false;
+    document.getElementById('quickwins-toggle').checked = false;
+    document.getElementById('stale-toggle').checked = false;
+    history.replaceState(null, '', buildCurrentUrl());
+    if (loaded) {
+      if (activeUsers.length > 0) renderFiltered(activeUsers);
+      else renderFilteredMaintainer();
+    }
+  };
+
+  // Classify a PR into an "easy next action" category, or null if it doesn't qualify
+  function getEasyActionCategory(pr) {
+    var ci = pr.ci || '';
+    var mergeable = pr.mergeable || '';
+    var approvals = parseInt(pr.approval_count) || 0;
+    var unresolved = parseInt(pr.unresolved_threads) || 0;
+    var lines = parseInt(pr.lines_changed) || 0;
+    var files = parseInt(pr.changed_files) || 0;
+    var comments = parseInt(pr.total_comments) || 0;
+    var commenters = parseInt(pr.distinct_commenters) || 0;
+
+    // Merge it: next_action says ready to merge (backend validates owner approval, CI, conflicts, threads)
+    if (/Ready to merge$/.test(pr.next_action || '')) {
+      return { tag: '\uD83D\uDFE2', label: 'Merge it', tip: 'CI green, maintainer approved, no conflicts, no unresolved threads' };
+    }
+    // Quick review: small, quiet, CI not failed
+    if (lines <= 50 && files <= 3 && ci !== 'FAILURE' && unresolved <= 1 && comments <= 3 && commenters <= 2) {
+      return { tag: '\uD83D\uDC40', label: 'Quick review', tip: 'Small PR (\u226450 lines, \u22643 files), minimal discussion, CI not failing' };
+    }
+    // Needs approval: CI green, clean, but no maintainer approval yet
+    if (ci === 'SUCCESS' && mergeable === 'MERGEABLE' && unresolved === 0 && lines <= 200 && comments <= 5 &&
+        /No owner approval|No review/.test(pr.blockers || '')) {
+      return { tag: '\u2705', label: 'Needs approval', tip: 'CI green, no conflicts, no unresolved threads, no maintainer approval yet, \u2264200 lines, \u22645 comments' };
+    }
+    // Needs rebase: approved but conflicting
+    if (approvals >= 1 && mergeable === 'CONFLICTING' && unresolved === 0) {
+      return { tag: '\uD83D\uDD27', label: 'Needs rebase', tip: 'Approved, has merge conflicts, no unresolved threads' };
+    }
+    return null;
+  }
+
+  // Apply report-mode filters (community, quickwins, stale) to a PR array.
+  // These are AND-composable: each active filter further narrows the set.
+  function applyReportModeFilters(prs) {
+    if (communityMode) {
+      prs = prs.filter(function(pr) {
+        return pr.is_community && /review/i.test(pr.next_action || '');
+      });
+    }
+    if (quickWinsMode) {
+      prs = prs.filter(function(pr) {
+        return /Ready to merge/i.test(pr.next_action || '');
+      });
+    }
+    if (staleMode) {
+      prs = prs.filter(function(pr) {
+        var age = parseInt(pr.age_days) || 0;
+        var stale = parseInt(pr.days_since_update) || 0;
+        return (age > 90 && stale > 30) || (age > 180 && stale > 14);
+      });
+    }
+    return prs;
+  }
+
+  // Default sort for the current filter state. Stale mode sorts by staleness;
+  // all other modes sort by action score (descending).
+  function defaultSort(prs) {
+    if (staleMode) {
+      prs.sort(function(a, b) {
+        return (parseInt(b.days_since_update) || 0) - (parseInt(a.days_since_update) || 0);
+      });
+    } else {
+      prs.sort(function(a, b) {
+        return (b.action_score != null ? b.action_score : b.score || 0) -
+               (a.action_score != null ? a.action_score : a.score || 0);
+      });
+    }
+    return prs;
+  }
+
+  function renderFiltered(usernames) {
+    var lcUsers = usernames.map(function(u) { return u.toLowerCase(); });
+    var filtered = allPrs.filter(function(pr) {
+      var people = getPeople(pr);
+      for (var j = 0; j < lcUsers.length; j++) {
+        if (people.indexOf(lcUsers[j]) >= 0) return true;
+        // In involves mode, also match reviewers/commenters from the involved field
+        if (involvesMode && pr.involved && pr.involved.length > 0) {
+          for (var i = 0; i < pr.involved.length; i++) {
+            if (pr.involved[i].toLowerCase() === lcUsers[j]) return true;
+          }
+        }
+      }
+      return false;
+    });
+
+    // Apply "next action on me only" filter
+    if (nextActionOnlyMode) {
+      filtered = filtered.filter(function(pr) {
+        return usernames.some(function(u) { return isUsersTurn(pr, u); });
+      });
+    }
+
+    // Apply "easy next actions only" filter using pre-computed categories
+    if (easyActionMode) {
+      filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
+    }
+
+    // Apply report-mode filters (community, quickwins, stale)
+    filtered = applyReportModeFilters(filtered);
+
+    defaultSort(filtered);
+
+    // Summary bar — just PR count and repo breakdown (user/mode visible in controls above)
+    var repoCounts = {};
+    filtered.forEach(function(pr) {
+      repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1;
+    });
+    var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
+      .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
+    var bar = document.getElementById('summary-bar');
+    while (bar.firstChild) bar.removeChild(bar.firstChild);
+    var countSpan = document.createElement('span');
+    countSpan.className = 'repo-breakdown';
+    countSpan.textContent = filtered.length + ' PRs' + (breakdown ? ': ' + breakdown : '');
+    bar.appendChild(countSpan);
+    bar.style.display = 'block';
+
+    renderTable(filtered);
+    renderFilterBanner();
+  }
+
+  function renderTable(prs) {
+    // Reset expand state each time the table is rebuilt so the button label
+    // and row visibility stay in sync (rows always start hidden in the HTML).
+    moreRowsExpanded = false;
+    if (prs.length === 0) {
+      document.getElementById('content').innerHTML =
+        '<p class="status" style="margin:2em 0">No PRs found' +
+        (activeUsers.length > 0 ? ' for ' + activeUsers.map(function(u) { return '@' + escHtml(u); }).join(', ') : '') + '.</p>';
+      return;
+    }
+
+    // Detect if any PR has area labels
+    var hasArea = prs.some(function(pr) { return pr.area_labels && pr.area_labels.length > 0; });
+
+    // Compute 10th percentile of lines_changed for "small PR" icon
+    var sortedLines = prs.map(function(pr) { return pr.lines_changed || 0; }).sort(function(a,b) { return a - b; });
+    var smallPrEnabled = sortedLines.length >= 10;
+    var smallPrThreshold = smallPrEnabled ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
+
+    var html = '<table id="pr-table"><colgroup>' +
+      '<col style="width:2.5%">' +     // Ready
+      '<col style="width:2.5%">' +     // Need
+      '<col style="width:2.5%">' +     // Action
+      '<col style="width:3.5%">' +    // PR
+      '<col style="width:6%">' +      // Repo
+      '<col>' +                       // Title (flex)
+      '<col style="width:25%">' +     // Next Action
+      '<col style="width:6%">' +      // CI
+      '<col style="width:3%">' +      // Disc
+      '<col style="width:2.5%">' +    // Age
+      '<col style="width:2.5%">' +    // Upd
+      '<col style="width:2.5%">' +    // Size
+      '<col style="width:8%">' +      // Author
+      (hasArea ? '<col style="width:7%">' : '') +
+      '</colgroup><thead><tr>' +
+      '<th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th>' +
+      '<th class="sortable" data-sort="num" title="Need: how much does this PR benefit from maintainer attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th>' +
+      '<th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th>' +
+      '<th class="sortable" data-sort="num" title="Pull request number">PR</th>' +
+      '<th class="sortable" data-sort="alpha" title="Repository">Repo</th>' +
+      '<th class="sortable" data-sort="alpha" title="PR title and labels">Title</th>' +
+      '<th class="sortable" data-sort="alpha" title="Who needs to act next and what they should do">Next Action</th>' +
+      '<th title="CI status from Build Analysis (or latest check run)">CI</th>' +
+      '<th class="sortable" data-sort="num" title="Discussion: unresolved/total review threads and distinct commenters">Disc</th>' +
+      '<th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th>' +
+      '<th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th>' +
+      '<th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th>' +
+      '<th class="sortable" data-sort="alpha" title="PR author">Author</th>' +
+      (hasArea ? '<th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>' : '') +
+      '</tr></thead><tbody>';
+
+    for (var i = 0; i < prs.length; i++) {
+      html += renderRow(prs[i], hasArea, i, smallPrThreshold, smallPrEnabled, activeUsers);
+    }
+    html += '</tbody></table>';
+
+    // Show more/fewer toggle for >500 rows
+    var extra = prs.length > 500 ? prs.length - 500 : 0;
+    if (prs.length > 500) {
+      html += '<button class="show-more-btn" id="toggle-more">Show ' + extra + ' more \u25BC</button>';
+    }
+
+    document.getElementById('content').innerHTML = html;
+
+    // Wire up show-more toggle
+    var toggleBtn = document.getElementById('toggle-more');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        moreRowsExpanded = !moreRowsExpanded;
+        toggleBtn.textContent = moreRowsExpanded ? 'Show fewer \u25B2' : 'Show ' + extra + ' more \u25BC';
+        applyTableFilter();
+      });
+    }
+
+    // Wire up sortable column headers (Action = column 2)
+    initTableSort('pr-table', 2);
+    initResizableColumns('pr-table');
+
+    // Apply any active secondary filters from URL state
+    if (activeAreas.length > 0 || activeRepos.length > 0) {
+      applyTableFilter();
+    }
+  }
+
+  function renderRow(pr, hasArea, idx, smallPrThreshold, smallPrEnabled, filterUsers) {
+    var prUrl = 'https://github.com/' + pr._repo + '/pull/' + pr.number;
+    var safeSlug = escAttr(pr._slug);
+    var safeSlugJs = escJs(pr._slug || '');
+
+    // Detect if the filtered user is the one who should act next
+    var userList = Array.isArray(filterUsers) ? filterUsers : (filterUsers ? [filterUsers] : []);
+    var isYourTurn = userList.some(function(u) { return isUsersTurn(pr, u); });
+
+    var moreClass = idx >= 500 ? ' class="more-row' + (isYourTurn ? ' your-turn' : '') + '" style="display:none"'
+                                : (isYourTurn ? ' class="your-turn"' : '');
+
+    // CI emoji
+    var ciEmoji = pr.ci === 'SUCCESS' ? '&#x2705;' :
+                  pr.ci === 'FAILURE' ? '&#x274C;' :
+                  pr.ci === 'IN_PROGRESS' ? '&#x23F3;' : '&#x26A0;&#xFE0F;';
+    var ciFailCount = 0;
+    if (pr.ci_detail && /^(\d+)\/(\d+)\/(\d+)$/.test(pr.ci_detail)) {
+      ciFailCount = parseInt(RegExp.$2);
+    }
+    var ciTitle = '';
+    var ciFailHint = '';
+    if (pr.ci === 'SUCCESS' && ciFailCount > 0) {
+      ciTitle = ' title="Build Analysis passed; ' + ciFailCount + ' non-blocking check(s) failed"';
+      ciFailHint = '<sup class="ci-warn">' + ciFailCount + '</sup>';
+    }
+
+    // Next action emoji
+    var na = pr.next_action || '';
+    var actionEmoji = /Ready to merge$/.test(na) ? '&#x1F7E2; ' :
+                      /resolve conflicts/.test(na) ? '&#x1F6D1; ' :
+                      /fix CI/.test(na) ? '&#x1F6D1; ' :
+                      /review needed/.test(na) ? '<span class="action-icon-lg">&#x1F441;</span> ' :
+                      /Wait for CI/.test(na) ? '&#x23F3; ' :
+                      /merge main/.test(na) ? '&#x1F504; ' : '';
+
+    // Heat classes
+    var ageHeat = pr.age_days >= 60 ? ' heat-3' : pr.age_days >= 30 ? ' heat-2' : pr.age_days >= 14 ? ' heat-1' : '';
+    var updateHeat = pr.days_since_update >= 30 ? ' heat-3' : pr.days_since_update >= 14 ? ' heat-2' : pr.days_since_update >= 7 ? ' heat-1' : '';
+    var discHeat = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? ' heat-3' :
+                   (pr.total_threads > 8 || pr.distinct_commenters > 3) ? ' heat-2' :
+                   pr.total_threads > 4 ? ' heat-1' : '';
+    var discEmoji = (pr.total_threads > 15 || pr.distinct_commenters > 5) ? '&#x1F525; ' : '';
+    var linesChanged = pr.lines_changed || 0;
+    var sizeIcon = (smallPrEnabled && linesChanged <= smallPrThreshold) ? '&#x1F401; ' : '';
+    var filesHeat = (pr.changed_files > 20 || linesChanged > 500) ? ' heat-2' :
+                     (pr.changed_files > 5 || linesChanged > 200) ? ' heat-1' : '';
+
+    // Author
+    var authorHtml = '';
+    var communityBadge = pr.is_community ? ' <span class="badge community" title="community">C</span>' : '';
+    if (/copilot-swe-agent/.test(pr.author)) {
+      if (pr.copilot_trigger) {
+        authorHtml = userHtml(pr.copilot_trigger) + ' <span class="badge" title="authored by Copilot">via &#x1F916;</span>';
+      } else {
+        authorHtml = '&#x1F916; copilot';
+      }
+    } else {
+      authorHtml = userHtml(pr.author);
+    }
+
+    // Area labels
+    var areaHtml = '';
+    if (hasArea && pr.area_labels && pr.area_labels.length > 0) {
+      areaHtml = pr.area_labels.map(function(lbl) {
+        var short = lbl.replace(/^area-/i, '');
+        return ' <button type="button" class="badge area-label" onclick="filterByArea(event,\'' + escJs(lbl) + '\')" title="Filter to ' + escAttr(lbl) + ' (Ctrl+click to add)">' + escHtml(short) + '</button>';
+      }).join('');
+    }
+
+    var people = getPeople(pr).join(',');
+    var involved = (pr.involved || []).join(',');
+    var labels = (pr.area_labels || []).join(',');
+    var safeTitle = escHtml(pr.title);
+    var safeWhy = (pr.why || '').replace(/&#10;/g, '\n');
+    var safeValueWhy = (pr.value_why || '').replace(/&#10;/g, '\n');
+    var safeActionWhy = (pr.action_why || '').replace(/&#10;/g, '\n');
+
+    // Score indicators
+    var isNewlyDiscovered = pr._isNew === true;
+    var readyVal = pr.merge_readiness != null ? pr.merge_readiness : (pr.score != null ? pr.score : 0);
+    var needVal = pr.value_score != null ? pr.value_score : 0;
+    var actionVal = pr.action_score != null ? pr.action_score : readyVal;
+    var readyClass = readyVal >= 6 ? ' ready-high' : '';
+    var actionEmoji2 = '';
+    var actionClass = '';
+    if (actionVal >= 5) { actionEmoji2 = '&#x1F3AF; '; actionClass = ' action-hot'; }
+    else if (actionVal >= 4) { actionEmoji2 = '&#x26A1; '; actionClass = ' action-warm'; }
+
+    // Easy action badge
+    var easyBadge = '';
+    if (pr._easyCategory) {
+      var easyTip = pr._easyCategory.label + ': ' + pr._easyCategory.tip;
+      easyBadge = '<span class="easy-badge">' + escHtml(pr._easyCategory.tag) +
+        '<button type="button" class="why-btn easy-why-btn" onclick="showWhy(this)" data-why="' + escAttr(easyTip) + '" aria-label="Easy action: ' + escAttr(pr._easyCategory.label) + ' \u2014 show criteria">?</button></span> ';
+    }
+
+    var unknownCell = '<span style="color:#8b949e;font-style:italic">unknown</span>';
+    var unknownScore = '<span style="color:#8b949e">?</span>';
+
+    return '<tr' + moreClass + ' data-repo="' + safeSlug + '" data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
+      '<td class="score' + readyClass + '">' + (isNewlyDiscovered ? unknownScore : readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button>') + '</td>' +
+      '<td class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
+      '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
+      '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
+      '<td class="repo-col"><button type="button" class="repo-filter-btn" onclick="filterByRepo(event,\'' + safeSlugJs + '\')" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</button><a class="filter-btn" href="#" onclick="filterByRepo(event,\'' + safeSlugJs + '\');return false" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)" aria-label="Filter to ' + escAttr(pr._slug) + '">&#x1F50D;</a></td>' +
+      '<td class="title">' + easyBadge + safeTitle + '</td>' +
+      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na)) + (pr.who_why ? '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(pr.who_why) + '" aria-label="Why these people?">?</button>' : '')) + '</td>' +
+      '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
+      '<td class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
+      '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
+      '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
+      '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' ' + ((pr.changed_files || 0) === 1 ? 'file' : 'files') + ', ' + linesChanged + ' ' + (linesChanged === 1 ? 'line' : 'lines') + ' (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
+      '<td class="author">' + communityBadge + authorHtml + '</td>' +
+      (hasArea ? '<td class="area-col">' + areaHtml + '</td>' : '') +
+      '</tr>';
+  }
+
+  // --- Helpers ---
+  function getPeople(pr) {
+    var text = (pr.who || '') + ' @' + (pr.author || '');
+    // From next_action, only extract the actor (first @mention before the colon),
+    // not people mentioned in the description (e.g., "respond to threads from @X")
+    if (pr.next_action) {
+      var actorMatch = pr.next_action.match(/^@[A-Za-z0-9-]+(?:\/[A-Za-z0-9-]+)*/);
+      if (actorMatch) text += ' ' + actorMatch[0];
+    }
+    if (pr.copilot_trigger) text += ' @' + pr.copilot_trigger;
+    var seen = {};
+    return getNormalizedMentions(text)
+      .filter(function(u) { if (seen[u]) return false; seen[u] = true; return true; });
+  }
+
+  // userHtml() and convertUserRefs() are now in shared-ui.js
+
+  // Expose internals for pr-view-refresh.js
+  window._prDashboard = {
+    get currentUser() { return activeUsers[0] || ''; },
+    get activeUsers() { return activeUsers; },
+    get repoList() { return repoList; },
+    get allPrs() { return allPrs; },
+    renderRow: renderRow
+  };
+
+})();
+</script>
+<script src="./pr-refresh.js"></script>
+<script src="./pr-view-refresh.js"></script>
+<script src="./footer.js"></script>
+</body>
+</html>

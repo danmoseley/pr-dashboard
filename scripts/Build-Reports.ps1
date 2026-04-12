@@ -247,9 +247,24 @@ $allReports = @{
 
 $reports = @($ReportTypes | ForEach-Object { $allReports[$_] } | Where-Object { $_ })
 
+# Reports that redirect to the unified cross-repo view instead of generating full HTML.
+# The filter is still run to compute counts for meta.json.
+$redirectReports = @{
+    "top15"       = "../actionable.html?repo=$Slug"
+    "community"   = "../actionable.html?repo=$Slug&community=true"
+    "quick-wins"  = "../actionable.html?repo=$Slug&quickwins=true"
+    "stale-close" = "../actionable.html?repo=$Slug&stale=true"
+}
+
 # Build nav links for this repo's reports
-$navLinks = @{ "Home" = "../index.html"; "All Repos" = "../all/actionable.html" }
-foreach ($r in $reports) { $navLinks[$r.Title] = $r.File }
+$navLinks = @{ "Home" = "../index.html"; "All Repos" = "../actionable.html" }
+foreach ($r in $reports) {
+    if ($redirectReports.ContainsKey($r.Id)) {
+        $navLinks[$r.Title] = $redirectReports[$r.Id]
+    } else {
+        $navLinks[$r.Title] = $r.File
+    }
+}
 
 # Track PR counts for meta.json
 $reportMeta = @{}
@@ -263,6 +278,29 @@ foreach ($report in $reports) {
     $filteredArray = @($filtered)
 
     $reportMeta[$report.Id] = @{ count = $filteredArray.Count; file = $report.File; title = $report.Title }
+
+    # For redirected reports, write a stub that sends users to the unified view
+    if ($redirectReports.ContainsKey($report.Id)) {
+        $redirectUrl = $redirectReports[$report.Id]
+        # The JS redirect merges any existing query params (e.g. ?user=alice) with the
+        # base redirect params. The meta-refresh is a no-JS fallback (no param merging).
+        $hasQuery = $redirectUrl.Contains('?')
+        $sep = if ($hasQuery) { '&' } else { '?' }
+        $redirectUrlHtml = [System.Net.WebUtility]::HtmlEncode($redirectUrl)
+        $stubHtml = "<!DOCTYPE html><html><head>" +
+            "<meta http-equiv=`"refresh`" content=`"0;url=$redirectUrlHtml`">" +
+            "<script>" +
+            "var base='$redirectUrl';" +
+            "var extra=location.search?location.search.replace(/^\?/,''):'';" +
+            "var hash=location.hash||'';" +
+            "var url=extra?base+'$sep'+extra+hash:base+hash;" +
+            "location.replace(url)" +
+            "</script>" +
+            "</head><body>Redirecting...</body></html>"
+        $stubHtml | Out-File -FilePath (Join-Path $outDir $report.File) -Encoding utf8
+        Write-Host "  -> $Slug/$($report.File) (redirect stub, $($filteredArray.Count) PRs counted)"
+        continue
+    }
 
     # Write filtered JSON to temp file
     $tempJson = Join-Path $outDir "$($report.Id)-data.json"
