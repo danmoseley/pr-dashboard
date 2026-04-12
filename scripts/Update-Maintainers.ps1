@@ -149,10 +149,10 @@ foreach ($entry in $repos) {
                         $parsed = $null
                     }
                     if ($parsed) {
-                        if ($parsed.errors) {
+                        if ($parsed.PSObject.Properties['errors']) {
                             $exitCode = 1
                             $errText = ($parsed.errors | ForEach-Object { $_.message }) -join '; '
-                        } elseif (-not $parsed.data -or -not $parsed.data.search) {
+                        } elseif (-not $parsed.PSObject.Properties['data'] -or -not $parsed.data.PSObject.Properties['search']) {
                             $exitCode = 1
                             $errText = 'Response missing data.search'
                         }
