@@ -44,7 +44,8 @@ function Import-PreviousScan {
     try {
         $prevScan = Get-Content $Path -Raw | ConvertFrom-Json
         if ($prevScan._cache_version -ne $RequiredCacheVersion) {
-            $result.DisableReason = "cache version mismatch (got $($prevScan._cache_version), need $RequiredCacheVersion)"
+            $gotVer = if ($null -ne $prevScan._cache_version) { $prevScan._cache_version } else { '<none>' }
+            $result.DisableReason = "cache version mismatch (got $gotVer, need $RequiredCacheVersion)"
             return $result
         }
         if ($null -eq $prevScan.prs) {
