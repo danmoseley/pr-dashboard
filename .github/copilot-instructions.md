@@ -51,7 +51,7 @@ To regenerate scan.json locally for a single repo (uses live API calls):
 
 ```powershell
 $m = (Get-Content config/maintainers.json | ConvertFrom-Json).'dotnet/runtime' -join ','
-pwsh ./scripts/Get-PrTriageData.ps1 -Repo "dotnet/runtime" -Limit 500 -Maintainers $m > docs/runtime/scan.json
+pwsh ./scripts/Get-PrTriageData.ps1 -Repo "dotnet/runtime" -Limit 500 -Maintainers $m -OutputFile docs/runtime/scan.json
 ```
 
 ## Coding Standards
