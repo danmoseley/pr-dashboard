@@ -129,7 +129,7 @@ foreach ($entry in $repos) {
         }
 
         $result = $null
-        $maxRetries = 3
+        $maxRetries = 5
         $succeeded = $false
         for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
             $errFile = [System.IO.Path]::GetTempFileName()
