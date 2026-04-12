@@ -14,7 +14,7 @@ The dashboard is a live tool used daily. **Every change must preserve site avail
 
 - **`scripts/Get-PrTriageData.ps1`** — The single source of truth for all triage logic. Produces `scan.json` per repo. All report types (actionable, community, quick-wins, consider-closing) consume its output.
 - **`scripts/Build-Reports.ps1`** — Reads `scan.json`, filters into report subsets, renders HTML via `ConvertTo-ReportHtml.ps1`.
-- **`docs/all/actionable.html`** — Cross-repo view that loads all `scan.json` files client-side and merges them.
+- **`docs/actionable.html`** — Cross-repo unified view that loads all `scan.json` files client-side and merges them. All report types are filter checkboxes on this single page.
 - **`config/maintainers.json`** — Hardcoded per-repo maintainer lists, used as a fallback when no area-owner match exists.
 - **`.github/workflows/generate-reports.yml`** — Orchestrates scanning all repos on a tiered schedule (priority repos ~4x daily, others ~daily). Has a "skip if recent run" guard to avoid redundant runs.
 

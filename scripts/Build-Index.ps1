@@ -105,7 +105,7 @@ $reportTypes = @(
 # Build header row
 $headerCells = $repos | ForEach-Object {
     $repoShort = $_.slug
-    "<th><a href=`"$($_.slug)/actionable.html`">$repoShort</a></th>"
+    "<th><a href=`"actionable.html?repo=$($_.slug)`">$repoShort</a></th>"
 }
 $headerRow = "<tr><th></th>$($headerCells -join '')</tr>"
 
@@ -147,6 +147,7 @@ $mergedRow = "<tr class=`"metric-row`"><td class=`"report-name`">Merged (7d)</td
 
 # Unified view redirect URLs for non-actionable report types
 $unifiedReportUrls = @{
+    "top15"       = ""
     "community"   = "community=true"
     "quick-wins"  = "quickwins=true"
     "stale-close" = "stale=true"
@@ -161,7 +162,9 @@ $dataRows = foreach ($rt in $reportTypes) {
         }
         if ($reportInfo -and $reportInfo.count -ge 0) {
             $href = if ($unifiedReportUrls.ContainsKey($rt.Id)) {
-                "all/actionable.html?repo=$($repo.slug)&$($unifiedReportUrls[$rt.Id])"
+                $qs = $unifiedReportUrls[$rt.Id]
+                if ($qs) { "actionable.html?repo=$($repo.slug)&$qs" }
+                else { "actionable.html?repo=$($repo.slug)" }
             } else {
                 "$($repo.slug)/$($reportInfo.file)"
             }
@@ -306,7 +309,7 @@ $($dataRows -join "`n")
 $updatedRow
 $statsRow
 <tr class="separator-row"><td class="report-name" colspan="$(1 + $repos.Count)"></td></tr>
-<tr><td colspan="$(1 + $repos.Count)" style="text-align:center;padding:0.75em 1em;border:2px solid var(--link);background:var(--header-bg);font-weight:600;font-size:1.05em"><a href="all/actionable.html">&#x1F30D; My PRs across all repos</a></td></tr>
+<tr><td colspan="$(1 + $repos.Count)" style="text-align:center;padding:0.75em 1em;border:2px solid var(--link);background:var(--header-bg);font-weight:600;font-size:1.05em"><a href="actionable.html">&#x1F30D; My PRs across all repos</a></td></tr>
 </tbody>
 </table>
 </div>

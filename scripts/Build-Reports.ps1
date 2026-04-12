@@ -250,13 +250,14 @@ $reports = @($ReportTypes | ForEach-Object { $allReports[$_] } | Where-Object { 
 # Reports that redirect to the unified cross-repo view instead of generating full HTML.
 # The filter is still run to compute counts for meta.json.
 $redirectReports = @{
-    "community"   = "../all/actionable.html?repo=$Slug&community=true"
-    "quick-wins"  = "../all/actionable.html?repo=$Slug&quickwins=true"
-    "stale-close" = "../all/actionable.html?repo=$Slug&stale=true"
+    "top15"       = "../actionable.html?repo=$Slug"
+    "community"   = "../actionable.html?repo=$Slug&community=true"
+    "quick-wins"  = "../actionable.html?repo=$Slug&quickwins=true"
+    "stale-close" = "../actionable.html?repo=$Slug&stale=true"
 }
 
 # Build nav links for this repo's reports
-$navLinks = @{ "Home" = "../index.html"; "All Repos" = "../all/actionable.html" }
+$navLinks = @{ "Home" = "../index.html"; "All Repos" = "../actionable.html" }
 foreach ($r in $reports) {
     if ($redirectReports.ContainsKey($r.Id)) {
         $navLinks[$r.Title] = $redirectReports[$r.Id]

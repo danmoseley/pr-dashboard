@@ -6,7 +6,7 @@
 const { chromium } = require('playwright');
 
 const BASE = 'http://localhost:8080';
-const ALL  = BASE + '/all/actionable.html';
+const ALL  = BASE + '/actionable.html';
 const RUNTIME = BASE + '/runtime/actionable.html';
 
 async function log(msg) { console.log('[' + new Date().toISOString().slice(11,19) + '] ' + msg); }
@@ -568,7 +568,7 @@ async function runTests() {
     }
 
     // F2: Per-repo page: click area label → chip appears in banner
-    // Per-repo pages now use the same button.area-label / filter-chip system as all/actionable.html.
+    // Per-repo pages now use the same button.area-label / filter-chip system as actionable.html.
     {
       const p = await openPage(RUNTIME, 1, 20000);
       const areaBtn = p.locator('button.area-label').first();
@@ -584,7 +584,7 @@ async function runTests() {
       await p.close();
     }
 
-    // F3: Per-repo ?area= URL round-trip (same as all/actionable.html)
+    // F3: Per-repo ?area= URL round-trip (same as actionable.html)
     {
       const p = await openPage(RUNTIME + '?area=area-CodeGen-coreclr', 1, 20000);
       await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length > 0, null, { timeout: 10000 }).catch(() => null);
@@ -601,7 +601,7 @@ async function runTests() {
       const chipsBefore = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
       if (chipsBefore === 0) { fail('F4: Per-repo clear filter', 'no chips to clear (check F3)'); }
       else {
-        // Per-repo pages use clearAllFilters(); all/actionable.html uses clearAllSecondaryFilters()
+        // Per-repo pages use clearAllFilters(); actionable.html uses clearAllSecondaryFilters()
         await p.evaluate(() => {
           if (typeof clearAllFilters === 'function') clearAllFilters();
           else if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters();

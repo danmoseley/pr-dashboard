@@ -3,7 +3,7 @@ Describe 'Report filter parity' {
         $scriptDir = Join-Path $PSScriptRoot '..'
         $buildReports = Join-Path $scriptDir 'Build-Reports.ps1'
         $buildIndex = Join-Path $scriptDir 'Build-Index.ps1'
-        $actionableHtml = Join-Path $PSScriptRoot '../../docs/all/actionable.html'
+        $actionableHtml = Join-Path $PSScriptRoot '../../docs/actionable.html'
 
         # Extract filter predicates from Build-Reports.ps1 by sourcing the report definitions
         # We can't dot-source the whole script (it has mandatory params), so we parse the predicates
@@ -169,10 +169,11 @@ Describe 'Report filter parity' {
     }
 
     Context 'Redirect stubs' {
-        It 'Build-Reports.ps1 defines redirect URLs for community, quick-wins, and stale-close' {
-            $buildReportsContent | Should -Match 'community.*all/actionable\.html\?repo=.*&community=true'
-            $buildReportsContent | Should -Match 'quick-wins.*all/actionable\.html\?repo=.*&quickwins=true'
-            $buildReportsContent | Should -Match 'stale-close.*all/actionable\.html\?repo=.*&stale=true'
+        It 'Build-Reports.ps1 defines redirect URLs for all report types' {
+            $buildReportsContent | Should -Match 'top15.*actionable\.html\?repo='
+            $buildReportsContent | Should -Match 'community.*actionable\.html\?repo=.*&community=true'
+            $buildReportsContent | Should -Match 'quick-wins.*actionable\.html\?repo=.*&quickwins=true'
+            $buildReportsContent | Should -Match 'stale-close.*actionable\.html\?repo=.*&stale=true'
         }
 
         It 'Build-Reports.ps1 does not generate full HTML for redirected reports' {
@@ -182,9 +183,9 @@ Describe 'Report filter parity' {
     }
 
     Context 'Index link targets' {
-        It 'Build-Index.ps1 defines unified URLs for non-actionable reports' {
+        It 'Build-Index.ps1 defines unified URLs for all report types' {
             $indexContent = Get-Content $buildIndex -Raw
-            # The $unifiedReportUrls hashtable should map each report type to the right URL param
+            $indexContent | Should -Match '"top15"\s*=\s*""'
             $indexContent | Should -Match '"community"\s*=\s*"community=true"'
             $indexContent | Should -Match '"quick-wins"\s*=\s*"quickwins=true"'
             $indexContent | Should -Match '"stale-close"\s*=\s*"stale=true"'
@@ -192,7 +193,7 @@ Describe 'Report filter parity' {
 
         It 'Build-Index.ps1 generates hrefs using unifiedReportUrls' {
             $indexContent = Get-Content $buildIndex -Raw
-            $indexContent | Should -Match 'all/actionable\.html\?repo='
+            $indexContent | Should -Match 'actionable\.html\?repo='
         }
     }
 
