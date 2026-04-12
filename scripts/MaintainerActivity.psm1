@@ -50,12 +50,14 @@ function Select-FallbackReviewers {
         [string[]]$AreaLabels
     )
 
-    # Compute first-2-segment path prefixes for the PR's changed files.
+    # Compute first-3-segment path prefixes for the PR's changed files (e.g. src/libraries/System.IO).
     # NOTE: This bucketing logic must stay in sync with Update-Maintainers.ps1,
-    # which applies the same 2-segment prefix when collecting activity data.
+    # which applies the same 3-segment prefix when collecting activity data.
     $prFilePrefixes = @($ChangedFilePaths | Where-Object { $_ } | ForEach-Object {
         $parts = $_ -split '/'
-        if ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" } else { $parts[0] }
+        if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
+        elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
+        else { $parts[0] }
     } | Select-Object -Unique)
 
     # Locate the per-repo activity map (supports both hashtable and PSCustomObject from ConvertFrom-Json)

@@ -152,14 +152,16 @@ foreach ($entry in $repos) {
                                 count  = 0
                             }
                         }
-                        # Collect file path prefixes (first 2 segments).
+                        # Collect file path prefixes (first 3 segments, e.g. src/libraries/System.IO).
                         # NOTE: This bucketing logic must stay in sync with MaintainerActivity.psm1
-                        # (Select-FallbackReviewers), which applies the same 2-segment prefix when scoring.
+                        # (Select-FallbackReviewers), which applies the same 3-segment prefix when scoring.
                         if ($node.files -and $node.files.nodes) {
                             foreach ($f in $node.files.nodes) {
                                 if ($f.path) {
                                     $parts = $f.path -split '/'
-                                    $prefix = if ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" } else { $parts[0] }
+                                    $prefix = if ($parts.Count -ge 3) { "$($parts[0])/$($parts[1])/$($parts[2])" }
+                                              elseif ($parts.Count -ge 2) { "$($parts[0])/$($parts[1])" }
+                                              else { $parts[0] }
                                     $repoActivity[$login].paths.Add($prefix)
                                 }
                             }
@@ -286,11 +288,11 @@ if (-not $SkipActivity) {
                 $acc = $repoAcc[$m]
                 $mergeCount = if ($acc.count) { [int]$acc.count } else { 0 }
 
-                # Top 5 path prefixes by frequency
+                # Top 10 path prefixes by frequency
                 $topPaths = @($acc.paths |
                     Group-Object |
                     Sort-Object -Property Count -Descending |
-                    Select-Object -First 5 |
+                    Select-Object -First 10 |
                     ForEach-Object { $_.Name })
 
                 # Top 5 area-* labels by frequency

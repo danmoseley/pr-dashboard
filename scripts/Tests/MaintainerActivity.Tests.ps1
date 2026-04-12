@@ -33,9 +33,9 @@ Describe 'Select-FallbackReviewers' {
     It 'Returns top 2 when path matches score higher' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice'  = @{ merge_count = 10; top_paths = @('src/networking'); top_area_labels = @() }
-                'bob'    = @{ merge_count = 5;  top_paths = @('src/other');      top_area_labels = @() }
-                'carol'  = @{ merge_count = 3;  top_paths = @('src/networking'); top_area_labels = @() }
+                'alice'  = @{ merge_count = 10; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'bob'    = @{ merge_count = 5;  top_paths = @('src/libraries/System.IO');  top_area_labels = @() }
+                'carol'  = @{ merge_count = 3;  top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -43,7 +43,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/networking/foo.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # alice and carol both match path (+3), alice has higher merge_count so comes first
@@ -55,8 +55,8 @@ Describe 'Select-FallbackReviewers' {
     It 'Returns label-matching maintainer above non-matching' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice' = @{ merge_count = 2;  top_paths = @('src/other'); top_area_labels = @('area-networking') }
-                'bob'   = @{ merge_count = 20; top_paths = @('src/other'); top_area_labels = @('area-other') }
+                'alice' = @{ merge_count = 2;  top_paths = @('src/libraries/System.IO'); top_area_labels = @('area-networking') }
+                'bob'   = @{ merge_count = 20; top_paths = @('src/libraries/System.IO'); top_area_labels = @('area-other') }
             }
         }
         $result = Select-FallbackReviewers `
@@ -64,7 +64,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/unrelated/foo.cs') `
+            -ChangedFilePaths @('src/libraries/System.Unrelated/Foo.cs') `
             -AreaLabels @('area-networking')
 
         # alice matches label (+2), bob does not — alice should come first despite fewer merges
@@ -74,8 +74,8 @@ Describe 'Select-FallbackReviewers' {
     It 'Uses merge_count as tiebreaker when scores are equal' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice' = @{ merge_count = 5;  top_paths = @('src/foo'); top_area_labels = @() }
-                'bob'   = @{ merge_count = 15; top_paths = @('src/foo'); top_area_labels = @() }
+                'alice' = @{ merge_count = 5;  top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'bob'   = @{ merge_count = 15; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -83,7 +83,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # Both match path (+3); bob has higher merge_count, so comes first
@@ -94,9 +94,9 @@ Describe 'Select-FallbackReviewers' {
     It 'Falls back to merge_count order when all scores are 0' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice' = @{ merge_count = 2;  top_paths = @('src/other'); top_area_labels = @() }
-                'bob'   = @{ merge_count = 10; top_paths = @('src/other'); top_area_labels = @() }
-                'carol' = @{ merge_count = 7;  top_paths = @('src/other'); top_area_labels = @() }
+                'alice' = @{ merge_count = 2;  top_paths = @('src/libraries/System.IO'); top_area_labels = @() }
+                'bob'   = @{ merge_count = 10; top_paths = @('src/libraries/System.IO'); top_area_labels = @() }
+                'carol' = @{ merge_count = 7;  top_paths = @('src/libraries/System.IO'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -115,9 +115,9 @@ Describe 'Select-FallbackReviewers' {
     It 'Uses alphabetical tiebreaker when scores and merge_counts are equal' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'zebra' = @{ merge_count = 5; top_paths = @('src/foo'); top_area_labels = @() }
-                'alice' = @{ merge_count = 5; top_paths = @('src/foo'); top_area_labels = @() }
-                'mike'  = @{ merge_count = 5; top_paths = @('src/foo'); top_area_labels = @() }
+                'zebra' = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'alice' = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'mike'  = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -125,7 +125,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # All match path (+3) and have same merge_count → alphabetical
@@ -136,9 +136,9 @@ Describe 'Select-FallbackReviewers' {
     It 'Excludes the PR author from candidates' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'author' = @{ merge_count = 100; top_paths = @('src/foo'); top_area_labels = @() }
-                'alice'  = @{ merge_count = 1;   top_paths = @('src/foo'); top_area_labels = @() }
-                'bob'    = @{ merge_count = 1;   top_paths = @('src/foo'); top_area_labels = @() }
+                'author' = @{ merge_count = 100; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'alice'  = @{ merge_count = 1;   top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'bob'    = @{ merge_count = 1;   top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -146,7 +146,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin 'author' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         $result | Should -Not -Contain 'author'
@@ -159,7 +159,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $null `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # No data → all scores 0, all merge_counts 0 → alphabetical
@@ -173,8 +173,8 @@ Describe 'Select-FallbackReviewers' {
         # (capped at +3 + 1.0 = 4.0) but alice wins the merge_count tiebreaker.
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice' = @{ merge_count = 100; top_paths = @('src/foo'); top_area_labels = @() }
-                'bob'   = @{ merge_count = 10;  top_paths = @('src/foo'); top_area_labels = @() }
+                'alice' = @{ merge_count = 100; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'bob'   = @{ merge_count = 10;  top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -182,7 +182,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # Both get +3 (path) + 1.0 (capped) = 4.0 → tie → merge_count desc → alice first
@@ -192,10 +192,10 @@ Describe 'Select-FallbackReviewers' {
     It 'Returns at most 2 reviewers even with many maintainers' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'a' = @{ merge_count = 5; top_paths = @('src/foo'); top_area_labels = @() }
-                'b' = @{ merge_count = 4; top_paths = @('src/foo'); top_area_labels = @() }
-                'c' = @{ merge_count = 3; top_paths = @('src/foo'); top_area_labels = @() }
-                'd' = @{ merge_count = 2; top_paths = @('src/foo'); top_area_labels = @() }
+                'a' = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'b' = @{ merge_count = 4; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'c' = @{ merge_count = 3; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
+                'd' = @{ merge_count = 2; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -203,7 +203,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         $result | Should -HaveCount 2
@@ -224,7 +224,7 @@ Describe 'Select-FallbackReviewers' {
     It 'Handles repo not present in activity data gracefully' {
         $activity = New-ActivityData @{
             'other/repo' = @{
-                'alice' = @{ merge_count = 10; top_paths = @('src/foo'); top_area_labels = @() }
+                'alice' = @{ merge_count = 10; top_paths = @('src/libraries/System.Net'); top_area_labels = @() }
             }
         }
         $result = Select-FallbackReviewers `
@@ -232,7 +232,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/foo/bar.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Sockets.cs') `
             -AreaLabels @()
 
         # No data for this repo → all scores 0, merge_counts 0 → alphabetical
@@ -243,8 +243,8 @@ Describe 'Select-FallbackReviewers' {
     It 'Combines path and label bonuses correctly' {
         $activity = New-ActivityData @{
             'test/repo' = @{
-                'alice' = @{ merge_count = 5; top_paths = @('src/net'); top_area_labels = @('area-net') }
-                'bob'   = @{ merge_count = 5; top_paths = @('src/net'); top_area_labels = @('area-other') }
+                'alice' = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @('area-net') }
+                'bob'   = @{ merge_count = 5; top_paths = @('src/libraries/System.Net'); top_area_labels = @('area-other') }
             }
         }
         $result = Select-FallbackReviewers `
@@ -252,7 +252,7 @@ Describe 'Select-FallbackReviewers' {
             -ExcludeLogin '' `
             -Repo 'test/repo' `
             -ActivityData $activity `
-            -ChangedFilePaths @('src/net/Socket.cs') `
+            -ChangedFilePaths @('src/libraries/System.Net/Socket.cs') `
             -AreaLabels @('area-net')
 
         # alice: +3 (path) + 2 (label) + 0.5 (merge_count/10) = 5.5
