@@ -259,7 +259,7 @@ function Invoke-ChunkedRepoScan {
     # The original query uses merged:>CutoffDate (exclusive), so chunks start
     # the day after CutoffDate to preserve semantics.
     $startDate = ([datetime]::Parse($CutoffDate)).AddDays(1)
-     $scanEnd = if ($EndDate) { [datetime]::Parse($EndDate) } else { (Get-Date).Date }
+     $scanEnd = if ($EndDate) { ([datetime]::Parse($EndDate)).Date } else { (Get-Date).Date }
     if ($startDate -gt $scanEnd) {
         return [PSCustomObject]@{
             Success      = $true

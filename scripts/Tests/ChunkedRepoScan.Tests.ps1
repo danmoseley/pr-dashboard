@@ -389,10 +389,11 @@ Describe 'Invoke-ChunkedRepoScan' {
 
             $result.Success | Should -BeTrue
             $result.TotalFetched | Should -Be 10   # 2 chunks of 5
-            # Verify no scan extends beyond EndDate
+            # Verify all scan calls respect the EndDate bound
+            Should -Invoke Invoke-RepoMaintainerScan -Times 2 -Exactly
             Should -Invoke Invoke-RepoMaintainerScan -ParameterFilter {
                 -not $EndDate -or [datetime]::Parse($EndDate) -le [datetime]::Parse('2026-03-14')
-            }
+            } -Times 2 -Exactly
         }
     }
 }
