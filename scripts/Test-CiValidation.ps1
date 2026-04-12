@@ -108,7 +108,7 @@ if (Test-Path $activityFile) {
             if ($badRepoKeys.Count -gt 0) {
                 $activityDetail = "Invalid repo keys: $($badRepoKeys -join ', ')"
             } else {
-                $badEntries = @()
+                $badEntries = [System.Collections.Generic.List[string]]::new()
                 foreach ($repo in $repoKeys) {
                     $maintainers = $a.$repo
                     foreach ($mp in $maintainers.PSObject.Properties) {
@@ -116,7 +116,7 @@ if (Test-Path $activityFile) {
                         if ($null -eq $entry.merge_count -or
                             $null -eq $entry.top_paths -or
                             $null -eq $entry.top_area_labels) {
-                            $badEntries += "$repo/$($mp.Name)"
+                            $badEntries.Add("$repo/$($mp.Name)")
                         }
                     }
                 }

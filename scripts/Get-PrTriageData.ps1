@@ -29,7 +29,8 @@
     Path to maintainer-activity.json, which contains per-maintainer activity signals
     used by the activity-based fallback reviewer selection. When missing or unreadable,
     activity-based ranking is unavailable, so fallback reviewer selection uses the
-    default ordering (currently alphabetical rather than merge-count-based).
+    existing default ordering (currently alphabetical, or maintainer-list order in
+    the stub path, rather than merge-count-based ordering).
 .EXAMPLE
     .\Get-PrTriageData.ps1 -Label "area-CodeGen-coreclr"
 .EXAMPLE
@@ -576,7 +577,7 @@ foreach ($pr in $refreshCandidates) {
         # Falls back to merge_count desc → alphabetical when all scores are 0 (no activity data or no matches).
         $prAreaLabels = @($labelNames | Where-Object { $_ -match '^area-' })
         $authorLogin = if ($pr.author) { $pr.author.login } else { '' }
-        if ($authorLogin -match '\[bot\]$' -and $botTrigger) {
+        if ($botTrigger) {
             $authorLogin = $botTrigger
         }
         $prOwners = @(Select-FallbackReviewers `
