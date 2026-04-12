@@ -130,7 +130,6 @@ function Invoke-RepoMaintainerScan {
                 Write-Host "${DisplayPrefix}  Attempt $attempt/$MaxRetries failed: $displayErr" -ForegroundColor Yellow
                 Write-Host "${DisplayPrefix}  Retrying in ${delay}s..." -ForegroundColor Yellow
                 Start-Sleep -Seconds $delay
-                Write-Host "${DisplayPrefix}$Repo ... " -NoNewline
             } else {
                 Write-Host ""
                 Write-Host "${DisplayPrefix}  Attempt $attempt/$MaxRetries failed: $displayErr" -ForegroundColor Red
@@ -217,7 +216,7 @@ function Invoke-ChunkedRepoScan {
         [switch]$SkipActivity,
         [string]$DisplayPrefix = '  ',
         [int]$MaxRetries = 5,
-        [ValidateRange(1, 365)][int]$ChunkDays = 30
+        [ValidateRange(1, 365)][int]$ChunkDays = 7
     )
 
     # Compute non-overlapping date ranges from (CutoffDate + 1 day) to today.
