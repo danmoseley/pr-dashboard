@@ -417,11 +417,13 @@ async function runTests() {
     {
       const p = await openPage(ALL + '?area=area-CodeGen-coreclr', 1);
       await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length > 0, null, { timeout: 10000 }).catch(() => null);
-      const filteredRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
+      const filteredRows = await p.$$eval('#pr-table tbody tr', rows =>
+        rows.filter(r => getComputedStyle(r).display !== 'none').length);
       // Clear the area filter to reveal previously hidden rows
       await p.evaluate(() => { if (typeof clearAllSecondaryFilters === 'function') clearAllSecondaryFilters(); });
       await p.waitForFunction(() => document.querySelectorAll('.filter-chip').length === 0, null, { timeout: 3000 }).catch(() => null);
-      const allRows = await p.$$eval('#pr-table tbody tr', rows => rows.length);
+      const allRows = await p.$$eval('#pr-table tbody tr', rows =>
+        rows.filter(r => getComputedStyle(r).display !== 'none').length);
       if (allRows > filteredRows) {
         pass('D5: Sort+filter+clear restores rows: ' + filteredRows + ' → ' + allRows);
       } else if (allRows === filteredRows) {
