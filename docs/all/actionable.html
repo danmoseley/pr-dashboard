@@ -77,6 +77,20 @@
     Easy next action on maintainer
   </label>
 </div>
+<div class="user-input" id="report-filters" style="gap:12px;margin-top:-0.5em;margin-bottom:0.7em">
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="community-toggle">
+    Community awaiting review
+  </label>
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="quickwins-toggle">
+    Quick wins: Ready to merge
+  </label>
+  <label class="involves-label" style="display:flex">
+    <input type="checkbox" id="stale-toggle">
+    Consider closing
+  </label>
+</div>
 <div class="recent-tiles" id="recent-tiles"></div>
 
 <details class="scoring">
@@ -166,6 +180,9 @@
   var easyActionMode = false;         // whether "Easy next actions only" is checked (user-filter context)
   var nextActionMaintainerMode = false; // whether "Next action on maintainer" is checked (no-user context)
   var easyActionMaintainerMode = false; // whether "Easy next action on maintainer" is checked (no-user context)
+  var communityMode = false;           // "Community awaiting review" filter (URL-only, not localStorage)
+  var quickWinsMode = false;           // "Quick wins: Ready to merge" filter (URL-only, not localStorage)
+  var staleMode = false;               // "Consider closing" filter (URL-only, not localStorage)
   var activeAreas = [];   // area labels currently filtered (multi-select)
   var activeRepos = [];   // repo slugs currently filtered (multi-select)
   var moreRowsExpanded = false; // track whether "Show N more" rows are visible
@@ -221,6 +238,13 @@
   var urlEasyAction = params.get('easyaction');
   var urlNextMaintainer = params.get('nextmaintainer');
   var urlEasyMaintainer = params.get('easymaintainer');
+  // Report-mode filters: URL-authoritative only, NOT localStorage-persisted
+  var urlCommunity = params.get('community');
+  var urlQuickWins = params.get('quickwins');
+  var urlStale = params.get('stale');
+  if (urlCommunity !== null) communityMode = urlCommunity === 'true' || urlCommunity === '1';
+  if (urlQuickWins !== null) quickWinsMode = urlQuickWins === 'true' || urlQuickWins === '1';
+  if (urlStale !== null) staleMode = urlStale === 'true' || urlStale === '1';
   try {
     // Use repeated params (?area=a&area=b) for unambiguous round-tripping.
     // For backward compat, also accept the legacy comma-separated form (?area=a,b).
@@ -286,6 +310,9 @@
   document.getElementById('easy-action-toggle').checked = easyActionMode;
   document.getElementById('next-action-maintainer-toggle').checked = nextActionMaintainerMode;
   document.getElementById('easy-action-maintainer-toggle').checked = easyActionMaintainerMode;
+  document.getElementById('community-toggle').checked = communityMode;
+  document.getElementById('quickwins-toggle').checked = quickWinsMode;
+  document.getElementById('stale-toggle').checked = staleMode;
   renderRecentTiles();
 
   // Clean up URL: remove user-context params (involves/nextaction/easyaction) if no user is set.
@@ -418,6 +445,38 @@
     applyEasyMaintainerImpliedState();
   }
 
+  // --- Report-mode filter toggle handlers (URL-only, not localStorage) ---
+  function reRender() {
+    history.replaceState(null, '', buildCurrentUrl());
+    if (!loaded) return;
+    if (activeUsers.length > 0) renderFiltered(activeUsers);
+    else renderFilteredMaintainer();
+  }
+
+  var communityToggle = document.getElementById('community-toggle');
+  if (communityToggle) {
+    communityToggle.addEventListener('change', function() {
+      communityMode = this.checked;
+      reRender();
+    });
+  }
+
+  var quickWinsToggle = document.getElementById('quickwins-toggle');
+  if (quickWinsToggle) {
+    quickWinsToggle.addEventListener('change', function() {
+      quickWinsMode = this.checked;
+      reRender();
+    });
+  }
+
+  var staleToggle = document.getElementById('stale-toggle');
+  if (staleToggle) {
+    staleToggle.addEventListener('change', function() {
+      staleMode = this.checked;
+      reRender();
+    });
+  }
+
   // Start fetching
   fetchData();
 
@@ -524,6 +583,9 @@
     if (activeUsers.length > 0 && easyActionMode) p.set('easyaction', 'true');
     if (nextActionMaintainerMode) p.set('nextmaintainer', 'true');
     if (easyActionMaintainerMode) p.set('easymaintainer', 'true');
+    if (communityMode) p.set('community', 'true');
+    if (quickWinsMode) p.set('quickwins', 'true');
+    if (staleMode) p.set('stale', 'true');
     activeAreas.forEach(function(a) { p.append('area', a); });
     activeRepos.forEach(function(r) { p.append('repo', r); });
     var qs = p.toString();
@@ -691,6 +753,9 @@
     easyActionMode = false;
     nextActionMaintainerMode = false;
     easyActionMaintainerMode = false;
+    communityMode = false;
+    quickWinsMode = false;
+    staleMode = false;
     document.getElementById('involves-toggle').checked = false;
     document.getElementById('involves-toggle').disabled = false;
     document.getElementById('next-action-toggle').checked = false;
@@ -698,6 +763,9 @@
     document.getElementById('next-action-maintainer-toggle').checked = false;
     document.getElementById('next-action-maintainer-toggle').disabled = false;
     document.getElementById('easy-action-maintainer-toggle').checked = false;
+    document.getElementById('community-toggle').checked = false;
+    document.getElementById('quickwins-toggle').checked = false;
+    document.getElementById('stale-toggle').checked = false;
     document.getElementById('clear-user-btn').style.display = 'none';
     document.getElementById('involves-label').style.display = 'none';
     document.getElementById('next-action-label').style.display = 'none';
@@ -858,6 +926,7 @@
   // Filter and render all PRs using the maintainer-context filters (no user set)
   function renderFilteredMaintainer() {
     var hasMaintainerFilter = nextActionMaintainerMode || easyActionMaintainerMode;
+    var hasReportFilter = communityMode || quickWinsMode || staleMode;
     var filtered = allPrs;
     if (hasMaintainerFilter) {
       filtered = filtered.filter(isMaintainersTurn);
@@ -866,14 +935,26 @@
       filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
     }
 
+    // Apply report-mode filters (community, quickwins, stale)
+    filtered = applyReportModeFilters(filtered);
+
     var bar = document.getElementById('summary-bar');
-    if (hasMaintainerFilter) {
-      filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+    if (hasMaintainerFilter || hasReportFilter) {
+      defaultSort(filtered);
       var repoCounts = {};
       filtered.forEach(function(pr) { repoCounts[pr._slug] = (repoCounts[pr._slug] || 0) + 1; });
       var breakdown = Object.keys(repoCounts).sort(function(a, b) { return repoCounts[b] - repoCounts[a]; })
         .map(function(s) { return s + ' (' + repoCounts[s] + ')'; }).join(', ');
-      var modeDesc = easyActionMaintainerMode ? 'Easy next action on maintainer' : 'Next action on maintainer';
+      var modeDesc = '';
+      if (easyActionMaintainerMode) modeDesc = 'Easy next action on maintainer';
+      else if (hasMaintainerFilter) modeDesc = 'Next action on maintainer';
+      var reportParts = [];
+      if (communityMode) reportParts.push('Community awaiting review');
+      if (quickWinsMode) reportParts.push('Quick wins');
+      if (staleMode) reportParts.push('Consider closing');
+      if (reportParts.length > 0) {
+        modeDesc = modeDesc ? modeDesc + ' + ' + reportParts.join(' + ') : reportParts.join(' + ');
+      }
       while (bar.firstChild) bar.removeChild(bar.firstChild);
 
       var strong = document.createElement('strong');
@@ -886,7 +967,8 @@
       clearLink.href = '#';
       clearLink.textContent = '\u2715 Clear';
       clearLink.onclick = function() {
-        window.clearMaintainerFilters();
+        if (hasMaintainerFilter) window.clearMaintainerFilters();
+        if (hasReportFilter) window.clearReportFilters();
         return false;
       };
       bar.appendChild(clearLink);
@@ -915,9 +997,21 @@
     try { localStorage.removeItem(LS_NM_BEFORE_EASY_KEY); } catch(e) {}
     savedNextMaintainerBeforeEasy = false;
     history.replaceState(null, '', buildCurrentUrl());
-    var bar = document.getElementById('summary-bar');
-    if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
-    if (loaded) renderTable(allPrs);
+    if (loaded) renderFilteredMaintainer();
+  };
+
+  window.clearReportFilters = function() {
+    communityMode = false;
+    quickWinsMode = false;
+    staleMode = false;
+    document.getElementById('community-toggle').checked = false;
+    document.getElementById('quickwins-toggle').checked = false;
+    document.getElementById('stale-toggle').checked = false;
+    history.replaceState(null, '', buildCurrentUrl());
+    if (loaded) {
+      if (activeUsers.length > 0) renderFiltered(activeUsers);
+      else renderFilteredMaintainer();
+    }
   };
 
   // Classify a PR into an "easy next action" category, or null if it doesn't qualify
@@ -951,6 +1045,45 @@
     return null;
   }
 
+  // Apply report-mode filters (community, quickwins, stale) to a PR array.
+  // These are AND-composable: each active filter further narrows the set.
+  function applyReportModeFilters(prs) {
+    if (communityMode) {
+      prs = prs.filter(function(pr) {
+        return pr.is_community && /review/i.test(pr.next_action || '');
+      });
+    }
+    if (quickWinsMode) {
+      prs = prs.filter(function(pr) {
+        return /Ready to merge/.test(pr.next_action || '');
+      });
+    }
+    if (staleMode) {
+      prs = prs.filter(function(pr) {
+        var age = parseInt(pr.age_days) || 0;
+        var stale = parseInt(pr.days_since_update) || 0;
+        return (age > 90 && stale > 30) || (age > 180 && stale > 14);
+      });
+    }
+    return prs;
+  }
+
+  // Default sort for the current filter state. Stale mode sorts by staleness;
+  // all other modes sort by action score (descending).
+  function defaultSort(prs) {
+    if (staleMode) {
+      prs.sort(function(a, b) {
+        return (parseInt(b.days_since_update) || 0) - (parseInt(a.days_since_update) || 0);
+      });
+    } else {
+      prs.sort(function(a, b) {
+        return (b.action_score != null ? b.action_score : b.score || 0) -
+               (a.action_score != null ? a.action_score : a.score || 0);
+      });
+    }
+    return prs;
+  }
+
   function renderFiltered(usernames) {
     var lcUsers = usernames.map(function(u) { return u.toLowerCase(); });
     var filtered = allPrs.filter(function(pr) {
@@ -979,7 +1112,10 @@
       filtered = filtered.filter(function(pr) { return pr._easyCategory !== null; });
     }
 
-    filtered.sort(function(a, b) { return (b.action_score != null ? b.action_score : b.score || 0) - (a.action_score != null ? a.action_score : a.score || 0); });
+    // Apply report-mode filters (community, quickwins, stale)
+    filtered = applyReportModeFilters(filtered);
+
+    defaultSort(filtered);
 
     // Summary bar
     var repoCounts = {};
@@ -992,6 +1128,9 @@
     var userDisplay = usernames.map(function(u) { return '@' + escHtml(u); }).join(', ');
     var modeNote = nextActionOnlyMode ? ' (next action on me only)' : involvesMode ? ' (includes all involved)' : '';
     if (easyActionMode) modeNote += ' (easy actions only)';
+    if (communityMode) modeNote += ' (community awaiting review)';
+    if (quickWinsMode) modeNote += ' (quick wins)';
+    if (staleMode) modeNote += ' (consider closing)';
     bar.innerHTML = 'Showing PRs for <strong>' + userDisplay + '</strong>' + modeNote +
       ' <a href="#" onclick="clearUser();return false">&#x2715; Clear</a>' +
       '<span class="repo-breakdown"> &#8212; ' + filtered.length + ' PRs' +
