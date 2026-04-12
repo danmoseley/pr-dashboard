@@ -1,55 +1,91 @@
 [
   {
     "day": "2026-04-11",
-    "date_utc": "2026-04-11T23:10:36.0000000Z",
+    "date_utc": "2026-04-12T04:34:08.0000000Z",
     "display": "April 11, 2026",
     "bullets": [
       {
-        "text": "Fixed issues with `Write-Warning` leaking ANSI text and `Write-Output` corrupting scan JSON in CI.",
+        "text": "Added incremental PR scanning to reduce API quota usage.",
+        "tier": "feature"
+      },
+      {
+        "text": "Introduced \"Next action on maintainer\" and \"Easy next action on maintainer\" filters for the no-user view.",
+        "tier": "feature"
+      },
+      {
+        "text": "Added activity-based fallback to automatically select up to two reviewers when necessary.",
+        "tier": "feature"
+      },
+      {
+        "text": "Enabled retry with backoff and error logging for GraphQL queries for better error handling.",
+        "tier": "feature"
+      },
+      {
+        "text": "Implemented a lightweight repository probe to skip unchanged repositories along with an API quota footer.",
+        "tier": "feature"
+      },
+      {
+        "text": "Added weekly auto-refresh workflow for maintainers.",
+        "tier": "feature"
+      },
+      {
+        "text": "Added a magnifying glass for the repo filter while removing the ↗ navigation icon.",
+        "tier": "feature"
+      },
+      {
+        "text": "Onboarded 11 new .NET repositories (standard tier, updated daily).",
+        "tier": "feature"
+      },
+      {
+        "text": "Fixed display issue for missing cache version in incremental scan warning.",
         "tier": "normal"
       },
       {
-        "text": "Fixed bugs involving `waitForFunction` argument order, `ONLY_GROUPS` whitespace handling, and comments in `run-parallel.js`.",
+        "text": "Resolved crash caused by StrictMode by safely accessing PSObject.Properties.",
         "tier": "normal"
       },
       {
-        "text": "Improved functionality for \"easy-maintainer\" by making it imply \"next-maintainer,\" added a clear button, and resolved issues with URL parameters.",
+        "text": "Fixed PowerShell stream leakage in stdout during scan by using `-OutputFile`.",
         "tier": "normal"
       },
       {
-        "text": "Adjusted behavior to skip unchanged repositories during scans and added an API quota usage footer.",
+        "text": "Addressed scan failures caused by Write-Warning leaking ANSI text to stdout in CI.",
+        "tier": "normal"
+      },
+      {
+        "text": "Fixed corrupt JSON output caused by Write-Output during scans.",
+        "tier": "normal"
+      },
+      {
+        "text": "Enhanced best-effort refresh behavior when no user filter is applied.",
+        "tier": "normal"
+      },
+      {
+        "text": "Corrected waitForFunction argument order, whitespace handling in ONLY_GROUPS, and a comment in run-parallel.js.",
+        "tier": "normal"
+      },
+      {
+        "text": "Removed inferred 'who' from the \"involves\" list.",
+        "tier": "normal"
+      },
+      {
+        "text": "Made \"easy-maintainer\" imply \"next-maintainer,\" added a clear button, and fixed issues with URL parameter handling.",
         "tier": "normal"
       },
       {
         "text": "Added diagnostic logging for scan validation failures.",
-        "tier": "feature"
+        "tier": "trivial"
       },
       {
-        "text": "Enabled incremental pull request scanning to reduce API quota usage.",
-        "tier": "feature"
+        "text": "Updated `README.md` with new information.",
+        "tier": "trivial"
       },
       {
-        "text": "Added \"Next action on maintainer\" and \"Easy next action on maintainer\" filters to assist with the no-user view.",
-        "tier": "feature"
-      },
-      {
-        "text": "Introduced a repository filter magnifying glass, while removing the redundant external navigation icon (↗).",
-        "tier": "feature"
-      },
-      {
-        "text": "Added auto-refresh functionality for the maintainers list and a weekly auto-refresh workflow.",
-        "tier": "feature"
-      },
-      {
-        "text": "Integrated 11 new standard-tier .NET repositories with daily updates.",
-        "tier": "feature"
-      },
-      {
-        "text": "Updated `README.md` and `copilot-instructions.md` to include coding standards, a pre-push quality checklist, and clarified instructions.",
+        "text": "Revised `copilot-instructions.md` with coding standards and added a pre-push checklist.",
         "tier": "trivial"
       }
     ],
-    "commit_range": "39f9cfe172671487d1d84a2ba32345d9cbfefa73..5ed263f4418e43a76744e52bc9739cf05f5bfefd"
+    "commit_range": "39f9cfe172671487d1d84a2ba32345d9cbfefa73..d4b981d408e735e90cb145e3d608bca3b6f840b4"
   },
   {
     "day": "2026-04-10",

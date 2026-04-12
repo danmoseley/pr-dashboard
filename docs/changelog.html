@@ -39,17 +39,26 @@
 <section class="entry">
   <h2>April 11, 2026</h2>
   <ul>
-  <li class="feature"><strong>Added diagnostic logging for scan validation failures.</strong></li>
-  <li class="feature"><strong>Enabled incremental pull request scanning to reduce API quota usage.</strong></li>
-  <li class="feature"><strong>Added &quot;Next action on maintainer&quot; and &quot;Easy next action on maintainer&quot; filters to assist with the no-user view.</strong></li>
-  <li class="feature"><strong>Introduced a repository filter magnifying glass, while removing the redundant external navigation icon (↗).</strong></li>
-  <li class="feature"><strong>Added auto-refresh functionality for the maintainers list and a weekly auto-refresh workflow.</strong></li>
-  <li class="feature"><strong>Integrated 11 new standard-tier .NET repositories with daily updates.</strong></li>
-  <li>Fixed issues with `Write-Warning` leaking ANSI text and `Write-Output` corrupting scan JSON in CI.</li>
-  <li>Fixed bugs involving `waitForFunction` argument order, `ONLY_GROUPS` whitespace handling, and comments in `run-parallel.js`.</li>
-  <li>Improved functionality for &quot;easy-maintainer&quot; by making it imply &quot;next-maintainer,&quot; added a clear button, and resolved issues with URL parameters.</li>
-  <li>Adjusted behavior to skip unchanged repositories during scans and added an API quota usage footer.</li>
-  <li class="trivial">Updated `README.md` and `copilot-instructions.md` to include coding standards, a pre-push quality checklist, and clarified instructions.</li>
+  <li class="feature"><strong>Added incremental PR scanning to reduce API quota usage.</strong></li>
+  <li class="feature"><strong>Introduced &quot;Next action on maintainer&quot; and &quot;Easy next action on maintainer&quot; filters for the no-user view.</strong></li>
+  <li class="feature"><strong>Added activity-based fallback to automatically select up to two reviewers when necessary.</strong></li>
+  <li class="feature"><strong>Enabled retry with backoff and error logging for GraphQL queries for better error handling.</strong></li>
+  <li class="feature"><strong>Implemented a lightweight repository probe to skip unchanged repositories along with an API quota footer.</strong></li>
+  <li class="feature"><strong>Added weekly auto-refresh workflow for maintainers.</strong></li>
+  <li class="feature"><strong>Added a magnifying glass for the repo filter while removing the ↗ navigation icon.</strong></li>
+  <li class="feature"><strong>Onboarded 11 new .NET repositories (standard tier, updated daily).</strong></li>
+  <li>Made &quot;easy-maintainer&quot; imply &quot;next-maintainer,&quot; added a clear button, and fixed issues with URL parameter handling.</li>
+  <li>Removed inferred &#39;who&#39; from the &quot;involves&quot; list.</li>
+  <li>Corrected waitForFunction argument order, whitespace handling in ONLY_GROUPS, and a comment in run-parallel.js.</li>
+  <li>Enhanced best-effort refresh behavior when no user filter is applied.</li>
+  <li>Resolved crash caused by StrictMode by safely accessing PSObject.Properties.</li>
+  <li>Addressed scan failures caused by Write-Warning leaking ANSI text to stdout in CI.</li>
+  <li>Fixed PowerShell stream leakage in stdout during scan by using `-OutputFile`.</li>
+  <li>Fixed display issue for missing cache version in incremental scan warning.</li>
+  <li>Fixed corrupt JSON output caused by Write-Output during scans.</li>
+  <li class="trivial">Updated `README.md` with new information.</li>
+  <li class="trivial">Added diagnostic logging for scan validation failures.</li>
+  <li class="trivial">Revised `copilot-instructions.md` with coding standards and added a pre-push checklist.</li>
   </ul>
 </section>
 
