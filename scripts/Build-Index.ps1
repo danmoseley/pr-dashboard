@@ -94,14 +94,6 @@ function Get-TrendIndicator {
     return @{ arrow = "$arrow"; cssClass = $cssClass; delta = [int]$delta; tooltip = $tooltip }
 }
 
-# All known report types in display order
-$reportTypes = @(
-    @{ Id = "top15"; Title = "Most Actionable" }
-    @{ Id = "community"; Title = "Community Awaiting Review" }
-    @{ Id = "quick-wins"; Title = "Quick Wins: Ready to Merge" }
-    @{ Id = "stale-close"; Title = "Consider Closing" }
-)
-
 # Build header row
 $headerCells = $repos | ForEach-Object {
     $repoShort = $_.slug
@@ -144,38 +136,6 @@ $mergedCells = foreach ($repo in $repos) {
     "<td class=`"metric`"><span class=`"metric-num`">$text</span><br>$spark</td>"
 }
 $mergedRow = "<tr class=`"metric-row`"><td class=`"report-name`">Merged (7d)</td>$($mergedCells -join '')</tr>"
-
-# Unified view redirect URLs for non-actionable report types
-$unifiedReportUrls = @{
-    "top15"       = ""
-    "community"   = "community=true"
-    "quick-wins"  = "quickwins=true"
-    "stale-close" = "stale=true"
-}
-
-# Build data rows (report links)
-$dataRows = foreach ($rt in $reportTypes) {
-    $cells = foreach ($repo in $repos) {
-        $reportInfo = $null
-        if ($repo.reports -and $repo.reports.PSObject.Properties[$rt.Id]) {
-            $reportInfo = $repo.reports.($rt.Id)
-        }
-        if ($reportInfo -and $reportInfo.count -ge 0) {
-            $href = if ($unifiedReportUrls.ContainsKey($rt.Id)) {
-                $qs = $unifiedReportUrls[$rt.Id]
-                if ($qs) { "actionable.html?repo=$($repo.slug)&$qs" }
-                else { "actionable.html?repo=$($repo.slug)" }
-            } else {
-                "$($repo.slug)/$($reportInfo.file)"
-            }
-            $encodedHref = [System.Net.WebUtility]::HtmlEncode($href)
-            "<td><a href=`"$encodedHref`">$($reportInfo.count) PRs</a></td>"
-        } else {
-            "<td class=`"na`">&mdash;</td>"
-        }
-    }
-    "<tr><td class=`"report-name`">$($rt.Title)</td>$($cells -join '')</tr>"
-}
 
 # Build updated row
 $updatedCells = $repos | ForEach-Object {
@@ -294,6 +254,7 @@ $indexHtml = @"
 <body>
 <h1>PR Dashboard</h1>
 <p class="meta">Automated PR triage reports for dotnet repositories <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback" target="_blank">&#x1F4AC; Feedback</a></p>
+<p style="font-size:2em;font-weight:700;margin:1em 0;text-align:center"><a href="actionable.html">&#x1F4CA; Click here for the report &#x1F4CA;</a></p>
 <div style="overflow-x:auto">
 <table>
 <thead>
@@ -305,12 +266,8 @@ $ageRow
 $mergedRow
 $communityChampRow
 $topMergerRow
-<tr class="separator-row"><td class="report-name" colspan="$(1 + $repos.Count)"></td></tr>
-$($dataRows -join "`n")
 $updatedRow
 $statsRow
-<tr class="separator-row"><td class="report-name" colspan="$(1 + $repos.Count)"></td></tr>
-<tr><td colspan="$(1 + $repos.Count)" style="text-align:center;padding:0.75em 1em;border:2px solid var(--link);background:var(--header-bg);font-weight:600;font-size:1.05em"><a href="actionable.html">&#x1F30D; My PRs across all repos</a></td></tr>
 </tbody>
 </table>
 </div>
