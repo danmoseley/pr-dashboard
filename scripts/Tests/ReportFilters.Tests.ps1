@@ -224,17 +224,20 @@ Describe 'Report filter parity' {
     }
 
     Context 'Index link targets' {
-        It 'Build-Index.ps1 defines unified URLs for all report types' {
-            $indexContent = Get-Content $buildIndex -Raw
-            $indexContent | Should -Match '"top15"\s*=\s*""'
-            $indexContent | Should -Match '"community"\s*=\s*"community=true"'
-            $indexContent | Should -Match '"quick-wins"\s*=\s*"quickwins=true"'
-            $indexContent | Should -Match '"stale-close"\s*=\s*"stale=true"'
-        }
-
-        It 'Build-Index.ps1 generates hrefs using unifiedReportUrls' {
+        It 'Build-Index.ps1 header links target actionable.html per-repo' {
             $indexContent = Get-Content $buildIndex -Raw
             $indexContent | Should -Match 'actionable\.html\?repo='
+        }
+
+        It 'Build-Index.ps1 has prominent CTA link to actionable.html' {
+            $indexContent = Get-Content $buildIndex -Raw
+            $indexContent | Should -Match 'href\s*=\s*["'']actionable\.html["'']'
+        }
+
+        It 'Build-Index.ps1 does not contain removed report-type rows' {
+            $indexContent = Get-Content $buildIndex -Raw
+            $indexContent | Should -Not -Match '\$dataRows'
+            $indexContent | Should -Not -Match 'Most Actionable|Community Awaiting|Quick Wins|Consider Closing'
         }
     }
 
