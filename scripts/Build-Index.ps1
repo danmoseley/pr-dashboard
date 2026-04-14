@@ -243,6 +243,8 @@ $indexHtml = @"
   a.feedback { font-size: 0.8em; background: #1f6feb; color: #fff; padding: 2px 10px;
               border-radius: 10px; text-decoration: none; margin-left: 8px; vertical-align: middle; }
   a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
+  .index-cta { font-size: 2em; font-weight: 700; margin: 1em 0; text-align: center; }
+  .index-table-wrap { overflow-x: auto; }
   @media (prefers-color-scheme: light) {
     :root { --bg: #fff; --fg: #1f2328; --border: #d0d7de; --link: #0969da;
              --hover: #f6f8fa; --header-bg: #f6f8fa; --good: #1a7f37; --bad: #cf222e; }
@@ -254,8 +256,8 @@ $indexHtml = @"
 <body>
 <h1>PR Dashboard</h1>
 <p class="meta">Automated PR triage reports for dotnet repositories <a class="feedback" href="https://github.com/danmoseley/pr-dashboard/issues/new?title=Feedback" target="_blank">&#x1F4AC; Feedback</a></p>
-<p style="font-size:2em;font-weight:700;margin:1em 0;text-align:center"><a href="actionable.html">&#x1F4CA; Click here for the report &#x1F4CA;</a></p>
-<div style="overflow-x:auto">
+<p class="index-cta"><a href="actionable.html">&#x1F4CA; Click here for the report &#x1F4CA;</a></p>
+<div class="index-table-wrap">
 <table>
 <thead>
 $headerRow

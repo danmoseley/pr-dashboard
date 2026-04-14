@@ -231,7 +231,7 @@ Describe 'Report filter parity' {
 
         It 'Build-Index.ps1 has prominent CTA link to actionable.html' {
             $indexContent = Get-Content $buildIndex -Raw
-            $indexContent | Should -Match 'href=.*actionable\.html'
+            $indexContent | Should -Match 'href\s*=\s*["'']actionable\.html["'']'
         }
 
         It 'Build-Index.ps1 does not contain removed report-type rows' {
