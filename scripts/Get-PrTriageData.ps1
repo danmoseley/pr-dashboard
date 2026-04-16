@@ -412,11 +412,13 @@ foreach ($pr in $refreshCandidates) {
 }
 $refreshCandidates = $validCandidates
 
+# Use smaller batches for large repos — their PRs tend to have heavier GraphQL payloads
+$batchSize = if ($LargeRepo) { 3 } else { 10 }
 $batches = [System.Collections.ArrayList]@()
 $batch = [System.Collections.ArrayList]@()
 foreach ($pr in $refreshCandidates) {
     [void]$batch.Add($pr.number)
-    if ($batch.Count -eq 10) {
+    if ($batch.Count -eq $batchSize) {
         [void]$batches.Add([long[]]$batch.ToArray())
         $batch = [System.Collections.ArrayList]@()
     }
@@ -427,18 +429,41 @@ $repoParts = $Repo -split '/'
 $repoOwner = $repoParts[0]
 $repoName = $repoParts[1]
 
-Write-Verbose "Fetching details in $($batches.Count) GraphQL batch(es)..."
+Write-Verbose "Fetching details in $($batches.Count) GraphQL batch(es) (batch size: $batchSize)..."
+$batchFailures = 0
 foreach ($b in $batches) {
     $parts = @()
     for ($i = 0; $i -lt $b.Count; $i++) {
         $parts += "pr$($i): pullRequest(number:$($b[$i])) { $fragment }"
     }
     $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
-    $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
-    for ($i = 0; $i -lt $b.Count; $i++) {
-        $prData = $result.data.repository."pr$i"
-        if ($prData) { $graphqlData[$b[$i]] = $prData }
+    try {
+        $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
+        if (-not $raw -or [string]::IsNullOrWhiteSpace($raw)) {
+            Write-Warning "Empty GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
+            $batchFailures++
+            continue
+        }
+        $result = $raw | ConvertFrom-Json
+        if ($result.errors) {
+            Write-Warning "GraphQL errors for batch: $($result.errors | ForEach-Object { $_.message } | Select-Object -First 3 | Join-String -Separator '; ')"
+        }
+        if (-not $result.data -or -not $result.data.repository) {
+            Write-Warning "No data in GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
+            $batchFailures++
+            continue
+        }
+        for ($i = 0; $i -lt $b.Count; $i++) {
+            $prData = $result.data.repository."pr$i"
+            if ($prData) { $graphqlData[$b[$i]] = $prData }
+        }
+    } catch {
+        Write-Warning "GraphQL batch failed for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
+        $batchFailures++
     }
+}
+if ($batchFailures -gt 0) {
+    Write-Warning "$batchFailures of $($batches.Count) GraphQL batches failed — $($graphqlData.Count) PRs have full details"
 }
 
 # Paginate statusCheckRollup contexts for PRs with >100 checks
