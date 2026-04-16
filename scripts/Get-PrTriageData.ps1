@@ -109,7 +109,7 @@ try {
     # Return sentinel cache version 0 so it never matches a real cache, ensuring all-refresh.
     function Get-IncrementalCacheVersion { 0 }
     function Import-PreviousScan { param([string]$Path, [int]$RequiredCacheVersion, [string]$Repo = ''); @{ Enabled = $false; PrLookup = @{}; Fingerprints = @{}; Timestamp = $null; DisableReason = 'module unavailable' } }
-    function Get-IncrementalPartition { param([array]$Candidates, [hashtable]$PreviousPrLookup, [hashtable]$PreviousFingerprints, [int]$MaxReuseSeconds = 43200); @{ RefreshCandidates = $Candidates; ReusedEntries = @{}; Fallback = $true } }
+    function Get-IncrementalPartition { param([array]$Candidates, [hashtable]$PreviousPrLookup, [hashtable]$PreviousFingerprints, [int]$MaxReuseSeconds = 129600); @{ RefreshCandidates = $Candidates; ReusedEntries = @{}; Fallback = $true } }
     function Merge-ReusedEntries { param([hashtable]$ReusedEntries, [array]$PrListData, [array]$Results); $Results }
 }
 $CacheVersion = Get-IncrementalCacheVersion

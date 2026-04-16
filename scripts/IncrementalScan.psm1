@@ -8,7 +8,8 @@
 $script:CacheVersion = 2
 
 # Max age in seconds before a cached entry is considered stale (used as default for Get-IncrementalPartition).
-$script:MaxReuseSec = 12 * 3600
+# Must exceed the longest schedule interval (standard tier runs ~daily) to allow reuse across runs.
+$script:MaxReuseSec = 36 * 3600
 
 function Get-IncrementalCacheVersion { $script:CacheVersion }
 
