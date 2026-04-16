@@ -380,6 +380,7 @@ $botLogins = @(
 )
 
 $repos = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
+$largeRepos = [System.Collections.Generic.HashSet[string]]@($repos | Where-Object { $_.largeRepo -eq $true } | ForEach-Object { $_.repo })
 $existing = @{}
 if (Test-Path $maintainersJsonPath) {
     $raw = Get-Content $maintainersJsonPath -Raw | ConvertFrom-Json
@@ -404,7 +405,12 @@ foreach ($entry in $repos) {
     $repo = $entry.repo
     Write-Host "  $repo ... " -NoNewline
 
-    $scanResult = Invoke-RepoMaintainerScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity
+    $repoSkipActivity = $SkipActivity -or ($repo -in $largeRepos)
+    if ($repoSkipActivity -and -not $SkipActivity) {
+        Write-Host "(large repo, skip-activity) " -NoNewline -ForegroundColor DarkGray
+    }
+
+    $scanResult = Invoke-RepoMaintainerScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity
 
     if (-not $scanResult.Success) {
         Write-Host "  ERROR querying $repo ($($scanResult.Error)) — queued for retry" -ForegroundColor Red
@@ -414,11 +420,9 @@ foreach ($entry in $repos) {
     }
 
     $mergerCounts = $scanResult.MergerCounts
-    if (-not $SkipActivity) {
+    if (-not $repoSkipActivity) {
         $activityAccum[$repo] = $scanResult.Activity
     }
-
-    # Apply threshold
     $discovered = @($mergerCounts.GetEnumerator() |
         Where-Object { $_.Value -ge $MinMerges } |
         Sort-Object Value -Descending |
@@ -454,7 +458,8 @@ if ($failedRepos.Count -gt 0) {
         $repo = $entry.repo
         Write-Host "  $repo (chunked retry) ..."
 
-        $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$SkipActivity -DisplayPrefix '  '
+        $repoSkipActivity = $SkipActivity -or ($repo -in $largeRepos)
+        $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity -DisplayPrefix '  '
 
         if (-not $scanResult.Success) {
             Write-Host "  ERROR querying $repo on chunked retry (giving up)" -ForegroundColor Red
@@ -469,7 +474,7 @@ if ($failedRepos.Count -gt 0) {
         }
 
         $mergerCounts = $scanResult.MergerCounts
-        if (-not $SkipActivity) {
+        if (-not $repoSkipActivity) {
             $activityAccum[$repo] = $scanResult.Activity
         }
 

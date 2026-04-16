@@ -63,7 +63,8 @@ param(
     [string]$PreviousScanFile,
     [string]$OutputFile,
     [string]$ActivityFile,
-    [switch]$OutputCsv
+    [switch]$OutputCsv,
+    [switch]$LargeRepo
 )
 
 $ErrorActionPreference = "Stop"
@@ -389,12 +390,19 @@ if ($incrementalEnabled) {
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors, changed files) ---
 # Only fetch details for PRs that need refreshing (all of them if incremental is disabled)
-$fragment = 'number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}} files(first:100){nodes{path}}'
+$skipFiles = $LargeRepo
+$filesFragment = if ($skipFiles) { '' } else { ' files(first:100){nodes{path}}' }
+if ($skipFiles) { Write-Verbose "Skipping files() in GraphQL for $Repo (large repo)" }
+$fragment = "number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}" + $filesFragment
 
 $graphqlData = @{}
 $batches = [System.Collections.ArrayList]@()
 $batch = [System.Collections.ArrayList]@()
 foreach ($pr in $refreshCandidates) {
+    if (-not $pr.number -or $pr.number -le 0) {
+        Write-Warning "Skipping candidate with invalid PR number: $($pr.number)"
+        continue
+    }
     [void]$batch.Add($pr.number)
     if ($batch.Count -eq 10) {
         [void]$batches.Add([long[]]$batch.ToArray())
