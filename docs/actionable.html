@@ -705,6 +705,7 @@
     if (!hasFilters) {
       banner.style.display = 'none';
       banner.innerHTML = '';
+      updatePageTitle();
       return;
     }
     var html = '<span style="color:#8b949e;margin-right:4px">Filters:</span>';
@@ -720,8 +721,17 @@
     html += ' <a href="#" onclick="clearAllSecondaryFilters();return false" style="font-size:0.85em;color:#8b949e;margin-left:4px">Clear all</a>';
     banner.innerHTML = html;
     banner.style.display = 'flex';
+    updatePageTitle();
+    return;
   }
 
+  function updatePageTitle() {
+    var parts = [];
+    if (activeRepos.length === 1) parts.push(activeRepos[0]);
+    if (activeAreas.length > 0) parts.push(activeAreas.map(function(a) { return a.replace(/^area-/i, ''); }).join(', '));
+    if (parts.length > 0) document.title = 'Actionable PRs — ' + parts.join(' / ') + ' - PR Dashboard';
+    else document.title = 'Actionable PRs — All Repos - PR Dashboard';
+  }
 
   window.filterByArea = function(event, label) {
     var ctrl = (event && (event.ctrlKey || event.metaKey)) || ctrlHeld;
@@ -809,6 +819,7 @@
     document.getElementById('summary-bar').style.display = 'none';
     var banner = document.getElementById('filter-banner');
     if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    updatePageTitle();
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
