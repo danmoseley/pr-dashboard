@@ -172,10 +172,12 @@ jobs:
               echo "  (large repo — will skip files in GraphQL)"
             fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
+            # Use '|| scan_exit=$?' so that a failing scan captures the exit code
+            # instead of aborting the entire step under 'set -eo pipefail'.
             scan_ok=true
             scan_stderr="docs/${slug}/scan.stderr.tmp"
-            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args $activity_args $large_repo_flag -OutputFile "docs/${slug}/scan.json.tmp" 2>"$scan_stderr"
-            scan_exit=$?
+            scan_exit=0
+            pwsh ./scripts/Get-PrTriageData.ps1 -Repo "$repo" -Limit 500 $maintainer_args $prev_scan_args $activity_args $large_repo_flag -OutputFile "docs/${slug}/scan.json.tmp" 2>"$scan_stderr" || scan_exit=$?
             if [ $scan_exit -ne 0 ]; then
               echo "::warning::Scan failed for $repo (exit $scan_exit)"
               if [ -s "$scan_stderr" ]; then

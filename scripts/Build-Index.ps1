@@ -311,7 +311,7 @@ if (Test-Path $reposJsonPath) {
     try {
         $existingEntries = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
         foreach ($e in $existingEntries) {
-            if ($e.repo -and $e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
+            if ($e.repo -and $e.PSObject.Properties['largeRepo'] -and $e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
         }
     } catch {
         Write-Host "::warning::Could not read existing repos.json for flag preservation: $_"

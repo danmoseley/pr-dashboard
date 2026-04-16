@@ -381,7 +381,7 @@ $botLogins = @(
 
 $repos = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
 $largeRepos = [System.Collections.Generic.HashSet[string]]::new()
-foreach ($r in ($repos | Where-Object { $_.largeRepo -eq $true })) {
+foreach ($r in ($repos | Where-Object { $_.PSObject.Properties['largeRepo'] -and $_.largeRepo -eq $true })) {
     if ($null -ne $r.repo -and -not [string]::IsNullOrWhiteSpace($r.repo)) {
         $null = $largeRepos.Add([string]$r.repo)
     }
