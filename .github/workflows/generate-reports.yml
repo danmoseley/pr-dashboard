@@ -2,9 +2,11 @@ name: Generate All Reports
 
 on:
   # schedule-desc: priority repos ~4x daily, others ~daily
+  # Split into separate crons so github.event.schedule identifies the all-tiers slot.
   schedule:
-    - cron: '11 0,6,12,18 * * 1-5'  # weekdays 4x: priority repos every 6h at :11 past, standard repos at 6:11 UTC only (off-minute to reduce GitHub delays)
-    - cron: '11 6,18 * * 0,6'       # weekends 2x: priority repos both, standard repos at 6:11 UTC only
+    - cron: '11 0,12,18 * * 1-5'  # weekdays priority-only (0, 12, 18 UTC)
+    - cron: '11 6 * * *'           # daily all-tiers slot (6 UTC every day)
+    - cron: '11 18 * * 0,6'        # weekends priority-only (18 UTC)
   workflow_dispatch: {}
 
 concurrency:
@@ -47,15 +49,16 @@ jobs:
           echo "PRIORITY_SCHEDULE_DESC=~4x daily" >> "$GITHUB_ENV"
           echo "STANDARD_SCHEDULE_DESC=~daily" >> "$GITHUB_ENV"
           # Determine if this is a daily slot where standard repos should also refresh.
-          # Standard repos run at the 06 UTC slot. We check the runtime clock with a
-          # ±1h tolerance (05-07 UTC) to handle GitHub Actions queuing delays.
-          current_hour=$(date -u +%H)
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$current_hour" = "05" ] || [ "$current_hour" = "06" ] || [ "$current_hour" = "07" ]; then
+          # Use github.event.schedule (the cron expression that triggered this run) instead
+          # of wall-clock time, because GitHub Actions scheduling delays of 1-2+ hours made
+          # the old ±1h tolerance window unreliable — the 06:11 UTC cron often started at 08+.
+          DAILY_CRON="11 6 * * *"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "${{ github.event.schedule }}" = "$DAILY_CRON" ]; then
             echo "RUN_STANDARD=true" >> "$GITHUB_ENV"
-            echo "Running all tiers (daily slot or manual trigger)"
+            echo "Running all tiers (daily slot or manual trigger, schedule='${{ github.event.schedule }}')"
           else
             echo "RUN_STANDARD=false" >> "$GITHUB_ENV"
-            echo "Running priority tier only (hour=$current_hour)"
+            echo "Running priority tier only (schedule='${{ github.event.schedule }}')"
           fi
 
       - name: Install gh-models extension
