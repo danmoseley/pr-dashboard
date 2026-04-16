@@ -304,13 +304,17 @@ setInterval(updateTimestamps, 60000);
 $indexHtml | Out-File -FilePath (Join-Path $DocsDir "index.html") -Encoding utf8
 Write-Host "Generated index.html ($($repos.Count) repos)"
 
-# Write repos.json for the cross-repo page, preserving extra fields (e.g., largeRepo) from existing file
+# Write repos.json for the cross-repo page, preserving the existing largeRepo flag when present
 $reposJsonPath = Join-Path $DocsDir "repos.json"
 $existingRepoFlags = @{}
 if (Test-Path $reposJsonPath) {
-    $existingEntries = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
-    foreach ($e in $existingEntries) {
-        if ($e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
+    try {
+        $existingEntries = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
+        foreach ($e in $existingEntries) {
+            if ($e.repo -and $e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
+        }
+    } catch {
+        Write-Host "::warning::Could not read existing repos.json for flag preservation: $_"
     }
 }
 $reposJson = $repos | ForEach-Object {

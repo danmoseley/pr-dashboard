@@ -464,7 +464,7 @@ if ($failedRepos.Count -gt 0) {
         Write-Host "  $repo (chunked retry) ..."
 
         $repoSkipActivity = $SkipActivity -or $largeRepos.Contains($repo)
-        $scanResult = Invoke-ChunkedRepoScan-Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity -DisplayPrefix '  '
+        $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity -DisplayPrefix '  '
 
         if (-not $scanResult.Success) {
             Write-Host "  ERROR querying $repo on chunked retry (giving up)" -ForegroundColor Red
