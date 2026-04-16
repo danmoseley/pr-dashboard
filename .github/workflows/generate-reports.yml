@@ -172,8 +172,8 @@ jobs:
               echo "  (large repo — will skip files in GraphQL)"
             fi
             # Write scan to temp file; only overwrite scan.json if valid JSON
-            # Use '|| true' so that a failing scan doesn't abort the entire step
-            # (GitHub Actions uses 'set -eo pipefail' by default for bash steps)
+            # Use '|| scan_exit=$?' so that a failing scan captures the exit code
+            # instead of aborting the entire step under 'set -eo pipefail'.
             scan_ok=true
             scan_stderr="docs/${slug}/scan.stderr.tmp"
             scan_exit=0
