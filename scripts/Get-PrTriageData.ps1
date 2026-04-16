@@ -477,7 +477,13 @@ foreach ($prNum in @($graphqlData.Keys)) {
     $allNodes = [System.Collections.ArrayList]@($rollup.contexts.nodes)
     while ($cursor) {
         $q = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { pullRequest(number:$prNum) { commits(last:1) { nodes { commit { statusCheckRollup { contexts(first:100, after:`"$cursor`") { pageInfo { hasNextPage endCursor } nodes { ...on CheckRun { name conclusion status } } } } } } } } } }"
-        $res = (Invoke-GhRetry @("api","graphql","-f","query=$q")) | ConvertFrom-Json
+        try {
+            $raw = Invoke-GhRetry @("api","graphql","-f","query=$q")
+            $res = if ($raw -and -not [string]::IsNullOrWhiteSpace($raw)) { $raw | ConvertFrom-Json } else { $null }
+        } catch {
+            Write-Warning "Failed to paginate checks for PR #${prNum}: $_"
+            break
+        }
         if (-not $res -or -not $res.data -or $res.errors) {
             Write-Warning "Failed to paginate checks for PR #${prNum}: $($res.errors.message -join '; ')"
             break
@@ -529,7 +535,14 @@ if ($prsWithCopilotReview.Count -gt 0) {
             $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
         }
         $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
-        $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
+        try {
+            $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
+            $result = if ($raw -and -not [string]::IsNullOrWhiteSpace($raw)) { $raw | ConvertFrom-Json } else { $null }
+        } catch {
+            Write-Warning "Copilot review check failed for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
+            continue
+        }
+        if (-not $result -or -not $result.data -or -not $result.data.repository) { continue }
         for ($i = 0; $i -lt $b.Count; $i++) {
             $prData = $result.data.repository."pr$i"
             if ($prData) {
@@ -565,7 +578,14 @@ if ($copilotAuthoredPRs.Count -gt 0) {
             $parts += "pr$($i): pullRequest(number:$($b[$i])) { number timelineItems(first:5,itemTypes:ASSIGNED_EVENT) { nodes { ... on AssignedEvent { actor{login} assignee{...on User{login}...on Bot{login}} } } } }"
         }
         $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
-        $result = (Invoke-GhRetry @("api","graphql","-f","query=$query")) | ConvertFrom-Json
+        try {
+            $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
+            $result = if ($raw -and -not [string]::IsNullOrWhiteSpace($raw)) { $raw | ConvertFrom-Json } else { $null }
+        } catch {
+            Write-Warning "Copilot trigger lookup failed for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
+            continue
+        }
+        if (-not $result -or -not $result.data -or -not $result.data.repository) { continue }
         for ($i = 0; $i -lt $b.Count; $i++) {
             $prData = $result.data.repository."pr$i"
             if ($prData) {
