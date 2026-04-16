@@ -304,7 +304,23 @@ setInterval(updateTimestamps, 60000);
 $indexHtml | Out-File -FilePath (Join-Path $DocsDir "index.html") -Encoding utf8
 Write-Host "Generated index.html ($($repos.Count) repos)"
 
-# Write repos.json for the cross-repo page
-$reposJson = $repos | ForEach-Object { [ordered]@{ slug = $_.slug; repo = $_.repo } } | ConvertTo-Json
-$reposJson | Out-File -FilePath (Join-Path $DocsDir "repos.json") -Encoding utf8
+# Write repos.json for the cross-repo page, preserving the existing largeRepo flag when present
+$reposJsonPath = Join-Path $DocsDir "repos.json"
+$existingRepoFlags = @{}
+if (Test-Path $reposJsonPath) {
+    try {
+        $existingEntries = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
+        foreach ($e in $existingEntries) {
+            if ($e.repo -and $e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
+        }
+    } catch {
+        Write-Host "::warning::Could not read existing repos.json for flag preservation: $_"
+    }
+}
+$reposJson = $repos | ForEach-Object {
+    $entry = [ordered]@{ slug = $_.slug; repo = $_.repo }
+    if ($existingRepoFlags.ContainsKey($_.repo)) { $entry['largeRepo'] = $true }
+    $entry
+} | ConvertTo-Json
+$reposJson | Out-File -FilePath $reposJsonPath -Encoding utf8
 Write-Host "Generated repos.json ($($repos.Count) repos)"
