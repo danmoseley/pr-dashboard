@@ -298,7 +298,7 @@ Describe 'Get-IncrementalPartition' {
     }
 
     It 'Refreshes FAILURE CI when TTL expired' {
-        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $staleAt = (Get-Date).AddHours(-37).ToString("o")
         $failEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -CI 'FAILURE' -RefreshedAt $staleAt
         $lookup = @{ '10' = $failEntry }
         $fpMap = @{ '10' = $fp1 }
@@ -309,7 +309,7 @@ Describe 'Get-IncrementalPartition' {
     }
 
     It 'Refreshes UNKNOWN mergeable when TTL expired' {
-        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $staleAt = (Get-Date).AddHours(-37).ToString("o")
         $unknownEntry = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -Mergeable 'UNKNOWN' -RefreshedAt $staleAt
         $lookup = @{ '10' = $unknownEntry }
         $fpMap = @{ '10' = $fp1 }
@@ -320,7 +320,7 @@ Describe 'Get-IncrementalPartition' {
     }
 
     It 'Force-refreshes when per-PR _refreshed_at exceeds TTL' {
-        $staleAt = (Get-Date).AddHours(-13).ToString("o")
+        $staleAt = (Get-Date).AddHours(-37).ToString("o")
         $staleEntry1 = New-FakeScanEntry -Number 10 -Fingerprint $fp1 -RefreshedAt $staleAt
         $staleEntry2 = New-FakeScanEntry -Number 20 -Fingerprint $fp2 -RefreshedAt $staleAt
         $lookup = @{ '10' = $staleEntry1; '20' = $staleEntry2 }
