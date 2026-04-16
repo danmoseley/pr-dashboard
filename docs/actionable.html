@@ -819,6 +819,7 @@
     document.getElementById('summary-bar').style.display = 'none';
     var banner = document.getElementById('filter-banner');
     if (banner) { banner.style.display = 'none'; banner.innerHTML = ''; }
+    updatePageTitle();
     try { localStorage.removeItem(LS_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_ACTIVE_USERS_KEY); } catch(e) {}
     try { localStorage.removeItem(LS_INVOLVES_KEY); } catch(e) {}
