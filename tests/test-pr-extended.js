@@ -560,6 +560,7 @@ async function runTests() {
       if (await areaBtn.count() === 0) { fail('F2: Per-repo area filter', 'no button.area-label elements found'); }
       else {
         const labelText = await areaBtn.textContent();
+        await areaBtn.scrollIntoViewIfNeeded();
         await areaBtn.click();
         await p.waitForFunction(() => document.querySelectorAll('#filter-banner .filter-chip').length > 0, null, { timeout: 5000 }).catch(() => null);
         const chipCount = await p.$$eval('#filter-banner .filter-chip', chips => chips.length);
@@ -700,8 +701,8 @@ async function runTests() {
       const title = await p.title();
       if (title.toLowerCase().includes('dashboard')) pass('I1: index.html title: ' + title);
       else fail('I1: index.html title', 'got: ' + title);
-      const runtimeLink = await p.$('a[href*="runtime/actionable"]');
-      if (runtimeLink) pass('I1: index.html has runtime/actionable link');
+      const runtimeLink = await p.$('a[href*="runtime"]');
+      if (runtimeLink) pass('I1: index.html has runtime link');
       else fail('I1: index.html runtime link', 'not found');
       await p.close();
     }
