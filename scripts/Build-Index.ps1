@@ -304,7 +304,19 @@ setInterval(updateTimestamps, 60000);
 $indexHtml | Out-File -FilePath (Join-Path $DocsDir "index.html") -Encoding utf8
 Write-Host "Generated index.html ($($repos.Count) repos)"
 
-# Write repos.json for the cross-repo page
-$reposJson = $repos | ForEach-Object { [ordered]@{ slug = $_.slug; repo = $_.repo } } | ConvertTo-Json
-$reposJson | Out-File -FilePath (Join-Path $DocsDir "repos.json") -Encoding utf8
+# Write repos.json for the cross-repo page, preserving extra fields (e.g., largeRepo) from existing file
+$reposJsonPath = Join-Path $DocsDir "repos.json"
+$existingRepoFlags = @{}
+if (Test-Path $reposJsonPath) {
+    $existingEntries = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
+    foreach ($e in $existingEntries) {
+        if ($e.largeRepo -eq $true) { $existingRepoFlags[$e.repo] = $true }
+    }
+}
+$reposJson = $repos | ForEach-Object {
+    $entry = [ordered]@{ slug = $_.slug; repo = $_.repo }
+    if ($existingRepoFlags.ContainsKey($_.repo)) { $entry['largeRepo'] = $true }
+    $entry
+} | ConvertTo-Json
+$reposJson | Out-File -FilePath $reposJsonPath -Encoding utf8
 Write-Host "Generated repos.json ($($repos.Count) repos)"

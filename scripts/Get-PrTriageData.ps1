@@ -25,6 +25,11 @@
     This avoids PowerShell stream-leaking issues when stdout is redirected
     by a shell wrapper (Write-Warning and Write-Host leak to stdout when
     pwsh runs as a subprocess). Omit for interactive/local use.
+.PARAMETER LargeRepo
+    When set, omits files(first:100) from the batched GraphQL query. This avoids
+    502 errors on repos whose PRs touch thousands of files (e.g., VMR syncs).
+    CODEOWNERS-based owner resolution and path-based fallback reviewer scoring are
+    unavailable; the script falls back to label-based matching and assigned reviewers.
 .PARAMETER ActivityFile
     Path to maintainer-activity.json, which contains per-maintainer activity signals
     used by the activity-based fallback reviewer selection. When missing or unreadable,
@@ -396,13 +401,20 @@ if ($skipFiles) { Write-Verbose "Skipping files() in GraphQL for $Repo (large re
 $fragment = "number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}" + $filesFragment
 
 $graphqlData = @{}
-$batches = [System.Collections.ArrayList]@()
-$batch = [System.Collections.ArrayList]@()
+# Filter out candidates with invalid PR numbers before batching/scoring
+$validCandidates = [System.Collections.Generic.List[object]]::new()
 foreach ($pr in $refreshCandidates) {
     if (-not $pr.number -or $pr.number -le 0) {
         Write-Warning "Skipping candidate with invalid PR number: $($pr.number)"
         continue
     }
+    [void]$validCandidates.Add($pr)
+}
+$refreshCandidates = $validCandidates
+
+$batches = [System.Collections.ArrayList]@()
+$batch = [System.Collections.ArrayList]@()
+foreach ($pr in $refreshCandidates) {
     [void]$batch.Add($pr.number)
     if ($batch.Count -eq 10) {
         [void]$batches.Add([long[]]$batch.ToArray())

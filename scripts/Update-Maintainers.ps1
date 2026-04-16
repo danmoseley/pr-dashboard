@@ -380,7 +380,12 @@ $botLogins = @(
 )
 
 $repos = Get-Content $reposJsonPath -Raw | ConvertFrom-Json
-$largeRepos = [System.Collections.Generic.HashSet[string]]@($repos | Where-Object { $_.largeRepo -eq $true } | ForEach-Object { $_.repo })
+$largeRepos = [System.Collections.Generic.HashSet[string]]::new()
+foreach ($r in ($repos | Where-Object { $_.largeRepo -eq $true })) {
+    if ($null -ne $r.repo -and -not [string]::IsNullOrWhiteSpace($r.repo)) {
+        $null = $largeRepos.Add([string]$r.repo)
+    }
+}
 $existing = @{}
 if (Test-Path $maintainersJsonPath) {
     $raw = Get-Content $maintainersJsonPath -Raw | ConvertFrom-Json
@@ -405,7 +410,7 @@ foreach ($entry in $repos) {
     $repo = $entry.repo
     Write-Host "  $repo ... " -NoNewline
 
-    $repoSkipActivity = $SkipActivity -or ($repo -in $largeRepos)
+    $repoSkipActivity = $SkipActivity -or $largeRepos.Contains($repo)
     if ($repoSkipActivity -and -not $SkipActivity) {
         Write-Host "(large repo, skip-activity) " -NoNewline -ForegroundColor DarkGray
     }
@@ -458,8 +463,8 @@ if ($failedRepos.Count -gt 0) {
         $repo = $entry.repo
         Write-Host "  $repo (chunked retry) ..."
 
-        $repoSkipActivity = $SkipActivity -or ($repo -in $largeRepos)
-        $scanResult = Invoke-ChunkedRepoScan -Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity -DisplayPrefix '  '
+        $repoSkipActivity = $SkipActivity -or $largeRepos.Contains($repo)
+        $scanResult = Invoke-ChunkedRepoScan-Repo $repo -CutoffDate $cutoffDate -BotLogins $botLogins -SkipActivity:$repoSkipActivity -DisplayPrefix '  '
 
         if (-not $scanResult.Success) {
             Write-Host "  ERROR querying $repo on chunked retry (giving up)" -ForegroundColor Red
