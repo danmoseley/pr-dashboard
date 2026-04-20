@@ -454,7 +454,7 @@ foreach ($b in $batches) {
         }
         $result = $raw | ConvertFrom-Json
         if ($result.errors) {
-            Write-Warning "GraphQL errors for batch: $($result.errors | ForEach-Object { $_.message } | Select-Object -First 3 | Join-String -Separator '; ')"
+            Write-Warning "GraphQL errors for batch: $((@($result.errors | ForEach-Object { $_.message } | Select-Object -First 3)) -join '; ')"
         }
         if (-not $result.data -or -not $result.data.repository) {
             Write-Warning "No data in GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
@@ -486,7 +486,7 @@ if ($refreshCandidates.Count -gt 0 -and $graphqlCoverage -lt 0.5) {
     throw "GraphQL coverage too low for $Repo ($($graphqlData.Count)/$($refreshCandidates.Count) = $([Math]::Round($graphqlCoverage * 100))%) — failing to preserve previous data"
 }
 
-# Paginate statusCheckRollupcontexts for PRs with >100 checks
+# Paginate statusCheckRollup contexts for PRs with >100 checks
 foreach ($prNum in @($graphqlData.Keys)) {
     $gql = $graphqlData[$prNum]
     if (-not $gql -or -not $gql.commits.nodes -or $gql.commits.nodes.Count -eq 0) { continue }
