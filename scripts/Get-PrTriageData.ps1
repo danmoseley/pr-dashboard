@@ -161,8 +161,7 @@ function Invoke-GhRetry {
             Write-Warning "gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            Write-Warning "gh failed after $MaxAttempts attempts: $errText"
-            return ($out -join "`n")
+            throw "gh failed after $MaxAttempts attempts: $errText"
         }
     }
 }
