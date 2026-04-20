@@ -439,6 +439,10 @@ foreach ($b in $batches) {
         $failedBatches += ($batches.Count - $batches.IndexOf($b))
         break
     }
+    $parts = @()
+    for ($i = 0; $i -lt $b.Count; $i++) {
+        $parts += "pr$($i): pullRequest(number:$($b[$i])) { $fragment }"
+    }
     $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
     try {
         $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
@@ -481,9 +485,8 @@ $graphqlCoverage = if ($refreshCandidates.Count -gt 0) { $graphqlData.Count / $r
 if ($refreshCandidates.Count -gt 0 -and $graphqlCoverage -lt 0.5) {
     throw "GraphQL coverage too low for $Repo ($($graphqlData.Count)/$($refreshCandidates.Count) = $([Math]::Round($graphqlCoverage * 100))%) — failing to preserve previous data"
 }
-}
 
-# Paginate statusCheckRollup contexts for PRs with >100 checks
+# Paginate statusCheckRollupcontexts for PRs with >100 checks
 foreach ($prNum in @($graphqlData.Keys)) {
     $gql = $graphqlData[$prNum]
     if (-not $gql -or -not $gql.commits.nodes -or $gql.commits.nodes.Count -eq 0) { continue }
