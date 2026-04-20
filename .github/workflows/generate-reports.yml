@@ -91,7 +91,7 @@ jobs:
             "dotnet/csharplang:csharplang:standard"
             "dotnet/diagnostics:diagnostics:standard"
             "dotnet/docs:docs:standard"
-            "dotnet/dotnet:dotnet:standard"
+            "dotnet/dotnet:dotnet:standard:allow-fail"
             "dotnet/dotnet-api-docs:dotnet-api-docs:standard"
             "dotnet/efcore:efcore:standard"
             "dotnet/performance:performance:standard"
@@ -108,7 +108,7 @@ jobs:
           scanned_slugs=()  # Track repos that were processed this run (scanned or probe-skipped)
           freshly_scanned=()  # Track repos that were actually rescanned (for rate-limit injection)
           for entry in "${repos[@]}"; do
-            IFS=':' read -r repo slug tier <<< "$entry"
+            IFS=':' read -r repo slug tier failmode <<< "$entry"
 
             # Skip standard-tier repos unless this is the daily slot or manual trigger
             if [ "$tier" = "standard" ] && [ "$RUN_STANDARD" != "true" ]; then
@@ -154,7 +154,7 @@ jobs:
                 # Still run Build-Reports in case templates changed
                 if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
                   echo "::warning::Report generation failed for $repo"
-                  failed+=("$repo")
+                  if [ "$failmode" != "allow-fail" ]; then failed+=("$repo"); fi
                 fi
                 continue
               fi
@@ -220,7 +220,7 @@ jobs:
               rm -f "$scan_stderr"
               echo "::warning::Invalid or empty scan output for $repo — keeping previous data"
               rm -f "docs/${slug}/scan.json.tmp"
-              failed+=("$repo")
+              if [ "$failmode" != "allow-fail" ]; then failed+=("$repo"); fi
               if [ ! -f "docs/${slug}/scan.json" ]; then
                 echo "::warning::No previous scan.json for $repo — skipping reports"
                 continue
@@ -230,7 +230,7 @@ jobs:
             freshly_scanned+=("$slug")
             if ! pwsh ./scripts/Build-Reports.ps1 -ScanFile "docs/${slug}/scan.json" -Repo "$repo" -Slug "$slug" -ScheduleDesc "$schedule_desc" -SkipAI; then
               echo "::warning::Report generation failed for $repo"
-              failed+=("$repo")
+              if [ "$failmode" != "allow-fail" ]; then failed+=("$repo"); fi
               continue
             fi
           done

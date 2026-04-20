@@ -430,18 +430,22 @@ $repoOwner = $repoParts[0]
 $repoName = $repoParts[1]
 
 Write-Verbose "Fetching details in $($batches.Count) GraphQL batch(es) (batch size: $batchSize)..."
-$batchFailures = 0
+$failedBatches = 0
+$consecutiveFailures = 0
 foreach ($b in $batches) {
-    $parts = @()
-    for ($i = 0; $i -lt $b.Count; $i++) {
-        $parts += "pr$($i): pullRequest(number:$($b[$i])) { $fragment }"
+    # Circuit breaker: after 2 consecutive batch failures, skip remaining batches
+    if ($consecutiveFailures -ge 2) {
+        Write-Warning "Circuit breaker: skipping remaining $($batches.Count - $batches.IndexOf($b)) batch(es) after $consecutiveFailures consecutive failures"
+        $failedBatches += ($batches.Count - $batches.IndexOf($b))
+        break
     }
     $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
     try {
         $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
         if (-not $raw -or [string]::IsNullOrWhiteSpace($raw)) {
             Write-Warning "Empty GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
-            $batchFailures++
+            $failedBatches++
+            $consecutiveFailures++
             continue
         }
         $result = $raw | ConvertFrom-Json
@@ -450,20 +454,33 @@ foreach ($b in $batches) {
         }
         if (-not $result.data -or -not $result.data.repository) {
             Write-Warning "No data in GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
-            $batchFailures++
+            $failedBatches++
+            $consecutiveFailures++
             continue
         }
+        $consecutiveFailures = 0
         for ($i = 0; $i -lt $b.Count; $i++) {
             $prData = $result.data.repository."pr$i"
             if ($prData) { $graphqlData[$b[$i]] = $prData }
         }
     } catch {
         Write-Warning "GraphQL batch failed for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
-        $batchFailures++
+        $failedBatches++
+        $consecutiveFailures++
     }
 }
-if ($batchFailures -gt 0) {
-    Write-Warning "$batchFailures of $($batches.Count) GraphQL batches failed — $($graphqlData.Count) PRs have full details"
+if ($failedBatches -gt 0) {
+    Write-Warning "$failedBatches of $($batches.Count) GraphQL batches failed — $($graphqlData.Count) PRs have full details"
+}
+if ($failedBatches -eq $batches.Count -and $batches.Count -gt 0) {
+    throw "All $($batches.Count) GraphQL batches failed for $Repo — no enrichment data available"
+}
+# Coverage threshold: if <50% of refresh candidates got GraphQL data, the scan
+# quality is too low to trust — fail and preserve previous data
+$graphqlCoverage = if ($refreshCandidates.Count -gt 0) { $graphqlData.Count / $refreshCandidates.Count } else { 1.0 }
+if ($refreshCandidates.Count -gt 0 -and $graphqlCoverage -lt 0.5) {
+    throw "GraphQL coverage too low for $Repo ($($graphqlData.Count)/$($refreshCandidates.Count) = $([Math]::Round($graphqlCoverage * 100))%) — failing to preserve previous data"
+}
 }
 
 # Paginate statusCheckRollup contexts for PRs with >100 checks
@@ -530,31 +547,33 @@ if ($prsWithCopilotReview.Count -gt 0) {
     if ($cb.Count -gt 0) { [void]$copilotBatches.Add([long[]]$cb.ToArray()) }
     Write-Verbose "Checking $($prsWithCopilotReview.Count) PR(s) for Copilot review errors in $($copilotBatches.Count) batch(es)..."
     foreach ($b in $copilotBatches) {
-        $parts = @()
-        for ($i = 0; $i -lt $b.Count; $i++) {
-            $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
-        }
-        $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
         try {
+            $parts = @()
+            for ($i = 0; $i -lt $b.Count; $i++) {
+                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
+            }
+            $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
             $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
             $result = if ($raw -and -not [string]::IsNullOrWhiteSpace($raw)) { $raw | ConvertFrom-Json } else { $null }
-        } catch {
-            Write-Warning "Copilot review check failed for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
-            continue
-        }
-        if (-not $result -or -not $result.data -or -not $result.data.repository) { continue }
-        for ($i = 0; $i -lt $b.Count; $i++) {
-            $prData = $result.data.repository."pr$i"
-            if ($prData) {
-                # Only flag if the MOST RECENT copilot review is an error
-                # (a successful review on a newer commit supersedes an earlier error)
-                $lastCopilotReview = $prData.reviews.nodes |
-                    Where-Object { $_.author.login -eq "copilot-pull-request-reviewer" } |
-                    Select-Object -Last 1
-                if ($lastCopilotReview -and $lastCopilotReview.body -match "Copilot encountered an error") {
-                    $copilotErrorPRs[$b[$i]] = $true
+            if (-not $result -or -not $result.data -or -not $result.data.repository -or $result.errors) {
+                Write-Warning "Copilot review batch returned no data for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')] — skipping"
+                continue
+            }
+            for ($i = 0; $i -lt $b.Count; $i++) {
+                $prData = $result.data.repository."pr$i"
+                if ($prData) {
+                    # Only flag if the MOST RECENT copilot review is an error
+                    # (a successful review on a newer commit supersedes an earlier error)
+                    $lastCopilotReview = $prData.reviews.nodes |
+                        Where-Object { $_.author.login -eq "copilot-pull-request-reviewer" } |
+                        Select-Object -Last 1
+                    if ($lastCopilotReview -and $lastCopilotReview.body -match "Copilot encountered an error") {
+                        $copilotErrorPRs[$b[$i]] = $true
+                    }
                 }
             }
+        } catch {
+            Write-Warning "Copilot review batch failed for PRs $($b -join ','): $_ — skipping"
         }
     }
     Write-Verbose "Found $($copilotErrorPRs.Count) PR(s) with Copilot review errors"
@@ -573,28 +592,30 @@ if ($copilotAuthoredPRs.Count -gt 0) {
     if ($tb.Count -gt 0) { [void]$triggerBatches.Add([long[]]$tb.ToArray()) }
     Write-Verbose "Looking up trigger user for $($copilotAuthoredPRs.Count) Copilot PR(s) in $($triggerBatches.Count) batch(es)..."
     foreach ($b in $triggerBatches) {
-        $parts = @()
-        for ($i = 0; $i -lt $b.Count; $i++) {
-            $parts += "pr$($i): pullRequest(number:$($b[$i])) { number timelineItems(first:5,itemTypes:ASSIGNED_EVENT) { nodes { ... on AssignedEvent { actor{login} assignee{...on User{login}...on Bot{login}} } } } }"
-        }
-        $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
         try {
+            $parts = @()
+            for ($i = 0; $i -lt $b.Count; $i++) {
+                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number timelineItems(first:5,itemTypes:ASSIGNED_EVENT) { nodes { ... on AssignedEvent { actor{login} assignee{...on User{login}...on Bot{login}} } } } }"
+            }
+            $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
             $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
             $result = if ($raw -and -not [string]::IsNullOrWhiteSpace($raw)) { $raw | ConvertFrom-Json } else { $null }
-        } catch {
-            Write-Warning "Copilot trigger lookup failed for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
-            continue
-        }
-        if (-not $result -or -not $result.data -or -not $result.data.repository) { continue }
-        for ($i = 0; $i -lt $b.Count; $i++) {
-            $prData = $result.data.repository."pr$i"
-            if ($prData) {
-                $trigger = $prData.timelineItems.nodes |
-                    Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "^(app/)?copilot-swe-agent$|^Copilot$" } |
-                    Select-Object -First 1 -ExpandProperty assignee |
-                    Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
-                if ($trigger) { $copilotTriggers[$b[$i]] = $trigger }
+            if (-not $result -or -not $result.data -or -not $result.data.repository -or $result.errors) {
+                Write-Warning "Copilot trigger batch returned no data for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')] — skipping"
+                continue
             }
+            for ($i = 0; $i -lt $b.Count; $i++) {
+                $prData = $result.data.repository."pr$i"
+                if ($prData) {
+                    $trigger = $prData.timelineItems.nodes |
+                        Where-Object { $_.actor.login -match "copilot-swe-agent" -and $_.assignee.login -and $_.assignee.login -notmatch "^(app/)?copilot-swe-agent$|^Copilot$" } |
+                        Select-Object -First 1 -ExpandProperty assignee |
+                        Select-Object -ExpandProperty login -ErrorAction SilentlyContinue
+                    if ($trigger) { $copilotTriggers[$b[$i]] = $trigger }
+                }
+            }
+        } catch {
+            Write-Warning "Copilot trigger batch failed for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
         }
     }
     Write-Verbose "Found trigger user for $($copilotTriggers.Count) of $($copilotAuthoredPRs.Count) Copilot PR(s)"
@@ -1400,6 +1421,8 @@ $output = @{
         reused = $reusedPrEntries.Count
         full_scan = (-not $incrementalEnabled -or $incrementalFallback)
         fallback = $incrementalFallback
+        graphql_failed_batches = $failedBatches
+        graphql_total_batches = $batches.Count
     }
     owners = $owners
     scanned = $prsRaw.Count
