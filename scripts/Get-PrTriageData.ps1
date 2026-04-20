@@ -153,15 +153,17 @@ function Invoke-GhRetry {
         $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
         $out  = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
         $errText = ($errs | ForEach-Object { $_.ToString() }) -join '; '
-        if ($LASTEXITCODE -eq 0 -and -not ($errText -match 'HTTP [45]\d{2}')) {
-            return ($out -join "`n")
+        $outText = $out -join "`n"
+        $failureDetail = if ($errText) { $errText } else { $outText }
+        if ($LASTEXITCODE -eq 0 -and -not ($failureDetail -match 'HTTP [45]\d{2}')) {
+            return $outText
         }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
-            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $errText — retrying in ${delay}s"
+            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $failureDetail — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            throw "gh failed after $MaxAttempts attempts: $errText"
+            throw "gh failed after $MaxAttempts attempts: $failureDetail"
         }
     }
 }
