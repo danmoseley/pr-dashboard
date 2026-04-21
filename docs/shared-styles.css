@@ -67,17 +67,92 @@ th.sortable { cursor: pointer; user-select: none; }
 th.sortable:hover { color: var(--link); }
 th.sorted { color: var(--link); }
 
-/* PR table cells */
-.pr-num { white-space: nowrap; min-width: 35px; }
-.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 60px; }
-.area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 40px; }
-.action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 60px; }
-.ci { white-space: nowrap; padding: 5px 4px; min-width: 24px; overflow: hidden; }
+/* PR table cells -- min-widths use data-col so both th and td are covered */
+.pr-num { white-space: nowrap; }
+.title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ci { white-space: nowrap; padding: 5px 4px; overflow: hidden; }
 .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
 .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
 .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
-.author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 40px; }
-.repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 25px; }
+.author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Non-proportional shrink tiers via data-col attribute selectors */
+/* All cells clip overflow in fixed layout */
+td[data-col], th[data-col] { overflow: hidden; text-overflow: ellipsis; }
+
+/* Default (wide) column widths — matches original inline percentages */
+col[data-col="ready"]  { width: 2.5%; }
+col[data-col="need"]   { width: 2.5%; }
+col[data-col="action"] { width: 2.5%; }
+col[data-col="pr"]     { width: 3.5%; }
+col[data-col="repo"]   { width: 6%; }
+/* title has no explicit width — it gets the remaining flex space */
+col[data-col="nextaction"] { width: 25%; }
+col[data-col="ci"]     { width: 6%; }
+col[data-col="disc"]   { width: 3%; }
+col[data-col="age"]    { width: 2.5%; }
+col[data-col="upd"]    { width: 2.5%; }
+col[data-col="size"]   { width: 2.5%; }
+col[data-col="author"] { width: 8%; }
+col[data-col="area"]   { width: 7%; }
+
+/* Medium-narrow: squeeze collapse-first columns, give space to content columns */
+@media (max-width: 1200px) {
+  col[data-col="ready"]  { width: 1.5%; }
+  col[data-col="need"]   { width: 1.5%; }
+  col[data-col="action"] { width: 2%; }
+  col[data-col="disc"]   { width: 1.5%; }
+  col[data-col="age"]    { width: 1.5%; }
+  col[data-col="upd"]    { width: 1.5%; }
+  col[data-col="size"]   { width: 1.5%; }
+  col[data-col="ci"]     { width: 3%; }
+  col[data-col="repo"]   { width: 4%; }
+  col[data-col="author"] { width: 5%; }
+  col[data-col="area"]   { width: 5%; }
+}
+
+/* Narrow: collapse-first columns nearly vanish */
+@media (max-width: 900px) {
+  col[data-col="ready"]  { width: 0.5%; }
+  col[data-col="need"]   { width: 0.5%; }
+  col[data-col="action"] { width: 1%; }
+  col[data-col="disc"]   { width: 0.5%; }
+  col[data-col="age"]    { width: 0.5%; }
+  col[data-col="upd"]    { width: 0.5%; }
+  col[data-col="size"]   { width: 1%; }
+  col[data-col="ci"]     { width: 2%; }
+  col[data-col="repo"]   { width: 2.5%; }
+  col[data-col="pr"]     { width: 2.5%; }
+  col[data-col="author"] { width: 4%; }
+  col[data-col="area"]   { width: 3%; }
+  col[data-col="nextaction"] { width: 20%; }
+}
+
+/* Very narrow: collapse-first columns hidden, minimal widths for remaining */
+@media (max-width: 650px) {
+  col[data-col="ready"]  { width: 0; }
+  col[data-col="need"]   { width: 0; }
+  col[data-col="disc"]   { width: 0; }
+  col[data-col="age"]    { width: 0; }
+  col[data-col="upd"]    { width: 0; }
+  col[data-col="action"] { width: 0.5%; }
+  col[data-col="size"]   { width: 0.5%; }
+  col[data-col="ci"]     { width: 1.5%; }
+  col[data-col="repo"]   { width: 2%; }
+  col[data-col="pr"]     { width: 2%; }
+  col[data-col="author"] { width: 3%; }
+  col[data-col="area"]   { width: 0; }
+  col[data-col="nextaction"] { width: 15%; }
+  td[data-col="ready"], th[data-col="ready"],
+  td[data-col="need"], th[data-col="need"],
+  td[data-col="disc"], th[data-col="disc"],
+  td[data-col="age"], th[data-col="age"],
+  td[data-col="upd"], th[data-col="upd"],
+  td[data-col="area"], th[data-col="area"] { font-size: 0; padding: 0; border: 0; }
+}
 
 /* Column chooser */
 .col-chooser-btn {
@@ -96,6 +171,12 @@ th.sorted { color: var(--link); }
 }
 .col-chooser-popup label:hover { color: var(--link); }
 .col-chooser-popup input[type="checkbox"] { margin-right: 6px; vertical-align: middle; }
+.col-chooser-reset {
+  display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444c56;
+  color: #8b949e; cursor: pointer; font-size: 0.85em; text-align: center;
+  background: none; border-left: none; border-right: none; border-bottom: none; width: 100%;
+}
+.col-chooser-reset:hover { color: var(--link); }
 
 /* Heat classes */
 .heat-1 { background: rgba(187, 128, 9, 0.15); }

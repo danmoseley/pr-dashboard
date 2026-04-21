@@ -12,9 +12,9 @@
     border-radius: 6px; padding: 3px 10px; font-size: 0.85em; width: 220px; }
   .user-input input[type="text"]::placeholder { color: #484f58; }
   .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
-  .user-input > button { background: #238636; color: #fff; border: none; border-radius: 6px;
+  #go-btn { background: #238636; color: #fff; border: none; border-radius: 6px;
     padding: 3px 12px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
-  .user-input > button:hover { background: #2ea043; }
+  #go-btn:hover { background: #2ea043; }
   .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
     color: #8b949e !important; padding: 3px 8px !important; font-size: 0.85em !important;
     font-weight: normal !important; line-height: 1; }
@@ -52,7 +52,7 @@
 <p class="meta">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
 <p class="meta" id="meta-line"></p>
 
-<div class="user-input">
+<div class="user-input" id="user-input-row">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
   <button id="clear-user-btn" class="clear-user-btn" onclick="clearUserOnly()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
@@ -1178,20 +1178,20 @@
     var smallPrThreshold = smallPrEnabled ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
 
     var html = '<table id="pr-table"><colgroup>' +
-      '<col data-col="ready" style="width:2.5%">' +
-      '<col data-col="need" style="width:2.5%">' +
-      '<col data-col="action" style="width:2.5%">' +
-      '<col data-col="pr" style="width:3.5%">' +
-      '<col data-col="repo" style="width:6%">' +
+      '<col data-col="ready">' +
+      '<col data-col="need">' +
+      '<col data-col="action">' +
+      '<col data-col="pr">' +
+      '<col data-col="repo">' +
       '<col data-col="title">' +
-      '<col data-col="nextaction" style="width:25%">' +
-      '<col data-col="ci" style="width:6%">' +
-      '<col data-col="disc" style="width:3%">' +
-      '<col data-col="age" style="width:2.5%">' +
-      '<col data-col="upd" style="width:2.5%">' +
-      '<col data-col="size" style="width:2.5%">' +
-      '<col data-col="author" style="width:8%">' +
-      (hasArea ? '<col data-col="area" style="width:7%">' : '') +
+      '<col data-col="nextaction">' +
+      '<col data-col="ci">' +
+      '<col data-col="disc">' +
+      '<col data-col="age">' +
+      '<col data-col="upd">' +
+      '<col data-col="size">' +
+      '<col data-col="author">' +
+      (hasArea ? '<col data-col="area">' : '') +
       '</colgroup><thead><tr>' +
       '<th data-col="ready" class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th>' +
       '<th data-col="need" class="sortable" data-sort="num" title="Need: how much does this PR benefit from maintainer attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th>' +
@@ -1235,7 +1235,7 @@
     // Wire up sortable column headers (Action = column 2)
     initTableSort('pr-table', 2);
     initResizableColumns('pr-table');
-    initColumnChooser('pr-table');
+    initColumnChooser('pr-table', null, 'user-input-row');
 
     // Apply any active secondary filters from URL state
     if (activeAreas.length > 0 || activeRepos.length > 0) {
