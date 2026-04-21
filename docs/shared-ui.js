@@ -166,7 +166,7 @@
     table._unlockLayout = function() { locked = false; };
     ths.forEach(function(th) {
       var grip = document.createElement('div');
-      grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
+      grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none;border-right:1px solid #484f58';
       th.style.position = 'relative';
       grip.addEventListener('mousedown', function(e) {
         lockLayout();
