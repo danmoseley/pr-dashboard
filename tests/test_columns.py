@@ -1,6 +1,8 @@
 """
 Playwright tests for column picker and responsive column width behavior.
-Run with: python -m pytest tests/test_columns.py -v
+These are manual-only Python Playwright checks; CI runs the Node Playwright suite
+(see test-pr-extended.js Group M for the CI-enforced column/viewport tests).
+Run locally with: python -m pytest tests/test_columns.py -v
 """
 import pytest
 from playwright.sync_api import sync_playwright, expect

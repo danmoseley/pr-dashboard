@@ -166,6 +166,7 @@
     table._unlockLayout = function() { locked = false; };
     ths.forEach(function(th) {
       var grip = document.createElement('div');
+      grip.className = 'col-resize-grip';
       grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none;border-right:1px solid #484f58';
       th.style.position = 'relative';
       grip.addEventListener('mousedown', function(e) {
@@ -242,23 +243,29 @@
     // Apply on load
     applyHidden();
 
-    // Reuse existing button if already created (re-render safe)
+    // Reuse existing button if already created (re-render safe).
+    // Clone to drop old listeners that close over a detached table.
     var btnId = tableId + '-col-chooser-btn';
     var btn = document.getElementById(btnId);
-    if (btn) return; // already wired up
-    btn = document.createElement('button');
-    btn.type = 'button';
-    btn.id = btnId;
-    btn.className = 'col-chooser-btn';
-    btn.textContent = '\u2699 Columns';
-    btn.title = 'Show/hide table columns';
-
-    // Place in specified container or before the table
-    var container = containerId && document.getElementById(containerId);
-    if (container) {
-      container.appendChild(btn);
+    if (btn) {
+      var fresh = btn.cloneNode(true);
+      btn.parentNode.replaceChild(fresh, btn);
+      btn = fresh;
     } else {
-      table.parentNode.insertBefore(btn, table);
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = btnId;
+      btn.className = 'col-chooser-btn';
+      btn.textContent = '\u2699 Columns';
+      btn.title = 'Show/hide table columns';
+
+      // Place in specified container or before the table
+      var container = containerId && document.getElementById(containerId);
+      if (container) {
+        container.appendChild(btn);
+      } else {
+        table.parentNode.insertBefore(btn, table);
+      }
     }
 
     var popup = null;
@@ -323,8 +330,11 @@
       var r = btn.getBoundingClientRect();
       popup.style.left = Math.max(0, Math.min(r.left, window.innerWidth - 180)) + 'px';
       popup.style.top = (r.bottom + 4) + 'px';
-      // Dismiss on outside click (single tracked listener)
+      // Dismiss on outside click (single tracked listener).
+      // Guard: only attach if popup is still open when the timeout fires.
+      var currentPopup = popup;
       setTimeout(function() {
+        if (popup !== currentPopup) return; // popup was closed before timeout fired
         dismissFn = function(ev) {
           if (popup && !popup.contains(ev.target) && ev.target !== btn) {
             closePopup();
