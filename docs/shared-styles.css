@@ -99,58 +99,49 @@ col[data-col="size"]   { width: 2.5%; }
 col[data-col="author"] { width: 8%; }
 col[data-col="area"]   { width: 7%; }
 
-/* Medium-narrow: squeeze collapse-first columns, give space to content columns */
+/* Tier 1 (≤1200px): numbers vanish immediately, disc/age/upd/size shrink fast */
 @media (max-width: 1200px) {
-  col[data-col="ready"]  { width: 1.5%; }
-  col[data-col="need"]   { width: 1.5%; }
-  col[data-col="action"] { width: 2%; }
-  col[data-col="disc"]   { width: 1.5%; }
-  col[data-col="age"]    { width: 1.5%; }
-  col[data-col="upd"]    { width: 1.5%; }
-  col[data-col="size"]   { width: 1.5%; }
-  col[data-col="ci"]     { width: 3%; }
-  col[data-col="repo"]   { width: 4%; }
-  col[data-col="author"] { width: 5%; }
-  col[data-col="area"]   { width: 5%; }
-}
-
-/* Narrow: collapse-first columns nearly vanish */
-@media (max-width: 900px) {
-  col[data-col="ready"]  { width: 0.5%; }
-  col[data-col="need"]   { width: 0.5%; }
-  col[data-col="action"] { width: 1%; }
-  col[data-col="disc"]   { width: 0.5%; }
-  col[data-col="age"]    { width: 0.5%; }
-  col[data-col="upd"]    { width: 0.5%; }
-  col[data-col="size"]   { width: 1%; }
-  col[data-col="ci"]     { width: 2%; }
-  col[data-col="repo"]   { width: 2.5%; }
-  col[data-col="pr"]     { width: 2.5%; }
-  col[data-col="author"] { width: 4%; }
-  col[data-col="area"]   { width: 3%; }
-  col[data-col="nextaction"] { width: 20%; }
-}
-
-/* Very narrow: collapse-first columns hidden, minimal widths for remaining */
-@media (max-width: 650px) {
   col[data-col="ready"]  { width: 0; }
   col[data-col="need"]   { width: 0; }
+  col[data-col="action"] { width: 0; }
+  col[data-col="disc"]   { width: 1%; }
+  col[data-col="age"]    { width: 1%; }
+  col[data-col="upd"]    { width: 1%; }
+  col[data-col="size"]   { width: 1%; }
+  col[data-col="ci"]     { width: 2.5%; }
+  col[data-col="repo"]   { width: 5%; }
+  col[data-col="author"] { width: 6%; }
+  col[data-col="area"]   { width: 5%; }
+  td[data-col="ready"], th[data-col="ready"],
+  td[data-col="need"], th[data-col="need"],
+  td[data-col="action"], th[data-col="action"] { font-size: 0; padding: 0; border: 0; }
+}
+
+/* Tier 2 (≤900px): disc/age/upd/size vanish, CI to icon width, area/author squeeze */
+@media (max-width: 900px) {
   col[data-col="disc"]   { width: 0; }
   col[data-col="age"]    { width: 0; }
   col[data-col="upd"]    { width: 0; }
-  col[data-col="action"] { width: 0.5%; }
-  col[data-col="size"]   { width: 0.5%; }
+  col[data-col="size"]   { width: 0; }
   col[data-col="ci"]     { width: 1.5%; }
-  col[data-col="repo"]   { width: 2%; }
-  col[data-col="pr"]     { width: 2%; }
-  col[data-col="author"] { width: 3%; }
-  col[data-col="area"]   { width: 0; }
-  col[data-col="nextaction"] { width: 15%; }
-  td[data-col="ready"], th[data-col="ready"],
-  td[data-col="need"], th[data-col="need"],
+  col[data-col="repo"]   { width: 4%; }
+  col[data-col="pr"]     { width: 3%; }
+  col[data-col="author"] { width: 4%; }
+  col[data-col="area"]   { width: 3%; }
   td[data-col="disc"], th[data-col="disc"],
   td[data-col="age"], th[data-col="age"],
   td[data-col="upd"], th[data-col="upd"],
+  td[data-col="size"], th[data-col="size"] { font-size: 0; padding: 0; border: 0; }
+}
+
+/* Tier 3 (≤650px): area/author vanish, CI/repo/PR minimal, max space to title+nextaction */
+@media (max-width: 650px) {
+  col[data-col="ci"]     { width: 1%; }
+  col[data-col="repo"]   { width: 3%; }
+  col[data-col="pr"]     { width: 2.5%; }
+  col[data-col="author"] { width: 0; }
+  col[data-col="area"]   { width: 0; }
+  td[data-col="author"], th[data-col="author"],
   td[data-col="area"], th[data-col="area"] { font-size: 0; padding: 0; border: 0; }
 }
 

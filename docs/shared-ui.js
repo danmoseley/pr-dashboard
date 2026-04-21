@@ -210,8 +210,22 @@
     function applyHidden() {
       var set = {};
       hidden.forEach(function(c) { set[c] = true; });
-      table.querySelectorAll('[data-col]').forEach(function(el) {
-        el.style.display = set[el.getAttribute('data-col')] ? 'none' : '';
+      // For table-layout:fixed, we must zero out the <col> width AND hide cell content
+      table.querySelectorAll('colgroup col[data-col]').forEach(function(col) {
+        if (set[col.getAttribute('data-col')]) {
+          col.style.width = '0';
+        } else if (!col.style.width || col.style.width === '0' || col.style.width === '0px') {
+          col.style.width = ''; // restore CSS-driven width
+        }
+      });
+      table.querySelectorAll('td[data-col], th[data-col]').forEach(function(el) {
+        if (set[el.getAttribute('data-col')]) {
+          el.style.fontSize = '0'; el.style.padding = '0';
+          el.style.border = '0'; el.style.overflow = 'hidden';
+        } else {
+          el.style.fontSize = ''; el.style.padding = '';
+          el.style.border = ''; el.style.overflow = '';
+        }
       });
     }
 
