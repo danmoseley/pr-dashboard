@@ -56,34 +56,14 @@ class TestMediaQueryShrinking:
             assert not self._is_effectively_hidden(page, col), f"{col} should be visible at 1399px"
         page.close()
 
-    def test_1100_stats_author_vanish(self, browser):
-        """Tier 2 (≤1100px): disc/age/upd/size/author vanish."""
+    def test_1100_only_core_remain(self, browser):
+        """Tier 2 (≤1100px): only PR/repo/title/nextaction remain."""
         page = browser.new_page(viewport={"width": 1099, "height": 600})
         page.goto(BASE); page.wait_for_timeout(300)
-        for col in ["ready", "need", "action", "disc", "age", "upd", "size", "author"]:
+        for col in ["ready", "need", "action", "disc", "age", "upd", "size", "author", "ci", "area"]:
             assert self._is_effectively_hidden(page, col), f"{col} should be hidden at 1099px"
-        for col in ["pr", "repo", "title", "nextaction", "ci", "area"]:
-            assert not self._is_effectively_hidden(page, col), f"{col} should be visible at 1099px"
-        page.close()
-
-    def test_850_area_vanishes(self, browser):
-        """Tier 3 (≤850px): area vanishes."""
-        page = browser.new_page(viewport={"width": 849, "height": 600})
-        page.goto(BASE); page.wait_for_timeout(300)
-        for col in ["ready", "need", "action", "disc", "age", "upd", "size", "author", "area"]:
-            assert self._is_effectively_hidden(page, col), f"{col} should be hidden at 849px"
-        for col in ["pr", "repo", "title", "nextaction", "ci"]:
-            assert not self._is_effectively_hidden(page, col), f"{col} should be visible at 849px"
-        page.close()
-
-    def test_650_ci_vanishes(self, browser):
-        """Tier 4 (≤650px): CI vanishes, only PR/repo/title/nextaction remain."""
-        page = browser.new_page(viewport={"width": 649, "height": 600})
-        page.goto(BASE); page.wait_for_timeout(300)
-        for col in ["ready", "need", "action", "disc", "age", "upd", "size", "author", "area", "ci"]:
-            assert self._is_effectively_hidden(page, col), f"{col} should be hidden at 649px"
         for col in ["pr", "repo", "title", "nextaction"]:
-            assert not self._is_effectively_hidden(page, col), f"{col} should be visible at 649px"
+            assert not self._is_effectively_hidden(page, col), f"{col} should be visible at 1099px"
         page.close()
 
     def test_title_gets_more_space_as_narrower(self, browser):
