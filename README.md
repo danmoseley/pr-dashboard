@@ -43,19 +43,3 @@ Append `?user=USERNAME` to any report URL to filter to a specific person's PRs, 
 
 You can also hover any @username in a report and click "only" to filter interactively.
 
-## Local regeneration
-
-After the workflows have run at least once, you can regenerate HTML reports locally from
-cached `scan.json` data (no API calls needed). Useful after changing templates or styles:
-
-```powershell
-# Regenerate all reports from cached scan data (skip AI observations)
-pwsh ./scripts/Regen-Html.ps1
-
-# Include AI observations (requires gh-models extension)
-pwsh ./scripts/Regen-Html.ps1 -SkipAI:$false
-```
-
-## Adding reports
-
-Edit `scripts/Build-Reports.ps1` to add new report definitions. Edit the workflow files to add new repositories.
