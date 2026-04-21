@@ -122,6 +122,7 @@ PICKER_HTML = """<!DOCTYPE html>
 </table>
 <script src="shared-ui.js"></script>
 <script>
+  initResizableColumns('pr-table');
   initColumnChooser('pr-table', 'test-hidden-cols', 'controls');
 </script>
 </body></html>"""
@@ -239,3 +240,45 @@ class TestColumnPicker:
         # Important columns still have width
         for col in ["title", "nextaction", "pr"]:
             assert self._col_width(picker_page, col) > 20, f"{col} should still be visible"
+
+
+# ── Drag-to-resize tests ──
+
+class TestDragResize:
+
+    def _col_width(self, page, col_id):
+        th = page.locator(f'th[data-col="{col_id}"]')
+        return th.bounding_box()["width"]
+
+    def test_drag_resize_changes_column_width(self, picker_page):
+        """Dragging the right edge of a header should change its width."""
+        col = "repo"
+        before = self._col_width(picker_page, col)
+        th = picker_page.locator(f'th[data-col="{col}"]')
+        box = th.bounding_box()
+        # Drag from right edge of header 80px to the right
+        start_x = box["x"] + box["width"] - 2
+        start_y = box["y"] + box["height"] / 2
+        picker_page.mouse.move(start_x, start_y)
+        picker_page.mouse.down()
+        picker_page.mouse.move(start_x + 80, start_y, steps=5)
+        picker_page.mouse.up()
+        picker_page.wait_for_timeout(200)
+        after = self._col_width(picker_page, col)
+        assert after > before + 40, f"repo should have grown: {before:.0f} -> {after:.0f}"
+
+    def test_drag_resize_shrinks_column(self, picker_page):
+        """Dragging left should shrink a column."""
+        col = "nextaction"
+        before = self._col_width(picker_page, col)
+        th = picker_page.locator(f'th[data-col="{col}"]')
+        box = th.bounding_box()
+        start_x = box["x"] + box["width"] - 2
+        start_y = box["y"] + box["height"] / 2
+        picker_page.mouse.move(start_x, start_y)
+        picker_page.mouse.down()
+        picker_page.mouse.move(start_x - 80, start_y, steps=5)
+        picker_page.mouse.up()
+        picker_page.wait_for_timeout(200)
+        after = self._col_width(picker_page, col)
+        assert after < before - 40, f"nextaction should have shrunk: {before:.0f} -> {after:.0f}"

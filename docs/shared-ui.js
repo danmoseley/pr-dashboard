@@ -171,7 +171,13 @@
       grip.addEventListener('mousedown', function(e) {
         lockLayout();
         var startX = e.pageX, startW = th.offsetWidth;
-        function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
+        var colKey = th.getAttribute('data-col');
+        var col = colKey ? table.querySelector('colgroup col[data-col="' + colKey + '"]') : null;
+        function onMove(e2) {
+          var w = Math.max(30, startW + e2.pageX - startX) + 'px';
+          th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w;
+          if (col) col.style.width = w;
+        }
         function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
