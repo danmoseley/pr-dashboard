@@ -178,4 +178,93 @@
       th.appendChild(grip);
     });
   };
+
+  // Column chooser: hide/show columns, persisted in localStorage
+  window.initColumnChooser = function(tableId, storageKey) {
+    var table = document.getElementById(tableId);
+    if (!table) return;
+    storageKey = storageKey || 'pr-dashboard-hidden-cols';
+
+    // Column definitions: data-col value -> display label
+    var allCols = [];
+    var ths = table.querySelectorAll('thead th[data-col]');
+    ths.forEach(function(th) {
+      allCols.push({ id: th.getAttribute('data-col'), label: th.textContent.trim() });
+    });
+    if (allCols.length === 0) return;
+
+    // Read hidden set from localStorage
+    var hidden;
+    try {
+      var raw = localStorage.getItem(storageKey);
+      hidden = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(hidden)) hidden = [];
+    } catch(e) { hidden = []; }
+
+    function applyHidden() {
+      var set = {};
+      hidden.forEach(function(c) { set[c] = true; });
+      // Toggle display on col, th, and td with matching data-col
+      table.querySelectorAll('[data-col]').forEach(function(el) {
+        el.style.display = set[el.getAttribute('data-col')] ? 'none' : '';
+      });
+    }
+
+    function saveHidden() {
+      try { localStorage.setItem(storageKey, JSON.stringify(hidden)); } catch(e) {}
+    }
+
+    // Apply on load
+    applyHidden();
+
+    // Create ⚙ button — insert near the table
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'col-chooser-btn';
+    btn.textContent = '\u2699 Columns';
+    btn.title = 'Show/hide table columns';
+    table.parentNode.insertBefore(btn, table);
+
+    var popup = null;
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (popup) { popup.remove(); popup = null; return; }
+      popup = document.createElement('div');
+      popup.className = 'col-chooser-popup';
+      var hiddenSet = {};
+      hidden.forEach(function(c) { hiddenSet[c] = true; });
+      allCols.forEach(function(col) {
+        var lbl = document.createElement('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !hiddenSet[col.id];
+        cb.addEventListener('change', function() {
+          if (cb.checked) {
+            hidden = hidden.filter(function(c) { return c !== col.id; });
+          } else {
+            if (hidden.indexOf(col.id) === -1) hidden.push(col.id);
+          }
+          saveHidden();
+          applyHidden();
+        });
+        lbl.appendChild(cb);
+        lbl.appendChild(document.createTextNode(col.label));
+        popup.appendChild(lbl);
+      });
+      document.body.appendChild(popup);
+      // Position below button
+      var r = btn.getBoundingClientRect();
+      popup.style.left = Math.max(0, Math.min(r.left, window.innerWidth - 180)) + 'px';
+      popup.style.top = (r.bottom + 4) + 'px';
+      // Dismiss on outside click
+      setTimeout(function() {
+        document.addEventListener('click', function dismiss(ev) {
+          if (popup && !popup.contains(ev.target) && ev.target !== btn) {
+            popup.remove(); popup = null;
+            document.removeEventListener('click', dismiss);
+          }
+        });
+      }, 0);
+    });
+  };
 })();
