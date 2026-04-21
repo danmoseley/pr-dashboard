@@ -152,30 +152,201 @@
     var locked = false;
     function lockLayout() {
       if (locked) return; locked = true;
-      // Freeze current column widths then switch to fixed layout
+      // Freeze current column widths so drag-resize works in absolute px
       var widths = Array.prototype.map.call(ths, function(h) { return h.offsetWidth + 'px'; });
-      // Clear <col> widths so th widths drive fixed-layout sizing
+      // Override CSS-driven <col> widths with snapshotted px widths
       var cols = table.querySelectorAll('colgroup col');
-      cols.forEach(function(c) { c.style.width = ''; });
+      cols.forEach(function(c, i) { c.style.width = widths[i]; });
       ths.forEach(function(h, i) {
         h.style.width = widths[i]; h.style.minWidth = widths[i]; h.style.maxWidth = widths[i];
       });
       table.style.tableLayout = 'fixed';
     }
+    // Expose unlock so column chooser reset can undo drag-resize
+    table._unlockLayout = function() { locked = false; };
     ths.forEach(function(th) {
       var grip = document.createElement('div');
-      grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none';
+      grip.className = 'col-resize-grip';
+      grip.style.cssText = 'position:absolute;top:0;right:0;bottom:0;width:5px;cursor:col-resize;user-select:none;border-right:1px solid #484f58';
       th.style.position = 'relative';
       grip.addEventListener('mousedown', function(e) {
         lockLayout();
         var startX = e.pageX, startW = th.offsetWidth;
-        function onMove(e2) { th.style.width = Math.max(30, startW + e2.pageX - startX) + 'px'; th.style.minWidth = th.style.width; th.style.maxWidth = th.style.width; }
+        var colKey = th.getAttribute('data-col');
+        var col = colKey ? table.querySelector('colgroup col[data-col="' + colKey + '"]') : null;
+        function onMove(e2) {
+          var w = Math.max(30, startW + e2.pageX - startX) + 'px';
+          th.style.width = w; th.style.minWidth = w; th.style.maxWidth = w;
+          if (col) col.style.width = w;
+        }
         function onUp() { document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); }
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
         e.preventDefault();
       });
       th.appendChild(grip);
+    });
+  };
+
+  // Column chooser: hide/show columns, persisted in localStorage
+  window.initColumnChooser = function(tableId, storageKey, containerId) {
+    var table = document.getElementById(tableId);
+    if (!table) return;
+    storageKey = storageKey || 'pr-dashboard-hidden-cols';
+
+
+    // Column definitions: data-col value -> display label (strip sort arrows)
+    function readCols() {
+      var cols = [];
+      table.querySelectorAll('thead th[data-col]').forEach(function(th) {
+        var label = th.textContent.replace(/[\u25B2\u25BC\u2191\u2193]/g, '').trim();
+        cols.push({ id: th.getAttribute('data-col'), label: label });
+      });
+      return cols;
+    }
+    if (readCols().length === 0) return;
+
+    // Read hidden set from localStorage
+    var hidden;
+    try {
+      var raw = localStorage.getItem(storageKey);
+      hidden = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(hidden)) hidden = [];
+    } catch(e) { hidden = []; }
+
+    function applyHidden() {
+      var set = {};
+      hidden.forEach(function(c) { set[c] = true; });
+      // For table-layout:fixed, we must zero out the <col> width AND hide cell content
+      table.querySelectorAll('colgroup col[data-col]').forEach(function(col) {
+        if (set[col.getAttribute('data-col')]) {
+          col.style.width = '0';
+        } else if (!col.style.width || col.style.width === '0' || col.style.width === '0px') {
+          col.style.width = ''; // restore CSS-driven width
+        }
+      });
+      table.querySelectorAll('td[data-col], th[data-col]').forEach(function(el) {
+        if (set[el.getAttribute('data-col')]) {
+          el.style.fontSize = '0'; el.style.padding = '0';
+          el.style.border = '0'; el.style.overflow = 'hidden';
+        } else {
+          el.style.fontSize = ''; el.style.padding = '';
+          el.style.border = ''; el.style.overflow = '';
+        }
+      });
+    }
+
+    function saveHidden() {
+      try { localStorage.setItem(storageKey, JSON.stringify(hidden)); } catch(e) {}
+    }
+
+    // Apply on load
+    applyHidden();
+
+    // Reuse existing button if already created (re-render safe).
+    // Clone to drop old listeners that close over a detached table.
+    var btnId = tableId + '-col-chooser-btn';
+    var btn = document.getElementById(btnId);
+    if (btn) {
+      var fresh = btn.cloneNode(true);
+      btn.parentNode.replaceChild(fresh, btn);
+      btn = fresh;
+    } else {
+      btn = document.createElement('button');
+      btn.type = 'button';
+      btn.id = btnId;
+      btn.className = 'col-chooser-btn';
+      btn.textContent = '\u2699 Columns';
+      btn.title = 'Show/hide table columns';
+
+      // Place in specified container or before the table
+      var container = containerId && document.getElementById(containerId);
+      if (container) {
+        container.appendChild(btn);
+      } else {
+        table.parentNode.insertBefore(btn, table);
+      }
+    }
+
+    var popup = null;
+    var dismissFn = null;
+
+    function closePopup() {
+      if (popup) { popup.remove(); popup = null; }
+      if (dismissFn) { document.removeEventListener('click', dismissFn); dismissFn = null; }
+    }
+
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (popup) { closePopup(); return; }
+      popup = document.createElement('div');
+      popup.className = 'col-chooser-popup';
+      var hiddenSet = {};
+      hidden.forEach(function(c) { hiddenSet[c] = true; });
+      var checkboxes = [];
+      readCols().forEach(function(col) {
+        var lbl = document.createElement('label');
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !hiddenSet[col.id];
+        cb.setAttribute('data-col-id', col.id);
+        cb.addEventListener('change', function() {
+          if (cb.checked) {
+            hidden = hidden.filter(function(c) { return c !== col.id; });
+          } else {
+            if (hidden.indexOf(col.id) === -1) hidden.push(col.id);
+          }
+          saveHidden();
+          applyHidden();
+        });
+        lbl.appendChild(cb);
+        lbl.appendChild(document.createTextNode(col.label));
+        popup.appendChild(lbl);
+        checkboxes.push(cb);
+      });
+      // Reset button
+      var resetBtn = document.createElement('button');
+      resetBtn.type = 'button';
+      resetBtn.className = 'col-chooser-reset';
+      resetBtn.textContent = 'Reset all';
+      resetBtn.addEventListener('click', function() {
+        hidden = [];
+        saveHidden();
+        applyHidden();
+        checkboxes.forEach(function(cb) { cb.checked = true; });
+        // Clear any column width customizations from drag-resize
+        if (table._unlockLayout) table._unlockLayout();
+        table.querySelectorAll('thead th').forEach(function(th) {
+          th.style.width = ''; th.style.minWidth = ''; th.style.maxWidth = '';
+        });
+        // Clear inline <col> widths so CSS media-query rules take effect again
+        table.querySelectorAll('colgroup col').forEach(function(c) {
+          c.style.width = '';
+        });
+      });
+      popup.appendChild(resetBtn);
+
+      document.body.appendChild(popup);
+      var r = btn.getBoundingClientRect();
+      popup.style.left = Math.max(0, Math.min(r.left, window.innerWidth - 180)) + 'px';
+      popup.style.top = (r.bottom + 4) + 'px';
+      // Dismiss on outside click (single tracked listener).
+      // Guard: only attach if popup is still open when the timeout fires.
+      var currentPopup = popup;
+      setTimeout(function() {
+        if (popup !== currentPopup) return; // popup was closed before timeout fired
+        dismissFn = function(ev) {
+          if (popup && !popup.contains(ev.target) && ev.target !== btn) {
+            closePopup();
+          }
+        };
+        document.addEventListener('click', dismissFn);
+      }, 0);
+    });
+
+    // Dismiss on Escape
+    document.addEventListener('keydown', function(ev) {
+      if (ev.key === 'Escape' && popup) closePopup();
     });
   };
 })();

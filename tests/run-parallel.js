@@ -60,7 +60,7 @@ function runScript(script, extraEnv) {
   // Wall-clock bottleneck: ~120 s instead of the previous ~264 s sequential run.
   const results = await Promise.all([
     runScript('test-pr-filters.js'),
-    runScript('test-pr-extended.js', { ONLY_GROUPS: 'A,B,C,D,E,G,H,J,K,L' }),
+    runScript('test-pr-extended.js', { ONLY_GROUPS: 'A,B,C,D,E,G,H,J,K,L,M' }),
     runScript('test-pr-extended.js', { ONLY_GROUPS: 'F' }),
     runScript('test-pr-extended.js', { ONLY_GROUPS: 'I' }),
   ]);

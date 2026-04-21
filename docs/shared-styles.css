@@ -35,13 +35,13 @@ th {
 td { padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
 tr:hover { background: var(--hover); }
 
-/* Score cells */
-.score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; }
+/* Score cells - can collapse to nothing at narrow widths */
+.score { font-weight: bold; text-align: right; white-space: nowrap; font-size: 0.95em; position: relative; overflow: hidden; }
 .ready-high { background: rgba(35, 134, 54, 0.12); }
 .action-score {
   font-weight: 800; text-align: right; white-space: nowrap; font-size: 1.25em; color: #f0c674;
   background: rgba(240, 198, 116, 0.08); border-left: 2px solid rgba(240, 198, 116, 0.3);
-  border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative;
+  border-right: 2px solid rgba(240, 198, 116, 0.3); position: relative; overflow: hidden;
 }
 .action-hot { background: rgba(35, 134, 54, 0.18); border-color: rgba(35, 134, 54, 0.4); }
 .action-warm { background: rgba(35, 134, 54, 0.08); border-color: rgba(35, 134, 54, 0.2); }
@@ -67,16 +67,97 @@ th.sortable { cursor: pointer; user-select: none; }
 th.sortable:hover { color: var(--link); }
 th.sorted { color: var(--link); }
 
-/* PR table cells */
+/* PR table cells -- min-widths use data-col so both th and td are covered */
 .pr-num { white-space: nowrap; }
 .title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .area-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .action { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ci { white-space: nowrap; padding: 5px 4px; }
+.ci { white-space: nowrap; padding: 5px 4px; overflow: hidden; }
 .ci-warn { color: #d29922; font-size: 0.7em; vertical-align: super; margin-left: -2px; }
 .disc { text-align: right; white-space: nowrap; padding: 5px 3px; font-size: 0.8em; }
 .num { text-align: right; white-space: nowrap; padding: 5px 4px; }
 .author { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.repo-col { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Non-proportional shrink tiers via data-col attribute selectors */
+/* All cells clip overflow in fixed layout */
+td[data-col], th[data-col] { overflow: hidden; text-overflow: ellipsis; }
+
+/* Default (wide) column widths — matches original inline percentages */
+col[data-col="ready"]  { width: 2.5%; }
+col[data-col="need"]   { width: 2.5%; }
+col[data-col="action"] { width: 2.5%; }
+col[data-col="pr"]     { width: 3.5%; }
+col[data-col="repo"]   { width: 6%; }
+/* title has no explicit width — it gets the remaining flex space */
+col[data-col="nextaction"] { width: 25%; }
+col[data-col="ci"]     { width: 6%; }
+col[data-col="disc"]   { width: 3%; }
+col[data-col="age"]    { width: 2.5%; }
+col[data-col="upd"]    { width: 2.5%; }
+col[data-col="size"]   { width: 2.5%; }
+col[data-col="author"] { width: 8%; }
+col[data-col="area"]   { width: 7%; }
+
+/* Tier 1 (≤1400px): ready/need/action vanish */
+@media (max-width: 1400px) {
+  col[data-col="ready"]  { width: 0; }
+  col[data-col="need"]   { width: 0; }
+  col[data-col="action"] { width: 0; }
+  col[data-col="disc"]   { width: 2%; }
+  col[data-col="age"]    { width: 2%; }
+  col[data-col="upd"]    { width: 2%; }
+  col[data-col="size"]   { width: 2%; }
+  col[data-col="author"] { width: 6%; }
+  td[data-col="ready"], th[data-col="ready"],
+  td[data-col="need"], th[data-col="need"],
+  td[data-col="action"], th[data-col="action"] { font-size: 0; padding: 0; border: 0; }
+}
+
+/* Tier 2 (≤1100px): everything except PR/repo/title/nextaction vanishes */
+@media (max-width: 1100px) {
+  col[data-col="disc"]   { width: 0; }
+  col[data-col="age"]    { width: 0; }
+  col[data-col="upd"]    { width: 0; }
+  col[data-col="size"]   { width: 0; }
+  col[data-col="author"] { width: 0; }
+  col[data-col="ci"]     { width: 0; }
+  col[data-col="area"]   { width: 0; }
+  col[data-col="pr"]     { width: 5%; }
+  col[data-col="repo"]   { width: 8%; }
+  col[data-col="nextaction"] { width: 35%; }
+  td[data-col="disc"], th[data-col="disc"],
+  td[data-col="age"], th[data-col="age"],
+  td[data-col="upd"], th[data-col="upd"],
+  td[data-col="size"], th[data-col="size"],
+  td[data-col="author"], th[data-col="author"],
+  td[data-col="ci"], th[data-col="ci"],
+  td[data-col="area"], th[data-col="area"] { font-size: 0; padding: 0; border: 0; }
+}
+
+/* Column chooser */
+.col-chooser-btn {
+  background: var(--header-bg); border: 1px solid var(--border); color: #8b949e; cursor: pointer;
+  padding: 3px 8px; border-radius: 4px; font-size: 0.8em; vertical-align: middle;
+}
+.col-chooser-btn:hover { color: var(--link); border-color: var(--link); }
+.col-chooser-popup {
+  position: fixed; background: #1c2128; border: 1px solid #444c56; border-radius: 6px;
+  padding: 8px 12px; font-size: 0.85em; color: #e6edf3; z-index: 100;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4); min-width: 150px;
+}
+.col-chooser-popup label {
+  display: block; padding: 3px 0; cursor: pointer; white-space: nowrap;
+  user-select: none;
+}
+.col-chooser-popup label:hover { color: var(--link); }
+.col-chooser-popup input[type="checkbox"] { margin-right: 6px; vertical-align: middle; }
+.col-chooser-reset {
+  display: block; margin-top: 6px; padding-top: 6px; border-top: 1px solid #444c56;
+  color: #8b949e; cursor: pointer; font-size: 0.85em; text-align: center;
+  background: none; border-left: none; border-right: none; border-bottom: none; width: 100%;
+}
+.col-chooser-reset:hover { color: var(--link); }
 
 /* Heat classes */
 .heat-1 { background: rgba(187, 128, 9, 0.15); }
@@ -158,6 +239,7 @@ a.feedback:hover { background: #388bfd; color: #fff; text-decoration: none; }
   th.action-col { background: rgba(154, 103, 0, 0.1) !important; color: #9a6700; }
   a.feedback { background: #0969da; }
   a.feedback:hover { background: #0550ae; }
+  .col-chooser-popup { background: #fff; border-color: #d0d7de; color: #1f2328; box-shadow: 0 4px 12px rgba(0,0,0,0.12); }
   tr.your-turn { box-shadow: inset 3px 0 0 0 #bf8700; background: rgba(191, 135, 0, 0.06); }
   tr.your-turn:hover { background: rgba(191, 135, 0, 0.1); }
 }

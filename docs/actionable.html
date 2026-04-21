@@ -12,9 +12,9 @@
     border-radius: 6px; padding: 3px 10px; font-size: 0.85em; width: 220px; }
   .user-input input[type="text"]::placeholder { color: #484f58; }
   .user-input input[type="text"]:focus { outline: none; border-color: var(--link); }
-  .user-input > button { background: #238636; color: #fff; border: none; border-radius: 6px;
+  #go-btn { background: #238636; color: #fff; border: none; border-radius: 6px;
     padding: 3px 12px; font-size: 0.85em; cursor: pointer; font-weight: 500; }
-  .user-input > button:hover { background: #2ea043; }
+  #go-btn:hover { background: #2ea043; }
   .clear-user-btn { background: none !important; border: 1px solid var(--border) !important;
     color: #8b949e !important; padding: 3px 8px !important; font-size: 0.85em !important;
     font-weight: normal !important; line-height: 1; }
@@ -52,7 +52,7 @@
 <p class="meta">Cross-repo view of actionable PRs across all tracked dotnet repositories</p>
 <p class="meta" id="meta-line"></p>
 
-<div class="user-input">
+<div class="user-input" id="user-input-row">
   <input type="text" id="user-field" placeholder="GitHub username (e.g. danmoseley)" autocomplete="off" spellcheck="false">
   <button id="go-btn" onclick="applyUser()">Go</button>
   <button id="clear-user-btn" class="clear-user-btn" onclick="clearUserOnly()" aria-label="Clear user filter" style="display:none"><span aria-hidden="true">&#x2715;</span></button>
@@ -1178,35 +1178,35 @@
     var smallPrThreshold = smallPrEnabled ? sortedLines[Math.floor((sortedLines.length - 1) * 0.10)] : 0;
 
     var html = '<table id="pr-table"><colgroup>' +
-      '<col style="width:2.5%">' +     // Ready
-      '<col style="width:2.5%">' +     // Need
-      '<col style="width:2.5%">' +     // Action
-      '<col style="width:3.5%">' +    // PR
-      '<col style="width:6%">' +      // Repo
-      '<col>' +                       // Title (flex)
-      '<col style="width:25%">' +     // Next Action
-      '<col style="width:6%">' +      // CI
-      '<col style="width:3%">' +      // Disc
-      '<col style="width:2.5%">' +    // Age
-      '<col style="width:2.5%">' +    // Upd
-      '<col style="width:2.5%">' +    // Size
-      '<col style="width:8%">' +      // Author
-      (hasArea ? '<col style="width:7%">' : '') +
+      '<col data-col="ready">' +
+      '<col data-col="need">' +
+      '<col data-col="action">' +
+      '<col data-col="pr">' +
+      '<col data-col="repo">' +
+      '<col data-col="title">' +
+      '<col data-col="nextaction">' +
+      '<col data-col="ci">' +
+      '<col data-col="disc">' +
+      '<col data-col="age">' +
+      '<col data-col="upd">' +
+      '<col data-col="size">' +
+      '<col data-col="author">' +
+      (hasArea ? '<col data-col="area">' : '') +
       '</colgroup><thead><tr>' +
-      '<th class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th>' +
-      '<th class="sortable" data-sort="num" title="Need: how much does this PR benefit from maintainer attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th>' +
-      '<th class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th>' +
-      '<th class="sortable" data-sort="num" title="Pull request number">PR</th>' +
-      '<th class="sortable" data-sort="alpha" title="Repository">Repo</th>' +
-      '<th class="sortable" data-sort="alpha" title="PR title and labels">Title</th>' +
-      '<th class="sortable" data-sort="alpha" title="Who needs to act next and what they should do">Next Action</th>' +
-      '<th title="CI status from Build Analysis (or latest check run)">CI</th>' +
-      '<th class="sortable" data-sort="num" title="Discussion: unresolved/total review threads and distinct commenters">Disc</th>' +
-      '<th class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th>' +
-      '<th class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th>' +
-      '<th class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th>' +
-      '<th class="sortable" data-sort="alpha" title="PR author">Author</th>' +
-      (hasArea ? '<th class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>' : '') +
+      '<th data-col="ready" class="sortable" data-sort="num" title="Ready: how close is this PR to being mergeable? Based on CI, approvals, conflicts, size, etc.">Ready</th>' +
+      '<th data-col="need" class="sortable" data-sort="num" title="Need: how much does this PR benefit from maintainer attention? Community PRs, stalled feedback, missing approvals score higher.">Need</th>' +
+      '<th data-col="action" class="sortable action-col" data-sort="num" title="Action: combined score = (ready+1) x (need+1), normalized 0-10. PRs that are both high-need and near-ready rank highest.">Action</th>' +
+      '<th data-col="pr" class="sortable" data-sort="num" title="Pull request number">PR</th>' +
+      '<th data-col="repo" class="sortable" data-sort="alpha" title="Repository">Repo</th>' +
+      '<th data-col="title" class="sortable" data-sort="alpha" title="PR title and labels">Title</th>' +
+      '<th data-col="nextaction" class="sortable" data-sort="alpha" title="Who needs to act next and what they should do">Next Action</th>' +
+      '<th data-col="ci" title="CI status from Build Analysis (or latest check run)">CI</th>' +
+      '<th data-col="disc" class="sortable" data-sort="num" title="Discussion: unresolved/total review threads and distinct commenters">Disc</th>' +
+      '<th data-col="age" class="sortable" data-sort="num" title="Age in days since PR was opened">Age</th>' +
+      '<th data-col="upd" class="sortable" data-sort="num" title="Days since last update (push, comment, or review)">Upd</th>' +
+      '<th data-col="size" class="sortable" data-sort="num" title="Total lines changed (additions + deletions). &#x1F401; = smallest 10%">Size</th>' +
+      '<th data-col="author" class="sortable" data-sort="alpha" title="PR author">Author</th>' +
+      (hasArea ? '<th data-col="area" class="sortable" data-sort="alpha" title="Area labels assigned to this PR">Area</th>' : '') +
       '</tr></thead><tbody>';
 
     for (var i = 0; i < prs.length; i++) {
@@ -1235,6 +1235,7 @@
     // Wire up sortable column headers (Action = column 2)
     initTableSort('pr-table', 2);
     initResizableColumns('pr-table');
+    initColumnChooser('pr-table', null, 'user-input-row');
 
     // Apply any active secondary filters from URL state
     if (activeAreas.length > 0 || activeRepos.length > 0) {
@@ -1343,20 +1344,20 @@
     var unknownScore = '<span style="color:#8b949e">?</span>';
 
     return '<tr' + moreClass + ' data-repo="' + safeSlug + '" data-people="' + escAttr(people) + '" data-involved="' + escAttr(involved) + '" data-labels="' + escAttr(labels) + '">' +
-      '<td class="score' + readyClass + '">' + (isNewlyDiscovered ? unknownScore : readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button>') + '</td>' +
-      '<td class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
-      '<td class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
-      '<td class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
-      '<td class="repo-col"><button type="button" class="repo-filter-btn" onclick="filterByRepo(event,\'' + safeSlugJs + '\')" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</button><a class="filter-btn" href="#" onclick="filterByRepo(event,\'' + safeSlugJs + '\');return false" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)" aria-label="Filter to ' + escAttr(pr._slug) + '">&#x1F50D;</a></td>' +
-      '<td class="title">' + easyBadge + safeTitle + '</td>' +
-      '<td class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na)) + (pr.who_why ? '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(pr.who_why) + '" aria-label="Why these people?">?</button>' : '')) + '</td>' +
-      '<td class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
-      '<td class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
-      '<td class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
-      '<td class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
-      '<td class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' ' + ((pr.changed_files || 0) === 1 ? 'file' : 'files') + ', ' + linesChanged + ' ' + (linesChanged === 1 ? 'line' : 'lines') + ' (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
-      '<td class="author">' + communityBadge + authorHtml + '</td>' +
-      (hasArea ? '<td class="area-col">' + areaHtml + '</td>' : '') +
+      '<td data-col="ready" class="score' + readyClass + '">' + (isNewlyDiscovered ? unknownScore : readyVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeWhy) + '" aria-label="Show Ready score breakdown">?</button>') + '</td>' +
+      '<td data-col="need" class="score">' + (isNewlyDiscovered ? unknownScore : needVal + '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeValueWhy) + '" aria-label="Show Need score breakdown">?</button>') + '</td>' +
+      '<td data-col="action" class="action-score' + actionClass + '">' + (isNewlyDiscovered ? unknownScore : actionEmoji2 + actionVal + '<button type="button" class="why-btn action-why-btn" onclick="showWhy(this)" data-why="' + escAttr(safeActionWhy) + '" aria-label="Show Action score breakdown">?</button>') + '</td>' +
+      '<td data-col="pr" class="pr-num"><a href="' + prUrl + '" title="' + escAttr(pr.title || '') + '">#' + pr.number + '</a></td>' +
+      '<td data-col="repo" class="repo-col"><button type="button" class="repo-filter-btn" onclick="filterByRepo(event,\'' + safeSlugJs + '\')" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)">' + escHtml(pr._slug) + '</button><a class="filter-btn" href="#" onclick="filterByRepo(event,\'' + safeSlugJs + '\');return false" title="Filter to ' + escAttr(pr._slug) + ' (Ctrl+click to add)" aria-label="Filter to ' + escAttr(pr._slug) + '">&#x1F50D;</a></td>' +
+      '<td data-col="title" class="title">' + easyBadge + safeTitle + '</td>' +
+      '<td data-col="nextaction" class="action" title="' + escAttr(pr.blockers || '') + '">' + (isNewlyDiscovered ? unknownCell : (isYourTurn ? '<span class="your-turn-badge" title="Your turn to act">&#x1F449; </span>' : '') + actionEmoji + convertUserRefs(escHtml(na)) + (pr.who_why ? '<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr(pr.who_why) + '" aria-label="Why these people?">?</button>' : '')) + '</td>' +
+      '<td data-col="ci" class="ci"' + ciTitle + '>' + (isNewlyDiscovered && pr.ci === 'UNKNOWN' ? unknownCell : ciEmoji + ciFailHint + ' ' + (pr.ci_detail || '')) + '</td>' +
+      '<td data-col="disc" class="disc' + discHeat + '">' + (isNewlyDiscovered ? unknownCell : discEmoji + (pr.unresolved_threads || 0) + '/' + (pr.total_threads || 0) + 't ' + (pr.distinct_commenters || 0) + 'p<button type="button" class="why-btn" onclick="showWhy(this)" data-why="' + escAttr((pr.unresolved_threads || 0) + ' unresolved / ' + (pr.total_threads || 0) + ' total threads\n' + (pr.distinct_commenters || 0) + ' distinct commenters') + '" aria-label="Show discussion details">?</button>') + '</td>' +
+      '<td data-col="age" class="num' + ageHeat + '">' + (pr.age_days || 0) + 'd</td>' +
+      '<td data-col="upd" class="num' + updateHeat + '">' + (pr.days_since_update || 0) + 'd</td>' +
+      '<td data-col="size" class="num' + filesHeat + '" title="' + (pr.changed_files || 0) + ' ' + ((pr.changed_files || 0) === 1 ? 'file' : 'files') + ', ' + linesChanged + ' ' + (linesChanged === 1 ? 'line' : 'lines') + ' (additions + deletions)">' + sizeIcon + linesChanged + '</td>' +
+      '<td data-col="author" class="author">' + communityBadge + authorHtml + '</td>' +
+      (hasArea ? '<td data-col="area" class="area-col">' + areaHtml + '</td>' : '') +
       '</tr>';
   }
 

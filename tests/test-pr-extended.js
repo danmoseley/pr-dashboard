@@ -29,7 +29,9 @@ async function runTests() {
   // Shared context: reusing one context (vs. per-test newContext) avoids the overhead of
   // spinning up a new browser context (~100ms+) for every test. localStorage isolation is
   // achieved via addInitScript, which runs before any page script on every navigation.
-  const ctx = await browser.newContext();
+  // Use a wide viewport so all columns are visible (media queries hide columns at ≤1400px).
+  // Group M tests narrow viewports using separate browser contexts.
+  const ctx = await browser.newContext({ viewport: { width: 1600, height: 900 } });
   await ctx.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
 
   // Helper: open a fresh page and wait for the PR table to have rows.
@@ -383,7 +385,6 @@ async function runTests() {
     // D3: After sort, first row score ≥ last visible row score (numeric desc)
     {
       const p = await openPage(ALL, 100);
-      // Find a numeric sortable column
       const numHeader = await p.$('#pr-table thead th.sortable[data-sort="num"]');
       if (!numHeader) { fail('D3: Numeric sort order', 'no th[data-sort=num] found'); }
       else {
@@ -1378,6 +1379,180 @@ async function runTests() {
     }
 
     } // end GROUP L
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // Group M: Column visibility at different viewport widths
+    // Validates the CSS media-query responsive column hiding and the column
+    // chooser UI. Tests use separate browser contexts with explicit viewports.
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (shouldRun('M')) { log('\n── Group M: Responsive columns & chooser ──');
+
+    // Helper: true when a data-col column has computed width > 1px in the table
+    async function isColVisible(page, colId) {
+      return page.evaluate(id => {
+        const th = document.querySelector('th[data-col="' + id + '"]');
+        if (!th) return false;
+        const w = th.getBoundingClientRect().width;
+        return w > 1;
+      }, colId);
+    }
+
+    const coreCols = ['pr', 'repo', 'title', 'nextaction'];
+    const tier1Cols = ['ready', 'need', 'action']; // vanish at ≤1400px
+    const tier2Cols = ['ci', 'disc', 'age', 'upd', 'size', 'author', 'area']; // vanish at ≤1100px
+
+    // M1: Wide viewport (1600px) — all columns visible
+    {
+      // Reuse the existing wide context
+      const p = await openPage(ALL, 1);
+      const allCols = [...coreCols, ...tier1Cols, ...tier2Cols];
+      const visibility = {};
+      for (const col of allCols) visibility[col] = await isColVisible(p, col);
+      const allVisible = allCols.every(c => visibility[c]);
+      if (allVisible) pass('M1: All columns visible at 1600px');
+      else fail('M1: All columns visible at 1600px', 'hidden: ' + allCols.filter(c => !visibility[c]).join(', '));
+      await p.close();
+    }
+
+    // M2: Medium viewport (1300px ≤1400px) — tier1 columns hidden, others visible
+    {
+      const narrowCtx = await browser.newContext({ viewport: { width: 1300, height: 900 } });
+      await narrowCtx.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
+      const p = await narrowCtx.newPage();
+      await p.goto(ALL, { waitUntil: 'domcontentloaded' });
+      await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 1, { timeout: 20000 }).catch(() => null);
+      const tier1Hidden = [];
+      for (const col of tier1Cols) { if (await isColVisible(p, col)) tier1Hidden.push(col); }
+      const coreVis = [];
+      for (const col of coreCols) { if (!(await isColVisible(p, col))) coreVis.push(col); }
+      if (tier1Hidden.length === 0 && coreVis.length === 0) {
+        pass('M2: At 1300px — tier1 (ready/need/action) hidden, core cols visible');
+      } else {
+        fail('M2: At 1300px', 'tier1 still visible: ' + (tier1Hidden.join(',') || 'none') +
+          '; core hidden: ' + (coreVis.join(',') || 'none'));
+      }
+      await p.close();
+      await narrowCtx.close();
+    }
+
+    // M3: Narrow viewport (1000px ≤1100px) — only core 4 visible
+    {
+      const narrowCtx = await browser.newContext({ viewport: { width: 1000, height: 900 } });
+      await narrowCtx.addInitScript(() => { try { localStorage.clear(); } catch (e) {} });
+      const p = await narrowCtx.newPage();
+      await p.goto(ALL, { waitUntil: 'domcontentloaded' });
+      await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 1, { timeout: 20000 }).catch(() => null);
+      const nonCoreVisible = [];
+      for (const col of [...tier1Cols, ...tier2Cols]) {
+        if (await isColVisible(p, col)) nonCoreVisible.push(col);
+      }
+      const coreMissing = [];
+      for (const col of coreCols) { if (!(await isColVisible(p, col))) coreMissing.push(col); }
+      if (nonCoreVisible.length === 0 && coreMissing.length === 0) {
+        pass('M3: At 1000px — only core 4 columns visible');
+      } else {
+        fail('M3: At 1000px', 'non-core visible: ' + (nonCoreVisible.join(',') || 'none') +
+          '; core missing: ' + (coreMissing.join(',') || 'none'));
+      }
+      await p.close();
+      await narrowCtx.close();
+    }
+
+    // M4: Column chooser — toggle hides/shows column
+    {
+      const p = await openPage(ALL, 1);
+      const chooserBtn = await p.$('.col-chooser-btn');
+      if (!chooserBtn) {
+        fail('M4: Column chooser toggle', 'no .col-chooser-btn found');
+      } else {
+        await chooserBtn.click();
+        const popup = await p.waitForSelector('.col-chooser-popup', { timeout: 2000 }).catch(() => null);
+        if (!popup) {
+          fail('M4: Column chooser toggle', 'popup did not appear');
+        } else {
+          // Uncheck "author" column
+          const authorCb = await popup.$('input[data-col-id="author"]');
+          if (!authorCb) {
+            fail('M4: Column chooser toggle', 'no author checkbox');
+          } else {
+            await authorCb.click();
+            // Author column should now be hidden
+            const authorVis = await isColVisible(p, 'author');
+            if (!authorVis) pass('M4: Column chooser hides author column');
+            else fail('M4: Column chooser toggle', 'author still visible after unchecking');
+          }
+        }
+      }
+      await p.close();
+    }
+
+    // M5: Column chooser state persists in localStorage
+    {
+      // Use a separate context WITHOUT localStorage-clearing init script
+      const persistCtx = await browser.newContext({ viewport: { width: 1600, height: 900 } });
+      const p = await persistCtx.newPage();
+      await p.goto(ALL, { waitUntil: 'domcontentloaded' });
+      await p.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 1, { timeout: 20000 }).catch(() => null);
+      const chooserBtn = await p.$('.col-chooser-btn');
+      if (!chooserBtn) {
+        fail('M5: Column chooser persistence', 'no .col-chooser-btn found');
+      } else {
+        // Hide "area" column
+        await chooserBtn.click();
+        const popup = await p.waitForSelector('.col-chooser-popup', { timeout: 2000 }).catch(() => null);
+        const areaCb = popup && await popup.$('input[data-col-id="area"]');
+        if (!areaCb) {
+          fail('M5: Column chooser persistence', 'no area checkbox');
+        } else {
+          await areaCb.click();
+          await p.close();
+          // Open new page in same context — area should still be hidden (from localStorage)
+          const p2 = await persistCtx.newPage();
+          await p2.goto(ALL, { waitUntil: 'domcontentloaded' });
+          await p2.waitForFunction(n => document.querySelectorAll('#pr-table tbody tr').length >= n, 1, { timeout: 20000 }).catch(() => null);
+          const areaVis = await isColVisible(p2, 'area');
+          if (!areaVis) pass('M5: Column chooser state persists across page loads');
+          else fail('M5: Column chooser persistence', 'area visible after reload');
+          await p2.close();
+        }
+      }
+      await persistCtx.close();
+    }
+
+    // M6: Drag-resize updates column widths
+    {
+      const p = await openPage(ALL, 1);
+      // Wait for grips to be injected by initResizableColumns()
+      const grip = await p.waitForSelector('.col-resize-grip', { timeout: 5000 }).catch(() => null);
+      if (!grip) {
+        fail('M6: Drag-resize columns', 'no .col-resize-grip found');
+      } else {
+        const box = await grip.boundingBox();
+        if (!box) {
+          fail('M6: Drag-resize columns', 'grip not visible');
+        } else {
+          // Get initial width of the first th
+          const beforeW = await p.evaluate(() => {
+            const th = document.querySelector('#pr-table thead th');
+            return th ? th.getBoundingClientRect().width : 0;
+          });
+          // Drag grip 50px to the right
+          await p.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await p.mouse.down();
+          await p.mouse.move(box.x + box.width / 2 + 50, box.y + box.height / 2, { steps: 5 });
+          await p.mouse.up();
+          const afterW = await p.evaluate(() => {
+            const th = document.querySelector('#pr-table thead th');
+            return th ? th.getBoundingClientRect().width : 0;
+          });
+          if (Math.abs(afterW - beforeW) > 10) pass('M6: Drag-resize changes column width (' + Math.round(beforeW) + ' → ' + Math.round(afterW) + 'px)');
+          else fail('M6: Drag-resize columns', 'width unchanged: ' + Math.round(beforeW) + ' → ' + Math.round(afterW));
+        }
+      }
+      await p.close();
+    }
+
+    } // end GROUP M
 
     // ── Summary ──────────────────────────────────────────────────────────────
     console.log('\n=== RESULTS: ' + passed + ' passed, ' + failed + ' failed ===');
