@@ -158,12 +158,13 @@ function Invoke-GhRetry {
         if ($LASTEXITCODE -eq 0 -and -not ($failureDetail -match 'HTTP [45]\d{2}')) {
             return $outText
         }
+        $displayDetail = if ($failureDetail -and $failureDetail.Length -gt 500) { $failureDetail.Substring(0, 500) + '…' } else { $failureDetail }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
-            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $failureDetail — retrying in ${delay}s"
+            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $displayDetail — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            throw "gh failed after $MaxAttempts attempts: $failureDetail"
+            throw "gh failed after $MaxAttempts attempts: $displayDetail"
         }
     }
 }
@@ -541,12 +542,12 @@ $prsWithCopilotReview = @($candidates | Where-Object {
     $gql -and ($gql.reviews.nodes | Where-Object { $_.author.login -eq "copilot-pull-request-reviewer" })
 })
 if ($prsWithCopilotReview.Count -gt 0) {
-    # Use larger batches since this is a lightweight fragment (only fetches copilot review bodies)
+    # Use small batches — review bodies can be large, causing timeouts at higher batch sizes
     $copilotBatches = [System.Collections.ArrayList]@()
     $cb = [System.Collections.ArrayList]@()
     foreach ($pr in $prsWithCopilotReview) {
         [void]$cb.Add($pr.number)
-        if ($cb.Count -eq 50) { [void]$copilotBatches.Add([long[]]$cb.ToArray()); $cb = [System.Collections.ArrayList]@() }
+        if ($cb.Count -eq 10) { [void]$copilotBatches.Add([long[]]$cb.ToArray()); $cb = [System.Collections.ArrayList]@() }
     }
     if ($cb.Count -gt 0) { [void]$copilotBatches.Add([long[]]$cb.ToArray()) }
     Write-Verbose "Checking $($prsWithCopilotReview.Count) PR(s) for Copilot review errors in $($copilotBatches.Count) batch(es)..."
@@ -554,7 +555,7 @@ if ($prsWithCopilotReview.Count -gt 0) {
         try {
             $parts = @()
             for ($i = 0; $i -lt $b.Count; $i++) {
-                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
+                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:1) { nodes { author{login} body } } }"
             }
             $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
             $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
