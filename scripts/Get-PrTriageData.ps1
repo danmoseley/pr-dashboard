@@ -147,23 +147,27 @@ function Get-ProbeHash([array]$PrListData) {
 
 # Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
 function Invoke-GhRetry {
-    param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(60, 300, 1200))
+    param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(15, 30, 60))
     for ($i = 1; $i -le $MaxAttempts; $i++) {
         $output = & gh @Arguments 2>&1
         $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
         $out  = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
         $errText = ($errs | ForEach-Object { $_.ToString() }) -join '; '
         $outText = $out -join "`n"
-        $failureDetail = if ($errText) { $errText } else { $outText }
-        if ($LASTEXITCODE -eq 0 -and -not ($failureDetail -match 'HTTP [45]\d{2}')) {
-            return $outText
+        # gh sometimes writes valid JSON to stderr (especially large GraphQL responses).
+        # If exit code is 0, treat as success — prefer stdout, fall back to stderr if stdout empty.
+        if ($LASTEXITCODE -eq 0) {
+            $response = if (-not [string]::IsNullOrWhiteSpace($outText)) { $outText } elseif ($errText -match '^\s*\{') { $errText } else { $outText }
+            return $response
         }
+        # Truncate error detail for logging to avoid dumping huge response bodies
+        $logDetail = if ($errText.Length -gt 500) { $errText.Substring(0, 500) + "... (truncated, $($errText.Length) chars)" } else { $errText }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
-            Write-Warning "gh failed (attempt $i/${MaxAttempts}): $failureDetail — retrying in ${delay}s"
+            Write-Warning "gh failed (attempt $i/${MaxAttempts}, exit=$LASTEXITCODE): $logDetail — retrying in ${delay}s"
             Start-Sleep -Seconds $delay
         } else {
-            throw "gh failed after $MaxAttempts attempts: $failureDetail"
+            throw "gh failed after $MaxAttempts attempts (exit=$LASTEXITCODE): $logDetail"
         }
     }
 }
@@ -297,7 +301,7 @@ if ($incrementalEnabled) {
 }
 
 # --- Step 1: List PRs ---
-Write-Verbose "Fetching PR list..."
+Write-Host "  [$Repo] Step 1: Fetching PR list..."
 $listArgs = @("pr","list","--repo",$Repo,"--state","open","--limit",$Limit,
     "--json","number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,changedFiles,additions,deletions,assignees")
 if ($Label) { $listArgs += @("--label",$Label) }
@@ -395,6 +399,7 @@ if ($incrementalEnabled) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors, changed files) ---
+Write-Host "  [$Repo] Step 3: Fetching PR details ($($refreshCandidates.Count) PRs to refresh)..."
 # Only fetch details for PRs that need refreshing (all of them if incremental is disabled)
 $skipFiles = $LargeRepo
 $filesFragment = if ($skipFiles) { '' } else { ' files(first:100){nodes{path}}' }
@@ -535,18 +540,19 @@ function Get-OwnersForPr($labelNames) {
 }
 
 # --- Step 4b: Detect Copilot review errors (targeted query, avoids fetching body for all reviews) ---
+Write-Host "  [$Repo] Step 4b: Checking for Copilot review errors..."
 $copilotErrorPRs = @{}
 $prsWithCopilotReview = @($candidates | Where-Object {
     $gql = $graphqlData[$_.number]
     $gql -and ($gql.reviews.nodes | Where-Object { $_.author.login -eq "copilot-pull-request-reviewer" })
 })
 if ($prsWithCopilotReview.Count -gt 0) {
-    # Use larger batches since this is a lightweight fragment (only fetches copilot review bodies)
+    # Small batches — review bodies can be very large (full review summaries)
     $copilotBatches = [System.Collections.ArrayList]@()
     $cb = [System.Collections.ArrayList]@()
     foreach ($pr in $prsWithCopilotReview) {
         [void]$cb.Add($pr.number)
-        if ($cb.Count -eq 50) { [void]$copilotBatches.Add([long[]]$cb.ToArray()); $cb = [System.Collections.ArrayList]@() }
+        if ($cb.Count -eq 5) { [void]$copilotBatches.Add([long[]]$cb.ToArray()); $cb = [System.Collections.ArrayList]@() }
     }
     if ($cb.Count -gt 0) { [void]$copilotBatches.Add([long[]]$cb.ToArray()) }
     Write-Verbose "Checking $($prsWithCopilotReview.Count) PR(s) for Copilot review errors in $($copilotBatches.Count) batch(es)..."
@@ -554,7 +560,8 @@ if ($prsWithCopilotReview.Count -gt 0) {
         try {
             $parts = @()
             for ($i = 0; $i -lt $b.Count; $i++) {
-                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:5) { nodes { author{login} body } } }"
+                # Only fetch last 1 review — we only care about the most recent Copilot review
+                $parts += "pr$($i): pullRequest(number:$($b[$i])) { number reviews(last:1) { nodes { author{login} body } } }"
             }
             $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
             $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
