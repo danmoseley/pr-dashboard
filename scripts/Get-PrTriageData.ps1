@@ -152,16 +152,26 @@ function Invoke-GhRetry {
         $output = & gh @Arguments 2>&1
         $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
         $out  = @($output | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] })
-        $errText = ($errs | ForEach-Object { $_.ToString() }) -join '; '
+        $errText = ($errs | ForEach-Object { $_.ToString() }) -join "`n"
         $outText = $out -join "`n"
+        $errTrimmed = if ([string]::IsNullOrWhiteSpace($errText)) { '' } else { $errText.TrimStart() }
         # gh sometimes writes valid JSON to stderr (especially large GraphQL responses).
         # If exit code is 0, treat as success — prefer stdout, fall back to stderr if stdout empty.
         if ($LASTEXITCODE -eq 0) {
-            $response = if (-not [string]::IsNullOrWhiteSpace($outText)) { $outText } elseif ($errText -match '^\s*\{') { $errText } else { $outText }
-            return $response
+            if (-not [string]::IsNullOrWhiteSpace($outText)) {
+                return $outText
+            }
+
+            if (($errTrimmed.StartsWith('{')) -or ($errTrimmed.StartsWith('['))) {
+                return $errText
+            }
+
+            return $outText
         }
+
+        $failureDetail = if (-not [string]::IsNullOrWhiteSpace($errText)) { $errText } elseif (-not [string]::IsNullOrWhiteSpace($outText)) { $outText } else { 'No output captured.' }
         # Truncate error detail for logging to avoid dumping huge response bodies
-        $logDetail = if ($errText.Length -gt 500) { $errText.Substring(0, 500) + "... (truncated, $($errText.Length) chars)" } else { $errText }
+        $logDetail = if ($failureDetail.Length -gt 500) { $failureDetail.Substring(0, 500) + "... (truncated, $($failureDetail.Length) chars)" } else { $failureDetail }
         if ($i -lt $MaxAttempts) {
             $delay = $DelaySeconds[$i - 1]
             Write-Warning "gh failed (attempt $i/${MaxAttempts}, exit=$LASTEXITCODE): $logDetail — retrying in ${delay}s"
@@ -301,7 +311,7 @@ if ($incrementalEnabled) {
 }
 
 # --- Step 1: List PRs ---
-Write-Host "  [$Repo] Step 1: Fetching PR list..."
+Write-Verbose "  [$Repo] Step 1: Fetching PR list..."
 $listArgs = @("pr","list","--repo",$Repo,"--state","open","--limit",$Limit,
     "--json","number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,changedFiles,additions,deletions,assignees")
 if ($Label) { $listArgs += @("--label",$Label) }
@@ -399,7 +409,7 @@ if ($incrementalEnabled) {
 }
 
 # --- Step 3: Batched GraphQL (reviews, threads, Build Analysis, thread authors, changed files) ---
-Write-Host "  [$Repo] Step 3: Fetching PR details ($($refreshCandidates.Count) PRs to refresh)..."
+Write-Verbose "  [$Repo] Step 3: Fetching PR details ($($refreshCandidates.Count) PRs to refresh)..."
 # Only fetch details for PRs that need refreshing (all of them if incremental is disabled)
 $skipFiles = $LargeRepo
 $filesFragment = if ($skipFiles) { '' } else { ' files(first:100){nodes{path}}' }
@@ -540,7 +550,7 @@ function Get-OwnersForPr($labelNames) {
 }
 
 # --- Step 4b: Detect Copilot review errors (targeted query, avoids fetching body for all reviews) ---
-Write-Host "  [$Repo] Step 4b: Checking for Copilot review errors..."
+Write-Verbose "  [$Repo] Step 4b: Checking for Copilot review errors..."
 $copilotErrorPRs = @{}
 $prsWithCopilotReview = @($candidates | Where-Object {
     $gql = $graphqlData[$_.number]
