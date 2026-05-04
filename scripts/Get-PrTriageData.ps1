@@ -147,7 +147,7 @@ function Get-ProbeHash([array]$PrListData) {
 
 # Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
 function Invoke-GhRetry {
-    param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(15, 30, 60))
+    param([string[]]$Arguments, [int]$MaxAttempts = 5, [int[]]$DelaySeconds = @(15, 30, 60, 120))
     for ($i = 1; $i -le $MaxAttempts; $i++) {
         $output = & gh @Arguments 2>&1
         $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
