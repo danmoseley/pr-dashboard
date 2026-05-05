@@ -26,8 +26,9 @@
     by a shell wrapper (Write-Warning and Write-Host leak to stdout when
     pwsh runs as a subprocess). Omit for interactive/local use.
 .PARAMETER LargeRepo
-    When set, omits files(first:100) from the batched GraphQL query. This avoids
-    502 errors on repos whose PRs touch thousands of files (e.g., VMR syncs).
+    When set, omits files(first:100) from the batched GraphQL query and reduces
+    batch size from 10 to 3. This avoids 502 errors on repos with many open PRs
+    or PRs that touch thousands of files (e.g., VMR syncs).
     CODEOWNERS-based owner resolution and path-based fallback reviewer scoring are
     unavailable; the script falls back to label-based matching and assigned reviewers.
 .PARAMETER ActivityFile
@@ -147,7 +148,7 @@ function Get-ProbeHash([array]$PrListData) {
 
 # Retry wrapper for gh CLI calls (handles transient HTTP 5xx / 429 errors)
 function Invoke-GhRetry {
-    param([string[]]$Arguments, [int]$MaxAttempts = 4, [int[]]$DelaySeconds = @(15, 30, 60))
+    param([string[]]$Arguments, [int]$MaxAttempts = 5, [int[]]$DelaySeconds = @(15, 30, 60, 120))
     for ($i = 1; $i -le $MaxAttempts; $i++) {
         $output = & gh @Arguments 2>&1
         $errs = @($output | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] })
@@ -445,55 +446,95 @@ $repoParts = $Repo -split '/'
 $repoOwner = $repoParts[0]
 $repoName = $repoParts[1]
 
-Write-Verbose "Fetching details in $($batches.Count) GraphQL batch(es) (batch size: $batchSize)..."
-$failedBatches = 0
-$consecutiveFailures = 0
-foreach ($b in $batches) {
-    # Circuit breaker: after 2 consecutive batch failures, skip remaining batches
-    if ($consecutiveFailures -ge 2) {
-        Write-Warning "Circuit breaker: skipping remaining $($batches.Count - $batches.IndexOf($b)) batch(es) after $consecutiveFailures consecutive failures"
-        $failedBatches += ($batches.Count - $batches.IndexOf($b))
-        break
-    }
+# Executes a single GraphQL batch and returns $true on success, $false on failure.
+function Invoke-GraphqlBatch {
+    param([long[]]$PrNumbers, [string]$Fragment, [string]$Owner, [string]$Name,
+          [hashtable]$DataOut)
     $parts = @()
-    for ($i = 0; $i -lt $b.Count; $i++) {
-        $parts += "pr$($i): pullRequest(number:$($b[$i])) { $fragment }"
+    for ($i = 0; $i -lt $PrNumbers.Count; $i++) {
+        $parts += "pr$($i): pullRequest(number:$($PrNumbers[$i])) { $Fragment }"
     }
-    $query = "{ repository(owner:`"$repoOwner`",name:`"$repoName`") { $($parts -join ' ') } }"
+    $query = "{ repository(owner:`"$Owner`",name:`"$Name`") { $($parts -join ' ') } }"
     try {
         $raw = Invoke-GhRetry @("api","graphql","-f","query=$query")
         if (-not $raw -or [string]::IsNullOrWhiteSpace($raw)) {
-            Write-Warning "Empty GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
-            $failedBatches++
-            $consecutiveFailures++
-            continue
+            Write-Warning "Empty GraphQL response for batch [$(($PrNumbers | ForEach-Object { '#' + $_ }) -join ', ')]"
+            return $false
         }
         $result = $raw | ConvertFrom-Json
         if ($result.errors) {
             Write-Warning "GraphQL errors for batch: $((@($result.errors | ForEach-Object { $_.message } | Select-Object -First 3)) -join '; ')"
         }
         if (-not $result.data -or -not $result.data.repository) {
-            Write-Warning "No data in GraphQL response for batch [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]"
-            $failedBatches++
-            $consecutiveFailures++
-            continue
+            Write-Warning "No data in GraphQL response for batch [$(($PrNumbers | ForEach-Object { '#' + $_ }) -join ', ')]"
+            return $false
         }
-        $consecutiveFailures = 0
-        for ($i = 0; $i -lt $b.Count; $i++) {
+        for ($i = 0; $i -lt $PrNumbers.Count; $i++) {
             $prData = $result.data.repository."pr$i"
-            if ($prData) { $graphqlData[$b[$i]] = $prData }
+            if ($prData) { $DataOut[$PrNumbers[$i]] = $prData }
         }
+        return $true
     } catch {
-        Write-Warning "GraphQL batch failed for PRs [$(($b | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
-        $failedBatches++
-        $consecutiveFailures++
+        Write-Warning "GraphQL batch failed for PRs [$(($PrNumbers | ForEach-Object { '#' + $_ }) -join ', ')]: $_"
+        return $false
     }
 }
-if ($failedBatches -gt 0) {
-    Write-Warning "$failedBatches of $($batches.Count) GraphQL batches failed — $($graphqlData.Count) PRs have full details"
+
+Write-Verbose "[$Repo] Fetching details: $($refreshCandidates.Count) PRs in $($batches.Count) batch(es) (size $batchSize, largeRepo=$LargeRepo)"
+$failedPrCount = 0
+$consecutiveSingleFailures = 0
+$totalAttempts = 0
+# Hard cap: at most 3× original batch count to bound total time from adaptive splitting
+$maxAttempts = [Math]::Max($batches.Count * 3, 10)
+# Use a queue so adaptive splits can be appended
+$batchQueue = [System.Collections.Generic.Queue[long[]]]::new()
+foreach ($b in $batches) { $batchQueue.Enqueue($b) }
+
+while ($batchQueue.Count -gt 0) {
+    # Circuit breaker: stop after 5 consecutive single-PR failures
+    if ($consecutiveSingleFailures -ge 5) {
+        $remaining = 0
+        while ($batchQueue.Count -gt 0) { $remaining += $batchQueue.Dequeue().Count }
+        Write-Warning "Circuit breaker: skipping $remaining remaining PR(s) after $consecutiveSingleFailures consecutive single-PR failures"
+        $failedPrCount += $remaining
+        break
+    }
+    # Hard cap: stop if we've exceeded the total attempt budget
+    if ($totalAttempts -ge $maxAttempts) {
+        $remaining = 0
+        while ($batchQueue.Count -gt 0) { $remaining += $batchQueue.Dequeue().Count }
+        Write-Warning "Attempt cap reached ($totalAttempts/$maxAttempts): skipping $remaining remaining PR(s)"
+        $failedPrCount += $remaining
+        break
+    }
+    $b = $batchQueue.Dequeue()
+    $totalAttempts++
+    $ok = Invoke-GraphqlBatch -PrNumbers $b -Fragment $fragment -Owner $repoOwner -Name $repoName `
+        -DataOut $graphqlData
+    if ($ok) {
+        $consecutiveSingleFailures = 0
+    } else {
+        if ($b.Count -gt 1) {
+            # Adaptive split: halve the batch and re-queue
+            $mid = [Math]::Ceiling($b.Count / 2)
+            $left = [long[]]$b[0..($mid - 1)]
+            $right = [long[]]$b[$mid..($b.Count - 1)]
+            Write-Warning "Splitting failed batch of $($b.Count) into $($left.Count)+$($right.Count) and retrying"
+            $batchQueue.Enqueue($left)
+            $batchQueue.Enqueue($right)
+        } else {
+            # Single-PR batch failed — nothing to split
+            $failedPrCount++
+            $consecutiveSingleFailures++
+            Write-Warning "Single-PR batch #$($b[0]) failed ($consecutiveSingleFailures consecutive single failures)"
+        }
+    }
 }
-if ($failedBatches -eq $batches.Count -and $batches.Count -gt 0) {
-    throw "All $($batches.Count) GraphQL batches failed for $Repo — no enrichment data available"
+if ($failedPrCount -gt 0) {
+    Write-Warning "$failedPrCount of $($refreshCandidates.Count) PR(s) failed GraphQL enrichment — $($graphqlData.Count) PRs have full details"
+}
+if ($graphqlData.Count -eq 0 -and $refreshCandidates.Count -gt 0) {
+    throw "All GraphQL batches failed for $Repo — no enrichment data available"
 }
 # Coverage threshold: if <50% of refresh candidates got GraphQL data, the scan
 # quality is too low to trust — fail and preserve previous data
