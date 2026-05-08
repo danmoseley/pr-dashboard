@@ -22,7 +22,7 @@ function Get-PrFingerprint {
     param([Parameter(Mandatory)]$pr)
     $labelsSorted = ($pr.labels | ForEach-Object { $_.name } | Sort-Object) -join ','
     $assigneesSorted = ($pr.assignees | ForEach-Object { $_.login } | Sort-Object) -join ','
-    return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles)|$($pr.additions)|$($pr.deletions)"
+    return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles ?? '')|$($pr.additions ?? '')|$($pr.deletions ?? '')"
 }
 
 function Import-PreviousScan {

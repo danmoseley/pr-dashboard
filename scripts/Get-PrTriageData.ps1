@@ -104,7 +104,7 @@ try {
     function Get-PrFingerprint($pr) {
         $labelsSorted = ($pr.labels | ForEach-Object { $_.name } | Sort-Object) -join ','
         $assigneesSorted = ($pr.assignees | ForEach-Object { $_.login } | Sort-Object) -join ','
-        return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles)|$($pr.additions)|$($pr.deletions)"
+        return "$($pr.updatedAt)|$($pr.mergeable)|$($pr.isDraft)|$labelsSorted|$assigneesSorted|$($pr.changedFiles ?? '')|$($pr.additions ?? '')|$($pr.deletions ?? '')"
     }
     # Fallback shims — script works standalone but incremental mode is explicitly disabled.
     # Return sentinel cache version 0 so it never matches a real cache, ensuring all-refresh.
@@ -313,8 +313,16 @@ if ($incrementalEnabled) {
 
 # --- Step 1: List PRs ---
 Write-Verbose "  [$Repo] Step 1: Fetching PR list..."
+# For large repos, skip diffstat fields (changedFiles,additions,deletions) in the listing query.
+# These fields force GitHub to compute diffs for every open PR in a single GraphQL call,
+# which causes HTTP 502 on repos with 200+ PRs. We fetch them per-PR in Step 3 instead.
+$listFields = if ($LargeRepo) {
+    "number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,assignees"
+} else {
+    "number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,changedFiles,additions,deletions,assignees"
+}
 $listArgs = @("pr","list","--repo",$Repo,"--state","open","--limit",$Limit,
-    "--json","number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,changedFiles,additions,deletions,assignees")
+    "--json",$listFields)
 if ($Label) { $listArgs += @("--label",$Label) }
 if ($Author) { $listArgs += @("--author",$Author) }
 if ($Assignee) { $listArgs += @("--assignee",$Assignee) }
@@ -362,7 +370,7 @@ if ($PrNumber) {
     $candidates = @($candidates | Where-Object { $_.number -eq [long]$PrNumber })
     if ($candidates.Count -eq 0) {
         # PR wasn't in filtered set - fetch it directly
-        $singlePr = & gh pr view $PrNumber --repo $Repo --json number,title,author,labels,mergeable,isDraft,createdAt,updatedAt,changedFiles,additions,deletions,assignees | ConvertFrom-Json
+        $singlePr = & gh pr view $PrNumber --repo $Repo --json $listFields | ConvertFrom-Json
         $candidates = @($singlePr)
     }
 }
@@ -415,7 +423,9 @@ Write-Verbose "  [$Repo] Step 3: Fetching PR details ($($refreshCandidates.Count
 $skipFiles = $LargeRepo
 $filesFragment = if ($skipFiles) { '' } else { ' files(first:100){nodes{path}}' }
 if ($skipFiles) { Write-Verbose "Skipping files() in GraphQL for $Repo (large repo)" }
-$fragment = "number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}" + $filesFragment
+# For large repos, fetch diffstat scalars here since they were skipped in Step 1 to avoid 502s
+$diffstatFragment = if ($LargeRepo) { ' additions deletions changedFiles' } else { '' }
+$fragment = "number comments(last:20){totalCount nodes{author{login}createdAt}} reviews(last:10){nodes{author{login}state commit{oid}}} reviewRequests(first:10){nodes{requestedReviewer{...on User{login}...on Team{name}}}} reviewThreads(first:50){nodes{isResolved comments(first:5){nodes{author{login}createdAt}}}} commits(last:1){nodes{commit{oid statusCheckRollup{contexts(first:100){pageInfo{hasNextPage endCursor} nodes{...on CheckRun{name conclusion status}}}}}}}" + $filesFragment + $diffstatFragment
 
 $graphqlData = @{}
 # Filter out candidates with invalid PR numbers before batching/scoring
@@ -573,6 +583,25 @@ foreach ($prNum in @($graphqlData.Keys)) {
     }
     $rollup.contexts | Add-Member -NotePropertyName nodes -NotePropertyValue @($allNodes) -Force
     Write-Verbose "PR #${prNum}: fetched $($allNodes.Count) total checks (paginated beyond 100)"
+}
+
+# For large repos, copy diffstat fields from GraphQL data back onto the PR list objects
+# so that scoring and output can use them as normal.
+if ($LargeRepo) {
+    foreach ($pr in $refreshCandidates) {
+        $gql = $graphqlData[$pr.number]
+        if ($gql) {
+            $pr | Add-Member -NotePropertyName changedFiles -NotePropertyValue ($gql.changedFiles ?? 0) -Force
+            $pr | Add-Member -NotePropertyName additions -NotePropertyValue ($gql.additions ?? 0) -Force
+            $pr | Add-Member -NotePropertyName deletions -NotePropertyValue ($gql.deletions ?? 0) -Force
+        } else {
+            # PR didn't get GraphQL data (batch failure) — default to 0 so scoring doesn't break
+            if ($null -eq $pr.changedFiles) { $pr | Add-Member -NotePropertyName changedFiles -NotePropertyValue 0 -Force }
+            if ($null -eq $pr.additions) { $pr | Add-Member -NotePropertyName additions -NotePropertyValue 0 -Force }
+            if ($null -eq $pr.deletions) { $pr | Add-Member -NotePropertyName deletions -NotePropertyValue 0 -Force }
+        }
+    }
+    Write-Verbose "Merged diffstat from GraphQL into $($refreshCandidates.Count) PR(s) (large repo)"
 }
 
 # --- Step 4: Determine area owners for label ---
