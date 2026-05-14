@@ -1,14 +1,14 @@
 {
   "screened_out": {
-    "drafts_count": 7,
-    "needs_author_action": [],
+    "stale": [],
     "bots": [
       {
         "author": "app/dotnet-maestro",
         "number": 7452
       }
     ],
-    "stale": [],
+    "needs_author_action": [],
+    "drafts_count": 7,
     "drafts": [
       {
         "author": "app/copilot-swe-agent",
@@ -47,20 +47,36 @@
       }
     ]
   },
-  "repo": "dotnet/extensions",
-  "timestamp": "2026-05-13T08:59:43.0212287+00:00",
-  "scanned": 24,
-  "total_after_filters": 16,
-  "owners": [],
-  "_probe_hash": "71270364b359572f",
-  "incremental": {
-    "graphql_failed_batches": null,
-    "graphql_total_batches": 2,
-    "reused": 1,
-    "full_scan": false,
-    "refreshed": 15,
-    "fallback": false
+  "filters": {
+    "author": null,
+    "next_action": null,
+    "top": 0,
+    "assignee": null,
+    "min_approvals": 0,
+    "updated_within": 0,
+    "community": false,
+    "min_score": 0.0,
+    "max_age": 0,
+    "min_age": 0,
+    "label": null,
+    "my_actions": null
   },
+  "returned": 15,
+  "_cache_version": 2,
+  "_probe_hash": "0a7ee78ac6cf433a",
+  "quick_actions": {
+    "ready_to_merge": 1,
+    "blocked_conflicts": 4,
+    "needs_author_action": 0,
+    "needs_maintainer_review": 5
+  },
+  "total_after_filters": 15,
+  "analyzed": 15,
+  "timestamp": "2026-05-14T08:55:22.5688961+00:00",
+  "repo": "dotnet/extensions",
+  "owners": [],
+  "elapsed_seconds": 4.2,
+  "scanned": 23,
   "prs": [
     {
       "number": 6862,
@@ -273,46 +289,6 @@
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
     },
     {
-      "number": 7523,
-      "title": "Merging internal changes into the release/10.6 branch",
-      "author": "joperezr",
-      "copilot_trigger": null,
-      "score": 6.9,
-      "merge_readiness": 6.9,
-      "value_score": 2.2,
-      "value_why": "no approval yet (+1.5)&#10;large change: 512 lines (+0.5)",
-      "action_score": 2.1,
-      "action_why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;feedback addressed (+2.5)&#10;needs approval (+1.5)&#10;team author (+1)&#10;recently active (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)",
-      "ci": "SUCCESS",
-      "ci_detail": "6/0/0",
-      "unresolved_threads": 0,
-      "total_threads": 0,
-      "total_comments": 0,
-      "distinct_commenters": 0,
-      "mergeable": "MERGEABLE",
-      "approval_count": 0,
-      "is_community": false,
-      "area_labels": [
-        "area-ai"
-      ],
-      "age_days": 1,
-      "days_since_update": 0,
-      "days_since_author_review_comment": 1,
-      "days_since_review": 0,
-      "changed_files": 15,
-      "lines_changed": 512,
-      "next_action": "@stephentoub, @jeffhandley: review needed",
-      "who": "@stephentoub, @jeffhandley",
-      "who_why": "@stephentoub: often merges PRs with files in test/Libraries/Microsoft.Extensions.AI.Abstractions.Tests, and PRs labeled area-ai\n@jeffhandley: often merges PRs with files in src/Libraries/Microsoft.Extensions.AI.Abstractions, and PRs labeled area-ai",
-      "involved": [
-        "joperezr"
-      ],
-      "blockers": "No review",
-      "why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;recently active (+1)&#10;team author (+1)&#10;recently updated (+0.7)&#10;well labeled (+0.5)&#10;good review momentum (+0.2)",
-      "_fingerprint": "05/12/2026 21:04:24|MERGEABLE|False|area-ai|joperezr|15|266|246",
-      "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
-    },
-    {
       "number": 6883,
       "title": "Fix typo in AddExtendedLoggerFactory method name",
       "author": "Meir017",
@@ -355,6 +331,48 @@
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
     },
     {
+      "number": 7433,
+      "title": "Clarify WriteAsync contract: add explicit IngestionDocument parameter to WriteAsync",
+      "author": "app/copilot-swe-agent",
+      "copilot_trigger": "adamsitnik",
+      "score": 6.1,
+      "merge_readiness": 6.1,
+      "value_score": 2.2,
+      "value_why": "no approval yet (+1.5)&#10;author silent 42d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)",
+      "action_score": 1.9,
+      "action_why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)&#10;author silent 42d, ball in their court (-1.5)",
+      "ci": "SUCCESS",
+      "ci_detail": "6/0/0",
+      "unresolved_threads": 4,
+      "total_threads": 4,
+      "total_comments": 9.0,
+      "distinct_commenters": 3,
+      "mergeable": "MERGEABLE",
+      "approval_count": 0,
+      "is_community": false,
+      "area_labels": [
+        "area-data-ingestion"
+      ],
+      "age_days": 47,
+      "days_since_update": 41,
+      "days_since_author_review_comment": 42,
+      "days_since_review": 41,
+      "changed_files": 4,
+      "lines_changed": 30,
+      "next_action": "@adamsitnik: respond to 4 thread(s) from @roji",
+      "who": "@adamsitnik",
+      "who_why": "@adamsitnik: PR author",
+      "involved": [
+        "adamsitnik",
+        "copilot-swe-agent",
+        "roji"
+      ],
+      "blockers": "4 threads, No maintainer approval, Stale 41d",
+      "why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;small, easy to review (+2)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)",
+      "_fingerprint": "04/03/2026 08:20:10|MERGEABLE|False|area-data-ingestion|adamsitnik,Copilot|4|16|14",
+      "_refreshed_at": "2026-05-14T08:55:22.5688961+00:00"
+    },
+    {
       "number": 7368,
       "title": "fix(ai template): avoid nullable filenameFilter tool schema for Ollama",
       "author": "SergioChan",
@@ -393,48 +411,6 @@
       "why": "no merge conflicts (+3)&#10;trivial change, 30-second review (+3)&#10;feedback addressed (+2.5)&#10;discussion healthy (+2.5)&#10;team author (+1)&#10;well labeled (+0.5)",
       "_fingerprint": "03/07/2026 01:29:43|MERGEABLE|False|area-ai-templates|SergioChan|1|1|1",
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
-    },
-    {
-      "number": 7433,
-      "title": "Clarify WriteAsync contract: add explicit IngestionDocument parameter to WriteAsync",
-      "author": "app/copilot-swe-agent",
-      "copilot_trigger": "adamsitnik",
-      "score": 6.1,
-      "merge_readiness": 6.1,
-      "value_score": 2.2,
-      "value_why": "no approval yet (+1.5)&#10;author silent 40d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)",
-      "action_score": 1.9,
-      "action_why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;some unresolved feedback (+2.2)&#10;small, easy to review (+2)&#10;needs approval (+1.5)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)&#10;author silent 40d, ball in their court (-1.5)",
-      "ci": "SUCCESS",
-      "ci_detail": "6/0/0",
-      "unresolved_threads": 4,
-      "total_threads": 4,
-      "total_comments": 9.0,
-      "distinct_commenters": 3,
-      "mergeable": "MERGEABLE",
-      "approval_count": 0,
-      "is_community": false,
-      "area_labels": [
-        "area-data-ingestion"
-      ],
-      "age_days": 45,
-      "days_since_update": 39,
-      "days_since_author_review_comment": 40,
-      "days_since_review": 39,
-      "changed_files": 4,
-      "lines_changed": 30,
-      "next_action": "@adamsitnik: respond to 4 thread(s) from @roji",
-      "who": "@adamsitnik",
-      "who_why": "@adamsitnik: PR author",
-      "involved": [
-        "adamsitnik",
-        "copilot-swe-agent",
-        "roji"
-      ],
-      "blockers": "4 threads, No maintainer approval, Stale 39d",
-      "why": "no merge conflicts (+3)&#10;CI passing (+2.5)&#10;small, easy to review (+2)&#10;some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)",
-      "_fingerprint": "04/03/2026 08:20:10|MERGEABLE|False|area-data-ingestion|adamsitnik,Copilot|4|16|14",
-      "_refreshed_at": "2026-05-12T08:55:15.8402293+00:00"
     },
     {
       "number": 7393,
@@ -523,47 +499,6 @@
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
     },
     {
-      "number": 7251,
-      "title": "Add IterationCompleted delegate to FunctionInvokingChatClient to facilitate agentic patterns",
-      "author": "PederHP",
-      "copilot_trigger": null,
-      "score": 4.2,
-      "merge_readiness": 4.2,
-      "value_score": 2.8,
-      "value_why": "no approval yet (+1.5)&#10;author silent 96d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 559 lines (+0.5)",
-      "action_score": 1.6,
-      "action_why": "CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+2.2)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)&#10;author silent 96d, ball in their court (-1.5)",
-      "ci": "SUCCESS",
-      "ci_detail": "6/0/0",
-      "unresolved_threads": 1,
-      "total_threads": 1,
-      "total_comments": 7.0,
-      "distinct_commenters": 2,
-      "mergeable": "CONFLICTING",
-      "approval_count": 0,
-      "is_community": false,
-      "area_labels": [
-        "area-ai"
-      ],
-      "age_days": 102,
-      "days_since_update": 96,
-      "days_since_author_review_comment": 96,
-      "days_since_review": 96,
-      "changed_files": 4,
-      "lines_changed": 559,
-      "next_action": "@PederHP: resolve conflicts; respond to 1 thread(s)",
-      "who": "@PederHP",
-      "who_why": "@PederHP: PR author",
-      "involved": [
-        "PederHP",
-        "stephentoub"
-      ],
-      "blockers": "Conflicts, 1 threads, No maintainer approval, Stale 96d",
-      "why": "CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)",
-      "_fingerprint": "02/06/2026 17:15:49|CONFLICTING|False|area-ai|PederHP|4|556|3",
-      "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
-    },
-    {
       "number": 7158,
       "title": "[WIP] Fix message ordering when processing function approval responses",
       "author": "app/copilot-swe-agent",
@@ -604,6 +539,47 @@
       "blockers": "Conflicts, CI fail (4 failed), 7 threads, No maintainer approval, Stale 65d",
       "why": "some unresolved feedback (+1.2)&#10;discussion healthy (+1.2)&#10;small, easy to review (+1)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)",
       "_fingerprint": "03/09/2026 20:20:36|CONFLICTING|False|area-ai|Copilot,stephentoub|2|463|29",
+      "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
+    },
+    {
+      "number": 7251,
+      "title": "Add IterationCompleted delegate to FunctionInvokingChatClient to facilitate agentic patterns",
+      "author": "PederHP",
+      "copilot_trigger": null,
+      "score": 4.2,
+      "merge_readiness": 4.2,
+      "value_score": 2.8,
+      "value_why": "no approval yet (+1.5)&#10;author silent 96d, ball in their court (-1.5)&#10;reviewed, not approved (+1.0)&#10;unresolved feedback (+1.0)&#10;large change: 559 lines (+0.5)",
+      "action_score": 1.6,
+      "action_why": "CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+2.2)&#10;needs approval (+1.5)&#10;team author (+1)&#10;reviewed, not approved (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)&#10;author silent 96d, ball in their court (-1.5)",
+      "ci": "SUCCESS",
+      "ci_detail": "6/0/0",
+      "unresolved_threads": 1,
+      "total_threads": 1,
+      "total_comments": 7.0,
+      "distinct_commenters": 2,
+      "mergeable": "CONFLICTING",
+      "approval_count": 0,
+      "is_community": false,
+      "area_labels": [
+        "area-ai"
+      ],
+      "age_days": 102,
+      "days_since_update": 96,
+      "days_since_author_review_comment": 96,
+      "days_since_review": 96,
+      "changed_files": 4,
+      "lines_changed": 559,
+      "next_action": "@PederHP: resolve conflicts; respond to 1 thread(s)",
+      "who": "@PederHP",
+      "who_why": "@PederHP: PR author",
+      "involved": [
+        "PederHP",
+        "stephentoub"
+      ],
+      "blockers": "Conflicts, 1 threads, No maintainer approval, Stale 96d",
+      "why": "CI passing (+2.5)&#10;discussion healthy (+2.5)&#10;some unresolved feedback (+1.2)&#10;team author (+1)&#10;has maintainer review (+0.8)&#10;well labeled (+0.5)",
+      "_fingerprint": "02/06/2026 17:15:49|CONFLICTING|False|area-ai|PederHP|4|556|3",
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
     },
     {
@@ -735,34 +711,18 @@
       "_refreshed_at": "2026-05-13T08:59:43.0212287+00:00"
     }
   ],
-  "elapsed_seconds": 9.2,
-  "analyzed": 16,
-  "_cache_version": 2,
-  "filters": {
-    "label": null,
-    "updated_within": 0,
-    "max_age": 0,
-    "my_actions": null,
-    "min_score": 0.0,
-    "min_age": 0,
-    "min_approvals": 0,
-    "community": false,
-    "next_action": null,
-    "top": 0,
-    "author": null,
-    "assignee": null
-  },
-  "returned": 16,
-  "quick_actions": {
-    "ready_to_merge": 1,
-    "needs_maintainer_review": 6,
-    "needs_author_action": 0,
-    "blocked_conflicts": 4
+  "incremental": {
+    "reused": 14,
+    "graphql_total_batches": 1,
+    "refreshed": 1,
+    "full_scan": false,
+    "fallback": false,
+    "graphql_failed_batches": null
   },
   "_rate_limit": {
+    "graphql_remaining": 3802,
+    "reset": 1778752133,
     "rest_remaining": 4859,
-    "reset": 1778666128,
-    "total_used": 138,
-    "graphql_remaining": 3922
+    "total_used": 138
   }
 }
