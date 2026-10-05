@@ -1,7 +1,7 @@
 {
   "dotnet/runtime": {
     "AaronRobinsonMSFT": {
-      "merge_count": 5,
+      "merge_count": 4,
       "top_paths": [
         "src/coreclr/vm",
         "src/coreclr/utilcode",
@@ -20,7 +20,7 @@
       ]
     },
     "adamperlin": {
-      "merge_count": 4,
+      "merge_count": 6,
       "top_paths": [
         "src/coreclr/jit",
         "src/coreclr/inc",
@@ -29,9 +29,9 @@
         "src/coreclr/interpreter",
         "src/coreclr/nativeaot",
         "src/tests/Regressions",
-        "src/coreclr/System.Private.CoreLib",
-        "src/libraries/System.Private.CoreLib",
-        "src/tests/JIT"
+        "src/coreclr/crossgen-corelib.proj",
+        "src/coreclr/scripts",
+        "src/coreclr/System.Private.CoreLib"
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
@@ -39,84 +39,86 @@
       ]
     },
     "adamsitnik": {
-      "merge_count": 7,
+      "merge_count": 3,
       "top_paths": [
         "src/libraries/System.Diagnostics.Process",
-        "src/libraries/System.Formats.Nrbf",
-        "src/libraries/Common",
-        "src/libraries/System.Private.CoreLib",
-        "src/libraries/System.Runtime"
+        ".github/copilot-instructions.md",
+        ".github/skills/api-proposal",
+        ".github/skills/aspnet-benchmark",
+        ".github/skills/build-and-test",
+        ".github/skills/issue-triage",
+        ".github/skills/jit-regression-test",
+        ".github/skills/microbenchmark",
+        ".github/skills/vectorization",
+        "src/libraries/Common"
       ],
       "top_area_labels": [
+        "area-skills",
         "area-System.Diagnostics.Process",
-        "area-System.Formats.Nrbf",
         "area-System.IO"
       ]
     },
     "agocke": {
-      "merge_count": 12,
+      "merge_count": 14,
       "top_paths": [
         "src/coreclr/tools",
         "src/tools/illink",
-        "eng/pipelines/common",
-        "eng/pipelines/libraries",
-        "src/tasks/AndroidAppBuilder",
+        "src/libraries/System.Threading.RateLimiting",
+        "src/tests/nativeaot",
         "eng/pipelines/coreclr",
-        "eng/pipelines/diagnostics",
+        "src/tasks/AndroidAppBuilder",
         "eng/pipelines/helix-platforms.yml",
+        "eng/pipelines/libraries",
+        "eng/pipelines/runtime.yml",
         "src/tests/Interop"
       ],
       "top_area_labels": [
+        "area-NativeAOT-coreclr",
         "area-ReadyToRun",
         "area-Infrastructure",
         "area-Interop-coreclr",
-        "area-NativeAOT-coreclr",
         "area-Tools-ILLink"
       ]
     },
     "akoeplinger": {
-      "merge_count": 84,
+      "merge_count": 75,
       "top_paths": [
         "eng/pipelines/coreclr",
-        "src/mono/nuget",
-        "src/libraries/System.Text.Json",
-        "eng/common/core-templates",
         "eng/pipelines/extra-platforms",
-        "src/coreclr/tools",
+        "eng/common/core-templates",
         "eng/Version.Details.xml",
         "eng/pipelines/common",
         "eng/Version.Details.props",
-        "eng/Versions.props"
+        "global.json",
+        "src/coreclr/tools",
+        "src/libraries/System.Net.Http",
+        "eng/pipelines/libraries"
       ],
       "top_area_labels": [
         "area-codeflow",
         "area-Infrastructure",
-        "area-Build-mono",
         "area-Infrastructure-libraries",
-        "area-Infrastructure-mono"
+        "area-Infrastructure-mono",
+        "area-System.Net"
       ]
     },
     "alinpahontu2912": {
-      "merge_count": 4,
+      "merge_count": 1,
       "top_paths": [
-        "src/libraries/System.IO.Compression",
-        "src/libraries/System.IO.Packaging",
-        "src/libraries/Common",
-        "src/libraries/System.Net.HttpListener"
+        "src/libraries/System.IO.Compression"
       ],
       "top_area_labels": [
-        "area-System.IO.Compression",
-        "area-System.Net.Http"
+        "area-System.IO.Compression"
       ]
     },
     "AndyAyersMS": {
-      "merge_count": 42,
+      "merge_count": 38,
       "top_paths": [
         "src/coreclr/jit",
         "src/tests/JIT",
-        "src/coreclr/tools",
         "src/coreclr/vm",
         "src/tests/GC",
+        "src/coreclr/tools",
         "src/coreclr/inc",
         "src/libraries/System.Private.CoreLib",
         "src/libraries/System.Runtime",
@@ -124,14 +126,14 @@
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
-        "area-ReadyToRun",
         "area-CodeGen-Interpreter-coreclr",
         "area-Infrastructure",
+        "area-ReadyToRun",
         "area-System.Threading"
       ]
     },
     "artl93": {
-      "merge_count": 28,
+      "merge_count": 30,
       "top_paths": [
         "src/libraries/Common",
         "src/libraries/System.Security.Cryptography",
@@ -158,10 +160,10 @@
       "top_area_labels": []
     },
     "bartonjs": {
-      "merge_count": 8,
+      "merge_count": 7,
       "top_paths": [
-        "src/libraries/System.Security.Cryptography",
         "src/libraries/System.Formats.Cbor",
+        "src/libraries/System.Security.Cryptography",
         "src/libraries/Common",
         "src/libraries/Microsoft.Bcl.Cryptography",
         "src/libraries/System.Security.Cryptography.Cose"
@@ -172,7 +174,7 @@
       ]
     },
     "BrzVlad": {
-      "merge_count": 12,
+      "merge_count": 10,
       "top_paths": [
         "src/coreclr/tools",
         "src/coreclr/jit",
@@ -180,17 +182,16 @@
         "src/coreclr/interpreter",
         "src/libraries/System.Private.CoreLib",
         "src/coreclr/inc",
-        "src/tests/JIT",
-        "src/libraries/System.IO.Compression",
         "src/mono/mono",
-        "src/tests/readytorun"
+        "src/tests/JIT",
+        "src/tests/readytorun",
+        "docs/design/coreclr"
       ],
       "top_area_labels": [
         "area-CodeGen-Interpreter-coreclr",
         "area-ReadyToRun",
         "area-Codegen-Interpreter-mono",
-        "area-Codegen-LLVM-mono",
-        "area-GC-coreclr"
+        "area-Codegen-LLVM-mono"
       ]
     },
     "cincuranet": {
@@ -208,28 +209,28 @@
       "top_area_labels": []
     },
     "davidwrighton": {
-      "merge_count": 11,
+      "merge_count": 13,
       "top_paths": [
         "src/coreclr/vm",
-        "src/coreclr/System.Private.CoreLib",
         "src/coreclr/tools",
-        "src/libraries/System.Runtime.InteropServices",
+        "src/coreclr/md",
         "src/coreclr/inc",
+        "src/libraries/System.Runtime.InteropServices",
+        "src/coreclr/utilcode",
+        "src/coreclr/pal",
         "src/coreclr/jit",
         "src/tests/async",
-        "docs/design/coreclr",
-        "src/coreclr/nativeaot",
-        "src/libraries/System.Runtime.InteropServices.JavaScript"
+        "src/coreclr/runtime"
       ],
       "top_area_labels": [
         "area-ReadyToRun",
         "area-VM-coreclr",
-        "area-System.Reflection",
-        "area-System.Runtime.InteropServices"
+        "area-System.Runtime.InteropServices",
+        "area-System.Threading"
       ]
     },
     "dhartglassMSFT": {
-      "merge_count": 6,
+      "merge_count": 9,
       "top_paths": [
         "src/coreclr/jit",
         "src/tests/JIT",
@@ -240,44 +241,48 @@
       ]
     },
     "DrewScoggins": {
-      "merge_count": 0,
-      "top_paths": [],
-      "top_area_labels": []
+      "merge_count": 1,
+      "top_paths": [
+        "eng/pipelines/performance"
+      ],
+      "top_area_labels": [
+        "area-Infrastructure"
+      ]
     },
     "eduardo-vp": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
-        "src/tests/baseservices",
-        "src/coreclr/vm"
+        "src/coreclr/vm",
+        "src/tests/baseservices"
       ],
       "top_area_labels": [
         "area-System.Threading"
       ]
     },
     "EgorBo": {
-      "merge_count": 58,
+      "merge_count": 72,
       "top_paths": [
         "src/coreclr/jit",
         "src/tests/JIT",
         "src/coreclr/vm",
+        "src/libraries/System.Private.CoreLib",
+        "src/libraries/Common",
         "src/coreclr/inc",
-        "src/coreclr/System.Private.CoreLib",
         "src/coreclr/tools",
+        "src/coreclr/nativeaot",
         "src/coreclr/debug",
-        "src/coreclr/scripts",
-        "src/tools/illink",
-        "docs/design/coreclr"
+        "src/coreclr/scripts"
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
         "area-Infrastructure",
+        "area-System.Runtime",
         "area-VM-coreclr",
-        "area-GC-coreclr",
-        "area-Infrastructure-coreclr"
+        "area-Meta"
       ]
     },
     "eiriktsarpalis": {
-      "merge_count": 9,
+      "merge_count": 8,
       "top_paths": [
         "src/libraries/System.Text.Json",
         "src/libraries/System.Private.CoreLib"
@@ -289,17 +294,9 @@
       ]
     },
     "elinor-fung": {
-      "merge_count": 4,
-      "top_paths": [
-        "src/native/corehost",
-        "src/installer/tests",
-        "docs/design/features",
-        "src/coreclr/binder"
-      ],
-      "top_area_labels": [
-        "area-Host",
-        "area-AssemblyLoader"
-      ]
+      "merge_count": 0,
+      "top_paths": [],
+      "top_area_labels": []
     },
     "ericstj": {
       "merge_count": 0,
@@ -314,43 +311,44 @@
     "hoyosjs": {
       "merge_count": 2,
       "top_paths": [
-        "src/native/managed",
-        "src/coreclr/debug"
+        "src/coreclr/debug",
+        "src/coreclr/vm"
       ],
       "top_area_labels": [
-        "area-Diagnostics-cdac",
         "area-Diagnostics-coreclr"
       ]
     },
     "ilonatommy": {
-      "merge_count": 5,
+      "merge_count": 3,
       "top_paths": [
-        "eng/testing/BrowserVersions.props",
-        "src/mono/nuget"
+        "eng/testing/BrowserVersions.props"
       ],
       "top_area_labels": [
-        "area-Infrastructure-mono",
-        "area-Build-mono"
+        "area-Infrastructure-mono"
       ]
     },
     "iremyux": {
-      "merge_count": 0,
-      "top_paths": [],
-      "top_area_labels": []
+      "merge_count": 1,
+      "top_paths": [
+        "src/libraries/System.Formats.Tar"
+      ],
+      "top_area_labels": [
+        "area-System.Formats.Tar"
+      ]
     },
     "jakobbotsch": {
-      "merge_count": 54,
+      "merge_count": 45,
       "top_paths": [
         "src/coreclr/jit",
         "src/tests/async",
         "src/tests/JIT",
-        "src/coreclr/tools",
         "src/coreclr/System.Private.CoreLib",
         "src/tests/Common",
         "eng/pipelines/coreclr",
         "src/coreclr/scripts",
+        "src/coreclr/tools",
         ".github/workflows/jit-format.yml",
-        "docs/design/specs"
+        "docs/workflow/testing"
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
@@ -361,12 +359,13 @@
       ]
     },
     "janvorli": {
-      "merge_count": 4,
+      "merge_count": 7,
       "top_paths": [
         "src/coreclr/gc",
         "src/coreclr/pal",
         "src/libraries/Common",
-        "src/coreclr/nativeaot"
+        "src/coreclr/nativeaot",
+        "src/tests/GC"
       ],
       "top_area_labels": [
         "area-GC-coreclr",
@@ -374,67 +373,65 @@
       ]
     },
     "jeffhandley": {
-      "merge_count": 9,
+      "merge_count": 4,
       "top_paths": [
-        "src/libraries/System.Private.CoreLib",
         "src/libraries/System.Management",
-        "src/coreclr/nativeaot",
+        "src/libraries/System.Private.CoreLib",
         "docs/area-owners.md"
       ],
       "top_area_labels": [
-        "area-System.Runtime",
+        "area-Meta",
         "area-System.Collections",
         "area-System.Management",
-        "area-Meta",
-        "area-System.Reflection"
+        "area-System.Runtime"
       ]
     },
     "jkoritzinsky": {
-      "merge_count": 24,
+      "merge_count": 32,
       "top_paths": [
+        "src/tools/ilasm",
         "src/coreclr/pal",
         "src/libraries/System.Runtime.InteropServices",
+        "src/coreclr/vm",
         "src/coreclr/debug",
+        "src/native/managed",
         "src/coreclr/jit",
         "src/coreclr/tools",
         "src/libraries/System.Runtime.InteropServices.JavaScript",
-        "src/coreclr/md",
-        "src/native/minipal",
-        "src/coreclr/nativeaot",
         "src/coreclr/inc"
       ],
       "top_area_labels": [
-        "area-Infrastructure",
-        "area-Interop-coreclr",
         "area-VM-coreclr",
-        "area-NativeAOT-coreclr",
-        "area-System.Runtime.InteropServices"
+        "area-Interop-coreclr",
+        "area-ILTools-coreclr",
+        "area-Infrastructure",
+        "area-Diagnostics-coreclr"
       ]
     },
     "jkotas": {
-      "merge_count": 42,
+      "merge_count": 41,
       "top_paths": [
-        "src/coreclr/tools",
         "src/coreclr/nativeaot",
         "src/coreclr/vm",
-        "src/coreclr/gc",
-        "src/libraries/System.Private.CoreLib",
+        "src/coreclr/tools",
         "src/libraries/System.Runtime",
+        "src/libraries/System.Private.CoreLib",
         "src/libraries/System.Reflection.Context",
-        "src/coreclr/pal",
-        "src/coreclr/System.Private.CoreLib",
-        "src/libraries/Common"
+        "src/coreclr/gc",
+        "src/libraries/Common",
+        "src/tests/JIT",
+        "src/coreclr/jit"
       ],
       "top_area_labels": [
         "area-NativeAOT-coreclr",
         "area-VM-coreclr",
         "area-Infrastructure",
-        "area-Tools-ILVerification",
-        "area-ReadyToRun"
+        "area-ReadyToRun",
+        "area-System.Reflection"
       ]
     },
     "jozkee": {
-      "merge_count": 7,
+      "merge_count": 6,
       "top_paths": [
         "src/libraries/System.Text.Json",
         "eng/pipelines/libraries"
@@ -445,13 +442,13 @@
       ]
     },
     "jtschuster": {
-      "merge_count": 21,
+      "merge_count": 22,
       "top_paths": [
         "src/coreclr/tools",
+        "src/tools/illink",
         "src/coreclr/vm",
         "src/tests/Regressions",
         "src/coreclr/jit",
-        "src/tools/illink",
         "src/coreclr/nativeaot",
         "src/installer/tests",
         "src/tests/Interop",
@@ -461,31 +458,31 @@
       "top_area_labels": [
         "area-ReadyToRun",
         "area-NativeAOT-coreclr",
+        "area-Tools-ILLink",
         "area-Host",
-        "area-Infrastructure",
-        "area-Interop-coreclr"
+        "area-Infrastructure"
       ]
     },
     "JulieLeeMSFT": {
-      "merge_count": 38,
+      "merge_count": 45,
       "top_paths": [
         "src/coreclr/jit",
         "src/tests/JIT",
-        "src/libraries/System.Private.CoreLib",
         "src/coreclr/tools",
+        "src/libraries/System.Private.CoreLib",
         "src/tests/Regressions",
         "src/tests/Loader",
-        "src/coreclr/nativeaot",
+        "src/coreclr/vm",
         "src/libraries/Common",
-        "src/coreclr/pal",
-        "src/coreclr/vm"
+        "src/coreclr/nativeaot",
+        "src/native/libs"
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
         "area-VM-coreclr",
         "area-NativeAOT-coreclr",
-        "area-ReadyToRun",
-        "area-System.Collections"
+        "area-System.Threading",
+        "area-Interop-coreclr"
       ]
     },
     "kg": {
@@ -496,21 +493,22 @@
     "kotlarmilos": {
       "merge_count": 1,
       "top_paths": [
-        ".github/workflows/ci-failure-fix.md"
+        ".github/workflows/shared"
       ],
       "top_area_labels": [
-        "area-Infrastructure"
+        "area-skills"
       ]
     },
     "lateralusX": {
-      "merge_count": 3,
+      "merge_count": 4,
       "top_paths": [
-        "src/libraries/System.Runtime",
         "src/mono/mono",
+        "src/libraries/System.Runtime",
         "src/tests/tracing"
       ],
       "top_area_labels": [
         "area-CodeGen-Interpreter-coreclr",
+        "area-Codegen-JIT-mono",
         "area-Debugger-mono",
         "area-System.Threading.Tasks"
       ]
@@ -521,25 +519,25 @@
       "top_area_labels": []
     },
     "lewing": {
-      "merge_count": 66,
+      "merge_count": 94,
       "top_paths": [
         "src/tests/JIT",
-        "src/tests/async",
         "src/coreclr/tools",
-        "src/coreclr/vm",
         "src/native/managed",
-        "src/mono/mono",
+        "src/coreclr/vm",
+        "src/tests/async",
         "src/libraries/System.Runtime",
-        "src/tests/Loader",
+        "docs/design/datacontracts",
         "src/coreclr/jit",
-        "eng/pipelines/performance"
+        "src/tests/readytorun",
+        "src/tests/Loader"
       ],
       "top_area_labels": [
-        "area-CodeGen-coreclr",
-        "area-Infrastructure",
         "area-ReadyToRun",
-        "area-Codegen-Interpreter-mono",
-        "area-VM-coreclr"
+        "area-CodeGen-coreclr",
+        "area-VM-coreclr",
+        "area-Infrastructure",
+        "area-Build-mono"
       ]
     },
     "liveans": {
@@ -553,35 +551,29 @@
       "top_area_labels": []
     },
     "ManickaP": {
-      "merge_count": 2,
-      "top_paths": [
-        "src/libraries/System.Net.WebSockets",
-        "src/libraries/Fuzzing",
-        "eng/pipelines/libraries",
-        "eng/Versions.props"
-      ],
-      "top_area_labels": [
-        "area-System.Net",
-        "area-System.Net.Quic"
-      ]
+      "merge_count": 0,
+      "top_paths": [],
+      "top_area_labels": []
     },
     "maraf": {
-      "merge_count": 5,
+      "merge_count": 6,
       "top_paths": [
-        "src/mono/wasm",
         "src/mono/browser",
-        "eng/testing/scenarios",
         "src/native/libs",
+        "src/mono/wasm",
+        "eng/testing/scenarios",
+        "src/tasks/Crossgen2Tasks",
         "Directory.Build.props",
-        "eng/pipelines/common",
-        "src/libraries/sendtohelix-browser.targets",
-        "src/libraries/sendtohelix-wasm.targets",
         "src/libraries/System.Runtime",
-        "src/mono/nuget"
+        "src/mono/nuget",
+        "src/mono/sample",
+        "eng/native.wasm.targets"
       ],
       "top_area_labels": [
         "area-Build-mono",
-        "area-Infrastructure-mono"
+        "area-Infrastructure-mono",
+        "area-ReadyToRun",
+        "area-System.Runtime.InteropServices.JavaScript"
       ]
     },
     "matouskozak": {
@@ -606,26 +598,26 @@
       "merge_count": 15,
       "top_paths": [
         "src/native/managed",
-        "docs/design/datacontracts",
-        "src/coreclr/vm",
         "src/coreclr/debug",
+        "docs/design/datacontracts",
         "eng/pipelines/diagnostics",
-        "src/coreclr/gc",
+        "src/coreclr/vm",
         "eng/pipelines/runtime-diagnostics.yml",
-        "src/coreclr/tools",
-        "eng/Subsets.props",
-        "src/coreclr/System.Private.CoreLib"
+        "src/coreclr/gc",
+        "src/coreclr/pal",
+        "eng/pipelines/cdac",
+        "eng/Subsets.props"
       ],
       "top_area_labels": [
         "area-Diagnostics-cdac",
-        "area-NativeAOT-coreclr",
         "area-Diagnostics-coreclr",
         "area-GC-coreclr",
-        "area-Tracing-coreclr"
+        "area-NativeAOT-coreclr",
+        "area-VM-coreclr"
       ]
     },
     "mdh1418": {
-      "merge_count": 5,
+      "merge_count": 4,
       "top_paths": [
         "src/tests/FunctionalTests",
         "src/tests/tracing",
@@ -635,18 +627,17 @@
         "src/coreclr/pal",
         "src/libraries/sendtohelix-mobile.targets",
         "src/libraries/tests.proj",
-        "src/native/minipal",
-        "src/tasks/AndroidAppBuilder"
+        "src/tasks/AndroidAppBuilder",
+        "src/tests/build.sh"
       ],
       "top_area_labels": [
         "area-Diagnostics-coreclr",
         "area-Tracing-coreclr",
-        "area-Infrastructure",
-        "area-System.Threading"
+        "area-Infrastructure"
       ]
     },
     "MichalStrehovsky": {
-      "merge_count": 36,
+      "merge_count": 40,
       "top_paths": [
         "src/coreclr/nativeaot",
         "src/tests/Interop",
@@ -654,39 +645,39 @@
         "src/coreclr/System.Private.CoreLib",
         "src/mono/System.Private.CoreLib",
         "src/libraries/System.Private.CoreLib",
-        "src/tests/Loader",
+        "src/tests/JIT",
+        "src/tests/nativeaot",
         "eng/Subsets.props",
-        "src/libraries/System.Reflection.Context",
-        "src/libraries/System.Runtime"
+        "src/tests/Loader"
       ],
       "top_area_labels": [
         "area-NativeAOT-coreclr",
         "area-System.Reflection",
         "area-GC-coreclr",
-        "area-Interop-coreclr",
-        "area-skills"
+        "area-Infrastructure",
+        "area-Interop-coreclr"
       ]
     },
     "MihaZupan": {
-      "merge_count": 20,
+      "merge_count": 15,
       "top_paths": [
         "src/libraries/System.Net.Http",
-        "src/libraries/System.Net.ServerSentEvents",
         "src/libraries/System.Private.Uri",
-        "src/libraries/Common",
         "src/libraries/System.Net.WebSockets",
         "src/libraries/System.Private.CoreLib",
+        "src/libraries/Common",
         "src/libraries/System.Net.HttpListener",
         "src/libraries/System.Net.Security",
         "src/libraries/System.Net.WebProxy",
-        "src/libraries/System.Transactions.Local"
+        "src/libraries/System.Transactions.Local",
+        "src/libraries/System.Net.ServerSentEvents"
       ],
       "top_area_labels": [
         "area-System.Net",
-        "area-System.Net.Http",
         "area-System.ComponentModel",
+        "area-System.Net.Http",
         "area-System.Net.Sockets",
-        "area-Infrastructure"
+        "area-Meta"
       ]
     },
     "mmitche": {
@@ -711,13 +702,13 @@
       ]
     },
     "mrek-msft": {
-      "merge_count": 25,
+      "merge_count": 15,
       "top_paths": [
         "eng/Version.Details.xml",
         "eng/Versions.props",
         ".config/dotnet-tools.json",
-        "eng/Version.Details.props",
         "eng/common/core-templates",
+        "eng/Version.Details.props",
         "global.json",
         "src/libraries/Microsoft.Extensions.Configuration.Binder",
         "src/libraries/Microsoft.Extensions.Logging.Abstractions",
@@ -755,29 +746,29 @@
       "top_area_labels": []
     },
     "pavelsavara": {
-      "merge_count": 21,
+      "merge_count": 20,
       "top_paths": [
         "src/coreclr/tools",
         "src/coreclr/vm",
-        "src/native/libs",
         "src/mono/browser",
-        "src/mono/wasm",
+        "src/native/libs",
         "src/libraries/System.Runtime.InteropServices.JavaScript",
-        "src/libraries/System.Runtime",
-        "src/mono/nuget",
+        "src/mono/wasm",
         "src/tests/readytorun",
+        "src/libraries/System.Runtime",
+        "src/libraries/Common",
         "src/coreclr/interpreter"
       ],
       "top_area_labels": [
         "area-ReadyToRun",
         "area-CodeGen-Interpreter-coreclr",
-        "area-VM-coreclr",
         "area-Build-mono",
-        "area-Codegen-AOT-mono"
+        "area-System.Runtime.InteropServices.JavaScript",
+        "area-VM-coreclr"
       ]
     },
     "PranavSenthilnathan": {
-      "merge_count": 9,
+      "merge_count": 6,
       "top_paths": [
         "src/libraries/Common",
         "src/libraries/System.Security.Cryptography",
@@ -811,23 +802,24 @@
       ]
     },
     "radekdoulik": {
-      "merge_count": 9,
+      "merge_count": 12,
       "top_paths": [
         "src/tests/Interop",
         "src/tests/JIT",
-        "src/coreclr/vm",
         "src/mono/wasm",
+        "src/coreclr/vm",
+        "src/native/managed",
         "src/tests/Regressions",
+        "eng/pipelines/extra-platforms",
         "src/installer/pkg",
         "src/libraries/System.Runtime.Loader",
-        "src/mono/browser",
-        "src/mono/nuget",
-        "src/mono/wasi"
+        "src/mono/browser"
       ],
       "top_area_labels": [
         "area-Infrastructure",
         "area-CodeGen-coreclr",
         "area-CodeGen-Interpreter-coreclr",
+        "area-Diagnostics-cdac",
         "area-Interop-coreclr"
       ]
     },
@@ -837,7 +829,7 @@
       "top_area_labels": []
     },
     "rcj1": {
-      "merge_count": 5,
+      "merge_count": 2,
       "top_paths": [
         "src/native/managed",
         "src/coreclr/vm"
@@ -853,34 +845,31 @@
       "top_area_labels": []
     },
     "rosebyte": {
-      "merge_count": 6,
+      "merge_count": 4,
       "top_paths": [
         "src/libraries/Microsoft.Extensions.FileProviders.Physical",
         "src/libraries/Microsoft.Extensions.Caching.Memory",
         "src/libraries/Microsoft.Extensions.Configuration",
-        "src/libraries/Microsoft.Extensions.Configuration.Binder",
         "src/libraries/Microsoft.Extensions.Caching.Abstractions",
-        "src/libraries/Microsoft.Extensions.FileProviders.Composite",
-        "src/libraries/Microsoft.Extensions.Hosting"
+        "src/libraries/Microsoft.Extensions.FileProviders.Composite"
       ],
       "top_area_labels": [
-        "area-Extensions-Configuration",
         "area-Extensions-FileSystem",
         "area-Extensions-Caching",
-        "area-Extensions-Hosting"
+        "area-Extensions-Configuration"
       ]
     },
     "rzikm": {
-      "merge_count": 36,
+      "merge_count": 38,
       "top_paths": [
-        "src/libraries/System.Net.NameResolution",
         "src/libraries/System.Net.Security",
         "src/libraries/System.Net.Mail",
+        "src/libraries/System.Net.NameResolution",
         "src/libraries/System.Net.Quic",
         "src/libraries/Common",
-        "src/libraries/System.IO.Compression",
+        "src/libraries/System.Formats.Tar",
         "src/libraries/System.Net.Http",
-        "src/libraries/System.IO.Compression.ZipFile",
+        "src/libraries/System.IO.Compression",
         "src/libraries/System.Net.Http.WinHttpHandler",
         "src/libraries/System.Net.Sockets"
       ],
@@ -893,7 +882,7 @@
       ]
     },
     "sbomer": {
-      "merge_count": 3,
+      "merge_count": 2,
       "top_paths": [
         "src/tools/illink",
         "src/coreclr/tools"
@@ -918,25 +907,25 @@
       "top_area_labels": []
     },
     "steveisok": {
-      "merge_count": 43,
+      "merge_count": 36,
       "top_paths": [
         "src/coreclr/vm",
-        "src/libraries/System.Text.Json",
         "src/coreclr/debug",
         "src/libraries/System.Runtime",
         "src/coreclr/System.Private.CoreLib",
-        "src/libraries/System.Threading.Channels",
         "src/coreclr/gc",
         "src/coreclr/md",
-        "src/coreclr/pal",
-        "src/tests/JIT"
+        "src/native/minipal",
+        "src/tests/JIT",
+        "src/coreclr/nativeaot",
+        "src/coreclr/pal"
       ],
       "top_area_labels": [
         "area-Diagnostics-coreclr",
         "area-VM-coreclr",
         "area-GC-coreclr",
-        "area-PAL-coreclr",
-        "area-CodeGen-coreclr"
+        "area-NativeAOT-coreclr",
+        "area-PAL-coreclr"
       ]
     },
     "svick": {
@@ -962,39 +951,38 @@
       ]
     },
     "tannergooding": {
-      "merge_count": 62,
+      "merge_count": 55,
       "top_paths": [
         "src/tests/JIT",
         "src/libraries/System.Private.CoreLib",
         "src/coreclr/jit",
+        "src/libraries/System.Numerics.Tensors",
         "src/libraries/System.Runtime",
         "src/libraries/System.Runtime.Numerics",
         "src/libraries/Common",
         "src/libraries/System.Numerics.Vectors",
         "src/libraries/System.Runtime.Intrinsics",
-        "docs/workflow/testing",
-        "src/coreclr/System.Private.CoreLib"
+        "docs/workflow/testing"
       ],
       "top_area_labels": [
         "area-CodeGen-coreclr",
         "area-System.Numerics",
-        "area-Infrastructure",
         "area-System.Memory",
-        "area-VM-coreclr"
+        "area-System.Numerics.Tensors",
+        "area-Infrastructure"
       ]
     },
     "tarekgh": {
-      "merge_count": 11,
+      "merge_count": 10,
       "top_paths": [
-        "src/libraries/System.Diagnostics.DiagnosticSource",
-        "src/libraries/System.Runtime",
         "src/libraries/System.Private.CoreLib",
-        "src/native/libs"
+        "src/libraries/System.Diagnostics.DiagnosticSource",
+        "src/libraries/System.Runtime"
       ],
       "top_area_labels": [
         "area-System.Diagnostics.Tracing",
-        "area-System.Globalization",
         "area-System.DateTime",
+        "area-System.Globalization",
         "area-System.Text.Encoding"
       ]
     },
@@ -1019,7 +1007,7 @@
       ]
     },
     "vcsjones": {
-      "merge_count": 8,
+      "merge_count": 9,
       "top_paths": [
         "src/libraries/Common",
         "src/libraries/System.Security.Cryptography.Pkcs",
@@ -1034,23 +1022,24 @@
       ]
     },
     "vitek-karas": {
-      "merge_count": 8,
+      "merge_count": 12,
       "top_paths": [
+        ".github/workflows/evals",
         ".github/workflows/shared",
         "src/libraries/System.Runtime",
         ".github/workflows/ci-failure-fix.lock.yml",
-        ".github/workflows/evals",
-        ".github/workflows/ci-failure-fix.md",
-        ".github/aw/actions-lock.json",
-        ".github/workflows/breaking-change-doc.lock.yml",
         ".github/workflows/ci-eval.yml",
-        ".github/workflows/ci-failure-scan-feedback.lock.yml",
+        ".github/workflows/ci-failure-fix.md",
+        ".github/workflows/ci-failure-scan.md",
+        ".github/workflows/breaking-change-doc.lock.yml",
+        ".github/workflows/breaking-change-doc.md",
         ".github/workflows/ci-failure-scan.lock.yml"
       ],
       "top_area_labels": [
         "area-Infrastructure",
         "area-skills",
-        "area-System.IO"
+        "area-System.IO",
+        "area-System.Net.Http"
       ]
     },
     "ViveliDuCh": {
@@ -1092,13 +1081,20 @@
       ]
     },
     "wfurt": {
-      "merge_count": 4,
+      "merge_count": 9,
       "top_paths": [
         "src/libraries/System.Net.Sockets",
+        "src/libraries/Common",
+        "src/native/libs",
+        "src/libraries/System.Net.Security",
+        "src/libraries/System.Net.HttpListener",
+        "src/libraries/System.Net.Requests",
         "src/libraries/System.Net.Quic"
       ],
       "top_area_labels": [
         "area-System.Net.Sockets",
+        "area-System.Net",
+        "area-System.Net.Security",
         "area-System.Net.Quic"
       ]
     }
@@ -1110,7 +1106,7 @@
       "top_area_labels": []
     },
     "akoeplinger": {
-      "merge_count": 102,
+      "merge_count": 103,
       "top_paths": [
         "eng/Version.Details.xml",
         "eng/Version.Details.props",
@@ -1162,14 +1158,14 @@
       "top_area_labels": []
     },
     "Evangelink": {
-      "merge_count": 7,
+      "merge_count": 9,
       "top_paths": [
         "src/Microsoft.DotNet.Helix/Sdk.Tests",
         "src/Microsoft.DotNet.Arcade.Sdk/tools",
         "src/Microsoft.DotNet.Helix/AzureDevOpsTestPublisher",
-        "src/Microsoft.DotNet.Helix/JobMonitor",
         "src/Microsoft.DotNet.Helix/Sdk",
         "eng/common/core-templates",
+        "src/Microsoft.DotNet.Helix/JobMonitor",
         "src/Microsoft.DotNet.Arcade.Sdk.Tests/Microsoft.DotNet.Arcade.Sdk.Tests.csproj",
         "src/Microsoft.DotNet.Arcade.Sdk.Tests/TestArchitecturesTests.cs",
         "src/Microsoft.DotNet.Arcade.Sdk.Tests/testassets",
@@ -1199,15 +1195,15 @@
       "top_area_labels": []
     },
     "missymessa": {
-      "merge_count": 110,
+      "merge_count": 111,
       "top_paths": [
         "eng/common/core-templates",
         "src/Microsoft.DotNet.Helix/Sdk",
-        "eng/common/templates",
         "Documentation/OneLocBuild.md",
-        "eng/common/templates-official",
+        "eng/common/templates",
         ".vault-config/product-builds-engkeyvault.yaml",
         "eng/common/Get-GitHubAppToken.ps1",
+        "eng/common/templates-official",
         "src/Microsoft.DotNet.Helix/Sdk.Tests",
         "Documentation/OneLocBuildGitHubApp.md",
         "src/Microsoft.DotNet.Helix/Client"
@@ -1215,7 +1211,7 @@
       "top_area_labels": []
     },
     "mmitche": {
-      "merge_count": 55,
+      "merge_count": 54,
       "top_paths": [
         "src/Microsoft.DotNet.Helix/JobMonitor",
         "src/Microsoft.DotNet.Helix/Sdk.Tests",
@@ -1223,8 +1219,8 @@
         "src/Microsoft.DotNet.Helix/AzureDevOpsTestPublisher",
         "src/Microsoft.DotNet.Build.Tasks.Feed/src",
         "src/Microsoft.DotNet.Helix/Sdk",
-        "Directory.Packages.props",
         "eng/Version.Details.xml",
+        "Directory.Packages.props",
         "eng/common/core-templates",
         "eng/Version.Details.props"
       ],
@@ -1268,7 +1264,7 @@
       "top_area_labels": []
     },
     "ViktorHofer": {
-      "merge_count": 72,
+      "merge_count": 76,
       "top_paths": [
         "src/Microsoft.Cci.Extensions/Filters",
         "src/Common/Microsoft.Arcade.Common",
@@ -1293,7 +1289,7 @@
       "top_area_labels": []
     },
     "YuliiaKovalova": {
-      "merge_count": 5,
+      "merge_count": 6,
       "top_paths": [
         ".github/workflows/build-failure-analysis-command.lock.yml",
         ".github/workflows/build-failure-analysis-command.md",
@@ -1308,7 +1304,7 @@
   },
   "microsoft/aspire": {
     "adamint": {
-      "merge_count": 114,
+      "merge_count": 110,
       "top_paths": [
         "extension/src/test",
         "src/Aspire.Cli/Resources",
@@ -1340,61 +1336,62 @@
       "top_area_labels": []
     },
     "DamianEdwards": {
-      "merge_count": 23,
+      "merge_count": 26,
       "top_paths": [
         "src/Aspire.ProjectTemplates/templates",
         "src/Aspire.Cli/Resources",
-        "tests/Aspire.Cli.Tests/Telemetry",
+        "tests/Infrastructure.Tests/TemplateManifest",
         "src/Aspire.Cli/Telemetry",
+        "tests/Aspire.Cli.Tests/Telemetry",
         "tests/Aspire.Hosting.DevTunnels.Tests/Snapshots",
         ".github/extensions/aspire-team-app",
         "tests/Aspire.Acquisition.Tests/Scripts",
         "src/Aspire.Cli/Commands",
-        "src/Aspire.Hosting.Radius/CloudProviders",
-        "tests/Aspire.Cli.Tests/Commands"
+        "src/Aspire.Hosting.Radius/CloudProviders"
       ],
       "top_area_labels": [
         "area-cli",
         "area-integrations",
         "area-codeflow",
-        "area-templates"
+        "area-templates",
+        "area-engineering-systems"
       ]
     },
     "danegsta": {
-      "merge_count": 31,
+      "merge_count": 33,
       "top_paths": [
         "src/Aspire.Cli/Resources",
-        "tests/Aspire.Cli.Tests/Commands",
         "src/Aspire.Cli/Projects",
+        "tests/Aspire.Cli.Tests/Commands",
         "src/Aspire.Hosting/Dcp",
         "tests/Aspire.Cli.Tests/Projects",
-        "src/Aspire.Cli/Certificates",
         "src/Aspire.Cli/Processes",
+        "tests/Aspire.Hosting.Tests/Dcp",
         "eng/Version.Details.xml",
         "eng/Versions.props",
-        "tests/Aspire.Cli.Tests/Utils"
+        "src/Aspire.Cli/Certificates"
       ],
       "top_area_labels": [
-        "area-codeflow",
         "area-cli",
+        "area-codeflow",
         "area-app-model",
         "area-engineering-systems",
         "area-integrations"
       ]
     },
     "davidfowl": {
-      "merge_count": 12,
+      "merge_count": 7,
       "top_paths": [
         "src/Aspire.Deck/ui",
-        ".github/extensions/aspire-team-app",
         "src/Aspire.Dashboard/Components",
-        "src/Aspire.Cli/Resources",
-        "src/Aspire.Cli/Agents",
-        "playground/DotnetProject/TypeScriptAppHost",
         "src/Aspire.Dashboard/Model",
         "src/Aspire.Deck/src-tauri",
         "src/Aspire.Dashboard/Api",
-        "playground/DotnetProject/DotnetProject.AppHost"
+        "src/Aspire.Deck/CONTRACT.md",
+        "src/Aspire.Dashboard.Backend/DashboardApiContract.cs",
+        "src/Aspire.Dashboard.Backend/DashboardBackendApplication.cs",
+        "src/Aspire.Dashboard.Backend/DashboardBackendJsonSerializerContext.cs",
+        "src/Aspire.Dashboard.Backend/README.md"
       ],
       "top_area_labels": [
         "area-integrations",
@@ -1407,7 +1404,7 @@
       "top_area_labels": []
     },
     "eerhardt": {
-      "merge_count": 29,
+      "merge_count": 36,
       "top_paths": [
         "tests/Aspire.Hosting.Azure.Tests/Snapshots",
         "src/Aspire.Cli/Resources",
@@ -1415,10 +1412,10 @@
         "playground/GitHubModelsEndToEnd/GitHubModelsEndToEnd.WebStory",
         "src/Aspire.Hosting.Azure.ConnectorNamespace/Provisioning",
         "tests/Aspire.Cli.Tests/Snapshots",
+        "src/Aspire.Cli/Projects",
         "playground/GitHubModelsEndToEnd/GitHubModelsEndToEnd.AppHost",
-        "src/Aspire.Cli/NuGet",
-        "src/Aspire.Hosting.Foundry/Toolbox",
-        "tests/Aspire.Cli.Tests/Utils"
+        "tests/Aspire.Cli.Tests/Utils",
+        "Directory.Packages.props"
       ],
       "top_area_labels": [
         "area-integrations",
@@ -1451,15 +1448,15 @@
       ]
     },
     "IEvangelist": {
-      "merge_count": 46,
+      "merge_count": 49,
       "top_paths": [
         "src/Aspire.Dashboard/Components",
         "src/Aspire.Dashboard/Resources",
         ".github/workflows/pr-docs-check",
-        ".github/extensions/aspire-team-app",
         "src/Aspire.Dashboard/wwwroot",
         "src/Aspire.Cli/Resources",
         "src/Aspire.Hosting.Azure/Resources",
+        ".github/extensions/aspire-team-app",
         "src/Aspire.Cli/Agents",
         ".github/workflows/pr-docs-check.lock.yml",
         ".github/workflows/pr-docs-check.md"
@@ -1467,24 +1464,24 @@
       "top_area_labels": [
         "area-engineering-systems",
         "area-dashboard",
-        "area-integrations",
         "area-cli",
-        "area-vscode"
+        "area-integrations",
+        "area-codeflow"
       ]
     },
     "JamesNK": {
-      "merge_count": 86,
+      "merge_count": 89,
       "top_paths": [
         "src/Aspire.Dashboard/Components",
         "src/Aspire.Dashboard/Resources",
+        "src/Aspire.Dashboard/wwwroot",
         "src/Aspire.Cli/Resources",
         "src/Aspire.Dashboard/Model",
         "tests/Aspire.Dashboard.Components.Tests/Controls",
         "src/Aspire.Cli/Commands",
         "tests/Aspire.Dashboard.Tests/Integration",
-        "src/Aspire.Dashboard/wwwroot",
-        "src/Aspire.Dashboard/ServiceClient",
-        "tests/Aspire.Dashboard.Components.Tests/Pages"
+        "tests/Aspire.Dashboard.Components.Tests/Pages",
+        "src/Aspire.Dashboard/ServiceClient"
       ],
       "top_area_labels": [
         "area-dashboard",
@@ -1495,18 +1492,18 @@
       ]
     },
     "joperezr": {
-      "merge_count": 123,
+      "merge_count": 139,
       "top_paths": [
         "src/Aspire.Cli/Resources",
         "src/Aspire.Dashboard/Components",
-        "tests/Aspire.Hosting.Docker.Tests/Snapshots",
         "src/Aspire.Cli/Templating",
+        "tests/Aspire.Hosting.Docker.Tests/Snapshots",
+        "src/Aspire.Dashboard/Resources",
         "tests/Aspire.Hosting.Kubernetes.Tests/Snapshots",
         "eng/Versions.props",
         "tests/Aspire.Dashboard.Components.Tests/Controls",
-        "src/Aspire.Cli/Agents",
         "tests/Aspire.Dashboard.Tests/Integration",
-        "src/Aspire.Hosting/Dcp"
+        "src/Aspire.Cli/Agents"
       ],
       "top_area_labels": [
         "area-codeflow",
@@ -1517,7 +1514,7 @@
       ]
     },
     "karolz-ms": {
-      "merge_count": 42,
+      "merge_count": 40,
       "top_paths": [
         "src/Aspire.Hosting/ApplicationModel",
         "src/Aspire.Hosting/Dcp",
@@ -1526,9 +1523,9 @@
         "tests/PolyglotAppHosts/Aspire.Hosting.Dotnet",
         "src/Aspire.Hosting/Publishing",
         "tests/Aspire.Hosting.Dotnet.Tests/DotnetProjectResourceTests.cs",
-        "src/Aspire.Cli/Processes",
-        "src/Aspire.Cli/Commands",
-        "src/Aspire.Hosting.Dotnet/DotnetProjectHostingExtensions.cs"
+        "src/Aspire.Cli/Agents",
+        "src/Aspire.Hosting.Dotnet/DotnetProjectHostingExtensions.cs",
+        "docs/plans/project-v2-csharpprogram-watch.md"
       ],
       "top_area_labels": [
         "area-app-model",
@@ -1557,18 +1554,18 @@
       ]
     },
     "mitchdenny": {
-      "merge_count": 83,
+      "merge_count": 85,
       "top_paths": [
+        "src/Aspire.Dashboard/Components",
         "tests/Aspire.Hosting.Kubernetes.Tests/Snapshots",
         "src/Aspire.Dashboard/Resources",
-        "src/Aspire.Dashboard/Components",
         "src/Aspire.Hosting.Radius/Publishing",
         "tests/Aspire.Hosting.Azure.Tests/Snapshots",
         "src/Aspire.Cli/Resources",
         "tests/Aspire.Hosting.Radius.Tests/Publishing",
         "src/Aspire.Hosting/ApplicationModel",
         ".github/extensions/aspire-team-app",
-        "src/Aspire.Hosting.Kubernetes/Resources"
+        "src/Aspire.Hosting.Radius/Secrets"
       ],
       "top_area_labels": [
         "area-integrations",
@@ -1579,11 +1576,11 @@
       ]
     },
     "radical": {
-      "merge_count": 31,
+      "merge_count": 38,
       "top_paths": [
-        "tests/Infrastructure.Tests/WorkflowScripts",
         "tests/Infrastructure.Tests/TestTriggerMap",
         "src/Aspire.Dashboard/Resources",
+        "tests/Infrastructure.Tests/WorkflowScripts",
         ".github/extensions/aspire-team-app",
         "eng/github-ci/test-trigger-map.yml",
         "tests/Aspire.Cli.EndToEnd.Tests/Helpers",
@@ -1596,8 +1593,8 @@
         "area-engineering-systems",
         "area-codeflow",
         "area-cli",
-        "area-integrations",
-        "area-vscode"
+        "area-dashboard",
+        "area-integrations"
       ]
     },
     "ReubenBond": {
@@ -1606,18 +1603,18 @@
       "top_area_labels": []
     },
     "sebastienros": {
-      "merge_count": 44,
+      "merge_count": 46,
       "top_paths": [
+        "src/Aspire.Cli/Resources",
+        "src/Aspire.Tray/Common",
         "tests/Aspire.Hosting.Kubernetes.Tests/Snapshots",
         ".github/workflows/polyglot-validation",
+        "src/Aspire.Cli/Commands",
         "tests/Aspire.Hosting.CodeGeneration.TypeScript.Tests/Snapshots",
         "tests/PolyglotAppHosts/Aspire.Hosting.Azure.AppConfiguration",
         "tests/PolyglotAppHosts/Aspire.Hosting.Azure.AppContainers",
         "tests/PolyglotAppHosts/Aspire.Hosting.Azure.AppService",
-        "tests/PolyglotAppHosts/Aspire.Hosting.Azure.Kusto",
-        "tests/PolyglotAppHosts/Aspire.Hosting.Foundry",
-        "src/Aspire.Dashboard/Model",
-        "src/Components/Aspire.Microsoft.Azure.Cosmos"
+        "tests/PolyglotAppHosts/Aspire.Hosting.Azure.Kusto"
       ],
       "top_area_labels": [
         "area-integrations",
@@ -1645,7 +1642,7 @@
       "top_area_labels": []
     },
     "akoeplinger": {
-      "merge_count": 30,
+      "merge_count": 32,
       "top_paths": [
         "src/Components/test",
         "src/Components/Gateway",
@@ -1660,28 +1657,29 @@
       ],
       "top_area_labels": [
         "area-blazor",
-        "area-infrastructure"
+        "area-infrastructure",
+        "area-commandlinetools"
       ]
     },
     "BrennanConroy": {
-      "merge_count": 23,
+      "merge_count": 21,
       "top_paths": [
         "src/SignalR/clients",
         "src/Servers/IIS",
         "src/Servers/Kestrel",
-        "src/DataProtection/DataProtection",
-        "src/SignalR/common",
-        "src/Servers/Connections.Abstractions",
-        "src/Identity/test",
         "src/SignalR/server",
-        "src/Http/Http.Abstractions",
-        "src/Http/Http.Results"
+        "src/SignalR/common",
+        "src/SignalR/perf",
+        "src/DataProtection/DataProtection",
+        "src/Identity/test",
+        "src/Servers/Connections.Abstractions",
+        "src/Http/Http.Abstractions"
       ],
       "top_area_labels": [
-        "area-networking",
         "area-signalr",
-        "area-dataprotection",
+        "area-networking",
         "area-identity",
+        "area-dataprotection",
         "area-middleware"
       ]
     },
@@ -1691,22 +1689,21 @@
       "top_area_labels": []
     },
     "cincuranet": {
-      "merge_count": 13,
+      "merge_count": 11,
       "top_paths": [
         "src/Http/Routing",
-        "src/Http/Http.Abstractions",
-        "src/Components/WebAssembly",
-        "src/Installers/Windows",
         "src/SignalR/clients",
-        "src/Grpc/JsonTranscoding",
-        "src/Framework/AspNetCoreAnalyzers",
-        "src/Components/Components",
-        "src/Components/Server",
-        "src/Components/Web.JS"
+        "src/Security/Authentication",
+        "src/SignalR/common",
+        "src/Middleware/ResponseCaching",
+        "src/Http/Http.Abstractions",
+        "src/Http/Http.Extensions",
+        "src/Middleware/HttpOverrides",
+        "src/Mvc/Mvc.Core",
+        "src/Servers/HttpSys"
       ],
       "top_area_labels": [
         "area-middleware",
-        "area-networking",
         "area-signalr"
       ]
     },
@@ -1716,7 +1713,7 @@
       "top_area_labels": []
     },
     "dariatiurina": {
-      "merge_count": 16,
+      "merge_count": 17,
       "top_paths": [
         "src/Components/Endpoints",
         "src/Components/test",
@@ -1739,31 +1736,29 @@
       "top_area_labels": []
     },
     "DeagleGross": {
-      "merge_count": 31,
+      "merge_count": 29,
       "top_paths": [
         "src/Servers/Kestrel",
         "src/ProjectTemplates/Web.ProjectTemplates",
         "src/Security/Authentication",
         "src/Servers/HttpSys",
         ".github/workflows/pr-docs-check",
-        "src/DataProtection/DataProtection",
         ".github/workflows/issue-triage-agent.lock.yml",
         ".github/workflows/issue-triage-agent.md",
-        "src/DefaultBuilder/src",
-        "src/DefaultBuilder/test"
+        ".github/workflows/pr-docs-check.lock.yml",
+        ".github/workflows/pr-docs-check.md",
+        ".github/workflows/pr-attention-pulse-tests"
       ],
       "top_area_labels": [
         "area-networking",
         "area-infrastructure",
         "area-dataprotection",
-        "area-grpc",
-        "area-perf"
+        "area-grpc"
       ]
     },
     "halter73": {
-      "merge_count": 13,
+      "merge_count": 12,
       "top_paths": [
-        "src/Http/Http.Extensions",
         "src/Http/Http.Results",
         "src/Servers/IIS",
         "src/Mvc/Mvc.Core",
@@ -1772,29 +1767,30 @@
         "src/Identity/Extensions.Core",
         "src/Localization/Localization",
         "src/Security/Authentication",
-        "src/Hosting/Hosting"
+        "src/Hosting/Hosting",
+        "src/Http/Http"
       ],
       "top_area_labels": [
-        "area-networking",
         "area-auth",
         "area-hosting",
         "area-identity",
-        "area-minimal"
+        "area-minimal",
+        "area-networking"
       ]
     },
     "ilonatommy": {
-      "merge_count": 85,
+      "merge_count": 82,
       "top_paths": [
         "src/Components/AI",
         "src/Components/test",
         "src/Identity/test",
         "src/Components/Web",
         "src/Components/Web.JS",
-        "src/Components/Server.AutoPause",
         "src/Components/Analyzers",
         "src/Components/QuickGrid",
         "src/Components/Endpoints",
-        "src/Mvc/test"
+        "src/Mvc/test",
+        "docs/list-of-diagnostics.md"
       ],
       "top_area_labels": [
         "area-blazor",
@@ -1809,7 +1805,7 @@
       "top_area_labels": []
     },
     "javiercn": {
-      "merge_count": 43,
+      "merge_count": 50,
       "top_paths": [
         "src/Components/Testing",
         "src/Components/Samples",
@@ -1824,30 +1820,21 @@
       ],
       "top_area_labels": [
         "area-blazor",
-        "area-identity",
         "area-infrastructure",
+        "area-middleware",
         "area-mvc",
-        "area-commandlinetools"
+        "area-identity"
       ]
     },
     "jeffhandley": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
-        ".github/workflows/shared",
-        ".github/dependabot.yml",
-        ".github/labeler.README.md",
-        ".github/workflows/browsertesting-deps-update.lock.yml",
-        ".github/workflows/browsertesting-deps-update.md",
-        ".github/workflows/community-pr-issue-check.lock.yml",
-        ".github/workflows/community-pr-issue-check.md",
-        ".github/workflows/cswin32-update.lock.yml",
-        ".github/workflows/cswin32-update.md",
-        ".github/workflows/issue-triage-agent.lock.yml"
+        "eng/Versions.props"
       ],
       "top_area_labels": []
     },
     "kotlarmilos": {
-      "merge_count": 13,
+      "merge_count": 14,
       "top_paths": [
         "src/Components/AI",
         "src/Components/Components",
@@ -1866,7 +1853,7 @@
       ]
     },
     "lewing": {
-      "merge_count": 5,
+      "merge_count": 3,
       "top_paths": [
         "src/Validation/test",
         "src/Validation/Localization",
@@ -1874,10 +1861,10 @@
         "src/Validation/gen",
         "src/Validation/src",
         "src/Components/Endpoints",
-        "src/Components/Gateway",
         "src/Components/Web.JS",
         "src/Components/Web",
-        "AspNetCore.slnx"
+        "AspNetCore.slnx",
+        "eng/ProjectReferences.props"
       ],
       "top_area_labels": [
         "area-blazor"
@@ -1929,12 +1916,12 @@
         "src/Components/test",
         "src/Components/Endpoints",
         "src/Components/Web",
-        "src/Components/Forms",
         "src/Components/Web.JS",
+        "src/Components/Forms",
         "src/Validation/Localization",
         "src/Validation/gen",
         "src/Validation/src",
-        "src/Components/Analyzers"
+        ".github/workflows/pr-attention-pulse-tests"
       ],
       "top_area_labels": [
         "area-blazor",
@@ -1955,22 +1942,23 @@
       ]
     },
     "PureWeen": {
-      "merge_count": 24,
+      "merge_count": 27,
       "top_paths": [
         ".github/workflows/pr-attention-pulse-tests",
         ".github/skills/pr-attention-queue",
         ".github/workflows/pr-attention-pulse",
+        ".github/skills/review-pull-request",
         "src/Components/AGENTS.md",
         ".github/copilot-instructions.md",
         ".github/workflows/pr-attention-pulse.lock.yml",
         ".github/workflows/pr-attention-pulse.md",
         ".github/workflows/scripts",
-        "eng/skill-evals/pr-attention-queue",
-        "eng/skill-evals/README.md"
+        "eng/skill-evals/pr-attention-queue"
       ],
       "top_area_labels": [
         "area-infrastructure",
-        "area-blazor"
+        "area-blazor",
+        "area-signalr"
       ]
     },
     "rbhanda": {
@@ -2021,7 +2009,7 @@
       ]
     },
     "wtgodbe": {
-      "merge_count": 403,
+      "merge_count": 394,
       "top_paths": [
         "src/Servers/Kestrel",
         "src/Components/test",
@@ -2032,7 +2020,7 @@
         "src/Components/AI",
         "eng/Version.Details.xml",
         "src/OpenApi/test",
-        "eng/Versions.props"
+        "eng/Version.Details.props"
       ],
       "top_area_labels": [
         "area-infrastructure",
@@ -2043,18 +2031,18 @@
       ]
     },
     "Youssef1313": {
-      "merge_count": 70,
+      "merge_count": 60,
       "top_paths": [
         "src/OpenApi/test",
         "src/Validation/test",
         "src/Grpc/JsonTranscoding",
-        "src/OpenApi/src",
-        "src/Validation/src",
         "src/Tools/Extensions.ApiDescription.Client",
+        "src/Validation/src",
+        "src/OpenApi/src",
         "src/Validation/gen",
         "src/Servers/Kestrel",
-        "src/Http/Http.Extensions",
-        "src/Middleware/OutputCaching"
+        "src/Middleware/OutputCaching",
+        "src/Features/JsonPatch.SystemTextJson"
       ],
       "top_area_labels": [
         "area-minimal",
@@ -2067,16 +2055,17 @@
   },
   "dotnet/core": {
     "AndriySvyryd": {
-      "merge_count": 3,
+      "merge_count": 4,
       "top_paths": [
         "release-notes/11.0/preview"
       ],
       "top_area_labels": []
     },
     "baronfel": {
-      "merge_count": 10,
+      "merge_count": 13,
       "top_paths": [
-        "release-notes/11.0/preview"
+        "release-notes/11.0/preview",
+        "release-notes/11.0/samples"
       ],
       "top_area_labels": []
     },
@@ -2097,7 +2086,7 @@
       "top_area_labels": []
     },
     "danroth27": {
-      "merge_count": 31,
+      "merge_count": 32,
       "top_paths": [
         "release-notes/11.0/preview",
         ".github/skills/release-notes",
@@ -2107,6 +2096,7 @@
         ".github/skills/generate-changes",
         ".github/skills/generate-features",
         ".github/skills/review-release-notes",
+        ".github/workflows/super-linter.yml",
         "release-notes/11.0/README.md"
       ],
       "top_area_labels": []
@@ -2140,9 +2130,18 @@
       "top_area_labels": []
     },
     "jongalloway": {
-      "merge_count": 1,
+      "merge_count": 3,
       "top_paths": [
-        ".github/workflows/super-linter.yml"
+        ".github/workflows/super-linter.yml",
+        ".github/dependabot.yml",
+        ".github/workflows/agentics-maintenance.yml",
+        ".github/workflows/api-diff-orchestrator.yml",
+        ".github/workflows/api-diff-worker.lock.yml",
+        ".github/workflows/copilot-setup-steps.yml",
+        ".github/workflows/markdown-link-check.yml",
+        ".github/workflows/no-response.yml",
+        ".github/workflows/release-notes.lock.yml",
+        ".github/workflows/validate-pat-pool.yml"
       ],
       "top_area_labels": []
     },
@@ -2196,8 +2195,17 @@
       "top_area_labels": []
     },
     "richlander": {
-      "merge_count": 0,
-      "top_paths": [],
+      "merge_count": 1,
+      "top_paths": [
+        "release-notes/10.0/supported-os.json",
+        "release-notes/10.0/supported-os.md",
+        "release-notes/11.0/supported-os.json",
+        "release-notes/11.0/supported-os.md",
+        "release-notes/8.0/supported-os.json",
+        "release-notes/8.0/supported-os.md",
+        "release-notes/9.0/supported-os.json",
+        "release-notes/9.0/supported-os.md"
+      ],
       "top_area_labels": []
     },
     "svick": {
@@ -2222,12 +2230,10 @@
   },
   "dotnet/csharplang": {
     "333fred": {
-      "merge_count": 11,
+      "merge_count": 10,
       "top_paths": [
         "meetings/2026/README.md",
         "meetings/2026/LDM-2026-07-22.md",
-        "meetings/2026/LDM-2026-06-08.md",
-        "meetings/2026/LDM-2026-07-01.md",
         "meetings/2026/LDM-2026-07-15.md",
         "meetings/2026/LDM-2026-08-05.md",
         "meetings/2026/LDM-2026-08-12.md",
@@ -2256,7 +2262,7 @@
       "top_area_labels": []
     },
     "jjonescz": {
-      "merge_count": 5,
+      "merge_count": 6,
       "top_paths": [
         "proposals/unsafe-evolution.md",
         "proposals/csharp-14.0/ignored-directives.md"
@@ -2264,16 +2270,15 @@
       "top_area_labels": []
     },
     "jnm2": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
         "meetings/2020/LDM-2020-04-20.md",
-        "proposals/async-method-ref-parameters.md",
         "proposals/factory-methods.md"
       ],
       "top_area_labels": []
     },
     "MadsTorgersen": {
-      "merge_count": 3,
+      "merge_count": 4,
       "top_paths": [
         "meetings/2026/README.md"
       ],
@@ -2292,7 +2297,7 @@
   },
   "dotnet/diagnostics": {
     "hoyosjs": {
-      "merge_count": 38,
+      "merge_count": 39,
       "top_paths": [
         "src/SOS/Strike",
         "src/tests/SOS.UnitTests",
@@ -2313,7 +2318,7 @@
       "top_area_labels": []
     },
     "max-charlamb": {
-      "merge_count": 42,
+      "merge_count": 49,
       "top_paths": [
         "src/tests/SOS.Tests",
         "src/tests/SOS.TestHarness",
@@ -2322,21 +2327,22 @@
         "eng/Version.Details.xml",
         "src/tests/Microsoft.Diagnostics.Monitoring.EventPipe",
         "src/tests/Microsoft.Diagnostics.NETCore.Client",
+        "src/SOS/Strike",
         "src/tests/eventpipe",
-        "src/Microsoft.Diagnostics.TestHelpers/Xunit.Extensions",
-        "diagnostics.yml"
+        "src/tests/DbgShim.UnitTests"
       ],
       "top_area_labels": []
     },
     "mdh1418": {
-      "merge_count": 2,
+      "merge_count": 3,
       "top_paths": [
         "src/Microsoft.Diagnostics.NETCore.Client/DiagnosticsClient",
         "src/tests/dotnet-trace",
-        "src/tests/Microsoft.Diagnostics.NETCore.Client",
         "src/Tools/dotnet-trace",
+        "src/tests/Microsoft.Diagnostics.NETCore.Client",
         "documentation/design-docs/diagnostics-client-library.md",
         "documentation/design-docs/ipc-protocol.md",
+        "eng/Versions.props",
         "src/Microsoft.Diagnostics.NETCore.Client/DiagnosticsIpc",
         "src/Tools/dotnet-gcdump"
       ],
@@ -2379,14 +2385,14 @@
   },
   "dotnet/docs": {
     "AaronRobinsonMSFT": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
         "docs/standard/native-interop"
       ],
       "top_area_labels": []
     },
     "adegeo": {
-      "merge_count": 36,
+      "merge_count": 33,
       "top_paths": [
         "docs/core/porting",
         "docs/core/testing",
@@ -2395,9 +2401,9 @@
         "docs/core/extensions",
         "docs/csharp/whats-new",
         "docs/standard/security",
-        "docs/standard/threading",
         "docs/core/compatibility",
-        "docs/core/diagnostics"
+        "docs/core/diagnostics",
+        "docs/framework/release-notes"
       ],
       "top_area_labels": []
     },
@@ -2409,7 +2415,7 @@
       "top_area_labels": []
     },
     "BillWagner": {
-      "merge_count": 372,
+      "merge_count": 368,
       "top_paths": [
         "docs/csharp/language-reference",
         "docs/core/extensions",
@@ -2419,8 +2425,8 @@
         "docs/ai/snippets",
         "docs/ai/quickstarts",
         "docs/azure/includes",
-        "docs/csharp/whats-new",
-        "docs/csharp/misc"
+        "docs/csharp/misc",
+        "docs/csharp/programming-guide"
       ],
       "top_area_labels": []
     },
@@ -2442,16 +2448,16 @@
       "top_area_labels": []
     },
     "gewarren": {
-      "merge_count": 312,
+      "merge_count": 294,
       "top_paths": [
         "docs/core/extensions",
-        "samples/snippets/csharp",
-        "docs/azure/includes",
         "docs/core/testing",
+        "docs/azure/includes",
+        "samples/snippets/csharp",
         "docs/csharp/language-reference",
+        "samples/snippets/visualbasic",
         "docs/core/compatibility",
         "docs/framework/unmanaged-api",
-        "samples/snippets/visualbasic",
         "docs/core/diagnostics",
         "docs/ai/snippets"
       ],
@@ -2548,17 +2554,17 @@
   },
   "dotnet/efcore": {
     "AndriySvyryd": {
-      "merge_count": 208,
+      "merge_count": 231,
       "top_paths": [
         "test/EFCore.SqlServer.FunctionalTests/Query",
         "test/EFCore.Cosmos.FunctionalTests/Query",
         "src/EFCore.Cosmos/Query",
-        "benchmark/EFCore.Benchmarks/Models",
         "test/EFCore.Relational.Specification.Tests/Query",
-        "src/EFCore.Relational/Query",
+        "benchmark/EFCore.Benchmarks/Models",
         "eng/harness-evaluation/skills",
-        "src/EFCore.Cosmos/Storage",
         "test/EFCore.Sqlite.FunctionalTests/Query",
+        "src/EFCore.Relational/Query",
+        "src/EFCore.Cosmos/Storage",
         "src/EFCore/Metadata"
       ],
       "top_area_labels": [
@@ -2587,7 +2593,7 @@
       "top_area_labels": []
     },
     "wtgodbe": {
-      "merge_count": 158,
+      "merge_count": 153,
       "top_paths": [
         "eng/Versions.props",
         "eng/Version.Details.xml",
@@ -2598,7 +2604,7 @@
         "NuGet.config",
         "test/Directory.Packages.props",
         "Directory.Packages.props",
-        "test/EFCore.Sqlite.FunctionalTests/Query"
+        "eng/common/cross"
       ],
       "top_area_labels": [
         "area-infrastructure",
@@ -2608,23 +2614,22 @@
   },
   "dotnet/extensions": {
     "adamsitnik": {
-      "merge_count": 12,
+      "merge_count": 9,
       "top_paths": [
         "test/Libraries/Microsoft.Extensions.Diagnostics.ResourceMonitoring.Tests",
-        "src/Libraries/Microsoft.Extensions.VectorData.ConformanceTests",
         "test/Libraries/Microsoft.Extensions.Caching.Hybrid.Tests",
+        "src/Libraries/Microsoft.Extensions.VectorData.ConformanceTests",
         "test/Libraries/Microsoft.Extensions.AI.Evaluation.Reporting.Tests",
-        "src/Libraries/Microsoft.Extensions.VectorData.Abstractions",
         "test/Libraries/Microsoft.Extensions.AI.Integration.Tests",
-        "test/Libraries/Microsoft.Extensions.DataIngestion.Tests",
         "test/Libraries/Microsoft.Extensions.AI.OpenAI.Tests",
+        "test/Libraries/Microsoft.Extensions.DataIngestion.Tests",
         "eng/Versions.props",
-        "test/Libraries/Microsoft.Extensions.AI.Evaluation.Integration.Tests"
+        "test/Libraries/Microsoft.Extensions.AI.Evaluation.Integration.Tests",
+        "test/ProjectTemplates/Microsoft.Extensions.AI.Templates.IntegrationTests"
       ],
       "top_area_labels": [
         "area-mevd",
-        "area-ai",
-        "area-data-ingestion"
+        "area-ai"
       ]
     },
     "DeagleGross": {
@@ -2637,8 +2642,18 @@
       "top_paths": [],
       "top_area_labels": []
     },
+    "EasyL0ver": {
+      "merge_count": 3,
+      "top_paths": [
+        "src/Libraries/Microsoft.AspNetCore.Diagnostics.Middleware",
+        "test/Libraries/Microsoft.AspNetCore.Diagnostics.Middleware.Tests"
+      ],
+      "top_area_labels": [
+        "area-telemetry"
+      ]
+    },
     "evgenyfedorov2": {
-      "merge_count": 6,
+      "merge_count": 7,
       "top_paths": [
         "test/Generators/Microsoft.Gen.Logging",
         "src/Generators/Microsoft.Gen.Logging",
@@ -2646,7 +2661,9 @@
         "test/Libraries/Microsoft.Extensions.Http.Diagnostics.Tests",
         ".config/dotnet-tools.json"
       ],
-      "top_area_labels": []
+      "top_area_labels": [
+        "area-ai-eval"
+      ]
     },
     "ilonatommy": {
       "merge_count": 0,
@@ -2678,7 +2695,7 @@
       "top_area_labels": []
     },
     "jozkee": {
-      "merge_count": 8,
+      "merge_count": 9,
       "top_paths": [
         "src/Libraries/Microsoft.Extensions.AI.Abstractions",
         "test/Libraries/Microsoft.Extensions.AI.Tests",
@@ -2688,27 +2705,33 @@
         "src/Libraries/Microsoft.Extensions.AI",
         "test/Libraries/Microsoft.Extensions.AI.Abstractions.Tests",
         ".github/skills/investigate-npm-feed-failures",
+        "src/Libraries/Microsoft.Extensions.AI.Evaluation.Reporting",
         "src/Shared/DiagnosticIds"
       ],
       "top_area_labels": [
         "area-ai",
+        "area-ai-eval",
         "area-infrastructure"
       ]
     },
     "peterwald": {
-      "merge_count": 14,
+      "merge_count": 16,
       "top_paths": [
         "src/Libraries/Microsoft.Extensions.AI.Evaluation.Reporting",
-        "azure-pipelines.yml",
         "test/Libraries/Microsoft.Extensions.AI.Evaluation.Reporting.Tests",
         "src/Libraries/Microsoft.Extensions.AI.Evaluation.Reporting.Azure",
+        "azure-pipelines.yml",
         "test/Libraries/Microsoft.Extensions.AI.Evaluation.NLP.Tests",
         "src/Libraries/Microsoft.Extensions.AI.Evaluation.NLP",
+        "global.json",
         "README.md",
         "src/Libraries/Microsoft.Extensions.AI.Evaluation.Quality",
         "test/Libraries/Microsoft.Extensions.AI.Evaluation.Tests"
       ],
-      "top_area_labels": []
+      "top_area_labels": [
+        "area-ai-eval",
+        "area-infrastructure"
+      ]
     },
     "shyamnamboodiripad": {
       "merge_count": 0,
@@ -2749,18 +2772,18 @@
       "top_area_labels": []
     },
     "kotlarmilos": {
-      "merge_count": 3,
+      "merge_count": 1,
       "top_paths": [
         ".github/skills/ci-scan",
         ".github/skills/repo-health-check",
         ".github/skills/repo-health-groom",
         ".github/skills/repo-health-investigate",
-        ".github/workflows/ci-scan.agent.md",
         ".github/aw/actions-lock.json",
         ".github/copilot-instructions.md",
         ".github/skills/ci-scan-feedback",
         ".github/skills/issue-triage",
-        ".github/workflows/ci-scan-feedback.agent.lock.yml"
+        ".github/workflows/ci-scan-feedback.agent.lock.yml",
+        ".github/workflows/ci-scan-feedback.agent.md"
       ],
       "top_area_labels": []
     },
@@ -2770,32 +2793,51 @@
       "top_area_labels": []
     },
     "matouskozak": {
-      "merge_count": 22,
+      "merge_count": 25,
       "top_paths": [
         "eng/common/core-templates",
-        "eng/common/templates",
-        "eng/common/native",
         "eng/Versions.props",
+        "eng/common/native",
+        "eng/common/templates",
+        "docs/samples/Microsoft.ML.GenAI.Samples",
         "eng/common/cross",
         "eng/Version.Details.xml",
-        "eng/common/templates-official",
-        "global.json",
-        "test/BaselineOutput/Common",
-        "build/vsts-ci.yml"
+        "src/Microsoft.ML.GenAI.Core/Module",
+        "src/Microsoft.ML.GenAI.Phi/Module",
+        "global.json"
       ],
-      "top_area_labels": []
+      "top_area_labels": [
+        "area-GenAI"
+      ]
     },
     "rokonec": {
       "merge_count": 0,
       "top_paths": [],
       "top_area_labels": []
     },
-    "svick": {
+    "rosebyte": {
       "merge_count": 3,
+      "top_paths": [
+        "eng/Versions.props",
+        "src/Microsoft.Data.Analysis/DataFrame.Join.cs",
+        "src/Microsoft.Data.Analysis/Strings.Designer.cs",
+        "src/Microsoft.Data.Analysis/Strings.resx",
+        "test/Microsoft.Data.Analysis.Tests/DataFrameTests.Join.cs",
+        "test/Microsoft.Data.Analysis.Tests/DataFrameTests.Merge.cs"
+      ],
+      "top_area_labels": []
+    },
+    "svick": {
+      "merge_count": 4,
       "top_paths": [
         ".github/skills/ci-scan",
         "build/.outer-loop-build.yml",
         "build/libomp.rb",
+        "src/Microsoft.Data.Analysis/DataFrame.cs",
+        "src/Microsoft.Data.Analysis/DataFrame.Join.cs",
+        "src/Microsoft.ML.OnnxTransformer/OnnxOptions.cs",
+        "src/Microsoft.ML.OnnxTransformer/OnnxTransform.cs",
+        "src/Microsoft.ML.Transforms/SvmLight",
         "src/Microsoft.ML.Transforms/Text"
       ],
       "top_area_labels": []
@@ -2811,46 +2853,44 @@
   },
   "dotnet/maui": {
     "jfversluis": {
-      "merge_count": 22,
+      "merge_count": 11,
       "top_paths": [
-        "src/AI/samples",
-        "src/Controls/src",
         "src/Controls/tests",
-        "src/Essentials/src",
-        "src/Templates/src",
-        "src/BlazorWebView/src",
-        ".github/skills/run-device-tests",
+        "src/Controls/src",
+        "src/Core/src",
+        "docs/specs/XamlCSharpExpressions.md",
         "eng/pipelines/arcade",
-        "eng/Versions.props",
-        "src/Controls/samples"
+        "eng/pipelines/common",
+        "src/Templates/src",
+        "src/TestUtils/src"
       ],
       "top_area_labels": [
         "area-xaml",
         "area-infrastructure",
-        "area-templates",
         "area-controls-shell",
-        "area-controls-slider"
+        "area-controls-slider",
+        "area-templates"
       ]
     },
     "kubaflo": {
-      "merge_count": 779,
+      "merge_count": 819,
       "top_paths": [
         "src/Controls/tests",
         "src/Controls/src",
         "eng/common/core-templates",
         "src/Core/src",
-        "src/Essentials/src",
+        "src/Templates/src",
         "eng/common/cross",
+        "src/Essentials/src",
         ".github/skills/code-review",
         ".github/skills/release-readiness",
-        "src/Core/tests",
-        "src/BlazorWebView/src"
+        "src/Core/tests"
       ],
       "top_area_labels": [
         "area-infrastructure",
-        "area-testing",
-        "area-controls-shell",
         "area-controls-collectionview",
+        "area-controls-shell",
+        "area-testing",
         "area-essentials"
       ]
     },
@@ -2860,7 +2900,7 @@
       "top_area_labels": []
     },
     "PureWeen": {
-      "merge_count": 77,
+      "merge_count": 62,
       "top_paths": [
         "src/Controls/src",
         "src/Controls/tests",
@@ -2869,9 +2909,9 @@
         "eng/common/core-templates",
         ".github/skills/code-review",
         ".github/skills/review-test-failures",
-        "src/BlazorWebView/src",
         "eng/common/cross",
-        "src/Essentials/src"
+        ".github/skills/ci-fix",
+        "src/BlazorWebView/src"
       ],
       "top_area_labels": [
         "area-infrastructure",
@@ -2882,18 +2922,14 @@
       ]
     },
     "rmarinho": {
-      "merge_count": 10,
+      "merge_count": 9,
       "top_paths": [
-        "eng/Versions.props",
         "src/Controls/tests",
-        "eng/Version.Details.xml",
+        "eng/Versions.props",
         "src/Core/src",
+        "eng/Version.Details.xml",
         "global.json",
-        "src/Controls/src",
-        ".github/instructions/workload-msi.instructions.md",
-        "docs/design/WorkloadMsi.md",
-        "eng/NuGetVersions.targets",
-        "eng/pipelines/common"
+        "src/Controls/src"
       ],
       "top_area_labels": [
         "area-infrastructure",
@@ -2902,10 +2938,9 @@
       ]
     },
     "sheiksyedm": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
-        "src/Controls/tests",
-        "src/Core/src"
+        "src/Controls/tests"
       ],
       "top_area_labels": [
         "area-testing"
@@ -2934,7 +2969,7 @@
   },
   "dotnet/msbuild": {
     "AlesProkop": {
-      "merge_count": 76,
+      "merge_count": 70,
       "top_paths": [
         "src/Build.UnitTests/Snapshots",
         "eng/Version.Details.xml",
@@ -2942,21 +2977,21 @@
         "src/Build/Resources",
         "eng/Version.Details.props",
         "global.json",
-        "eng/common/native",
         ".github/branch-freeze/components",
-        "eng/common/cross",
+        "eng/common/native",
+        "src/Build/BackEnd",
         "src/Tasks/Resources"
       ],
       "top_area_labels": []
     },
     "AR-May": {
-      "merge_count": 44,
+      "merge_count": 43,
       "top_paths": [
         "eng/Version.Details.xml",
         "global.json",
         "eng/Versions.props",
-        "src/Build/BackEnd",
         "eng/common/core-templates",
+        "src/Build/BackEnd",
         "eng/Version.Details.props",
         "eng/common/Get-GitHubAppToken.ps1",
         ".github/workflows/review-on-open.agent.lock.yml",
@@ -2973,8 +3008,8 @@
         "src/Build.UnitTests/BackEnd",
         "src/Build/Logging",
         "src/Tasks.UnitTests/AssemblyDependency",
-        "src/TaskAnalyzer/README.md",
         "src/Build/BackEnd",
+        "src/TaskAnalyzer/README.md",
         "src/Build/Instance",
         "src/TaskAnalyzer/AnalyzerReleases.Unshipped.md",
         "src/TaskAnalyzer/DiagnosticDescriptors.cs"
@@ -3039,18 +3074,18 @@
       "top_area_labels": []
     },
     "JanProvaznik": {
-      "merge_count": 61,
+      "merge_count": 67,
       "top_paths": [
         "src/MSBuild/Resources",
         "src/Build/BackEnd",
         "src/Build.UnitTests/BackEnd",
         "src/Build/Resources",
+        "eng/common/core-templates",
+        "documentation/specs/multithreading",
         "src/Shared/Resources",
         "src/Utilities/Resources",
         "src/Framework/Resources",
-        "documentation/specs/multithreading",
-        "src/Build/Instance",
-        "src/Framework/BackEnd"
+        "eng/Version.Details.xml"
       ],
       "top_area_labels": []
     },
@@ -3117,18 +3152,18 @@
       "top_area_labels": []
     },
     "rainersigwald": {
-      "merge_count": 16,
+      "merge_count": 17,
       "top_paths": [
         "src/Framework/Coordinator",
         "src/Build/BackEnd",
         "src/Build.UnitTests/BackEnd",
+        "src/Tasks/AssemblyDependency",
         "src/Framework.UnitTests/Globbing",
         "src/Framework/Utilities",
         "documentation/wiki/Building-Testing-and-Debugging-on-Full-Framework-MSBuild.md",
         "README.md",
         "src/Build.UnitTests/TestAssets",
-        "src/Build/Evaluation",
-        "src/Build/Microsoft.Build.csproj"
+        "src/Build/Evaluation"
       ],
       "top_area_labels": []
     },
@@ -3148,7 +3183,7 @@
       "top_area_labels": []
     },
     "ViktorHofer": {
-      "merge_count": 166,
+      "merge_count": 161,
       "top_paths": [
         "eng/common/core-templates",
         "eng/Versions.props",
@@ -3164,18 +3199,18 @@
       "top_area_labels": []
     },
     "VolPlita": {
-      "merge_count": 7,
+      "merge_count": 9,
       "top_paths": [
         "src/Tasks/Resources",
+        "src/Build/Resources",
+        "src/Framework/Resources",
+        "src/MSBuild/Resources",
         "src/TaskAnalyzer/README.md",
         "src/Build.UnitTests/BackEnd",
         "src/TaskAnalyzer.Tests/MultiThreadableTaskAnalyzerTests.cs",
-        "src/TaskAnalyzer/BannedApiDefinitions.cs",
-        "src/TaskAnalyzer.Tests/TransitiveCallChainAnalyzerTests.cs",
-        "src/TaskAnalyzer.Tests/UnsupportedTaskItemTypeAnalyzerTests.cs",
         "src/TaskAnalyzer/AnalyzerReleases.Unshipped.md",
-        "src/TaskAnalyzer/DiagnosticDescriptors.cs",
-        "src/TaskAnalyzer/MultiThreadableTaskAnalyzer.cs"
+        "src/TaskAnalyzer/BannedApiDefinitions.cs",
+        "src/TaskAnalyzer.Tests/TransitiveCallChainAnalyzerTests.cs"
       ],
       "top_area_labels": []
     },
@@ -3208,18 +3243,18 @@
       "top_area_labels": []
     },
     "DrewScoggins": {
-      "merge_count": 8,
+      "merge_count": 10,
       "top_paths": [
         "src/tools/CertHelper",
+        "eng/pipelines/runtime-perf-jobs.yml",
         "eng/pipelines/templates",
+        "scripts/dotnet.py",
         "scripts/run_performance_job.py",
-        "src/benchmarks/micro",
+        "scripts/tests/test_dotnet.py",
         "src/tools/CertHelperTests",
         "docs/benchmarkdotnet.md",
         "scripts/benchmarks_ci.py",
-        "scripts/channel_map.py",
-        "scripts/machine_health.py",
-        "scripts/performance/common.py"
+        "scripts/channel_map.py"
       ],
       "top_area_labels": []
     },
@@ -3229,30 +3264,30 @@
       "top_area_labels": []
     },
     "janvorli": {
-      "merge_count": 2,
+      "merge_count": 1,
       "top_paths": [
         "src/benchmarks/gc"
       ],
       "top_area_labels": []
     },
     "lewing": {
-      "merge_count": 4,
+      "merge_count": 5,
       "top_paths": [
+        "src/benchmarks/micro",
         "scripts/run_performance_job.py",
         "scripts/tests/test_wasm_coreclr_r2r.py",
+        "docs/benchmarking-workflow-dotnet-runtime.md",
         "eng/pipelines/templates",
         "scripts/build_runtime_payload.py",
         "scripts/tests/test_run_performance_job.py",
         "docs/benchmarkdotnet.md",
-        "docs/benchmarking-workflow-dotnet-runtime.md",
         "eng/pipelines/runtime-wasm-perf-jobs.yml",
-        "scripts/benchmarks_ci.py",
-        "scripts/dotnet.py"
+        "scripts/benchmarks_ci.py"
       ],
       "top_area_labels": []
     },
     "LoopedBard3": {
-      "merge_count": 39,
+      "merge_count": 41,
       "top_paths": [
         "eng/Version.Details.xml",
         "eng/common/core-templates",
@@ -3262,8 +3297,8 @@
         "global.json",
         "eng/common/native",
         "eng/common/templates",
-        "eng/performance/maui_scenarios_android.proj",
-        "eng/pipelines/sdk-perf-jobs.yml"
+        "eng/pipelines/sdk-perf-jobs.yml",
+        "src/benchmarks/micro"
       ],
       "top_area_labels": []
     },
@@ -3290,13 +3325,13 @@
       "top_area_labels": []
     },
     "davidwengier": {
-      "merge_count": 19,
+      "merge_count": 29,
       "top_paths": [
+        "eng/restore-internal-tools.yml",
         "src/Razor/src",
         "src/Razor/test",
-        "Directory.Packages.props",
         "eng/Version.Details.xml",
-        "eng/restore-internal-tools.yml",
+        "Directory.Packages.props",
         "eng/common/sdl",
         "src/Compiler/perf",
         "global.json",
@@ -3668,10 +3703,8 @@
       ]
     },
     "akoeplinger": {
-      "merge_count": 10,
+      "merge_count": 8,
       "top_paths": [
-        "src/Tasks/Common",
-        "src/Layout/redist",
         "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/ScopedCssIntegrationTests.cs",
         ".config/dotnet-tools.json",
         "eng/Version.Details.props",
@@ -3679,26 +3712,23 @@
         "global.json",
         "src/Cli/dotnet",
         "src/Dotnet.Watch/Watch",
-        "src/Layout/Directory.Build.props"
+        "src/Layout/Directory.Build.props",
+        "src/Layout/redist",
+        "src/StaticWebAssetsSdk/Targets"
       ],
       "top_area_labels": [
-        "Area-Infrastructure",
         "Area-Watch"
       ]
     },
     "AlesProkop": {
-      "merge_count": 7,
+      "merge_count": 3,
       "top_paths": [
         "src/StaticWebAssetsSdk/Tasks",
-        "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssets",
         "src/Resolvers/Microsoft.NET.Sdk.WorkloadMSBuildSdkResolver",
-        "src/BlazorWasmSdk/Tasks",
         "src/Cli/dotnet",
-        "src/Tasks/Microsoft.NET.Build.Tasks",
         "test/dotnet.Tests/CommandTests",
         "test/Microsoft.DotNet.MSBuildSdkResolver.Tests/GivenACachingWorkloadResolver.cs",
-        "test/Microsoft.NET.Build.Tasks.Tests/GivenAWriteAppConfigWithSupportedRuntimeMultiThreading.cs",
-        "test/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/GZipCompressTest.cs"
+        "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssets"
       ],
       "top_area_labels": []
     },
@@ -3711,25 +3741,25 @@
       "top_area_labels": []
     },
     "baronfel": {
-      "merge_count": 69,
+      "merge_count": 73,
       "top_paths": [
         "src/Containers/Microsoft.NET.Build.Containers",
         "src/Cli/dotnet",
         "documentation/general/dotnetup",
         "src/Installer/dotnetup.Library",
+        "src/Cli/Microsoft.DotNet.Cli.InternalMicrosoft",
         "src/Cli/Microsoft.DotNet.Cli.Telemetry",
+        "src/Cli/dotnet-aot",
         "template_feed/Microsoft.DotNet.Common.ItemTemplates/content",
         "test/dotnet.Tests/CommandTests",
-        "src/Cli/dotnet-aot",
-        "src/Layout/redist",
-        "test/dotnet-new.IntegrationTests/Approvals"
+        "src/Containers/packaging"
       ],
       "top_area_labels": [
         "Area-dotnet AOT",
+        "Area-Telemetry",
         "Area-Infrastructure",
-        "Area-Tools",
         "Area-Containers",
-        "Area-Telemetry"
+        "Area-CLI"
       ]
     },
     "davidwengier": {
@@ -3745,7 +3775,7 @@
       "top_area_labels": []
     },
     "dsplaisted": {
-      "merge_count": 31,
+      "merge_count": 27,
       "top_paths": [
         "src/Installer/dotnetup.Library",
         "src/Cli/dotnet",
@@ -3775,23 +3805,23 @@
       ]
     },
     "Evangelink": {
-      "merge_count": 134,
+      "merge_count": 133,
       "top_paths": [
         "src/Cli/dotnet",
         "test/dotnet.Tests/CommandTests",
         "src/Cli/Microsoft.DotNet.Cli.Definitions",
         "template_feed/Microsoft.DotNet.Common.ProjectTemplates.11.0/content",
         "test/TestAssets/TestProjects",
-        "test/TemplateEngine/Microsoft.TemplateEngine.Orchestrator.RunnableProjects.UnitTests",
         "src/Microsoft.CodeAnalysis.NetAnalyzers/src",
-        "src/TemplateEngine/Tools",
+        "test/TemplateEngine/Microsoft.TemplateEngine.Core.UnitTests",
         "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssets",
-        "test/TemplateEngine/Microsoft.TemplateEngine.Core.UnitTests"
+        "eng/Version.Details.props",
+        "eng/Version.Details.xml"
       ],
       "top_area_labels": [
         "Area-Infrastructure",
-        "Area-dotnet test",
         "Area-dotnet test (MTP)",
+        "Area-dotnet test",
         "Area-CLI"
       ]
     },
@@ -3867,25 +3897,25 @@
       ]
     },
     "JeremyKuhne": {
-      "merge_count": 13,
+      "merge_count": 11,
       "top_paths": [
         "src/Cli/dotnet",
-        "src/Cli/dotnet-aot",
         "src/Cli/dn",
-        "src/Cli/Microsoft.DotNet.Cli.Utils",
         "src/TemplateEngine/Microsoft.TemplateEngine.Edge",
-        ".github/skills/add-dotnet-aot-command",
+        "src/Cli/dotnet-aot",
         "src/TemplateEngine/Microsoft.TemplateEngine.Core",
         "test/dotnet.Tests/CommandTests",
+        ".github/skills/add-dotnet-aot-command",
         "src/Cli/Microsoft.TemplateEngine.Cli",
-        "test/dotnet-aot.Tests/AotIntegrationTests.cs"
+        "src/TemplateEngine/Microsoft.TemplateEngine.Abstractions",
+        "src/TemplateEngine/Microsoft.TemplateEngine.Orchestrator.RunnableProjects"
       ],
       "top_area_labels": [
         "Area-run-file"
       ]
     },
     "jjonescz": {
-      "merge_count": 23,
+      "merge_count": 21,
       "top_paths": [
         "src/Cli/Microsoft.DotNet.FileBasedPrograms",
         "src/Microsoft.CodeAnalysis.NetAnalyzers/src",
@@ -3901,9 +3931,7 @@
       "top_area_labels": [
         "Area-run-file",
         "Area-Telemetry",
-        "Area-dotnet test",
-        "Area-Format",
-        "Area-Run"
+        "Area-Format"
       ]
     },
     "jkoritzinsky": {
@@ -3912,11 +3940,11 @@
       "top_area_labels": []
     },
     "joeloff": {
-      "merge_count": 35,
+      "merge_count": 31,
       "top_paths": [
         "src/Cli/dotnet",
-        "eng/Version.Details.xml",
         "eng/common/core-templates",
+        "eng/Version.Details.xml",
         "global.json",
         "eng/Version.Details.props",
         "NuGet.config",
@@ -3990,23 +4018,24 @@
       "merge_count": 4,
       "top_paths": [
         "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssetsBaselines",
+        "src/Tasks/Microsoft.NET.Build.Tasks",
         "test/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/StaticWebAssetsBaselines",
         "src/StaticWebAssetsSdk/Targets",
         "src/BlazorWasmSdk/Targets",
         "src/StaticWebAssetsSdk/Sdk",
         "src/WasmSdk/Sdk",
-        "src/Workloads/Manifests",
+        "test/Microsoft.NET.Build.Tasks.Tests/GivenAPrepareForReadyToRunCompilation.cs",
         "test/Microsoft.NET.Sdk.BlazorWebAssembly.Tests/WasmPublishIntegrationTest.cs",
-        "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssetsDesignTimeTest.cs",
-        "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssetsIntegrationTest.cs"
+        "test/Microsoft.NET.Sdk.StaticWebAssets.Tests/StaticWebAssetsDesignTimeTest.cs"
       ],
       "top_area_labels": [
         "Area-WasmSdk",
-        "Area-AspNetCore"
+        "Area-AspNetCore",
+        "Area-ReadyToRun"
       ]
     },
     "marcpopMSFT": {
-      "merge_count": 84,
+      "merge_count": 86,
       "top_paths": [
         "src/Cli/dotnet",
         "src/Cli/Microsoft.DotNet.Cli.Definitions",
@@ -4028,7 +4057,7 @@
       ]
     },
     "MichaelSimons": {
-      "merge_count": 19,
+      "merge_count": 18,
       "top_paths": [
         "test/Compatibility/ApiCompat",
         "test/Compatibility/ApiDiff",
@@ -4060,7 +4089,7 @@
       "top_area_labels": []
     },
     "mthalman": {
-      "merge_count": 112,
+      "merge_count": 118,
       "top_paths": [
         "documentation/manpages/sdk",
         "src/Cli/dotnet",
@@ -4071,7 +4100,7 @@
         "eng/common/core-templates",
         "global.json",
         "NuGet.config",
-        "src/SourceBuild/content"
+        "src/Cli/Microsoft.DotNet.Cli.InternalMicrosoft"
       ],
       "top_area_labels": [
         "Area-AIEngineering",
@@ -4079,18 +4108,18 @@
       ]
     },
     "nagilson": {
-      "merge_count": 95,
+      "merge_count": 82,
       "top_paths": [
         "src/Cli/dotnet",
         "src/Cli/Microsoft.DotNet.Cli.Telemetry",
-        "src/Microsoft.CodeAnalysis.NetAnalyzers/tests",
         "src/Cli/Microsoft.DotNet.Cli.Definitions",
         "src/Containers/Microsoft.NET.Build.Containers",
         "src/Installer/dotnetup.Library",
+        "src/Cli/Microsoft.DotNet.FileBasedPrograms",
         "eng/Version.Details.xml",
         "eng/Versions.props",
-        "src/Cli/Microsoft.DotNet.FileBasedPrograms",
-        ".github/ci-quality-monitor/test"
+        ".github/ci-quality-monitor/test",
+        "src/Dotnet.Watch/Watch"
       ],
       "top_area_labels": [
         "Area-Watch"
@@ -4149,7 +4178,7 @@
       "top_area_labels": []
     },
     "tannergooding": {
-      "merge_count": 26,
+      "merge_count": 27,
       "top_paths": [
         "src/Microsoft.CodeAnalysis.NetAnalyzers/src",
         "src/Microsoft.CodeAnalysis.NetAnalyzers/tests",
@@ -4257,18 +4286,18 @@
       "top_area_labels": []
     },
     "AbhitejJohn": {
-      "merge_count": 68,
+      "merge_count": 70,
       "top_paths": [
         "eng/skill-validator/src",
+        "tests/dotnet-msbuild/binlog-failure-analysis",
         "tests/dotnet/csharp-refactoring",
+        "tests/dotnet-msbuild/binlog-generation",
         "tests/dotnet-advanced/vectorization",
         ".github/workflows/evaluation.yml",
+        "tests/dotnet-msbuild/build-parallelism",
         "plugins/dotnet-msbuild/skills",
-        "plugins/dotnet-maui/skills",
-        ".github/workflows/evaluation-run.yml",
-        "plugins/dotnet-ai/skills",
-        ".github/workflows/evaluation-workflow-tests.yml",
-        "eng/evaluation/test_token_failover.py"
+        "eng/skill-validator/tests",
+        "plugins/dotnet-maui/skills"
       ],
       "top_area_labels": []
     },
@@ -4324,18 +4353,18 @@
       "top_area_labels": []
     },
     "Evangelink": {
-      "merge_count": 93,
+      "merge_count": 89,
       "top_paths": [
         "plugins/dotnet-test/skills",
         "tests/dotnet-test/code-testing-agent",
         "tests/dotnet-test/find-untested-sources",
         "tests/dotnet-test/platform-detection",
         "eng/skill-validator/tests",
+        "tests/dotnet-test/agent.code-testing-generator",
         "tests/dotnet-test-migration/migrate-nunit-to-mstest",
         "plugins/dotnet-test/agents",
         "tests/dotnet-test/testability-obstacle",
-        "tests/dotnet-test/mtp-hot-reload",
-        "tests/dotnet-test/test-gap-analysis"
+        "tests/dotnet-test/mtp-hot-reload"
       ],
       "top_area_labels": []
     },
@@ -4432,21 +4461,25 @@
     "webreidi": {
       "merge_count": 3,
       "top_paths": [
+        "tests/dotnet-winforms/winforms-expert",
         "tests/dotnet-data/create-datadriven-aspnetcore",
-        "tests/dotnet/csharp-expert",
         ".github/CODEOWNERS",
-        "CODE_OF_CONDUCT.md",
-        "plugins/dotnet-data/skills",
         "plugins/dotnet-winforms/skills",
-        "tests/dotnet-winforms/winforms-expert"
+        "tests/dotnet/csharp-expert",
+        ".agents/plugins/marketplace.json",
+        ".claude-plugin/marketplace.json",
+        ".cursor-plugin/marketplace.json",
+        ".github/plugin/marketplace.json",
+        "dotnet-skills.luna.experiment.yaml"
       ],
       "top_area_labels": [
         "area-aspnet"
       ]
     },
     "YuliiaKovalova": {
-      "merge_count": 3,
+      "merge_count": 4,
       "top_paths": [
+        "plugins/dotnet/skills",
         "plugins/dotnet-template-engine/skills",
         "eng/skill-validator/tests",
         "plugins/dotnet-msbuild/agents",
@@ -4455,8 +4488,7 @@
         "tests/dotnet-template-engine/template-validation",
         "eng/skill-validator/src",
         "plugins/dotnet-msbuild/.codex-plugin",
-        "tests/dotnet-template-engine/template-comparison",
-        "tests/dotnet-template-engine/template-instantiation"
+        "tests/dotnet-template-engine/template-comparison"
       ],
       "top_area_labels": []
     }
@@ -4476,18 +4508,18 @@
       "top_area_labels": []
     },
     "dibarbet": {
-      "merge_count": 36,
+      "merge_count": 42,
       "top_paths": [
         "package.json",
         "package-lock.json",
         "CHANGELOG.md",
         "src/razor/src",
         "test/omnisharp/omnisharpUnitTests",
+        "azure-pipelines/release.yml",
+        "test/lsptoolshost/unitTests",
         "src/main.ts",
         "src/omnisharp/features",
-        "azure-pipelines.yml",
-        "azure-pipelines/release.yml",
-        "eslint.config.mjs"
+        "src/shared/copilot"
       ],
       "top_area_labels": []
     },
@@ -4502,7 +4534,7 @@
       "top_area_labels": []
     },
     "JoeRobich": {
-      "merge_count": 36,
+      "merge_count": 35,
       "top_paths": [
         "CHANGELOG.md",
         "package.json",
@@ -4512,17 +4544,14 @@
         "azure-pipelines/release.yml",
         "test/omnisharp/omnisharpUnitTests",
         ".github/workflows/update-changelog.yml",
-        "package-lock.json",
-        "test/lsptoolshost/integrationTests"
+        "azure-pipelines/build-vsix.yml",
+        "azure-pipelines/publish-roslyn-copilot.yml"
       ],
       "top_area_labels": []
     },
     "mwiemer-microsoft": {
-      "merge_count": 2,
-      "top_paths": [
-        "azure-pipelines.yml",
-        "azure-pipelines/install-node.yml"
-      ],
+      "merge_count": 0,
+      "top_paths": [],
       "top_area_labels": []
     },
     "peterwald": {
@@ -4552,7 +4581,7 @@
       "top_area_labels": []
     },
     "WardenGnaw": {
-      "merge_count": 1,
+      "merge_count": 2,
       "top_paths": [
         "package.json",
         "src/tools/updatePackageDependencies.ts"
@@ -4591,7 +4620,7 @@
       ]
     },
     "LeafShi1": {
-      "merge_count": 51,
+      "merge_count": 47,
       "top_paths": [
         "src/System.Windows.Forms/System",
         "src/test/unit",
@@ -4606,8 +4635,8 @@
       ],
       "top_area_labels": [
         "area-Infrastructure",
-        "area-DarkMode",
-        "area-controls-DataGridView"
+        "area-controls-DataGridView",
+        "area-DarkMode"
       ]
     },
     "merriemcgaw": {
@@ -4616,18 +4645,18 @@
       "top_area_labels": []
     },
     "ricardobossan": {
-      "merge_count": 6,
+      "merge_count": 3,
       "top_paths": [
         "src/System.Windows.Forms/System",
-        "src/test/unit",
-        "src/System.Windows.Forms/PublicAPI.Unshipped.txt"
+        "src/System.Windows.Forms/PublicAPI.Unshipped.txt",
+        "src/test/unit"
       ],
       "top_area_labels": [
         "area-DarkMode"
       ]
     },
     "Shyam-Gupta": {
-      "merge_count": 67,
+      "merge_count": 68,
       "top_paths": [
         "eng/Version.Details.xml",
         "global.json",
@@ -4635,17 +4664,17 @@
         "eng/common/core-templates",
         "NuGet.config",
         "eng/Versions.props",
-        "src/System.Windows.Forms/Resources",
         "src/System.Windows.Forms/System",
+        "src/System.Windows.Forms/Resources",
         "src/System.Private.Windows.Core/tests",
-        "eng/common/Get-GitHubAppToken.ps1"
+        "src/test/unit"
       ],
       "top_area_labels": [
         "area-Clipboard"
       ]
     },
     "SimonZhao888": {
-      "merge_count": 17,
+      "merge_count": 13,
       "top_paths": [
         "src/System.Windows.Forms/System",
         "src/test/unit",
@@ -4729,7 +4758,7 @@
       "top_area_labels": []
     },
     "subhajitm": {
-      "merge_count": 22,
+      "merge_count": 24,
       "top_paths": [
         "eng/Version.Details.xml",
         "eng/common/core-templates",
@@ -4745,18 +4774,18 @@
       "top_area_labels": []
     },
     "vinnarayana-msft": {
-      "merge_count": 4,
+      "merge_count": 1,
       "top_paths": [
-        "eng/Version.Details.props",
-        "eng/Version.Details.xml",
-        "global.json",
         "eng/common/core-templates",
         "eng/common/cross",
         "eng/common/dotnet-install.ps1",
         "eng/common/dotnet-install.sh",
         "eng/common/SetupNugetSources.ps1",
         "eng/common/tools.ps1",
-        "eng/common/tools.sh"
+        "eng/common/tools.sh",
+        "eng/Version.Details.props",
+        "eng/Version.Details.xml",
+        "global.json"
       ],
       "top_area_labels": []
     }
